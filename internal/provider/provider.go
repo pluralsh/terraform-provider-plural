@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"terraform-provider-plural/internal/console"
+	resource2 "terraform-provider-plural/internal/resource"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -93,7 +94,9 @@ func (p *PluralProvider) Configure(ctx context.Context, req provider.ConfigureRe
 }
 
 func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		resource2.NewClusterResource,
+	}
 }
 
 func (p *PluralProvider) DataSources(_ context.Context) []func() datasource.DataSource {
