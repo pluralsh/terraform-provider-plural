@@ -11,7 +11,7 @@ import (
 )
 
 func PluralProvider() *schema.Provider {
-	provider := &schema.Provider{
+	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"console_url": {
 				Type:        schema.TypeString,
@@ -33,32 +33,29 @@ func PluralProvider() *schema.Provider {
 				Description: "Use `plural cd login` command for authentication.",
 			},
 		},
+		ConfigureContextFunc: func(_ context.Context, d *schema.ResourceData) (any, diag.Diagnostics) {
+			url := d.Get("console_url").(string)
+			token := d.Get("access_token").(string)
+			useCli := d.Get("use_cli").(bool)
+
+			if useCli {
+				config := console.ReadConfig()
+
+				token = config.Token
+				if token == "" {
+					return nil, diag.Errorf("you have not set up a console login, run `plural cd login` to save your credentials")
+				}
+
+				url = config.Url
+				if config.Url == "" {
+					return nil, diag.Errorf("you have not set up a console login, run `plural cd login` to save your credentials")
+				}
+			}
+
+			return console.NewClient(url, token), nil
+		},
 		ResourcesMap: map[string]*schema.Resource{
 			"plural_cluster": resource.Cluster(),
 		},
 	}
-
-	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (any, diag.Diagnostics) {
-		url := d.Get("console_url").(string)
-		token := d.Get("access_token").(string)
-		useCli := d.Get("use_cli").(bool)
-
-		if useCli {
-			config := console.ReadConfig()
-
-			token = config.Token
-			if token == "" {
-				return nil, diag.Errorf("you have not set up a console login, run `plural cd login` to save your credentials")
-			}
-
-			url = config.Url
-			if config.Url == "" {
-				return nil, diag.Errorf("you have not set up a console login, run `plural cd login` to save your credentials")
-			}
-		}
-
-		return console.NewClient(url, token), nil
-	}
-
-	return provider
 }
