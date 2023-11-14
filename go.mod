@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/golangci/golangci-lint v1.55.2
 	github.com/hashicorp/terraform-plugin-docs v0.16.0
+	github.com/hashicorp/terraform-plugin-framework v1.4.2
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.30.0
 	github.com/pluralsh/console-client-go v0.0.34
 	github.com/samber/lo v1.38.1

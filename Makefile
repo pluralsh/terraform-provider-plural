@@ -23,7 +23,7 @@ update-dependencies: ## update dependencies
 
 .PHONY: install-tools
 install-tools: ## install required tools
-	@cat internal/tools.go | grep _ | awk -F'"' '{print $$2}' | xargs -tI {} go install {}
+	@cat tools/tools.go | grep _ | awk -F'"' '{print $$2}' | xargs -tI {} go install {}
 
 ##@ Build
 
