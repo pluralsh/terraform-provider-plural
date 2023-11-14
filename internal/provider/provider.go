@@ -2,17 +2,20 @@ package provider
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 
-	"terraform-provider-plural/internal/console"
-	resource2 "terraform-provider-plural/internal/resource"
+	"terraform-provider-plural/internal/resource/cluster"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	client "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/plural-cli/pkg/console"
 )
 
 var _ provider.Provider = &PluralProvider{}
@@ -88,14 +91,17 @@ func (p *PluralProvider) Configure(ctx context.Context, req provider.ConfigureRe
 		}
 	}
 
-	client := console.NewClient(consoleUrl, accessToken)
-	resp.ResourceData = client
-	resp.DataSourceData = client
+	consoleClient := client.NewClient(http.DefaultClient, fmt.Sprintf("%s/gql", consoleUrl), func(req *http.Request) {
+		req.Header.Set("Authorization", fmt.Sprintf("Token %s", accessToken))
+	})
+
+	resp.ResourceData = consoleClient
+	resp.DataSourceData = consoleClient
 }
 
 func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		resource2.NewClusterResource,
+		cluster.NewClusterResource,
 	}
 }
 

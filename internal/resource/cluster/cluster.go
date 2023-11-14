@@ -1,4 +1,4 @@
-package resource
+package cluster
 
 import (
 	"context"
