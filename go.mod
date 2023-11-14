@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/Yamashou/gqlgenc v0.16.0
 	github.com/hashicorp/terraform-plugin-sdk v1.17.2
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.30.0
 	github.com/pkg/errors v0.9.1
 	github.com/pluralsh/console-client-go v0.0.34
 	gopkg.in/yaml.v2 v2.4.0
@@ -12,6 +13,7 @@ require (
 
 require (
 	cloud.google.com/go v0.110.10 // indirect
+	cloud.google.com/go/compute v1.23.3 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.1.5 // indirect
 	cloud.google.com/go/storage v1.35.1 // indirect
