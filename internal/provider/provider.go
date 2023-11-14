@@ -8,26 +8,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
-func PluralCDProvider() *schema.Provider {
+func PluralProvider() *schema.Provider {
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"console_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("PLURALCD_CONSOLE_URL", nil),
+				DefaultFunc: schema.EnvDefaultFunc("PLURAL_CONSOLE_URL", nil),
 				Description: "Plural Console URL, i.e. https://console.demo.onplural.sh.",
 			},
 			"access_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("PLURALCD_ACCESS_TOKEN", nil),
+				DefaultFunc: schema.EnvDefaultFunc("PLURAL_ACCESS_TOKEN", nil),
 				Description: "Plural Console access token.",
 			},
 			"use_cli": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
-				DefaultFunc: schema.EnvDefaultFunc("PLURALCD_USE_CLI", nil),
+				DefaultFunc: schema.EnvDefaultFunc("PLURAL_USE_CLI", nil),
 				Description: "Use `plural cd login` command for authentication.",
 			},
 		},
@@ -52,7 +52,6 @@ func PluralCDProvider() *schema.Provider {
 			if config.Url == "" {
 				return nil, fmt.Errorf("you have not set up a console login, run `plural cd login` to save your credentials")
 			}
-
 		}
 
 		return console.NewClient(url, token)
