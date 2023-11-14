@@ -31,6 +31,10 @@ install-tools: ## install required tools
 build: ## build
 	go build -o terraform-provider-plural
 
+.PHONY: release
+release: ## builds release version of the app. Requires GoReleaser to work.
+	goreleaser build --clean --single-target --snapshot
+
 ##@ Codegen
 
 .PHONY: generate-docs
