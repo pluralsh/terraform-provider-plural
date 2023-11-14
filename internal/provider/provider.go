@@ -1,11 +1,13 @@
 package provider
 
 import (
-	"fmt"
+	"context"
 
-	"cd-terraform-provider/internal/console"
+	"terraform-provider-plural/internal/console"
+	"terraform-provider-plural/internal/resource"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func PluralProvider() *schema.Provider {
@@ -31,11 +33,12 @@ func PluralProvider() *schema.Provider {
 				Description: "Use `plural cd login` command for authentication.",
 			},
 		},
-		ResourcesMap:   map[string]*schema.Resource{},
-		DataSourcesMap: map[string]*schema.Resource{},
+		ResourcesMap: map[string]*schema.Resource{
+			"plural_cluster": resource.Cluster(),
+		},
 	}
 
-	provider.ConfigureFunc = func(d *schema.ResourceData) (any, error) {
+	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (any, diag.Diagnostics) {
 		url := d.Get("console_url").(string)
 		token := d.Get("access_token").(string)
 		useCli := d.Get("use_cli").(bool)
@@ -45,16 +48,16 @@ func PluralProvider() *schema.Provider {
 
 			token = config.Token
 			if token == "" {
-				return nil, fmt.Errorf("you have not set up a console login, run `plural cd login` to save your credentials")
+				return nil, diag.Errorf("you have not set up a console login, run `plural cd login` to save your credentials")
 			}
 
 			url = config.Url
 			if config.Url == "" {
-				return nil, fmt.Errorf("you have not set up a console login, run `plural cd login` to save your credentials")
+				return nil, diag.Errorf("you have not set up a console login, run `plural cd login` to save your credentials")
 			}
 		}
 
-		return console.NewClient(url, token)
+		return console.NewClient(url, token), nil
 	}
 
 	return provider
