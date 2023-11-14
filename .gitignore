@@ -4,3 +4,6 @@
 
 # System
 .DS_Store
+
+# Build
+dist/
