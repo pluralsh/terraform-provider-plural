@@ -54,3 +54,8 @@ lint: install-tools ## run linters
 .PHONY: fix
 fix: install-tools ## fix issues found by linters
 	golangci-lint run --fix ./...
+
+# Run acceptance tests
+.PHONY: testacc
+testacc:
+	TF_ACC=1 go test ./... -v $(TESTARGS) -timeout 120m
