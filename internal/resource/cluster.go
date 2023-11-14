@@ -102,11 +102,11 @@ func (r *ClusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	clusterAttrs := consoleClient.ClusterAttributes{
+	attrs := consoleClient.ClusterAttributes{
 		Name:   data.Name.String(),
 		Handle: lo.ToPtr(data.Handle.String()),
 	}
-	cluster, err := r.client.CreateCluster(ctx, clusterAttrs)
+	cluster, err := r.client.CreateCluster(ctx, attrs)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create cluster, got error: %s", err))
 		return
@@ -154,32 +154,28 @@ func (r *ClusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 func (r *ClusterResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data ClusterResourceModel
-
-	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// httpResp, err := r.client.Do(httpReq)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update example, got error: %s", err))
-	//     return
-	// }
+	attrs := consoleClient.ClusterUpdateAttributes{
+		Handle: lo.ToPtr(data.Handle.String()),
+	}
+	cluster, err := r.client.UpdateCluster(ctx, data.Id.String(), attrs)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update cluster, got error: %s", err))
+		return
+	}
 
-	// Save updated data into Terraform state
+	data.Handle = types.StringValue(*cluster.UpdateCluster.Handle)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *ClusterResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data ClusterResourceModel
-
-	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
