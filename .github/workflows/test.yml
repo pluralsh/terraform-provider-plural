@@ -8,6 +8,9 @@ on:
       - 'README.md'
 permissions:
   contents: read
+env:
+  GOPATH: /home/runner/go/
+  GOPROXY: "https://proxy.golang.org"
 jobs:
   build:
     name: Build
