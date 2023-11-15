@@ -7,3 +7,7 @@
 
 # Build
 build/terraform-provider-plural
+
+# Terraform
+example/**/.terraform/
+example/**/.terraform.lock.hcl
