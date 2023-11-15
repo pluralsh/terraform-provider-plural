@@ -12,3 +12,4 @@ build/terraform-provider-plural
 example/**/.terraform/
 example/**/.terraform.lock.hcl
 example/**/terraform.tfstate*
+example/**/terraform.tfplan
