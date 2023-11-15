@@ -10,7 +10,6 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/pluralsh/console-client-go v0.0.35
 	github.com/pluralsh/plural-cli v0.8.1-0.20231114145714-860fa85f7e63
-	github.com/samber/lo v1.38.1
 )
 
 require (
@@ -246,6 +245,7 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/ryancurrah/gomodguard v1.3.0 // indirect
 	github.com/ryanrolds/sqlclosecheck v0.5.1 // indirect
+	github.com/samber/lo v1.38.1 // indirect
 	github.com/sanposhiho/wastedassign/v2 v2.0.7 // indirect
 	github.com/sashamelentyev/interfacebloat v1.1.0 // indirect
 	github.com/sashamelentyev/usestdlibvars v1.24.0 // indirect

@@ -6,4 +6,10 @@
 .DS_Store
 
 # Build
-dist/
+build/terraform-provider-plural
+
+# Terraform
+example/**/.terraform/
+example/**/.terraform.lock.hcl
+example/**/terraform.tfstate*
+example/**/terraform.tfplan
