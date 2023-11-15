@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"terraform-provider-plural/internal/model"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -13,38 +15,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	consoleClient "github.com/pluralsh/console-client-go"
-
-	"terraform-provider-plural/internal/client"
+	console "github.com/pluralsh/console-client-go"
 )
 
-var _ resource.Resource = &ClusterResource{}
-var _ resource.ResourceWithImportState = &ClusterResource{}
+var _ resource.Resource = &clusterResource{}
+var _ resource.ResourceWithImportState = &clusterResource{}
 
 func NewClusterResource() resource.Resource {
-	return &ClusterResource{}
+	return &clusterResource{}
 }
 
 // ClusterResource defines the cluster resource implementation.
-type ClusterResource struct {
-	client *consoleClient.Client
+type clusterResource struct {
+	client *console.Client
 }
 
-// ClusterResourceModel describes the cluster resource data model.
-type ClusterResourceModel struct {
-	Id        types.String `tfsdk:"id"`
-	Name      types.String `tfsdk:"name"`
-	Handle    types.String `tfsdk:"handle"`
-	Cloud     types.String `tfsdk:"cloud"`
-	Protect   types.Bool   `tfsdk:"protect"`
-	Tags      types.Map    `tfsdk:"tags"`
-}
-
-func (r *ClusterResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *clusterResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_cluster"
 }
 
-func (r *ClusterResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "A representation of a cluster you can deploy to.",
 		Attributes: map[string]schema.Attribute{
@@ -54,6 +44,10 @@ func (r *ClusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+			},
+			"inserted_at": schema.StringAttribute{
+				MarkdownDescription: "Creation date of this cluster.",
+				Computed:            true,
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: "Human-readable name of this cluster, that also translates to cloud resource name.",
@@ -82,33 +76,31 @@ func (r *ClusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 	}
 }
 
-func (r *ClusterResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *clusterResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	internalClient, ok := req.ProviderData.(*client.Client)
-
+	client, ok := req.ProviderData.(*console.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Cluster Resource Configure Type",
 			fmt.Sprintf("Expected *console.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
-
 		return
 	}
 
-	r.client = internalClient.Client
+	r.client = client
 }
 
-func (r *ClusterResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data ClusterResourceModel
+func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data model.Cluster
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	attrs := consoleClient.ClusterAttributes{
+	attrs := console.ClusterAttributes{
 		Name:    data.Name.ValueString(),
 		Handle:  data.Handle.ValueStringPointer(),
 		Protect: data.Protect.ValueBoolPointer(),
@@ -121,7 +113,11 @@ func (r *ClusterResource) Create(ctx context.Context, req resource.CreateRequest
 
 	tflog.Trace(ctx, "created a cluster")
 
+	data.Name = types.StringValue(cluster.CreateCluster.Name)
+	data.Handle = types.StringPointerValue(cluster.CreateCluster.Handle)
 	data.Id = types.StringValue(cluster.CreateCluster.ID)
+	data.Protect = types.BoolPointerValue(cluster.CreateCluster.Protect)
+	data.InseredAt = types.StringPointerValue(cluster.CreateCluster.InsertedAt)
 
 	if data.Cloud.ValueString() == "byok" {
 		if cluster.CreateCluster.DeployToken == nil {
@@ -140,8 +136,8 @@ func (r *ClusterResource) Create(ctx context.Context, req resource.CreateRequest
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *ClusterResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data ClusterResourceModel
+func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data model.Cluster
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -154,22 +150,24 @@ func (r *ClusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	data.Id = types.StringValue(cluster.Cluster.ID)
+	data.InseredAt = types.StringPointerValue(cluster.Cluster.InsertedAt)
 	data.Name = types.StringValue(cluster.Cluster.Name)
-	data.Handle = types.StringValue(*cluster.Cluster.Handle)
-	data.Protect = types.BoolNull() // TODO: Update client to return this field.
+	data.Handle = types.StringPointerValue(cluster.Cluster.Handle)
+	data.Protect = types.BoolPointerValue(cluster.Cluster.Protect)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *ClusterResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data ClusterResourceModel
+func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data model.Cluster
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	attrs := consoleClient.ClusterUpdateAttributes{
-		Handle: data.Handle.ValueStringPointer(),
+	attrs := console.ClusterUpdateAttributes{
+		Handle:  data.Handle.ValueStringPointer(),
+		Protect: data.Protect.ValueBoolPointer(),
 	}
 	cluster, err := r.client.UpdateCluster(ctx, data.Id.ValueString(), attrs)
 	if err != nil {
@@ -177,13 +175,14 @@ func (r *ClusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	data.Handle = types.StringValue(*cluster.UpdateCluster.Handle)
+	data.Handle = types.StringPointerValue(cluster.UpdateCluster.Handle)
+	data.Protect = types.BoolPointerValue(cluster.UpdateCluster.Protect)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *ClusterResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data ClusterResourceModel
+func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data model.Cluster
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -198,6 +197,6 @@ func (r *ClusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 	tflog.Trace(ctx, "deleted the cluster")
 }
 
-func (r *ClusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *clusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
