@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"terraform-provider-plural/internal/model"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -16,34 +18,23 @@ import (
 	console "github.com/pluralsh/console-client-go"
 )
 
-var _ resource.Resource = &ClusterResource{}
-var _ resource.ResourceWithImportState = &ClusterResource{}
+var _ resource.Resource = &clusterResource{}
+var _ resource.ResourceWithImportState = &clusterResource{}
 
 func NewClusterResource() resource.Resource {
-	return &ClusterResource{}
+	return &clusterResource{}
 }
 
 // ClusterResource defines the cluster resource implementation.
-type ClusterResource struct {
+type clusterResource struct {
 	client *console.Client
 }
 
-// ClusterResourceModel describes the cluster resource data model.
-type ClusterResourceModel struct {
-	Id        types.String `tfsdk:"id"`
-	InseredAt types.String `tfsdk:"inserted_at"`
-	Name      types.String `tfsdk:"name"`
-	Handle    types.String `tfsdk:"handle"`
-	Cloud     types.String `tfsdk:"cloud"`
-	Protect   types.Bool   `tfsdk:"protect"`
-	Tags      types.Map    `tfsdk:"tags"`
-}
-
-func (r *ClusterResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *clusterResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_cluster"
 }
 
-func (r *ClusterResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "A representation of a cluster you can deploy to.",
 		Attributes: map[string]schema.Attribute{
@@ -85,7 +76,7 @@ func (r *ClusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 	}
 }
 
-func (r *ClusterResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *clusterResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -102,8 +93,8 @@ func (r *ClusterResource) Configure(_ context.Context, req resource.ConfigureReq
 	r.client = client
 }
 
-func (r *ClusterResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data ClusterResourceModel
+func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data model.Cluster
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -145,8 +136,8 @@ func (r *ClusterResource) Create(ctx context.Context, req resource.CreateRequest
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *ClusterResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data ClusterResourceModel
+func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data model.Cluster
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -167,8 +158,8 @@ func (r *ClusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *ClusterResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data ClusterResourceModel
+func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data model.Cluster
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -190,8 +181,8 @@ func (r *ClusterResource) Update(ctx context.Context, req resource.UpdateRequest
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *ClusterResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data ClusterResourceModel
+func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data model.Cluster
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -206,6 +197,6 @@ func (r *ClusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 	tflog.Trace(ctx, "deleted the cluster")
 }
 
-func (r *ClusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *clusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

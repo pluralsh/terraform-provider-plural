@@ -20,3 +20,7 @@ resource "plural_cluster" "byok_workload_cluster" {
     "managed-by" = "terraform-provider-plural"
   }
 }
+
+data "plural_cluster" "byok_workload_cluster" {
+  handle = "wctf"
+}
