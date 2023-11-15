@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	consoleClient "github.com/pluralsh/console-client-go"
+	console "github.com/pluralsh/console-client-go"
 )
 
 var _ resource.Resource = &ClusterResource{}
@@ -25,7 +25,7 @@ func NewClusterResource() resource.Resource {
 
 // ClusterResource defines the cluster resource implementation.
 type ClusterResource struct {
-	client *consoleClient.Client
+	client *console.Client
 }
 
 // ClusterResourceModel describes the cluster resource data model.
@@ -90,14 +90,12 @@ func (r *ClusterResource) Configure(_ context.Context, req resource.ConfigureReq
 		return
 	}
 
-	client, ok := req.ProviderData.(*consoleClient.Client)
-
+	client, ok := req.ProviderData.(*console.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Cluster Resource Configure Type",
 			fmt.Sprintf("Expected *console.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
-
 		return
 	}
 
@@ -111,7 +109,7 @@ func (r *ClusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	attrs := consoleClient.ClusterAttributes{
+	attrs := console.ClusterAttributes{
 		Name:    data.Name.ValueString(),
 		Handle:  data.Handle.ValueStringPointer(),
 		Protect: data.Protect.ValueBoolPointer(),
@@ -124,7 +122,11 @@ func (r *ClusterResource) Create(ctx context.Context, req resource.CreateRequest
 
 	tflog.Trace(ctx, "created a cluster")
 
+	data.Name = types.StringValue(cluster.CreateCluster.Name)
+	data.Handle = types.StringPointerValue(cluster.CreateCluster.Handle)
 	data.Id = types.StringValue(cluster.CreateCluster.ID)
+	data.Protect = types.BoolPointerValue(cluster.CreateCluster.Protect)
+	data.InseredAt = types.StringPointerValue(cluster.CreateCluster.InsertedAt)
 
 	if data.Cloud.ValueString() == "byok" {
 		if cluster.CreateCluster.DeployToken == nil {
@@ -157,10 +159,10 @@ func (r *ClusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	data.Id = types.StringValue(cluster.Cluster.ID)
-	data.InseredAt = types.StringNull() // TODO: Update client to return this field.
+	data.InseredAt = types.StringPointerValue(cluster.Cluster.InsertedAt)
 	data.Name = types.StringValue(cluster.Cluster.Name)
-	data.Handle = types.StringValue(*cluster.Cluster.Handle)
-	data.Protect = types.BoolNull() // TODO: Update client to return this field.
+	data.Handle = types.StringPointerValue(cluster.Cluster.Handle)
+	data.Protect = types.BoolPointerValue(cluster.Cluster.Protect)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -172,8 +174,9 @@ func (r *ClusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	attrs := consoleClient.ClusterUpdateAttributes{
-		Handle: data.Handle.ValueStringPointer(),
+	attrs := console.ClusterUpdateAttributes{
+		Handle:  data.Handle.ValueStringPointer(),
+		Protect: data.Protect.ValueBoolPointer(),
 	}
 	cluster, err := r.client.UpdateCluster(ctx, data.Id.ValueString(), attrs)
 	if err != nil {
@@ -181,7 +184,8 @@ func (r *ClusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	data.Handle = types.StringValue(*cluster.UpdateCluster.Handle)
+	data.Handle = types.StringPointerValue(cluster.UpdateCluster.Handle)
+	data.Protect = types.BoolPointerValue(cluster.UpdateCluster.Protect)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
