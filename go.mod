@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework v1.4.2
 	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
-	github.com/pluralsh/console-client-go v0.0.34
+	github.com/pluralsh/console-client-go v0.0.35
 	github.com/pluralsh/plural-cli v0.8.1-0.20231114145714-860fa85f7e63
 	github.com/samber/lo v1.38.1
 )

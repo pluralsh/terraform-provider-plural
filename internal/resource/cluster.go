@@ -15,6 +15,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	consoleClient "github.com/pluralsh/console-client-go"
 	"github.com/samber/lo"
+
+	"terraform-provider-plural/internal/client"
 )
 
 var _ resource.Resource = &ClusterResource{}
@@ -81,7 +83,7 @@ func (r *ClusterResource) Configure(_ context.Context, req resource.ConfigureReq
 		return
 	}
 
-	client, ok := req.ProviderData.(*consoleClient.Client)
+	internalClient, ok := req.ProviderData.(*client.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -92,7 +94,7 @@ func (r *ClusterResource) Configure(_ context.Context, req resource.ConfigureReq
 		return
 	}
 
-	r.client = client
+	r.client = internalClient.Client
 }
 
 func (r *ClusterResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

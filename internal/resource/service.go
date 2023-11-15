@@ -1,10 +1,10 @@
-package service
+package resource
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -16,6 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	consoleClient "github.com/pluralsh/console-client-go"
+
+	"terraform-provider-plural/internal/client"
 )
 
 var _ resource.Resource = &ServiceDeploymentResource{}
@@ -27,7 +29,7 @@ func NewServiceDeploymentResource() resource.Resource {
 
 // ServiceDeploymentResource defines the ServiceDeployment resource implementation.
 type ServiceDeploymentResource struct {
-	client *consoleClient.Client
+	client *client.Client
 }
 
 // ServiceDeploymentResourceModel describes the ServiceDeployment resource data model.
@@ -52,7 +54,7 @@ type RepositoryModel struct {
 }
 
 func (r *ServiceDeploymentResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_ServiceDeployment"
+	resp.TypeName = req.ProviderTypeName + "_service_deployment"
 }
 
 func (r *ServiceDeploymentResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -77,19 +79,34 @@ func (r *ServiceDeploymentResource) Schema(_ context.Context, _ resource.SchemaR
 			"configuration": schema.ListNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"name":  schema.StringAttribute{},
-						"value": schema.StringAttribute{},
+						"name": schema.StringAttribute{
+							Required: true,
+						},
+						"value": schema.StringAttribute{
+							Required: true,
+						},
 					},
 				},
 				MarkdownDescription: "List of [name, value] secrets used to alter this ServiceDeployment configuration.",
 				Optional:            true,
 			},
-			"cluster": schema.ObjectAttribute{
-				AttributeTypes: map[string]attr.Type{
-					"id":     types.StringType,
-					"handle": types.StringType,
+			"cluster": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"id": schema.StringAttribute{
+						Validators: []validator.String{
+							stringvalidator.ConflictsWith(path.MatchRoot("cluster").AtName("handle")),
+							stringvalidator.ExactlyOneOf(path.MatchRoot("cluster").AtName("handle")),
+						},
+						Optional:   true,
+					},
+					"handle": schema.StringAttribute{
+						Validators: []validator.String{
+							stringvalidator.ConflictsWith(path.MatchRoot("cluster").AtName("id")),
+							stringvalidator.ExactlyOneOf(path.MatchRoot("cluster").AtName("id")),
+						},
+						Optional:   true,
+					},
 				},
-				Validators:          []validator.Object{objectvalidator.ExactlyOneOf(path.MatchRelative().AtName("id"), path.MatchRelative().AtName("handle"))},
 				MarkdownDescription: "Unique cluster id/handle to deploy this ServiceDeployment",
 				Required:            true,
 			},
@@ -111,7 +128,7 @@ func (r *ServiceDeploymentResource) Configure(_ context.Context, req resource.Co
 		return
 	}
 
-	client, ok := req.ProviderData.(*consoleClient.Client)
+	c, ok := req.ProviderData.(*client.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -122,7 +139,7 @@ func (r *ServiceDeploymentResource) Configure(_ context.Context, req resource.Co
 		return
 	}
 
-	r.client = client
+	r.client = c
 }
 
 func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -142,7 +159,7 @@ func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.Cre
 	data.Repository.As(ctx, repository, basetypes.ObjectAsOptions{})
 
 	attrs := consoleClient.ServiceDeploymentAttributes{
-		Name:         data.Name.String(),
+		Name:         data.Name.ValueString(),
 		RepositoryID: repository.Id,
 		Git: consoleClient.GitRefAttributes{
 			Ref:    repository.Ref,
@@ -151,7 +168,7 @@ func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.Cre
 		Configuration: configuration,
 	}
 
-	_, err := CreateServiceDeployment(ctx, r.client, &cluster.Id, &cluster.Handle, attrs)
+	_, err := r.client.CreateServiceDeployment(ctx, &cluster.Id, &cluster.Handle, attrs)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create ServiceDeployment, got error: %s", err))
 		return
@@ -170,7 +187,7 @@ func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	ServiceDeployment, err := r.client.GetServiceDeployment(ctx, data.Id.String())
+	ServiceDeployment, err := r.client.GetServiceDeployment(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read ServiceDeployment, got error: %s", err))
 		return
@@ -192,9 +209,9 @@ func (r *ServiceDeploymentResource) Update(ctx context.Context, req resource.Upd
 
 	// TODO: figure out what can be updated
 	//attrs := consoleClient.ServiceDeploymentUpdateAttributes{
-	//	Handle: lo.ToPtr(data.Handle.String()),
+	//	Handle: lo.ToPtr(data.Handle.ValueString()),
 	//}
-	//ServiceDeployment, err := r.client.UpdateServiceDeployment(ctx, data.Id.String(), attrs)
+	//ServiceDeployment, err := r.client.UpdateServiceDeployment(ctx, data.Id.ValueString(), attrs)
 	//if err != nil {
 	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update ServiceDeployment, got error: %s", err))
 	//	return
@@ -212,7 +229,7 @@ func (r *ServiceDeploymentResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	_, err := r.client.DeleteServiceDeployment(ctx, data.Id.String())
+	_, err := r.client.DeleteServiceDeployment(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete ServiceDeployment, got error: %s", err))
 		return

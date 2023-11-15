@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 
+	internalclient "terraform-provider-plural/internal/client"
 	ds "terraform-provider-plural/internal/datasource"
 	r "terraform-provider-plural/internal/resource"
 
@@ -138,19 +139,24 @@ func (p *PluralProvider) Configure(ctx context.Context, req provider.ConfigureRe
 		req.Header.Set("Authorization", fmt.Sprintf("Token %s", accessToken))
 	})
 
-	resp.ResourceData = consoleClient
-	resp.DataSourceData = consoleClient
+	internalClient := internalclient.NewClient(consoleClient)
+
+	resp.ResourceData = internalClient
+	resp.DataSourceData = internalClient
 }
 
 func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		r.NewClusterResource,
+		r.NewGitRepositoryResource,
+		r.NewServiceDeploymentResource,
 	}
 }
 
 func (p *PluralProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		ds.NewClusterDataSource,
+		ds.NewGitRepositoryDataSource,
 	}
 }
 
