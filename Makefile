@@ -55,6 +55,10 @@ validate-docs: install-tools ## validate generated docs
 test: ## run tests
 	go test ./... -v
 
+.PHONY: testacc
+testacc: ## run acceptance tests
+	TF_ACC=1 go test ./... -v $(TESTARGS) -timeout 120m
+
 .PHONY: lint
 lint: install-tools ## run linters
 	golangci-lint run ./...
@@ -62,8 +66,3 @@ lint: install-tools ## run linters
 .PHONY: fix
 fix: install-tools ## fix issues found by linters
 	golangci-lint run --fix ./...
-
-# Run acceptance tests
-.PHONY: testacc
-testacc:
-	TF_ACC=1 go test ./... -v $(TESTARGS) -timeout 120m
