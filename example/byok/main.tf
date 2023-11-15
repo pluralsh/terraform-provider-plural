@@ -1,6 +1,5 @@
 provider "plural" {
-  console_url = ""
-  access_token = ""
+  use_cli = true
 }
 
 resource "plural_cluster" "byok_workload_cluster" {

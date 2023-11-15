@@ -1,6 +1,5 @@
 provider "plural" {
-  console_url = ""
-  access_token = ""
+  use_cli = true
 }
 
 resource "plural_provider" "aws_provider" {
