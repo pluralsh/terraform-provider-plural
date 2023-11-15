@@ -3,12 +3,12 @@
 page_title: "plural_cluster Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  Cluster resource
+  A representation of a cluster you can deploy to.
 ---
 
 # plural_cluster (Resource)
 
-Cluster resource
+A representation of a cluster you can deploy to.
 
 
 
