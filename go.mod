@@ -125,7 +125,6 @@ require (
 	github.com/golangci/unconvert v0.0.0-20180507085042-28b1c447d1f4 // indirect
 	github.com/google/btree v1.0.1 // indirect
 	github.com/google/gnostic v0.6.9 // indirect
-	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-github/v45 v45.2.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
@@ -349,4 +348,11 @@ require (
 	sigs.k8s.io/kustomize/kyaml v0.14.3 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
+)
+
+replace (
+	k8s.io/cli-runtime => k8s.io/cli-runtime v0.26.3
+	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20230109183929-3758b55a6596
+	sigs.k8s.io/kustomize/api => sigs.k8s.io/kustomize/api v0.12.1
+	sigs.k8s.io/kustomize/kyaml => sigs.k8s.io/kustomize/kyaml v0.13.9
 )
