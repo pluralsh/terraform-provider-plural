@@ -1,4 +1,4 @@
-package cluster
+package resource
 
 import (
 	"context"
@@ -44,7 +44,7 @@ func (r *ClusterResource) Metadata(_ context.Context, req resource.MetadataReque
 
 func (r *ClusterResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Cluster resource",
+		MarkdownDescription: "A representation of a cluster you can deploy to.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
