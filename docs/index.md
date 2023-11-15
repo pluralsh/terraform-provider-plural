@@ -17,6 +17,6 @@ description: |-
 
 ### Optional
 
-- `access_token` (String) Plural Console access token. Can be sourced from `PLURAL_ACCESS_TOKEN`.
+- `access_token` (String, Sensitive) Plural Console access token. Can be sourced from `PLURAL_ACCESS_TOKEN`.
 - `console_url` (String) Plural Console URL, i.e. `https://console.demo.onplural.sh`. Can be sourced from `PLURAL_CONSOLE_URL`.
-- `use_cli` (Boolean) Use `plural cd login` command for authentication. Can be sourced from `PLURAL_USE_CLI`.
+- `use_cli` (Boolean) Use Plural CLI `plural cd login` command for authentication. Can be sourced from `PLURAL_USE_CLI`.

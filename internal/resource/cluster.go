@@ -1,4 +1,4 @@
-package cluster
+package resource
 
 import (
 	"context"
@@ -32,10 +32,10 @@ type ClusterResource struct {
 // ClusterResourceModel describes the cluster resource data model.
 type ClusterResourceModel struct {
 	Id     types.String `tfsdk:"id"`
-	Name   types.String `tfsdk:"defaulted"`
-	Handle types.String `tfsdk:"defaulted"`
-	Cloud  types.String `tfsdk:"defaulted"`
-	Tags   types.Map    `tfsdk:"defaulted"`
+	Name   types.String `tfsdk:"name"`
+	Handle types.String `tfsdk:"handle"`
+	Cloud  types.String `tfsdk:"cloud"`
+	Tags   types.Map    `tfsdk:"tags"`
 }
 
 func (r *ClusterResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -44,7 +44,7 @@ func (r *ClusterResource) Metadata(_ context.Context, req resource.MetadataReque
 
 func (r *ClusterResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Cluster resource",
+		MarkdownDescription: "A representation of a cluster you can deploy to.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
