@@ -157,10 +157,10 @@ func (r *ClusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	data.Id = types.StringValue(cluster.Cluster.ID)
-	data.InseredAt = types.StringUnknown() // TODO: Update client to return this field.
+	data.InseredAt = types.StringNull() // TODO: Update client to return this field.
 	data.Name = types.StringValue(cluster.Cluster.Name)
 	data.Handle = types.StringValue(*cluster.Cluster.Handle)
-	data.Protect = types.BoolUnknown() // TODO: Update client to return this field.
+	data.Protect = types.BoolNull() // TODO: Update client to return this field.
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
