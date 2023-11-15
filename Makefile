@@ -40,7 +40,7 @@ release: ## builds release version of the app. Requires GoReleaser to work.
 	goreleaser build --clean --single-target --snapshot
 
 .PHONY: install-go
-install: ## installs terraform plugin binary locally
+install-go: ## installs terraform plugin binary locally
 	go install .
 
 ##@ Codegen
