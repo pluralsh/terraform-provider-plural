@@ -3,12 +3,12 @@
 page_title: "plural_cluster Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  
+  Cluster resource
 ---
 
 # plural_cluster (Resource)
 
-
+Cluster resource
 
 
 
@@ -17,14 +17,14 @@ description: |-
 
 ### Required
 
-- `name` (String)
+- `cloud` (String) The cloud provider used to create this cluster.
+- `name` (String) Human-readable name of this cluster, that also translates to cloud resource name.
 
 ### Optional
 
-- `cloud` (String)
-- `handle` (String)
-- `tags` (Map of String)
+- `handle` (String) A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.
+- `tags` (Map of String) Key-value tags used to filter clusters.
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) Internal identifier of this cluster.

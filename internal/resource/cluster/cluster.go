@@ -48,28 +48,29 @@ func (r *ClusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Internal identifier of this cluster",
+				MarkdownDescription: "Internal identifier of this cluster.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "Human-readable name of this cluster, that also translates to cloud resource name",
+				MarkdownDescription: "Human-readable name of this cluster, that also translates to cloud resource name.",
 				Required:            true,
 			},
 			"handle": schema.StringAttribute{
-				MarkdownDescription: "A short, unique human-readable name used to identify this cluster and does not necessarily map to the cloud resource name",
+				MarkdownDescription: "A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.",
 				Optional:            true,
 				Computed:            true,
 			},
 			"cloud": schema.StringAttribute{
-				MarkdownDescription: "Human-readable name of this cluster, that also translates to cloud resource name",
+				MarkdownDescription: "The cloud provider used to create this cluster.",
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.OneOfCaseInsensitive("byok")},
 			},
 			"tags": schema.MapAttribute{
-				MarkdownDescription: "Key-value tags used to filter clusters",
+				MarkdownDescription: "Key-value tags used to filter clusters.",
 				Optional:            true,
+				ElementType:         types.StringType,
 			},
 		},
 	}

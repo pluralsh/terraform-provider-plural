@@ -41,15 +41,15 @@ func (p *PluralProvider) Schema(_ context.Context, _ provider.SchemaRequest, res
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"console_url": schema.StringAttribute{
-				MarkdownDescription: "Plural Console URL, i.e. `https://console.demo.onplural.sh`.",
+				MarkdownDescription: "Plural Console URL, i.e. `https://console.demo.onplural.sh`. Can be sourced from `PLURAL_CONSOLE_URL`.",
 				Optional:            true,
 			},
 			"access_token": schema.StringAttribute{
-				MarkdownDescription: "Plural Console access token.",
+				MarkdownDescription: "Plural Console access token. Can be sourced from `PLURAL_ACCESS_TOKEN`.",
 				Optional:            true,
 			},
 			"use_cli": schema.BoolAttribute{
-				MarkdownDescription: "Use `plural cd login` command for authentication.",
+				MarkdownDescription: "Use `plural cd login` command for authentication. Can be sourced from `PLURAL_USE_CLI`.",
 				Optional:            true,
 			},
 		},
