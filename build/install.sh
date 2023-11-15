@@ -9,11 +9,10 @@ PLUGIN="registry.terraform.io/pluralsh/plural"
 PLUGIN_NAME="terraform-provider-$(basename "${PLUGIN}")"
 PLUGIN_LOCATION="${ROOT_DIR}/build/${PLUGIN_NAME}"
 VERSION=0.0.1
-FILENAME="${PLUGIN_NAME}_v${VERSION}-${OS}-${ARCH}"
-DEST_PATH="${HOME}/.terraform.d/plugins/${PLUGIN}/${VERSION}/${OS}_${ARCH}/${FILENAME}"
+DESTINATION="${HOME}/.terraform.d/plugins/${PLUGIN}/${VERSION}/${OS}_${ARCH}/${PLUGIN_NAME}_v${VERSION}-${OS}-${ARCH}"
 
-mkdir -p "$(dirname "${DEST_PATH}")"
-cp "${PLUGIN_LOCATION}" "${DEST_PATH}"
-echo "Installed ${PLUGIN} into ${DEST_PATH}"
+mkdir -p "$(dirname "${DESTINATION}")"
+mv "${PLUGIN_LOCATION}" "${DESTINATION}"
+echo "Installed ${PLUGIN} into ${DESTINATION}"
 
 
