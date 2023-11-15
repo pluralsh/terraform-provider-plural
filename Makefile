@@ -39,7 +39,7 @@ install: build ## install plugin locally
 release: ## builds release version of the app. Requires GoReleaser to work.
 	goreleaser build --clean --single-target --snapshot
 
-.PHONY: install
+.PHONY: install-go
 install: ## installs terraform plugin binary locally
 	go install .
 

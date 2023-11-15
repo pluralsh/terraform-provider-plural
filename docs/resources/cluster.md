@@ -23,6 +23,7 @@ A representation of a cluster you can deploy to.
 ### Optional
 
 - `handle` (String) A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.
+- `protect` (Boolean) If set to `true` then this cluster cannot be deleted.
 - `tags` (Map of String) Key-value tags used to filter clusters.
 
 ### Read-Only
