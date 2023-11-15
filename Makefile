@@ -29,7 +29,11 @@ install-tools: ## install required tools
 
 .PHONY: build
 build: ## build
-	go build -o terraform-provider-plural
+	go build -o build/terraform-provider-plural
+
+.PHONY: install
+install: build ## install plugin locally
+	@build/install.sh
 
 .PHONY: release
 release: ## builds release version of the app. Requires GoReleaser to work.
