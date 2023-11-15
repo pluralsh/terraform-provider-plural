@@ -52,7 +52,7 @@ func (p *PluralProvider) Schema(_ context.Context, _ provider.SchemaRequest, res
 				Sensitive:           true,
 			},
 			"use_cli": schema.BoolAttribute{
-				MarkdownDescription: "Use `plural cd login` command for authentication. Can be sourced from `PLURAL_USE_CLI`.",
+				MarkdownDescription: "Use Plural CLI `plural cd login` command for authentication. Can be sourced from `PLURAL_USE_CLI`.",
 				Optional:            true,
 			},
 		},
@@ -87,11 +87,23 @@ func (p *PluralProvider) Configure(ctx context.Context, req provider.ConfigureRe
 		accessToken = config.Token
 		consoleUrl = config.Url
 
-		if accessToken == "" || consoleUrl == "" {
+		if consoleUrl == "" {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("use_cli"),
-				"Missing Plural CLI Credentials",
-				"The provider could not read read credentials from Plural CLI. Run `plural cd login` to save your credentials first.",
+				"Missing Plural Console URL",
+				"The provider could not read Plural Console URL from Plural CLI. "+
+					"Run `plural cd login` to save your credentials first. "+
+					"You can also specify Plural Console URL and access token directly, see documentation for more information.",
+			)
+		}
+
+		if accessToken == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("use_cli"),
+				"Missing Plural Access Token",
+				"The provider could not read Plural Console access token from Plural CLI. "+
+					"Run `plural cd login` to save your credentials first. "+
+					"You can also specify Plural Console URL and access token directly, see documentation for more information.",
 			)
 		}
 	} else {
@@ -101,7 +113,9 @@ func (p *PluralProvider) Configure(ctx context.Context, req provider.ConfigureRe
 				"Missing Plural Console URL",
 				"The provider cannot create the Plural Console client as there is a missing or empty value for the Plural Console URL. "+
 					"Set the URL value in the configuration or use the PLURAL_CONSOLE_URL environment variable. "+
-					"If either is already set, ensure the value is not empty.")
+					"If either is already set, ensure the value is not empty. "+
+					"You can also use Plural CLI for authentication, see documentation for more information.",
+			)
 		}
 
 		if accessToken == "" {
@@ -110,7 +124,9 @@ func (p *PluralProvider) Configure(ctx context.Context, req provider.ConfigureRe
 				"Missing Plural Console Access Token",
 				"The provider cannot create the Plural Console client as there is a missing or empty value for the Plural Console access token. "+
 					"Set the URL value in the configuration or use the PLURAL_ACCESS_TOKEN environment variable. "+
-					"If either is already set, ensure the value is not empty.")
+					"If either is already set, ensure the value is not empty. "+
+					"You can also use Plural CLI for authentication, see documentation for more information.",
+			)
 		}
 	}
 
