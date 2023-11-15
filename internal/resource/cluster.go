@@ -30,11 +30,13 @@ type ClusterResource struct {
 
 // ClusterResourceModel describes the cluster resource data model.
 type ClusterResourceModel struct {
-	Id     types.String `tfsdk:"id"`
-	Name   types.String `tfsdk:"name"`
-	Handle types.String `tfsdk:"handle"`
-	Cloud  types.String `tfsdk:"cloud"`
-	Tags   types.Map    `tfsdk:"tags"`
+	Id        types.String `tfsdk:"id"`
+	InseredAt types.String `tfsdk:"inserted_at"`
+	Name      types.String `tfsdk:"name"`
+	Handle    types.String `tfsdk:"handle"`
+	Cloud     types.String `tfsdk:"cloud"`
+	Protect   types.Bool   `tfsdk:"protect"`
+	Tags      types.Map    `tfsdk:"tags"`
 }
 
 func (r *ClusterResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -52,6 +54,10 @@ func (r *ClusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"inserted_at": schema.StringAttribute{
+				MarkdownDescription: "Creation date of this cluster.",
+				Computed:            true,
+			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: "Human-readable name of this cluster, that also translates to cloud resource name.",
 				Required:            true,
@@ -65,6 +71,10 @@ func (r *ClusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				MarkdownDescription: "The cloud provider used to create this cluster.",
 				Required:            true,
 				Validators:          []validator.String{stringvalidator.OneOfCaseInsensitive("byok")},
+			},
+			"protect": schema.BoolAttribute{
+				MarkdownDescription: "If set to `true` then this cluster cannot be deleted.",
+				Optional:            true,
 			},
 			"tags": schema.MapAttribute{
 				MarkdownDescription: "Key-value tags used to filter clusters.",
@@ -102,8 +112,9 @@ func (r *ClusterResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	attrs := consoleClient.ClusterAttributes{
-		Name:   data.Name.ValueString(),
-		Handle: data.Handle.ValueStringPointer(),
+		Name:    data.Name.ValueString(),
+		Handle:  data.Handle.ValueStringPointer(),
+		Protect: data.Protect.ValueBoolPointer(),
 	}
 	cluster, err := r.client.CreateCluster(ctx, attrs)
 	if err != nil {
@@ -121,9 +132,10 @@ func (r *ClusterResource) Create(ctx context.Context, req resource.CreateRequest
 			return
 		}
 
-		// deployToken := *cluster.CreateCluster.DeployToken
-		// url := fmt.Sprintf("%s/ext/gql", p.ConsoleClient.Url())
-		// p.doInstallOperator(url, deployToken)
+		// TODO:
+		//   deployToken := *cluster.CreateCluster.DeployToken
+		//   url := fmt.Sprintf("%s/ext/gql", p.ConsoleClient.Url())
+		//   p.doInstallOperator(url, deployToken)
 
 		tflog.Trace(ctx, "installed the cluster operator")
 	}
@@ -145,8 +157,10 @@ func (r *ClusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	data.Id = types.StringValue(cluster.Cluster.ID)
+	data.InseredAt = types.StringUnknown() // TODO: Update client to return this field.
 	data.Name = types.StringValue(cluster.Cluster.Name)
 	data.Handle = types.StringValue(*cluster.Cluster.Handle)
+	data.Protect = types.BoolUnknown() // TODO: Update client to return this field.
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -184,6 +198,8 @@ func (r *ClusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete cluster, got error: %s", err))
 		return
 	}
+
+	tflog.Trace(ctx, "deleted the cluster")
 }
 
 func (r *ClusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

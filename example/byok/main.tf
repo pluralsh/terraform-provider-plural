@@ -15,6 +15,7 @@ resource "plural_cluster" "byok_workload_cluster" {
   name = "workload-cluster-tf"
   handle = "wctf"
   cloud = "byok"
+  protect = "false"
   tags = {
     "managed-by" = "terraform-provider-plural"
   }
