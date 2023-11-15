@@ -33,7 +33,6 @@ type ClusterResource struct {
 // ClusterResourceModel describes the cluster resource data model.
 type ClusterResourceModel struct {
 	Id        types.String `tfsdk:"id"`
-	InseredAt types.String `tfsdk:"inserted_at"`
 	Name      types.String `tfsdk:"name"`
 	Handle    types.String `tfsdk:"handle"`
 	Cloud     types.String `tfsdk:"cloud"`
@@ -55,10 +54,6 @@ func (r *ClusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-			},
-			"inserted_at": schema.StringAttribute{
-				MarkdownDescription: "Creation date of this cluster.",
-				Computed:            true,
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: "Human-readable name of this cluster, that also translates to cloud resource name.",
@@ -159,7 +154,6 @@ func (r *ClusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	data.Id = types.StringValue(cluster.Cluster.ID)
-	data.InseredAt = types.StringNull() // TODO: Update client to return this field.
 	data.Name = types.StringValue(cluster.Cluster.Name)
 	data.Handle = types.StringValue(*cluster.Cluster.Handle)
 	data.Protect = types.BoolNull() // TODO: Update client to return this field.

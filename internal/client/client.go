@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	gqlclient "github.com/pluralsh/console-client-go"
+	"github.com/samber/lo"
 )
 
 type Client struct {
@@ -12,16 +13,24 @@ type Client struct {
 }
 
 func (c *Client) CreateServiceDeployment(ctx context.Context, id, handle *string, attrs gqlclient.ServiceDeploymentAttributes) (*gqlclient.ServiceDeploymentFragment, error) {
-	if id == nil && handle == nil {
+	if len(lo.FromPtr(id)) == 0 && len(lo.FromPtr(handle)) == 0 {
 		return nil, fmt.Errorf("could not create ServiceDeployment: id and handle not provided")
 	}
 
-	if id != nil {
+	if  len(lo.FromPtr(id)) > 0 {
 		res, err := c.Client.CreateServiceDeployment(ctx, *id, attrs)
+		if err != nil {
+			return nil, err
+		}
+
 		return res.CreateServiceDeployment, err
 	}
 
 	res, err := c.Client.CreateServiceDeploymentWithHandle(ctx, *handle, attrs)
+	if err != nil {
+		return nil, err
+	}
+
 	return res.CreateServiceDeployment, err
 }
 

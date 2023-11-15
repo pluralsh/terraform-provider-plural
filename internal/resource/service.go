@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	consoleClient "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/polly/algorithms"
 
 	"terraform-provider-plural/internal/client"
 )
@@ -43,14 +44,19 @@ type ServiceDeploymentResourceModel struct {
 }
 
 type ClusterModel struct {
-	Id     string `json:"id"`
-	Handle string `json:"handle"`
+	Id     types.String `tfsdk:"id"`
+	Handle types.String `tfsdk:"handle"`
 }
 
 type RepositoryModel struct {
-	Id     string `json:"id"`
-	Ref    string `json:"ref"`
-	Folder string `json:"folder"`
+	Id     string `tfsdk:"id"`
+	Ref    string `tfsdk:"ref"`
+	Folder string `tfsdk:"folder"`
+}
+
+type ConfigurationModel struct {
+	Name  types.String `tfsdk:"name"`
+	Value types.String `tfsdk:"value"`
 }
 
 func (r *ServiceDeploymentResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -97,14 +103,14 @@ func (r *ServiceDeploymentResource) Schema(_ context.Context, _ resource.SchemaR
 							stringvalidator.ConflictsWith(path.MatchRoot("cluster").AtName("handle")),
 							stringvalidator.ExactlyOneOf(path.MatchRoot("cluster").AtName("handle")),
 						},
-						Optional:   true,
+						Optional: true,
 					},
 					"handle": schema.StringAttribute{
 						Validators: []validator.String{
 							stringvalidator.ConflictsWith(path.MatchRoot("cluster").AtName("id")),
 							stringvalidator.ExactlyOneOf(path.MatchRoot("cluster").AtName("id")),
 						},
-						Optional:   true,
+						Optional: true,
 					},
 				},
 				MarkdownDescription: "Unique cluster id/handle to deploy this ServiceDeployment",
@@ -150,31 +156,38 @@ func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	var cluster ClusterModel
-	data.Cluster.As(ctx, cluster, basetypes.ObjectAsOptions{})
+	data.Cluster.As(ctx, &cluster, basetypes.ObjectAsOptions{})
 
 	var repository RepositoryModel
-	data.Repository.As(ctx, repository, basetypes.ObjectAsOptions{})
+	data.Repository.As(ctx, &repository, basetypes.ObjectAsOptions{})
 
-	var configuration []*consoleClient.ConfigAttributes
-	data.Repository.As(ctx, repository, basetypes.ObjectAsOptions{})
+	var configuration []ConfigurationModel
+	data.Configuration.ElementsAs(ctx, &configuration, false)
 
 	attrs := consoleClient.ServiceDeploymentAttributes{
 		Name:         data.Name.ValueString(),
+		Namespace:    data.Namespace.ValueString(),
 		RepositoryID: repository.Id,
 		Git: consoleClient.GitRefAttributes{
 			Ref:    repository.Ref,
 			Folder: repository.Folder,
 		},
-		Configuration: configuration,
+		Configuration: algorithms.Map(configuration, func(c ConfigurationModel) *consoleClient.ConfigAttributes {
+			return &consoleClient.ConfigAttributes{
+				Name:  c.Name.ValueString(),
+				Value: c.Value.ValueStringPointer(),
+			}
+		}),
 	}
 
-	_, err := r.client.CreateServiceDeployment(ctx, &cluster.Id, &cluster.Handle, attrs)
+	sd, err := r.client.CreateServiceDeployment(ctx, cluster.Id.ValueStringPointer(), cluster.Handle.ValueStringPointer(), attrs)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create ServiceDeployment, got error: %s", err))
 		return
 	}
 
-	// TODO: figure out if we need to read response and update state
+	// TODO: figure out what we need to read from response
+	data.Id = types.StringValue(sd.ID)
 
 	tflog.Trace(ctx, "created a ServiceDeployment")
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
