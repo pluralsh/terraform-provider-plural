@@ -857,6 +857,8 @@ github.com/pluralsh/gqlclient v1.11.0 h1:FfXW7FiEJLHOfTAa7NxDb8jb3aMZNIpCAcG+bg8
 github.com/pluralsh/gqlclient v1.11.0/go.mod h1:qSXKUlio1F2DRPy8el4oFYsmpKbkUYspgPB87T4it5I=
 github.com/pluralsh/plural-cli v0.8.1-0.20231114145714-860fa85f7e63 h1:1IWFJ6th8IMzSTND6RkmK/iYiOodtU3hXVs9X6nFWOQ=
 github.com/pluralsh/plural-cli v0.8.1-0.20231114145714-860fa85f7e63/go.mod h1:Cj5ZD6kf9OLd+333rdkUVvqFxcnKOecLxoy+nx8h22g=
+github.com/pluralsh/plural-cli v0.8.1-0.20231114161007-183eafb99b03 h1:toUJzv4+4SYGsw8kvrx2oQxrmKu8XYirrNmNyxx9NHk=
+github.com/pluralsh/plural-cli v0.8.1-0.20231114161007-183eafb99b03/go.mod h1:Cj5ZD6kf9OLd+333rdkUVvqFxcnKOecLxoy+nx8h22g=
 github.com/pluralsh/polly v0.1.1 h1:VtbS83re2YuDgscvaFgfzEDZs9uXRV84fCdvKCgIRE4=
 github.com/pluralsh/polly v0.1.1/go.mod h1:Yo1/jcW+4xwhWG+ZJikZy4J4HJkMNPZ7sq5auL2c/tY=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
