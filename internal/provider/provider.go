@@ -11,11 +11,14 @@ import (
 	ds "terraform-provider-plural/internal/datasource"
 	r "terraform-provider-plural/internal/resource"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	client "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/plural-cli/pkg/console"
@@ -46,15 +49,31 @@ func (p *PluralProvider) Schema(_ context.Context, _ provider.SchemaRequest, res
 			"console_url": schema.StringAttribute{
 				MarkdownDescription: "Plural Console URL, i.e. `https://console.demo.onplural.sh`. Can be sourced from `PLURAL_CONSOLE_URL`.",
 				Optional:            true,
+				Validators: []validator.String{
+					stringvalidator.ConflictsWith(path.MatchRoot("use_cli")),
+					stringvalidator.ExactlyOneOf(path.MatchRoot("use_cli")),
+				},
 			},
 			"access_token": schema.StringAttribute{
 				MarkdownDescription: "Plural Console access token. Can be sourced from `PLURAL_ACCESS_TOKEN`.",
 				Optional:            true,
 				Sensitive:           true,
+				Validators: []validator.String{
+					stringvalidator.ConflictsWith(path.MatchRoot("use_cli")),
+					stringvalidator.ExactlyOneOf(path.MatchRoot("use_cli")),
+				},
 			},
 			"use_cli": schema.BoolAttribute{
 				MarkdownDescription: "Use Plural CLI `plural cd login` command for authentication. Can be sourced from `PLURAL_USE_CLI`.",
 				Optional:            true,
+				Validators: []validator.Bool{
+					boolvalidator.ConflictsWith(
+						path.MatchRoot("console_url"),
+						path.MatchRoot("access_token"),
+					),
+					boolvalidator.ExactlyOneOf(path.MatchRoot("console_url")),
+					boolvalidator.ExactlyOneOf(path.MatchRoot("access_token")),
+				},
 			},
 		},
 	}
