@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	consoleClient "github.com/pluralsh/console-client-go"
-	"github.com/samber/lo"
 )
 
 var _ resource.Resource = &ClusterResource{}
@@ -160,7 +159,7 @@ func (r *ClusterResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	attrs := consoleClient.ClusterUpdateAttributes{
-		Handle: lo.ToPtr(data.Handle.ValueString()),
+		Handle: data.Handle.ValueStringPointer(),
 	}
 	cluster, err := r.client.UpdateCluster(ctx, data.Id.ValueString(), attrs)
 	if err != nil {
