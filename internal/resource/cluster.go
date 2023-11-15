@@ -103,8 +103,8 @@ func (r *ClusterResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	attrs := consoleClient.ClusterAttributes{
-		Name:   data.Name.String(),
-		Handle: lo.ToPtr(data.Handle.String()),
+		Name:   data.Name.ValueString(),
+		Handle: data.Handle.ValueStringPointer(),
 	}
 	cluster, err := r.client.CreateCluster(ctx, attrs)
 	if err != nil {
@@ -116,7 +116,7 @@ func (r *ClusterResource) Create(ctx context.Context, req resource.CreateRequest
 
 	data.Id = types.StringValue(cluster.CreateCluster.ID)
 
-	if data.Cloud.String() == "byok" {
+	if data.Cloud.ValueString() == "byok" {
 		if cluster.CreateCluster.DeployToken == nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to fetch cluster deploy token"))
 			return
@@ -139,7 +139,7 @@ func (r *ClusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	cluster, err := r.client.GetCluster(ctx, lo.ToPtr(data.Id.String()))
+	cluster, err := r.client.GetCluster(ctx, data.Id.ValueStringPointer())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read cluster, got error: %s", err))
 		return
@@ -160,9 +160,9 @@ func (r *ClusterResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	attrs := consoleClient.ClusterUpdateAttributes{
-		Handle: lo.ToPtr(data.Handle.String()),
+		Handle: lo.ToPtr(data.Handle.ValueString()),
 	}
-	cluster, err := r.client.UpdateCluster(ctx, data.Id.String(), attrs)
+	cluster, err := r.client.UpdateCluster(ctx, data.Id.ValueString(), attrs)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update cluster, got error: %s", err))
 		return
@@ -180,7 +180,7 @@ func (r *ClusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	_, err := r.client.DeleteCluster(ctx, data.Id.String())
+	_, err := r.client.DeleteCluster(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete cluster, got error: %s", err))
 		return
