@@ -17,7 +17,7 @@ type Kubeconfig struct {
 	Host                  types.String `tfsdk:"host"`
 	Username              types.String `tfsdk:"username"`
 	Password              types.String `tfsdk:"password"`
-	Inscure               types.String `tfsdk:"insecure"`
+	Inscure               types.Bool   `tfsdk:"insecure"`
 	TlsServerName         types.String `tfsdk:"tls_server_name"`
 	ClientCertificate     types.String `tfsdk:"client_certificate"`
 	ClientKey             types.String `tfsdk:"client_key"`
