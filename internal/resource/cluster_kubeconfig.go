@@ -3,6 +3,10 @@ package resource
 import (
 	"bytes"
 	"context"
+	"os"
+	"time"
+
+	"k8s.io/client-go/discovery/cached/disk"
 
 	"terraform-provider-plural/internal/model"
 
@@ -144,13 +148,13 @@ func (k *KubeConfig) ToRESTConfig() (*rest.Config, error) {
 }
 
 // ToDiscoveryClient implemented interface method
-func (k *KubeConfig) ToDiscoveryClient() (discovery.DiscoveryInterface, error) {
+func (k *KubeConfig) ToDiscoveryClient() (discovery.CachedDiscoveryInterface, error) {
 	config, err := k.ToRESTConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	return discovery.NewDiscoveryClientForConfigOrDie(config), nil
+	return disk.NewCachedDiscoveryClientForConfig(config, os.TempDir(), os.TempDir(), 1 * time.Minute)
 }
 
 // ToRESTMapper implemented interface method
