@@ -2,6 +2,7 @@ package resource
 
 import (
 	"bytes"
+	"context"
 	"sync"
 
 	"terraform-provider-plural/internal/model"
@@ -10,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/go-homedir"
 	"k8s.io/apimachinery/pkg/api/meta"
 	apimachineryschema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -157,32 +159,27 @@ func (k *KubeConfig) ToRawKubeConfigLoader() clientcmd.ClientConfig {
 	return k.ClientConfig
 }
 
-func newKubeconfig(kubeconfig model.Kubeconfig, namespace *string) (*KubeConfig, error) {
+func newKubeconfig(ctx context.Context, kubeconfig model.Kubeconfig, namespace *string) (*KubeConfig, error) {
 	overrides := &clientcmd.ConfigOverrides{}
 	loader := &clientcmd.ClientConfigLoadingRules{}
 
-	if len(configPaths) > 0 {
-		expandedPaths := []string{}
-		for _, p := range configPaths {
-			path, err := homedir.Expand(p)
-			if err != nil {
-				return nil, err
-			}
+	if !kubeconfig.ConfigPath.IsNull() {
+		tflog.Trace(ctx, "using kubeconfig", map[string]interface{}{
+			"kubeconfig": kubeconfig.ConfigPath.ValueString(),
+		})
 
-			log.Printf("[DEBUG] Using kubeconfig: %s", path)
-			expandedPaths = append(expandedPaths, path)
+		path, err := homedir.Expand(kubeconfig.ConfigPath.ValueString())
+		if err != nil {
+			return nil, err
 		}
-
-		if len(expandedPaths) == 1 {
-			loader.ExplicitPath = expandedPaths[0]
-		} else {
-			loader.Precedence = expandedPaths
-		}
+		loader.ExplicitPath = path
 
 		if !kubeconfig.ConfigContext.IsNull() || !kubeconfig.ConfigContextAuthInfo.IsNull() || !kubeconfig.ConfigContextCluster.IsNull() {
 			if !kubeconfig.ConfigContext.IsNull() {
 				overrides.CurrentContext = kubeconfig.ConfigContext.ValueString()
-				log.Printf("[DEBUG] Using custom current context: %q", overrides.CurrentContext)
+				tflog.Trace(ctx, "using custom current context", map[string]interface{}{
+					"context": overrides.CurrentContext,
+				})
 			}
 
 			overrides.Context = clientcmdapi.Context{}
@@ -192,7 +189,9 @@ func newKubeconfig(kubeconfig model.Kubeconfig, namespace *string) (*KubeConfig,
 			if !kubeconfig.ConfigContextCluster.IsNull() {
 				overrides.Context.Cluster = kubeconfig.ConfigContextCluster.ValueString()
 			}
-			log.Printf("[DEBUG] Using overidden context: %#v", overrides.Context)
+			tflog.Trace(ctx, "using overridden context", map[string]interface{}{
+				"context": overrides.Context,
+			})
 		}
 	}
 
@@ -261,10 +260,10 @@ func newKubeconfig(kubeconfig model.Kubeconfig, namespace *string) (*KubeConfig,
 
 	client := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loader, overrides)
 	if client == nil {
-		log.Printf("[ERROR] Failed to initialize kubernetes config")
+		tflog.Error(ctx, "failed to initialize kubernetes config")
 		return nil, nil
 	}
-	log.Printf("[INFO] Successfully initialized kubernetes config")
+	tflog.Trace(ctx, "successfully initialized kubernetes config")
 
 	return &KubeConfig{ClientConfig: client}, nil
 }
