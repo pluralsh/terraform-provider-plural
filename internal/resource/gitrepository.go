@@ -66,11 +66,13 @@ func (r *GitRepositoryResource) Schema(_ context.Context, _ resource.SchemaReque
 				MarkdownDescription: "SSH private key to use with this repo if an ssh url was given.",
 				Validators:          []validator.String{stringvalidator.ConflictsWith(path.MatchRoot("username"), path.MatchRoot("password"))},
 				Optional:            true,
+				Sensitive:           true,
 			},
 			"passphrase": schema.StringAttribute{
 				MarkdownDescription: "Passphrase to decrypt the given private key.",
 				Validators:          []validator.String{stringvalidator.ConflictsWith(path.MatchRoot("username"), path.MatchRoot("password"))},
 				Optional:            true,
+				Sensitive:           true,
 			},
 			"username": schema.StringAttribute{
 				MarkdownDescription: "HTTP username for authenticated http repos, defaults to apiKey for GitHub.",
@@ -81,6 +83,7 @@ func (r *GitRepositoryResource) Schema(_ context.Context, _ resource.SchemaReque
 				MarkdownDescription: "HTTP password for http authenticated repos.",
 				Validators:          []validator.String{stringvalidator.ConflictsWith(path.MatchRoot("private_key"), path.MatchRoot("passphrase"))},
 				Optional:            true,
+				Sensitive:           true,
 			},
 			"url_format": schema.StringAttribute{
 				MarkdownDescription: "Similar to https_Path, a manually supplied url format for custom git. Should be something like {url}/tree/{ref}/{folder}.",

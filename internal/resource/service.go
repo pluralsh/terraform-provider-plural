@@ -89,7 +89,8 @@ func (r *ServiceDeploymentResource) Schema(_ context.Context, _ resource.SchemaR
 							Required: true,
 						},
 						"value": schema.StringAttribute{
-							Required: true,
+							Required:  true,
+							Sensitive: true,
 						},
 					},
 				},
