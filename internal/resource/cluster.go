@@ -73,6 +73,7 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Optional:            true,
 				ElementType:         types.StringType,
 			},
+			"kubeconfig": kubeconfigAttribute(),
 		},
 	}
 }
