@@ -19,7 +19,8 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/tools/clientcmd"
-	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
+
+	"terraform-provider-plural/internal/defaults"
 )
 
 func kubeconfigAttribute() schema.SingleNestedAttribute {
@@ -27,13 +28,13 @@ func kubeconfigAttribute() schema.SingleNestedAttribute {
 		Optional: true,
 		Attributes: map[string]schema.Attribute{
 			"host": schema.StringAttribute{
-				Optional: true,
-				//Default:             defaults.EnvString("PLURAL_KUBE_HOST", ""),
+				Optional:            true,
+				Default:             defaults.Env("PLURAL_KUBE_HOST", ""),
 				MarkdownDescription: "The complete address of the Kubernetes cluster, using scheme://hostname:port format. Can be sourced from `PLURAL_KUBE_HOST`.",
 			},
 			"username": schema.StringAttribute{
-				Optional: true,
-				//Default:             defaults.EnvString("PLURAL_KUBE_HOST", ""),
+				Optional:            true,
+				Default:             defaults.Env("PLURAL_KUBE_HOST", ""),
 				MarkdownDescription: "The username for basic authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_USER`.",
 			},
 			"password": schema.StringAttribute{
@@ -43,6 +44,7 @@ func kubeconfigAttribute() schema.SingleNestedAttribute {
 			},
 			"insecure": schema.BoolAttribute{
 				Optional:            true,
+				Default:             defaults.Env("PLURAL_KUBE_HOST", false),
 				MarkdownDescription: "Skips the validity check for the server's certificate. This will make your HTTPS connections insecure. Can be sourced from `PLURAL_KUBE_INSECURE`.",
 			},
 			"tls_server_name": schema.StringAttribute{
