@@ -43,7 +43,9 @@ type GitRepositoryResourceModel struct {
 	HttpsPath  types.String `tfsdk:"https_path"`
 }
 
-func (r *GitRepositoryResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *GitRepositoryResource) Metadata(
+	_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse,
+) {
 	resp.TypeName = req.ProviderTypeName + "_git_repository"
 }
 
@@ -64,26 +66,46 @@ func (r *GitRepositoryResource) Schema(_ context.Context, _ resource.SchemaReque
 			},
 			"private_key": schema.StringAttribute{
 				MarkdownDescription: "SSH private key to use with this repo if an ssh url was given.",
-				Validators:          []validator.String{stringvalidator.ConflictsWith(path.MatchRoot("username"), path.MatchRoot("password"))},
-				Optional:            true,
-				Sensitive:           true,
+				Validators: []validator.String{
+					stringvalidator.ConflictsWith(
+						path.MatchRoot("username"), path.MatchRoot("password"),
+					),
+					stringvalidator.AlsoRequires(path.MatchRoot("passphrase")),
+				},
+				Optional:  true,
+				Sensitive: true,
 			},
 			"passphrase": schema.StringAttribute{
 				MarkdownDescription: "Passphrase to decrypt the given private key.",
-				Validators:          []validator.String{stringvalidator.ConflictsWith(path.MatchRoot("username"), path.MatchRoot("password"))},
-				Optional:            true,
-				Sensitive:           true,
+				Validators: []validator.String{
+					stringvalidator.ConflictsWith(
+						path.MatchRoot("username"), path.MatchRoot("password"),
+					),
+					stringvalidator.AlsoRequires(path.MatchRoot("private_key")),
+				},
+				Optional:  true,
+				Sensitive: true,
 			},
 			"username": schema.StringAttribute{
 				MarkdownDescription: "HTTP username for authenticated http repos, defaults to apiKey for GitHub.",
-				Validators:          []validator.String{stringvalidator.ConflictsWith(path.MatchRoot("private_key"), path.MatchRoot("passphrase"))},
-				Optional:            true,
+				Validators: []validator.String{
+					stringvalidator.ConflictsWith(
+						path.MatchRoot("private_key"), path.MatchRoot("passphrase"),
+					),
+					stringvalidator.AlsoRequires(path.MatchRoot("password")),
+				},
+				Optional: true,
 			},
 			"password": schema.StringAttribute{
 				MarkdownDescription: "HTTP password for http authenticated repos.",
-				Validators:          []validator.String{stringvalidator.ConflictsWith(path.MatchRoot("private_key"), path.MatchRoot("passphrase"))},
-				Optional:            true,
-				Sensitive:           true,
+				Validators: []validator.String{
+					stringvalidator.ConflictsWith(
+						path.MatchRoot("private_key"), path.MatchRoot("passphrase"),
+					),
+					stringvalidator.AlsoRequires(path.MatchRoot("username")),
+				},
+				Optional:  true,
+				Sensitive: true,
 			},
 			"url_format": schema.StringAttribute{
 				MarkdownDescription: "Similar to https_Path, a manually supplied url format for custom git. Should be something like {url}/tree/{ref}/{folder}.",
@@ -97,7 +119,9 @@ func (r *GitRepositoryResource) Schema(_ context.Context, _ resource.SchemaReque
 	}
 }
 
-func (r *GitRepositoryResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *GitRepositoryResource) Configure(
+	_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse,
+) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -107,7 +131,10 @@ func (r *GitRepositoryResource) Configure(_ context.Context, req resource.Config
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected GitRepository Resource Configure Type",
-			fmt.Sprintf("Expected *client.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf(
+				"Expected *client.Client, got: %T. Please report this issue to the provider developers.",
+				req.ProviderData,
+			),
 		)
 
 		return
@@ -167,7 +194,9 @@ func (r *GitRepositoryResource) Read(ctx context.Context, req resource.ReadReque
 	}
 
 	if repository == nil {
-		resp.Diagnostics.AddError("Not Found", fmt.Sprintf("Unable to find GitRepository with ID: %s", data.Id.ValueString()))
+		resp.Diagnostics.AddError(
+			"Not Found", fmt.Sprintf("Unable to find GitRepository with ID: %s", data.Id.ValueString()),
+		)
 		return
 	}
 
@@ -210,6 +239,8 @@ func (r *GitRepositoryResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 }
 
-func (r *GitRepositoryResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *GitRepositoryResource) ImportState(
+	ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse,
+) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
