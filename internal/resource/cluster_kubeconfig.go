@@ -9,67 +9,66 @@ import (
 
 func kubeconfigAttribute() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
+		Optional: true,
 		Attributes: map[string]schema.Attribute{
 			"host": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "The address of the Kubernetes clusters", // KUBE_HOST
+				MarkdownDescription: "The address of the Kubernetes clusters. Can be sourced from `PLURAL_KUBE_HOST`.",
 			},
 			"username": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "The username for basic authentication to the Kubernetes cluster.", // KUBE_USER
+				MarkdownDescription: "The username for basic authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_USER`.",
 			},
 			"password": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
-				MarkdownDescription: "The password for basic authentication to the Kubernetes cluster.", // KUBE_PASSWORD
+				MarkdownDescription: "The password for basic authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_PASSWORD`.",
 			},
 			"insecure": schema.BoolAttribute{
 				Optional:            true,
-				MarkdownDescription: "Skips the validity check for the server's certificate. This will make your HTTPS connections insecure.", // KUBE_INSECURE
+				MarkdownDescription: "Skips the validity check for the server's certificate. This will make your HTTPS connections insecure. Can be sourced from `PLURAL_KUBE_INSECURE`.",
 			},
 			"tls_server_name": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "TLS server name is used to check server certificate. If it is empty, the hostname used to contact the server is used.", // KUBE_TLS_SERVER_NAME
+				MarkdownDescription: "TLS server name is used to check server certificate. If it is empty, the hostname used to contact the server is used. Can be sourced from `PLURAL_KUBE_TLS_SERVER_NAME`.",
 			},
 			"client_certificate": schema.StringAttribute{
 				Optional:            true,
-				Sensitive:           true,
-				MarkdownDescription: "The path to a client cert file for TLS.", // KUBE_CLIENT_CERT_DATA
+				MarkdownDescription: "The path to a client cert file for TLS. Can be sourced from `PLURAL_KUBE_CLIENT_CERT_DATA`.",
 			},
 			"client_key": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
-				MarkdownDescription: "The path to a client key file for TLS.", // KUBE_CLIENT_KEY_DATA
+				MarkdownDescription: "The path to a client key file for TLS. Can be sourced from `PLURAL_KUBE_CLIENT_KEY_DATA`.",
 			},
 			"cluster_ca_certificate": schema.StringAttribute{
 				Optional:            true,
-				Sensitive:           true,
-				MarkdownDescription: "The path to a cert file for the certificate authority.", // KUBE_CLUSTER_CA_CERT_DATA
+				MarkdownDescription: "The path to a cert file for the certificate authority. Can be sourced from `PLURAL_KUBE_CLUSTER_CA_CERT_DATA`.",
 			},
 			"config_path": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Path to the kubeconfig file.", // KUBE_CONFIG_PATH
+				MarkdownDescription: "Path to the kubeconfig file. Can be sourced from `PLURAL_KUBE_CONFIG_PATH`.",
 			},
 			"config_context": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "kubeconfig context to use.", // KUBE_CTX
+				MarkdownDescription: "kubeconfig context to use. Can be sourced from `PLURAL_KUBE_CTX`.",
 			},
 			"config_context_auth_info": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "", // KUBE_CTX_AUTH_INFO
+				MarkdownDescription: "Can be sourced from `PLURAL_KUBE_CTX_AUTH_INFO`.",
 			},
 			"config_context_cluster": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "", // KUBE_CTX_CLUSTER
+				MarkdownDescription: "Can be sourced from `PLURAL_KUBE_CTX_CLUSTER`.",
 			},
 			"token": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
-				MarkdownDescription: "Token is the bearer token for authentication to the Kubernetes cluster.", // KUBE_TOKEN
+				MarkdownDescription: "Token is the bearer token for authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_TOKEN`.",
 			},
 			"proxy_url": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "The URL to the proxy to be used for all requests made by this client.", // KUBE_PROXY_URL
+				MarkdownDescription: "The URL to the proxy to be used for all requests made by this client. Can be sourced from `PLURAL_KUBE_PROXY_URL`.",
 			},
 			"exec": schema.ListNestedAttribute{
 				Optional:            true,
