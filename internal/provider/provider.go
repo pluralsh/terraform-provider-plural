@@ -50,8 +50,8 @@ func (p *PluralProvider) Schema(_ context.Context, _ provider.SchemaRequest, res
 				MarkdownDescription: "Plural Console URL, i.e. `https://console.demo.onplural.sh`. Can be sourced from `PLURAL_CONSOLE_URL`.",
 				Optional:            true,
 				Validators: []validator.String{
+					stringvalidator.AlsoRequires(path.MatchRoot("access_token")),
 					stringvalidator.ConflictsWith(path.MatchRoot("use_cli")),
-					stringvalidator.ExactlyOneOf(path.MatchRoot("use_cli")),
 				},
 			},
 			"access_token": schema.StringAttribute{
@@ -59,8 +59,8 @@ func (p *PluralProvider) Schema(_ context.Context, _ provider.SchemaRequest, res
 				Optional:            true,
 				Sensitive:           true,
 				Validators: []validator.String{
+					stringvalidator.AlsoRequires(path.MatchRoot("console_url")),
 					stringvalidator.ConflictsWith(path.MatchRoot("use_cli")),
-					stringvalidator.ExactlyOneOf(path.MatchRoot("use_cli")),
 				},
 			},
 			"use_cli": schema.BoolAttribute{
@@ -71,8 +71,6 @@ func (p *PluralProvider) Schema(_ context.Context, _ provider.SchemaRequest, res
 						path.MatchRoot("console_url"),
 						path.MatchRoot("access_token"),
 					),
-					boolvalidator.ExactlyOneOf(path.MatchRoot("console_url")),
-					boolvalidator.ExactlyOneOf(path.MatchRoot("access_token")),
 				},
 			},
 		},
