@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -17,7 +18,7 @@ func NewClusterDataSource() datasource.DataSource {
 }
 
 type clusterDataSource struct {
-	client *console.Client
+	client *client.Client
 }
 
 func (d *clusterDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -68,16 +69,16 @@ func (d *clusterDataSource) Configure(_ context.Context, req datasource.Configur
 		return
 	}
 
-	client, ok := req.ProviderData.(*console.Client)
+	c, ok := req.ProviderData.(*client.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Cluster Resource Configure Type",
-			fmt.Sprintf("Expected *console.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *client.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}
 
-	d.client = client
+	d.client = c
 }
 
 func (d *clusterDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
