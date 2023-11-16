@@ -19,6 +19,7 @@ import (
 	"github.com/pluralsh/polly/algorithms"
 
 	"terraform-provider-plural/internal/client"
+	"terraform-provider-plural/internal/model"
 )
 
 var _ resource.Resource = &ServiceDeploymentResource{}
@@ -135,8 +136,7 @@ func (r *ServiceDeploymentResource) Configure(_ context.Context, req resource.Co
 		return
 	}
 
-	c, ok := req.ProviderData.(*client.Client)
-
+	data, ok := req.ProviderData.(*model.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected ServiceDeployment Resource Configure Type",
@@ -146,7 +146,7 @@ func (r *ServiceDeploymentResource) Configure(_ context.Context, req resource.Co
 		return
 	}
 
-	r.client = c
+	r.client = data.Client
 }
 
 func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

@@ -3,9 +3,11 @@ package resource
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os"
 	"time"
 
+	"github.com/samber/lo"
 	"k8s.io/client-go/discovery/cached/disk"
 
 	"terraform-provider-plural/internal/model"
@@ -33,74 +35,88 @@ func kubeconfigAttribute() schema.SingleNestedAttribute {
 		Attributes: map[string]schema.Attribute{
 			"host": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Default:             defaults.Env("PLURAL_KUBE_HOST", ""),
 				MarkdownDescription: "The complete address of the Kubernetes cluster, using scheme://hostname:port format. Can be sourced from `PLURAL_KUBE_HOST`.",
 			},
 			"username": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Default:             defaults.Env("PLURAL_KUBE_USER", ""),
 				MarkdownDescription: "The username for basic authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_USER`.",
 			},
 			"password": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Sensitive:           true,
 				Default:             defaults.Env("PLURAL_KUBE_PASSWORD", ""),
 				MarkdownDescription: "The password for basic authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_PASSWORD`.",
 			},
 			"insecure": schema.BoolAttribute{
 				Optional:            true,
+				Computed:            true,
 				Default:             defaults.Env("PLURAL_KUBE_INSECURE", false),
 				MarkdownDescription: "Skips the validity check for the server's certificate. This will make your HTTPS connections insecure. Can be sourced from `PLURAL_KUBE_INSECURE`.",
 			},
 			"tls_server_name": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Default:             defaults.Env("PLURAL_KUBE_TLS_SERVER_NAME", ""),
 				MarkdownDescription: "TLS server name is used to check server certificate. If it is empty, the hostname used to contact the server is used. Can be sourced from `PLURAL_KUBE_TLS_SERVER_NAME`.",
 			},
 			"client_certificate": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Default:             defaults.Env("PLURAL_KUBE_CLIENT_CERT_DATA", ""),
 				MarkdownDescription: "The path to a client cert file for TLS. Can be sourced from `PLURAL_KUBE_CLIENT_CERT_DATA`.",
 			},
 			"client_key": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Sensitive:           true,
 				Default:             defaults.Env("PLURAL_KUBE_CLIENT_KEY_DATA", ""),
 				MarkdownDescription: "The path to a client key file for TLS. Can be sourced from `PLURAL_KUBE_CLIENT_KEY_DATA`.",
 			},
 			"cluster_ca_certificate": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Default:             defaults.Env("PLURAL_KUBE_CLUSTER_CA_CERT_DATA", ""),
 				MarkdownDescription: "The path to a cert file for the certificate authority. Can be sourced from `PLURAL_KUBE_CLUSTER_CA_CERT_DATA`.",
 			},
 			"config_path": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Default:             defaults.Env("PLURAL_KUBE_CONFIG_PATH", ""),
 				MarkdownDescription: "Path to the kubeconfig file. Can be sourced from `PLURAL_KUBE_CONFIG_PATH`.",
 			},
 			"config_context": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Default:             defaults.Env("PLURAL_KUBE_CTX", ""),
 				MarkdownDescription: "kubeconfig context to use. Can be sourced from `PLURAL_KUBE_CTX`.",
 			},
 			"config_context_auth_info": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Default:             defaults.Env("PLURAL_KUBE_CTX_AUTH_INFO", ""),
 				MarkdownDescription: "Can be sourced from `PLURAL_KUBE_CTX_AUTH_INFO`.",
 			},
 			"config_context_cluster": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Default:             defaults.Env("PLURAL_KUBE_CTX_CLUSTER", ""),
 				MarkdownDescription: "Can be sourced from `PLURAL_KUBE_CTX_CLUSTER`.",
 			},
 			"token": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Sensitive:           true,
 				Default:             defaults.Env("PLURAL_KUBE_TOKEN", ""),
 				MarkdownDescription: "Token is the bearer token for authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_TOKEN`.",
 			},
 			"proxy_url": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Default:             defaults.Env("PLURAL_KUBE_PROXY_URL", ""),
 				MarkdownDescription: "The URL to the proxy to be used for all requests made by this client. Can be sourced from `PLURAL_KUBE_PROXY_URL`.",
 			},
@@ -154,7 +170,7 @@ func (k *KubeConfig) ToDiscoveryClient() (discovery.CachedDiscoveryInterface, er
 		return nil, err
 	}
 
-	return disk.NewCachedDiscoveryClientForConfig(config, os.TempDir(), os.TempDir(), 1 * time.Minute)
+	return disk.NewCachedDiscoveryClientForConfig(config, os.TempDir(), os.TempDir(), 1*time.Minute)
 }
 
 // ToRESTMapper implemented interface method
@@ -178,8 +194,8 @@ func newKubeconfig(ctx context.Context, kubeconfig model.Kubeconfig, namespace *
 	overrides := &clientcmd.ConfigOverrides{}
 	loader := &clientcmd.ClientConfigLoadingRules{}
 
-	if !kubeconfig.ConfigPath.IsNull() {
-		tflog.Trace(ctx, "using kubeconfig", map[string]interface{}{
+	if !lo.IsEmpty(kubeconfig.ConfigPath.ValueString()) {
+		tflog.Info(ctx, "using kubeconfig", map[string]interface{}{
 			"kubeconfig": kubeconfig.ConfigPath.ValueString(),
 		})
 
@@ -189,41 +205,44 @@ func newKubeconfig(ctx context.Context, kubeconfig model.Kubeconfig, namespace *
 		}
 		loader.ExplicitPath = path
 
-		if !kubeconfig.ConfigContext.IsNull() || !kubeconfig.ConfigContextAuthInfo.IsNull() || !kubeconfig.ConfigContextCluster.IsNull() {
-			if !kubeconfig.ConfigContext.IsNull() {
+		tflog.Info(ctx, fmt.Sprintf("%t", kubeconfig.ConfigContext.IsNull()))
+		tflog.Info(ctx, fmt.Sprintf("%t", kubeconfig.ConfigContext.IsUnknown()))
+
+		if !lo.IsEmpty(kubeconfig.ConfigContext.ValueString()) || !lo.IsEmpty(kubeconfig.ConfigContextAuthInfo.ValueString()) || !lo.IsEmpty(kubeconfig.ConfigContextCluster.ValueString()) {
+			if !lo.IsEmpty(kubeconfig.ConfigContext.ValueString()) {
 				overrides.CurrentContext = kubeconfig.ConfigContext.ValueString()
-				tflog.Trace(ctx, "using custom current context", map[string]interface{}{
+				tflog.Info(ctx, "using custom current context", map[string]interface{}{
 					"context": overrides.CurrentContext,
 				})
 			}
 
 			overrides.Context = clientcmdapi.Context{}
-			if !kubeconfig.ConfigContextAuthInfo.IsNull() {
+			if !lo.IsEmpty(kubeconfig.ConfigContextAuthInfo.ValueString()) {
 				overrides.Context.AuthInfo = kubeconfig.ConfigContextAuthInfo.ValueString()
 			}
-			if !kubeconfig.ConfigContextCluster.IsNull() {
+			if !lo.IsEmpty(kubeconfig.ConfigContextCluster.ValueString()) {
 				overrides.Context.Cluster = kubeconfig.ConfigContextCluster.ValueString()
 			}
-			tflog.Trace(ctx, "using overridden context", map[string]interface{}{
+			tflog.Info(ctx, "using overridden context", map[string]interface{}{
 				"context": overrides.Context,
 			})
 		}
 	}
 
 	// Overriding with static configuration
-	if !kubeconfig.Inscure.IsNull() {
-		overrides.ClusterInfo.InsecureSkipTLSVerify = kubeconfig.Inscure.ValueBool()
+	if !kubeconfig.Insecure.ValueBool() {
+		overrides.ClusterInfo.InsecureSkipTLSVerify = kubeconfig.Insecure.ValueBool()
 	}
-	if !kubeconfig.TlsServerName.IsNull() {
+	if !lo.IsEmpty(kubeconfig.TlsServerName.ValueString()) {
 		overrides.ClusterInfo.TLSServerName = kubeconfig.TlsServerName.ValueString()
 	}
-	if !kubeconfig.ClusterCACertificate.IsNull() {
+	if !lo.IsEmpty(kubeconfig.ClusterCACertificate.ValueString()) {
 		overrides.ClusterInfo.CertificateAuthorityData = bytes.NewBufferString(kubeconfig.ClusterCACertificate.ValueString()).Bytes()
 	}
-	if !kubeconfig.ClientCertificate.IsNull() {
+	if !lo.IsEmpty(kubeconfig.ClientCertificate.ValueString()) {
 		overrides.AuthInfo.ClientCertificateData = bytes.NewBufferString(kubeconfig.ClientCertificate.ValueString()).Bytes()
 	}
-	if !kubeconfig.Host.IsNull() {
+	if !lo.IsEmpty(kubeconfig.Host.ValueString()) {
 		hasCA := len(overrides.ClusterInfo.CertificateAuthorityData) != 0
 		hasCert := len(overrides.AuthInfo.ClientCertificateData) != 0
 		defaultTLS := hasCA || hasCert || overrides.ClusterInfo.InsecureSkipTLSVerify
@@ -234,22 +253,22 @@ func newKubeconfig(ctx context.Context, kubeconfig model.Kubeconfig, namespace *
 
 		overrides.ClusterInfo.Server = host.String()
 	}
-	if !kubeconfig.Username.IsNull() {
+	if !lo.IsEmpty(kubeconfig.Username.ValueString()) {
 		overrides.AuthInfo.Username = kubeconfig.Username.ValueString()
 	}
-	if !kubeconfig.Password.IsNull() {
+	if !lo.IsEmpty(kubeconfig.Password.ValueString()) {
 		overrides.AuthInfo.Password = kubeconfig.Password.ValueString()
 	}
-	if !kubeconfig.ClientKey.IsNull() {
+	if !lo.IsEmpty(kubeconfig.ClientKey.ValueString()) {
 		overrides.AuthInfo.ClientKeyData = bytes.NewBufferString(kubeconfig.ClientKey.ValueString()).Bytes()
 	}
-	if !kubeconfig.Token.IsNull() {
+	if !lo.IsEmpty(kubeconfig.Token.ValueString()) {
 		overrides.AuthInfo.Token = kubeconfig.Token.ValueString()
 	}
-	if !kubeconfig.ProxyURL.IsNull() {
+	if !lo.IsEmpty(kubeconfig.ProxyURL.ValueString()) {
 		overrides.ClusterDefaults.ProxyURL = kubeconfig.ProxyURL.ValueString()
 	}
-	if !kubeconfig.Exec.IsNull() {
+	if kubeconfig.Exec != nil {
 		exec := &clientcmdapi.ExecConfig{}
 
 		//if spec, ok := v.([]interface{})[0].(map[string]interface{}); ok {

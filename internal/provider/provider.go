@@ -9,6 +9,7 @@ import (
 
 	internalclient "terraform-provider-plural/internal/client"
 	ds "terraform-provider-plural/internal/datasource"
+	"terraform-provider-plural/internal/model"
 	r "terraform-provider-plural/internal/resource"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -158,8 +159,8 @@ func (p *PluralProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 	internalClient := internalclient.NewClient(consoleClient)
 
-	resp.ResourceData = internalClient
-	resp.DataSourceData = internalClient
+	resp.ResourceData = model.NewProviderData(internalClient, consoleUrl)
+	resp.DataSourceData = model.NewProviderData(internalClient, consoleUrl)
 }
 
 func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource {

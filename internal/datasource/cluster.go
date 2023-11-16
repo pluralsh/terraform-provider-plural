@@ -69,7 +69,7 @@ func (d *clusterDataSource) Configure(_ context.Context, req datasource.Configur
 		return
 	}
 
-	c, ok := req.ProviderData.(*client.Client)
+	data, ok := req.ProviderData.(*model.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Cluster Resource Configure Type",
@@ -78,7 +78,7 @@ func (d *clusterDataSource) Configure(_ context.Context, req datasource.Configur
 		return
 	}
 
-	d.client = c
+	d.client = data.Client
 }
 
 func (d *clusterDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

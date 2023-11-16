@@ -17,6 +17,7 @@ import (
 	"github.com/samber/lo"
 
 	"terraform-provider-plural/internal/client"
+	"terraform-provider-plural/internal/model"
 )
 
 var _ resource.Resource = &GitRepositoryResource{}
@@ -28,7 +29,7 @@ func NewGitRepositoryResource() resource.Resource {
 
 // GitRepositoryResource defines the GitRepository resource implementation.
 type GitRepositoryResource struct {
-	client *client.Client
+	client     *client.Client
 }
 
 // GitRepositoryResourceModel describes the GitRepository resource data model.
@@ -126,8 +127,7 @@ func (r *GitRepositoryResource) Configure(
 		return
 	}
 
-	c, ok := req.ProviderData.(*client.Client)
-
+	data, ok := req.ProviderData.(*model.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected GitRepository Resource Configure Type",
@@ -140,7 +140,7 @@ func (r *GitRepositoryResource) Configure(
 		return
 	}
 
-	r.client = c
+	r.client = data.Client
 }
 
 func (r *GitRepositoryResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

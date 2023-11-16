@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
 
@@ -28,7 +30,8 @@ func NewClusterResource() resource.Resource {
 
 // ClusterResource defines the cluster resource implementation.
 type clusterResource struct {
-	client *client.Client
+	client     *client.Client
+	consoleUrl string
 }
 
 func (r *clusterResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -67,6 +70,8 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			"protect": schema.BoolAttribute{
 				MarkdownDescription: "If set to `true` then this cluster cannot be deleted.",
 				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
 			},
 			"tags": schema.MapAttribute{
 				MarkdownDescription: "Key-value tags used to filter clusters.",
@@ -83,7 +88,7 @@ func (r *clusterResource) Configure(_ context.Context, req resource.ConfigureReq
 		return
 	}
 
-	c, ok := req.ProviderData.(*client.Client)
+	data, ok := req.ProviderData.(*model.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Cluster Resource Configure Type",
@@ -92,7 +97,8 @@ func (r *clusterResource) Configure(_ context.Context, req resource.ConfigureReq
 		return
 	}
 
-	r.client = c
+	r.client = data.Client
+	r.consoleUrl = data.ConsoleUrl
 }
 
 func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -127,10 +133,11 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 			return
 		}
 
-		// TODO:
-		//   deployToken := *cluster.CreateCluster.DeployToken
-		//   url := fmt.Sprintf("%s/ext/gql", p.ConsoleClient.Url())
-		//   p.doInstallOperator(url, deployToken)
+		err = doInstallOperator(ctx, data.Kubeconfig, r.consoleUrl, *cluster.CreateCluster.DeployToken)
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
+			return
+		}
 
 		tflog.Trace(ctx, "installed the cluster operator")
 	}
