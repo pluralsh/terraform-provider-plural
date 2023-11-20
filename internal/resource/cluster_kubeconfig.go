@@ -190,7 +190,7 @@ func (k *KubeConfig) ToRawKubeConfigLoader() clientcmd.ClientConfig {
 	return k.ClientConfig
 }
 
-func newKubeconfig(ctx context.Context, kubeconfig model.Kubeconfig, namespace *string) (*KubeConfig, error) {
+func newKubeconfig(ctx context.Context, kubeconfig *model.Kubeconfig, namespace *string) (*KubeConfig, error) {
 	overrides := &clientcmd.ConfigOverrides{}
 	loader := &clientcmd.ClientConfigLoadingRules{}
 

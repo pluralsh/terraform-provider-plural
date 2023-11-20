@@ -55,4 +55,4 @@ Required:
 Required:
 
 - `name` (String)
-- `value` (String)
+- `value` (String, Sensitive)

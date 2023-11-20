@@ -30,8 +30,9 @@ func NewClusterResource() resource.Resource {
 
 // ClusterResource defines the cluster resource implementation.
 type clusterResource struct {
-	client     *client.Client
-	consoleUrl string
+	client          *client.Client
+	consoleUrl      string
+	operatorHandler *OperatorHandler
 }
 
 func (r *clusterResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -65,7 +66,7 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			"cloud": schema.StringAttribute{
 				MarkdownDescription: "The cloud provider used to create this cluster.",
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.OneOfCaseInsensitive("byok")},
+				Validators:          []validator.String{stringvalidator.OneOfCaseInsensitive(model.CloudBYOK.String())},
 			},
 			"protect": schema.BoolAttribute{
 				MarkdownDescription: "If set to `true` then this cluster cannot be deleted.",
@@ -127,13 +128,19 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 	data.Protect = types.BoolPointerValue(cluster.CreateCluster.Protect)
 	data.InseredAt = types.StringPointerValue(cluster.CreateCluster.InsertedAt)
 
-	if data.Cloud.ValueString() == "byok" {
+	if model.IsCloud(data.Cloud.ValueString(), model.CloudBYOK) {
 		if cluster.CreateCluster.DeployToken == nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to fetch cluster deploy token"))
 			return
 		}
 
-		err = doInstallOperator(ctx, data.Kubeconfig, r.consoleUrl, *cluster.CreateCluster.DeployToken)
+		handler, err := NewOperatorHandler(ctx, &data.Kubeconfig, r.consoleUrl)
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to init OperatorHandler, got error: %s", err))
+			return
+		}
+
+		err = handler.InstallOrUpgrade(*cluster.CreateCluster.DeployToken)
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
 			return

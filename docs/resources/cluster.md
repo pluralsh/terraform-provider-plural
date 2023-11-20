@@ -45,7 +45,7 @@ Optional:
 - `config_context_cluster` (String) Can be sourced from `PLURAL_KUBE_CTX_CLUSTER`.
 - `config_path` (String) Path to the kubeconfig file. Can be sourced from `PLURAL_KUBE_CONFIG_PATH`.
 - `exec` (Attributes List) Specifies a command to provide client credentials (see [below for nested schema](#nestedatt--kubeconfig--exec))
-- `host` (String) The address of the Kubernetes clusters. Can be sourced from `PLURAL_KUBE_HOST`.
+- `host` (String) The complete address of the Kubernetes cluster, using scheme://hostname:port format. Can be sourced from `PLURAL_KUBE_HOST`.
 - `insecure` (Boolean) Skips the validity check for the server's certificate. This will make your HTTPS connections insecure. Can be sourced from `PLURAL_KUBE_INSECURE`.
 - `password` (String, Sensitive) The password for basic authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_PASSWORD`.
 - `proxy_url` (String) The URL to the proxy to be used for all requests made by this client. Can be sourced from `PLURAL_KUBE_PROXY_URL`.

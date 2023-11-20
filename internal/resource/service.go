@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	consoleClient "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/polly/algorithms"
@@ -32,32 +31,6 @@ func NewServiceDeploymentResource() resource.Resource {
 // ServiceDeploymentResource defines the ServiceDeployment resource implementation.
 type ServiceDeploymentResource struct {
 	client *client.Client
-}
-
-// ServiceDeploymentResourceModel describes the ServiceDeployment resource data model.
-type ServiceDeploymentResourceModel struct {
-	Id            types.String `tfsdk:"id"`
-	Name          types.String `tfsdk:"name"`
-	Namespace     types.String `tfsdk:"namespace"`
-	Configuration types.List   `tfsdk:"configuration"`
-	Cluster       types.Object `tfsdk:"cluster"`
-	Repository    types.Object `tfsdk:"repository"`
-}
-
-type ClusterModel struct {
-	Id     types.String `tfsdk:"id"`
-	Handle types.String `tfsdk:"handle"`
-}
-
-type RepositoryModel struct {
-	Id     string `tfsdk:"id"`
-	Ref    string `tfsdk:"ref"`
-	Folder string `tfsdk:"folder"`
-}
-
-type ConfigurationModel struct {
-	Name  types.String `tfsdk:"name"`
-	Value types.String `tfsdk:"value"`
 }
 
 func (r *ServiceDeploymentResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -150,30 +123,30 @@ func (r *ServiceDeploymentResource) Configure(_ context.Context, req resource.Co
 }
 
 func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data ServiceDeploymentResourceModel
+	var data model.ServiceDeployment
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	var cluster ClusterModel
-	data.Cluster.As(ctx, &cluster, basetypes.ObjectAsOptions{})
-
-	var repository RepositoryModel
-	data.Repository.As(ctx, &repository, basetypes.ObjectAsOptions{})
-
-	var configuration []ConfigurationModel
-	data.Configuration.ElementsAs(ctx, &configuration, false)
+	//var cluster ClusterModel
+	//data.Cluster.As(ctx, &cluster, basetypes.ObjectAsOptions{})
+	//
+	//var repository RepositoryModel
+	//data.Repository.As(ctx, &repository, basetypes.ObjectAsOptions{})
+	//
+	//var configuration []ConfigurationModel
+	//data.Configuration.ElementsAs(ctx, &configuration, false)
 
 	attrs := consoleClient.ServiceDeploymentAttributes{
 		Name:         data.Name.ValueString(),
 		Namespace:    data.Namespace.ValueString(),
-		RepositoryID: repository.Id,
+		RepositoryID: data.Repository.Id.ValueString(),
 		Git: consoleClient.GitRefAttributes{
-			Ref:    repository.Ref,
-			Folder: repository.Folder,
+			Ref:    data.Repository.Ref.ValueString(),
+			Folder: data.Repository.Folder.ValueString(),
 		},
-		Configuration: algorithms.Map(configuration, func(c ConfigurationModel) *consoleClient.ConfigAttributes {
+		Configuration: algorithms.Map(data.Configuration, func(c model.ServiceDeploymentConfiguration) *consoleClient.ConfigAttributes {
 			return &consoleClient.ConfigAttributes{
 				Name:  c.Name.ValueString(),
 				Value: c.Value.ValueStringPointer(),
@@ -181,7 +154,7 @@ func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.Cre
 		}),
 	}
 
-	sd, err := r.client.CreateServiceDeployment(ctx, cluster.Id.ValueStringPointer(), cluster.Handle.ValueStringPointer(), attrs)
+	sd, err := r.client.CreateServiceDeployment(ctx, data.Cluster.Id.ValueStringPointer(), data.Cluster.Handle.ValueStringPointer(), attrs)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create ServiceDeployment, got error: %s", err))
 		return
@@ -195,7 +168,7 @@ func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.Cre
 }
 
 func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data ServiceDeploymentResourceModel
+	var data model.ServiceDeployment
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -215,7 +188,7 @@ func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadR
 }
 
 func (r *ServiceDeploymentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data ServiceDeploymentResourceModel
+	var data model.ServiceDeployment
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -237,7 +210,7 @@ func (r *ServiceDeploymentResource) Update(ctx context.Context, req resource.Upd
 }
 
 func (r *ServiceDeploymentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data ServiceDeploymentResourceModel
+	var data model.ServiceDeployment
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return

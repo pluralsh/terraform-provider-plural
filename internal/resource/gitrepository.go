@@ -32,18 +32,6 @@ type GitRepositoryResource struct {
 	client     *client.Client
 }
 
-// GitRepositoryResourceModel describes the GitRepository resource data model.
-type GitRepositoryResourceModel struct {
-	Id         types.String `tfsdk:"id"`
-	Url        types.String `tfsdk:"url"`
-	PrivateKey types.String `tfsdk:"private_key"`
-	Passphrase types.String `tfsdk:"passphrase"`
-	Username   types.String `tfsdk:"username"`
-	Password   types.String `tfsdk:"password"`
-	UrlFormat  types.String `tfsdk:"url_format"`
-	HttpsPath  types.String `tfsdk:"https_path"`
-}
-
 func (r *GitRepositoryResource) Metadata(
 	_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse,
 ) {
@@ -144,7 +132,7 @@ func (r *GitRepositoryResource) Configure(
 }
 
 func (r *GitRepositoryResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data GitRepositoryResourceModel
+	var data model.GitRepository
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -174,59 +162,55 @@ func (r *GitRepositoryResource) Create(ctx context.Context, req resource.CreateR
 }
 
 func (r *GitRepositoryResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data GitRepositoryResourceModel
+	var data model.GitRepository
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	repositories, err := r.client.ListGitRepositories(ctx, nil, nil, lo.ToPtr(int64(999)))
+	repository, err := r.client.GetGitRepository(ctx, data.Id.ValueStringPointer(), nil)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read GitRepository, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get GitRepository, got error: %s", err))
 		return
 	}
 
-	var repository *consoleClient.GitRepositoryEdgeFragment
-	for _, repo := range repositories.GitRepositories.Edges {
-		if repo.Node.ID == data.Id.ValueString() {
-			repository = repo
-		}
-	}
-
-	if repository == nil {
-		resp.Diagnostics.AddError(
-			"Not Found", fmt.Sprintf("Unable to find GitRepository with ID: %s", data.Id.ValueString()),
-		)
-		return
-	}
+	data.Id = types.StringValue(repository.GitRepository.ID)
+	data.Url = types.StringValue(repository.GitRepository.URL)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *GitRepositoryResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data GitRepositoryResourceModel
+	var data model.GitRepository
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// TODO: figure out what can be updated
-	//attrs := consoleClient.GitRepositoryUpdateAttributes{
-	//	Handle: lo.ToPtr(data.Handle.String()),
-	//}
-	//GitRepository, err := r.client.UpdateGitRepository(ctx, data.Id.String(), attrs)
-	//if err != nil {
-	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update GitRepository, got error: %s", err))
-	//	return
-	//}
-	//
-	//data.Handle = types.StringValue(*GitRepository.UpdateGitRepository.Handle)
+	attrs := consoleClient.GitAttributes{
+		URL: data.Url.ValueString(),
+		Username: data.Username.ValueStringPointer(),
+		Password: data.Password.ValueStringPointer(),
+		PrivateKey: data.PrivateKey.ValueStringPointer(),
+		Passphrase: data.Passphrase.ValueStringPointer(),
+		HTTPSPath: data.HttpsPath.ValueStringPointer(),
+		URLFormat: data.UrlFormat.ValueStringPointer(),
+	}
+
+	response, err := r.client.UpdateGitRepository(ctx, data.Id.String(), attrs)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update GitRepository, got error: %s", err))
+		return
+	}
+
+	data.Id = types.StringValue(response.UpdateGitRepository.ID)
+	data.Url = types.StringValue(response.UpdateGitRepository.URL)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *GitRepositoryResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data GitRepositoryResourceModel
+	var data model.GitRepository
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return

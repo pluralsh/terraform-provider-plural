@@ -22,9 +22,9 @@ GitRepository resource
 ### Optional
 
 - `https_path` (String) Manually supplied https path for non standard git setups. This is auto-inferred in many cases.
-- `passphrase` (String) Passphrase to decrypt the given private key.
-- `password` (String) HTTP password for http authenticated repos.
-- `private_key` (String) SSH private key to use with this repo if an ssh url was given.
+- `passphrase` (String, Sensitive) Passphrase to decrypt the given private key.
+- `password` (String, Sensitive) HTTP password for http authenticated repos.
+- `private_key` (String, Sensitive) SSH private key to use with this repo if an ssh url was given.
 - `url_format` (String) Similar to https_Path, a manually supplied url format for custom git. Should be something like {url}/tree/{ref}/{folder}.
 - `username` (String) HTTP username for authenticated http repos, defaults to apiKey for GitHub.
 
