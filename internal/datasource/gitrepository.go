@@ -10,8 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	consoleClient "github.com/pluralsh/console-client-go"
-	"github.com/samber/lo"
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
@@ -119,26 +117,14 @@ func (r *GitRepositoryDataSource) Read(ctx context.Context, req datasource.ReadR
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
-	repositories, err := r.client.ListGitRepositories(ctx, nil, nil, lo.ToPtr(int64(999)))
+	response, err := r.client.GetGitRepository(ctx, nil, data.Url.ValueStringPointer())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read GitRepository, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get GitRepository, got error: %s", err))
 		return
 	}
 
-	var repository *consoleClient.GitRepositoryEdgeFragment
-	for _, repo := range repositories.GitRepositories.Edges {
-		if repo.Node.URL == data.Url.ValueString() {
-			repository = repo
-		}
-	}
-
-	if repository == nil {
-		resp.Diagnostics.AddError("Not Found", fmt.Sprintf("Unable to find GitRepository with ID: %s", data.Id.ValueString()))
-		return
-	}
-
-	data.Id = types.StringValue(repository.Node.ID)
-	data.Url = types.StringValue(repository.Node.URL)
+	data.Id = types.StringValue(response.GitRepository.ID)
+	data.Url = types.StringValue(response.GitRepository.URL)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
