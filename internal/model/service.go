@@ -9,6 +9,7 @@ type ServiceDeployment struct {
 	Id            types.String                     `tfsdk:"id"`
 	Name          types.String                     `tfsdk:"name"`
 	Namespace     types.String                     `tfsdk:"namespace"`
+	Protect       types.Bool                       `tfsdk:"protect"`
 	Configuration []ServiceDeploymentConfiguration `tfsdk:"configuration"`
 	Cluster       ServiceDeploymentCluster         `tfsdk:"cluster"`
 	Repository    ServiceDeploymentRepository      `tfsdk:"repository"`

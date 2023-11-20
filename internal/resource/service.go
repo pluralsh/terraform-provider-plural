@@ -56,6 +56,10 @@ func (r *ServiceDeploymentResource) Schema(_ context.Context, _ resource.SchemaR
 				MarkdownDescription: "Namespace to deploy this ServiceDeployment.",
 				Required:            true,
 			},
+			"protect": schema.BoolAttribute{
+				MarkdownDescription: "If true, deletion of this service is not allowed.",
+				Optional:            true,
+			},
 			"configuration": schema.ListNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -129,15 +133,6 @@ func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	//var cluster ClusterModel
-	//data.Cluster.As(ctx, &cluster, basetypes.ObjectAsOptions{})
-	//
-	//var repository RepositoryModel
-	//data.Repository.As(ctx, &repository, basetypes.ObjectAsOptions{})
-	//
-	//var configuration []ConfigurationModel
-	//data.Configuration.ElementsAs(ctx, &configuration, false)
-
 	attrs := consoleClient.ServiceDeploymentAttributes{
 		Name:         data.Name.ValueString(),
 		Namespace:    data.Namespace.ValueString(),
@@ -162,6 +157,19 @@ func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.Cre
 
 	// TODO: figure out what we need to read from response
 	data.Id = types.StringValue(sd.ID)
+	data.Repository.Ref = types.StringValue(sd.Git.Ref)
+	data.Repository.Folder = types.StringValue(sd.Git.Folder)
+	// TODO: use when gql client is updated
+	//data.Protect = sd.Protect
+	data.Configuration = algorithms.Map(sd.Configuration, func(config *struct {
+		Name  string "json:\"name\" graphql:\"name\""
+		Value string "json:\"value\" graphql:\"value\""
+	}) model.ServiceDeploymentConfiguration {
+		return model.ServiceDeploymentConfiguration{
+			Name:  types.StringValue(config.Name),
+			Value: types.StringValue(config.Value),
+		}
+	})
 
 	tflog.Trace(ctx, "created a ServiceDeployment")
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
