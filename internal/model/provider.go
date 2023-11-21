@@ -1,17 +1,20 @@
 package model
 
-import (
-	internalclient "terraform-provider-plural/internal/client"
-)
+import "github.com/hashicorp/terraform-plugin-framework/types"
 
-type ProviderData struct {
-	Client     *internalclient.Client
-	ConsoleUrl string
+// Provider describes the Provider resource and data source model.
+type Provider struct {
+	Id            types.String          `tfsdk:"id"`
+	Name          types.String          `tfsdk:"name"`
+	Cloud         types.String          `tfsdk:"cloud"`
+	CloudSettings ProviderCloudSettings `tfsdk:"cloud_settings"`
 }
 
-func NewProviderData(client *internalclient.Client, consoleUrl string) *ProviderData {
-	return &ProviderData{
-		Client:     client,
-		ConsoleUrl: consoleUrl,
-	}
+type ProviderCloudSettings struct {
+	AWS ProviderCloudSettingsAWS `tfsdk:"aws"`
+}
+
+type ProviderCloudSettingsAWS struct {
+	AccessKeyId     types.String `tfsdk:"access_key_id"`
+	SecretAccessKey types.String `tfsdk:"secret_access_key"`
 }

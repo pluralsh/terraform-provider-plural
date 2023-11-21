@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"terraform-provider-plural/internal/provider"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -29,7 +31,7 @@ func NewGitRepositoryResource() resource.Resource {
 
 // GitRepositoryResource defines the GitRepository resource implementation.
 type GitRepositoryResource struct {
-	client     *client.Client
+	client *client.Client
 }
 
 func (r *GitRepositoryResource) Metadata(
@@ -115,12 +117,12 @@ func (r *GitRepositoryResource) Configure(
 		return
 	}
 
-	data, ok := req.ProviderData.(*model.ProviderData)
+	data, ok := req.ProviderData.(*provider.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected GitRepository Resource Configure Type",
+			"Unexpected Git Repository Resource Configure Type",
 			fmt.Sprintf(
-				"Expected *client.Client, got: %T. Please report this issue to the provider developers.",
+				"Expected *provider.ProviderData, got: %T. Please report this issue to the provider developers.",
 				req.ProviderData,
 			),
 		)
@@ -148,14 +150,14 @@ func (r *GitRepositoryResource) Create(ctx context.Context, req resource.CreateR
 		URLFormat:  lo.ToPtr(data.UrlFormat.ValueString()),
 	}
 
-	repository, err := r.client.CreateGitRepository(ctx, attrs)
+	result, err := r.client.CreateGitRepository(ctx, attrs)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create GitRepository, got error: %s", err))
 		return
 	}
 
 	// TODO: figure out if we need to read response and update state
-	data.Id = types.StringValue(repository.CreateGitRepository.ID)
+	data.Id = types.StringValue(result.CreateGitRepository.ID)
 
 	tflog.Trace(ctx, "created a GitRepository")
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -168,14 +170,14 @@ func (r *GitRepositoryResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
-	repository, err := r.client.GetGitRepository(ctx, data.Id.ValueStringPointer(), nil)
+	result, err := r.client.GetGitRepository(ctx, data.Id.ValueStringPointer(), nil)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get GitRepository, got error: %s", err))
 		return
 	}
 
-	data.Id = types.StringValue(repository.GitRepository.ID)
-	data.Url = types.StringValue(repository.GitRepository.URL)
+	data.Id = types.StringValue(result.GitRepository.ID)
+	data.Url = types.StringValue(result.GitRepository.URL)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -188,23 +190,23 @@ func (r *GitRepositoryResource) Update(ctx context.Context, req resource.UpdateR
 	}
 
 	attrs := consoleClient.GitAttributes{
-		URL: data.Url.ValueString(),
-		Username: data.Username.ValueStringPointer(),
-		Password: data.Password.ValueStringPointer(),
+		URL:        data.Url.ValueString(),
+		Username:   data.Username.ValueStringPointer(),
+		Password:   data.Password.ValueStringPointer(),
 		PrivateKey: data.PrivateKey.ValueStringPointer(),
 		Passphrase: data.Passphrase.ValueStringPointer(),
-		HTTPSPath: data.HttpsPath.ValueStringPointer(),
-		URLFormat: data.UrlFormat.ValueStringPointer(),
+		HTTPSPath:  data.HttpsPath.ValueStringPointer(),
+		URLFormat:  data.UrlFormat.ValueStringPointer(),
 	}
 
-	response, err := r.client.UpdateGitRepository(ctx, data.Id.String(), attrs)
+	result, err := r.client.UpdateGitRepository(ctx, data.Id.String(), attrs)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update GitRepository, got error: %s", err))
 		return
 	}
 
-	data.Id = types.StringValue(response.UpdateGitRepository.ID)
-	data.Url = types.StringValue(response.UpdateGitRepository.URL)
+	data.Id = types.StringValue(result.UpdateGitRepository.ID)
+	data.Url = types.StringValue(result.UpdateGitRepository.URL)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

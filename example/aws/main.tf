@@ -23,10 +23,11 @@ resource "plural_provider" "aws_provider" {
 }
 
 resource "plural_cluster" "aws_cluster" {
-  name = "workload-cluster"
-  handle = "workload-cluster"
+  name = "workload-cluster-tf"
+  handle = "wctf"
   version = "1.23"
   cloud = "aws"
+  protect = "false"
   cloud_settings = {
     aws = {
       region = "us-east-1"
@@ -36,3 +37,8 @@ resource "plural_cluster" "aws_cluster" {
     "managed-by" = "terraform-provider-plural"
   }
 }
+
+data "plural_cluster" "byok_workload_cluster" {
+  handle = "wctf"
+}
+

@@ -9,7 +9,6 @@ import (
 
 	internalclient "terraform-provider-plural/internal/client"
 	ds "terraform-provider-plural/internal/datasource"
-	"terraform-provider-plural/internal/model"
 	r "terraform-provider-plural/internal/resource"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -37,6 +36,18 @@ type pluralProviderModel struct {
 	ConsoleUrl  types.String `tfsdk:"console_url"`
 	AccessToken types.String `tfsdk:"access_token"`
 	UseCli      types.Bool   `tfsdk:"use_cli"`
+}
+
+type ProviderData struct {
+	Client     *internalclient.Client
+	ConsoleUrl string
+}
+
+func NewProviderData(client *internalclient.Client, consoleUrl string) *ProviderData {
+	return &ProviderData{
+		Client:     client,
+		ConsoleUrl: consoleUrl,
+	}
 }
 
 func (p *PluralProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -159,8 +170,8 @@ func (p *PluralProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 	internalClient := internalclient.NewClient(consoleClient)
 
-	resp.ResourceData = model.NewProviderData(internalClient, consoleUrl)
-	resp.DataSourceData = model.NewProviderData(internalClient, consoleUrl)
+	resp.ResourceData = NewProviderData(internalClient, consoleUrl)
+	resp.DataSourceData = NewProviderData(internalClient, consoleUrl)
 }
 
 func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource {

@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"terraform-provider-plural/internal/model"
+	"terraform-provider-plural/internal/provider"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -12,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"terraform-provider-plural/internal/client"
-	"terraform-provider-plural/internal/model"
 )
 
 func NewGitRepositoryDataSource() datasource.DataSource {
@@ -22,18 +24,6 @@ func NewGitRepositoryDataSource() datasource.DataSource {
 // GitRepositoryDataSource defines the GitRepository resource implementation.
 type GitRepositoryDataSource struct {
 	client *client.Client
-}
-
-// GitRepositoryModel describes the GitRepository data model.
-type GitRepositoryModel struct {
-	Id         types.String `tfsdk:"id"`
-	Url        types.String `tfsdk:"url"`
-	PrivateKey types.String `tfsdk:"private_key"`
-	Passphrase types.String `tfsdk:"passphrase"`
-	Username   types.String `tfsdk:"username"`
-	Password   types.String `tfsdk:"password"`
-	UrlFormat  types.String `tfsdk:"url_format"`
-	HttpsPath  types.String `tfsdk:"https_path"`
 }
 
 func (r *GitRepositoryDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -89,11 +79,11 @@ func (r *GitRepositoryDataSource) Configure(_ context.Context, req datasource.Co
 		return
 	}
 
-	data, ok := req.ProviderData.(*model.ProviderData)
+	data, ok := req.ProviderData.(*provider.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected GitRepository Resource Configure Type",
-			fmt.Sprintf("Expected *client.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			"Unexpected Git Repository Resource Configure Type",
+			fmt.Sprintf("Expected *provider.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
@@ -112,7 +102,7 @@ func (r *GitRepositoryDataSource) Read(ctx context.Context, req datasource.ReadR
 		return
 	}
 
-	var data GitRepositoryModel
+	var data model.GitRepository
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)

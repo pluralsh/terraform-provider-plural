@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"terraform-provider-plural/internal/provider"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -113,11 +115,11 @@ func (r *ServiceDeploymentResource) Configure(_ context.Context, req resource.Co
 		return
 	}
 
-	data, ok := req.ProviderData.(*model.ProviderData)
+	data, ok := req.ProviderData.(*provider.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected ServiceDeployment Resource Configure Type",
-			fmt.Sprintf("Expected *client.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			"Unexpected Service Deployment Resource Configure Type",
+			fmt.Sprintf("Expected *provider.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
@@ -149,19 +151,19 @@ func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.Cre
 		}),
 	}
 
-	sd, err := r.client.CreateServiceDeployment(ctx, data.Cluster.Id.ValueStringPointer(), data.Cluster.Handle.ValueStringPointer(), attrs)
+	result, err := r.client.CreateServiceDeployment(ctx, data.Cluster.Id.ValueStringPointer(), data.Cluster.Handle.ValueStringPointer(), attrs)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create ServiceDeployment, got error: %s", err))
 		return
 	}
 
 	// TODO: figure out what we need to read from response
-	data.Id = types.StringValue(sd.ID)
-	data.Repository.Ref = types.StringValue(sd.Git.Ref)
-	data.Repository.Folder = types.StringValue(sd.Git.Folder)
+	data.Id = types.StringValue(result.ID)
+	data.Repository.Ref = types.StringValue(result.Git.Ref)
+	data.Repository.Folder = types.StringValue(result.Git.Folder)
 	// TODO: use when gql client is updated
 	//data.Protect = sd.Protect
-	data.Configuration = algorithms.Map(sd.Configuration, func(config *struct {
+	data.Configuration = algorithms.Map(result.Configuration, func(config *struct {
 		Name  string "json:\"name\" graphql:\"name\""
 		Value string "json:\"value\" graphql:\"value\""
 	}) model.ServiceDeploymentConfiguration {
@@ -182,14 +184,14 @@ func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	ServiceDeployment, err := r.client.GetServiceDeployment(ctx, data.Id.ValueString())
+	result, err := r.client.GetServiceDeployment(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read ServiceDeployment, got error: %s", err))
 		return
 	}
 
-	data.Id = types.StringValue(ServiceDeployment.ServiceDeployment.ID)
-	data.Name = types.StringValue(ServiceDeployment.ServiceDeployment.Name)
+	data.Id = types.StringValue(result.ServiceDeployment.ID)
+	data.Name = types.StringValue(result.ServiceDeployment.Name)
 	// TODO: read rest of the config
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -206,13 +208,13 @@ func (r *ServiceDeploymentResource) Update(ctx context.Context, req resource.Upd
 	//attrs := consoleClient.ServiceDeploymentUpdateAttributes{
 	//	Handle: lo.ToPtr(data.Handle.ValueString()),
 	//}
-	//ServiceDeployment, err := r.client.UpdateServiceDeployment(ctx, data.Id.ValueString(), attrs)
+	//result, err := r.client.UpdateServiceDeployment(ctx, data.Id.ValueString(), attrs)
 	//if err != nil {
 	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update ServiceDeployment, got error: %s", err))
 	//	return
 	//}
 	//
-	//data.Handle = types.StringValue(*ServiceDeployment.UpdateServiceDeployment.Handle)
+	//data.Handle = types.StringValue(*result.UpdateServiceDeployment.Handle)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
