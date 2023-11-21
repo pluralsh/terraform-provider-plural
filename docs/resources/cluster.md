@@ -18,11 +18,11 @@ A representation of a cluster you can deploy to.
 ### Required
 
 - `cloud` (String) The cloud provider used to create this cluster.
-- `cloud_settings` (Attributes) Cloud-specific settings for this cluster. (see [below for nested schema](#nestedatt--cloud_settings))
 - `name` (String) Human-readable name of this cluster, that also translates to cloud resource name.
 
 ### Optional
 
+- `cloud_settings` (Attributes) Cloud-specific settings for this cluster. (see [below for nested schema](#nestedatt--cloud_settings))
 - `handle` (String) A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.
 - `kubeconfig` (Attributes) (see [below for nested schema](#nestedatt--kubeconfig))
 - `protect` (Boolean) If set to `true` then this cluster cannot be deleted.

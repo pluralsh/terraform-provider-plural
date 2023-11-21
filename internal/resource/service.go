@@ -14,8 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	consoleClient "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/polly/algorithms"
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
@@ -40,6 +38,7 @@ func (r *ServiceDeploymentResource) Metadata(_ context.Context, req resource.Met
 func (r *ServiceDeploymentResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "ServiceDeployment resource",
+		// TODO: update schema with all model.ServiceDeployment attributes
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -56,8 +55,26 @@ func (r *ServiceDeploymentResource) Schema(_ context.Context, _ resource.SchemaR
 				MarkdownDescription: "Namespace to deploy this ServiceDeployment.",
 				Required:            true,
 			},
+			"version": schema.StringAttribute{
+				MarkdownDescription: "Semver version of this service ServiceDeployment.",
+				Optional:            true,
+			},
+			"docs_path": schema.StringAttribute{
+				MarkdownDescription: "Path to the documentation in the target git repository.",
+				Optional:            true,
+			},
 			"protect": schema.BoolAttribute{
 				MarkdownDescription: "If true, deletion of this service is not allowed.",
+				Optional:            true,
+			},
+			"kustomize": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"path": schema.StringAttribute{
+						Required:            true,
+						MarkdownDescription: "Path to the kustomize file in the target git repository.",
+					},
+				},
+				MarkdownDescription: "Kustomize related service metadata.",
 				Optional:            true,
 			},
 			"configuration": schema.ListNestedAttribute{
@@ -104,6 +121,85 @@ func (r *ServiceDeploymentResource) Schema(_ context.Context, _ resource.SchemaR
 				MarkdownDescription: "Repository information used to pull ServiceDeployment.",
 				Required:            true,
 			},
+			"bindings": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"read": schema.ListNestedAttribute{
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"group_id": schema.StringAttribute{
+									Optional: true,
+								},
+								"id": schema.StringAttribute{
+									Optional: true,
+								},
+								"user_id": schema.StringAttribute{
+									Optional: true,
+								},
+							},
+						},
+						MarkdownDescription: "Read policies of this ServiceDeployment.",
+						Optional:            true,
+					},
+					"write": schema.ListNestedAttribute{
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"group_id": schema.StringAttribute{
+									Optional: true,
+								},
+								"id": schema.StringAttribute{
+									Optional: true,
+								},
+								"user_id": schema.StringAttribute{
+									Optional: true,
+								},
+							},
+						},
+						MarkdownDescription: "Write policies of this ServiceDeployment.",
+						Optional:            true,
+					},
+				},
+				MarkdownDescription: "Read and write policies of this ServiceDeployment.",
+				Optional:            true,
+			},
+			"sync_config": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"diff_normalizer": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"group": schema.SingleNestedAttribute{
+								Optional: true,
+							},
+							"json_patches": schema.SingleNestedAttribute{
+								Optional: true,
+							},
+							"kind": schema.SingleNestedAttribute{
+								Optional: true,
+							},
+							"name": schema.SingleNestedAttribute{
+								Optional: true,
+							},
+							"namespace": schema.SingleNestedAttribute{
+								Optional: true,
+							},
+						},
+						Optional: true,
+					},
+					"namespace_metadata": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"annotations": schema.MapAttribute{
+								ElementType: types.StringType,
+								Optional:    true,
+							},
+							"labels": schema.MapAttribute{
+								ElementType: types.StringType,
+								Optional:    true,
+							},
+						},
+						Optional: true,
+					},
+				},
+				MarkdownDescription: "Repository information used to pull ServiceDeployment.",
+				Required:            true,
+			},
 		},
 	}
 }
@@ -116,8 +212,8 @@ func (r *ServiceDeploymentResource) Configure(_ context.Context, req resource.Co
 	data, ok := req.ProviderData.(*model.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Service Deployment Resource Configure Type",
-			fmt.Sprintf("Expected *model.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			"Unexpected ServiceDeployment Resource Configure Type",
+			fmt.Sprintf("Expected *client.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
@@ -127,92 +223,53 @@ func (r *ServiceDeploymentResource) Configure(_ context.Context, req resource.Co
 }
 
 func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data model.ServiceDeployment
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	data := new(model.ServiceDeployment)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	attrs := consoleClient.ServiceDeploymentAttributes{
-		Name:         data.Name.ValueString(),
-		Namespace:    data.Namespace.ValueString(),
-		RepositoryID: data.Repository.Id.ValueString(),
-		Git: consoleClient.GitRefAttributes{
-			Ref:    data.Repository.Ref.ValueString(),
-			Folder: data.Repository.Folder.ValueString(),
-		},
-		Configuration: algorithms.Map(data.Configuration, func(c model.ServiceDeploymentConfiguration) *consoleClient.ConfigAttributes {
-			return &consoleClient.ConfigAttributes{
-				Name:  c.Name.ValueString(),
-				Value: c.Value.ValueStringPointer(),
-			}
-		}),
-	}
-
-	result, err := r.client.CreateServiceDeployment(ctx, data.Cluster.Id.ValueStringPointer(), data.Cluster.Handle.ValueStringPointer(), attrs)
+	sd, err := r.client.CreateServiceDeployment(ctx, data.Cluster.Id.ValueStringPointer(), data.Cluster.Handle.ValueStringPointer(), data.Attributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create ServiceDeployment, got error: %s", err))
 		return
 	}
 
-	// TODO: figure out what we need to read from response
-	data.Id = types.StringValue(result.ID)
-	data.Repository.Ref = types.StringValue(result.Git.Ref)
-	data.Repository.Folder = types.StringValue(result.Git.Folder)
-	// TODO: use when gql client is updated
-	//data.Protect = sd.Protect
-	data.Configuration = algorithms.Map(result.Configuration, func(config *struct {
-		Name  string "json:\"name\" graphql:\"name\""
-		Value string "json:\"value\" graphql:\"value\""
-	}) model.ServiceDeploymentConfiguration {
-		return model.ServiceDeploymentConfiguration{
-			Name:  types.StringValue(config.Name),
-			Value: types.StringValue(config.Value),
-		}
-	})
+	data.Id = types.StringValue(sd.ID)
 
 	tflog.Trace(ctx, "created a ServiceDeployment")
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data model.ServiceDeployment
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	data := new(model.ServiceDeployment)
+	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	result, err := r.client.GetServiceDeployment(ctx, data.Id.ValueString())
+	response, err := r.client.GetServiceDeployment(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read ServiceDeployment, got error: %s", err))
 		return
 	}
 
-	data.Id = types.StringValue(result.ServiceDeployment.ID)
-	data.Name = types.StringValue(result.ServiceDeployment.Name)
-	// TODO: read rest of the config
-
+	data.From(response)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *ServiceDeploymentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data model.ServiceDeployment
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	data := new(model.ServiceDeployment)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// TODO: figure out what can be updated
-	//attrs := consoleClient.ServiceDeploymentUpdateAttributes{
-	//	Handle: lo.ToPtr(data.Handle.ValueString()),
-	//}
-	//result, err := r.client.UpdateServiceDeployment(ctx, data.Id.ValueString(), attrs)
-	//if err != nil {
-	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update ServiceDeployment, got error: %s", err))
-	//	return
-	//}
-	//
-	//data.Handle = types.StringValue(*result.UpdateServiceDeployment.Handle)
+	_, err := r.client.UpdateServiceDeployment(ctx, data.Id.ValueString(), data.UpdateAttributes())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update ServiceDeployment, got error: %s", err))
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
