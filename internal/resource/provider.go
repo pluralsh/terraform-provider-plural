@@ -181,13 +181,12 @@ func (r *providerResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	result, err := r.client.UpdateClusterProvider(ctx, data.Id.ValueString(), data.UpdateAttributes())
+	_, err := r.client.UpdateClusterProvider(ctx, data.Id.ValueString(), data.UpdateAttributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update provider, got error: %s", err))
 		return
 	}
 
-	data.From(result.UpdateClusterProvider)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
