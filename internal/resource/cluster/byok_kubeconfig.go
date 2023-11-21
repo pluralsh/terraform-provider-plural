@@ -3,7 +3,6 @@ package cluster
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"os"
 	"time"
 
@@ -70,9 +69,6 @@ func newKubeconfig(ctx context.Context, kubeconfig *model.Kubeconfig, namespace 
 			return nil, err
 		}
 		loader.ExplicitPath = path
-
-		tflog.Info(ctx, fmt.Sprintf("%t", kubeconfig.ConfigContext.IsNull()))
-		tflog.Info(ctx, fmt.Sprintf("%t", kubeconfig.ConfigContext.IsUnknown()))
 
 		if !lo.IsEmpty(kubeconfig.ConfigContext.ValueString()) || !lo.IsEmpty(kubeconfig.ConfigContextAuthInfo.ValueString()) || !lo.IsEmpty(kubeconfig.ConfigContextCluster.ValueString()) {
 			if !lo.IsEmpty(kubeconfig.ConfigContext.ValueString()) {
