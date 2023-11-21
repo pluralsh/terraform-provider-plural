@@ -69,6 +69,59 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Required:            true,
 				Validators:          []validator.String{model.CloudValidator},
 			},
+			"cloud_settings": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"aws": schema.SingleNestedAttribute{
+						Optional: true,
+						Attributes: map[string]schema.Attribute{
+							"region": schema.StringAttribute{
+								MarkdownDescription: "AWS region to deploy the cluster to.",
+								Required:            true,
+							},
+						},
+					},
+					"azure": schema.SingleNestedAttribute{
+						Optional: true,
+						Attributes: map[string]schema.Attribute{
+							"resource_group": schema.StringAttribute{
+								MarkdownDescription: "Name of the Azure resource group for this cluster.",
+								Required:            true,
+							},
+							"network": schema.StringAttribute{
+								MarkdownDescription: "Name of the Azure virtual network for this cluster.",
+								Required:            true,
+							},
+							"subscription_id": schema.StringAttribute{
+								MarkdownDescription: "GUID of the Azure subscription to hold this cluster.",
+								Required:            true,
+							},
+							"location": schema.StringAttribute{
+								MarkdownDescription: "String matching one of the canonical Azure region names, i.e. eastus.",
+								Required:            true,
+							},
+						},
+					},
+					"gcp": schema.SingleNestedAttribute{
+						Optional: true,
+						Attributes: map[string]schema.Attribute{
+							"project": schema.StringAttribute{
+								MarkdownDescription: "",
+								Required:            true,
+							},
+							"network": schema.StringAttribute{
+								MarkdownDescription: "",
+								Required:            true,
+							},
+							"region": schema.StringAttribute{
+								MarkdownDescription: "",
+								Required:            true,
+							},
+						},
+					},
+				},
+				MarkdownDescription: "Cloud-specific settings for this cluster.",
+				Required:            true,
+			},
 			"protect": schema.BoolAttribute{
 				MarkdownDescription: "If set to `true` then this cluster cannot be deleted.",
 				Optional:            true,
@@ -137,7 +190,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 
 		handler, err := NewOperatorHandler(ctx, &data.Kubeconfig, r.consoleUrl)
 		if err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to init OperatorHandler, got error: %s", err))
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to init operator handler, got error: %s", err))
 			return
 		}
 

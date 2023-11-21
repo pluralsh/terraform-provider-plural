@@ -63,14 +63,16 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 						Optional: true,
 						Attributes: map[string]schema.Attribute{
 							"access_key_id": schema.StringAttribute{
-								Default:   defaults.Env("PLURAL_AWS_ACCESS_KEY_ID", ""),
-								Required:  true, // TODO: Test Default and Required.
-								Sensitive: true,
+								MarkdownDescription: "Can be sourced from `PLURAL_AWS_ACCESS_KEY_ID`.",
+								Default:             defaults.Env("PLURAL_AWS_ACCESS_KEY_ID", ""),
+								Required:            true, // TODO: Test Default and Required.
+								Sensitive:           true,
 							},
 							"secret_access_key": schema.StringAttribute{
-								Default:   defaults.Env("PLURAL_AWS_SECRET_ACCESS_KEY", ""),
-								Required:  true, // TODO: Test Default and Required.
-								Sensitive: true,
+								MarkdownDescription: "Can be sourced from `PLURAL_AWS_SECRET_ACCESS_KEY`.",
+								Default:             defaults.Env("PLURAL_AWS_SECRET_ACCESS_KEY", ""),
+								Required:            true, // TODO: Test Default and Required.
+								Sensitive:           true,
 							},
 						},
 					},
