@@ -55,8 +55,26 @@ func (r *ServiceDeploymentResource) Schema(_ context.Context, _ resource.SchemaR
 				MarkdownDescription: "Namespace to deploy this ServiceDeployment.",
 				Required:            true,
 			},
+			"version": schema.StringAttribute{
+				MarkdownDescription: "Semver version of this service ServiceDeployment.",
+				Optional:            true,
+			},
+			"docs_path": schema.StringAttribute{
+				MarkdownDescription: "Path to the documentation in the target git repository.",
+				Optional:            true,
+			},
 			"protect": schema.BoolAttribute{
 				MarkdownDescription: "If true, deletion of this service is not allowed.",
+				Optional:            true,
+			},
+			"kustomize": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"path": schema.StringAttribute{
+						Required:            true,
+						MarkdownDescription: "Path to the kustomize file in the target git repository.",
+					},
+				},
+				MarkdownDescription: "Kustomize related service metadata.",
 				Optional:            true,
 			},
 			"configuration": schema.ListNestedAttribute{
@@ -99,6 +117,85 @@ func (r *ServiceDeploymentResource) Schema(_ context.Context, _ resource.SchemaR
 					"id":     types.StringType,
 					"ref":    types.StringType,
 					"folder": types.StringType,
+				},
+				MarkdownDescription: "Repository information used to pull ServiceDeployment.",
+				Required:            true,
+			},
+			"bindings": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"read": schema.ListNestedAttribute{
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"group_id": schema.StringAttribute{
+									Optional: true,
+								},
+								"id": schema.StringAttribute{
+									Optional: true,
+								},
+								"user_id": schema.StringAttribute{
+									Optional: true,
+								},
+							},
+						},
+						MarkdownDescription: "Read policies of this ServiceDeployment.",
+						Optional:            true,
+					},
+					"write": schema.ListNestedAttribute{
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"group_id": schema.StringAttribute{
+									Optional: true,
+								},
+								"id": schema.StringAttribute{
+									Optional: true,
+								},
+								"user_id": schema.StringAttribute{
+									Optional: true,
+								},
+							},
+						},
+						MarkdownDescription: "Write policies of this ServiceDeployment.",
+						Optional:            true,
+					},
+				},
+				MarkdownDescription: "Read and write policies of this ServiceDeployment.",
+				Optional:            true,
+			},
+			"sync_config": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"diff_normalizer": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"group": schema.SingleNestedAttribute{
+								Optional: true,
+							},
+							"json_patches": schema.SingleNestedAttribute{
+								Optional: true,
+							},
+							"kind": schema.SingleNestedAttribute{
+								Optional: true,
+							},
+							"name": schema.SingleNestedAttribute{
+								Optional: true,
+							},
+							"namespace": schema.SingleNestedAttribute{
+								Optional: true,
+							},
+						},
+						Optional: true,
+					},
+					"namespace_metadata": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"annotations": schema.MapAttribute{
+								ElementType: types.StringType,
+								Optional:    true,
+							},
+							"labels": schema.MapAttribute{
+								ElementType: types.StringType,
+								Optional:    true,
+							},
+						},
+						Optional: true,
+					},
 				},
 				MarkdownDescription: "Repository information used to pull ServiceDeployment.",
 				Required:            true,

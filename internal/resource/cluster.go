@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
@@ -118,7 +119,12 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 					},
 				},
 				MarkdownDescription: "Cloud-specific settings for this cluster.",
-				Required:            true,
+				Validators: []validator.Object{objectvalidator.AlsoRequires(
+					path.MatchRoot("cloud").AtSetValue(types.StringValue(model.CloudGCP.String())),
+					path.MatchRoot("cloud").AtSetValue(types.StringValue(model.CloudAzure.String())),
+					path.MatchRoot("cloud").AtSetValue(types.StringValue(model.CloudAWS.String())),
+				)},
+				Optional: true,
 			},
 			"protect": schema.BoolAttribute{
 				MarkdownDescription: "If set to `true` then this cluster cannot be deleted.",
