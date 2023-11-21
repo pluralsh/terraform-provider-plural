@@ -7,6 +7,7 @@ import (
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -64,7 +65,8 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			"cloud": schema.StringAttribute{
 				MarkdownDescription: "The cloud provider used to create this cluster.",
 				Required:            true,
-				Validators:          []validator.String{model.CloudValidator},
+				Validators: []validator.String{stringvalidator.OneOfCaseInsensitive(
+					model.CloudBYOK.String(), model.CloudAWS.String(), model.CloudAzure.String(), model.CloudGCP.String())},
 			},
 			"cloud_settings": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{

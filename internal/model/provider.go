@@ -1,6 +1,9 @@
 package model
 
-import "github.com/hashicorp/terraform-plugin-framework/types"
+import (
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	console "github.com/pluralsh/console-client-go"
+)
 
 // Provider describes the provider resource and data source model.
 type Provider struct {
@@ -30,4 +33,56 @@ type ProviderCloudSettingsAzure struct {
 
 type ProviderCloudSettingsGCP struct {
 	Credentials types.String `tfsdk:"credentials"`
+}
+
+func (p *Provider) CloudProviderSettingsAttributes() *console.CloudProviderSettingsAttributes {
+	if IsCloud(p.Cloud.ValueString(), CloudAWS) {
+		return &console.CloudProviderSettingsAttributes{
+			Aws: &console.AwsSettingsAttributes{
+				AccessKeyID:     p.CloudSettings.AWS.AccessKeyId.ValueString(),
+				SecretAccessKey: p.CloudSettings.AWS.SecretAccessKey.ValueString(),
+			},
+		}
+	}
+
+	if IsCloud(p.Cloud.ValueString(), CloudAzure) {
+		return &console.CloudProviderSettingsAttributes{
+			Azure: &console.AzureSettingsAttributes{
+				SubscriptionID: p.CloudSettings.Azure.SubscriptionId.ValueString(),
+				TenantID:       p.CloudSettings.Azure.TenantId.ValueString(),
+				ClientID:       p.CloudSettings.Azure.ClientId.ValueString(),
+				ClientSecret:   p.CloudSettings.Azure.ClientSecret.ValueString(),
+			},
+		}
+	}
+
+	if IsCloud(p.Cloud.ValueString(), CloudGCP) {
+		return &console.CloudProviderSettingsAttributes{
+			Gcp: &console.GcpSettingsAttributes{
+				ApplicationCredentials: p.CloudSettings.GCP.Credentials.ValueString(),
+			},
+		}
+	}
+
+	return nil
+}
+
+func (p *Provider) Attributes() console.ClusterProviderAttributes {
+	return console.ClusterProviderAttributes{
+		Name:          p.Name.ValueString(),
+		Cloud:         p.Cloud.ValueStringPointer(),
+		CloudSettings: p.CloudProviderSettingsAttributes(),
+	}
+}
+
+func (p *Provider) UpdateAttributes() console.ClusterProviderUpdateAttributes {
+	return console.ClusterProviderUpdateAttributes{
+		CloudSettings: p.CloudProviderSettingsAttributes(),
+	}
+}
+
+func (p *Provider) From(cp *console.ClusterProviderFragment) {
+	p.Id = types.StringValue(cp.ID)
+	p.Name = types.StringValue(cp.Name)
+	p.Cloud = types.StringValue(cp.Cloud)
 }
