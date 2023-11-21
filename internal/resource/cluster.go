@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"terraform-provider-plural/internal/provider"
-
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
@@ -143,11 +141,11 @@ func (r *clusterResource) Configure(_ context.Context, req resource.ConfigureReq
 		return
 	}
 
-	data, ok := req.ProviderData.(*provider.ProviderData)
+	data, ok := req.ProviderData.(*model.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Cluster Resource Configure Type",
-			fmt.Sprintf("Expected *provider.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *model.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}

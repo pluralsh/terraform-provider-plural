@@ -18,6 +18,7 @@ A representation of a cluster you can deploy to.
 ### Required
 
 - `cloud` (String) The cloud provider used to create this cluster.
+- `cloud_settings` (Attributes) Cloud-specific settings for this cluster. (see [below for nested schema](#nestedatt--cloud_settings))
 - `name` (String) Human-readable name of this cluster, that also translates to cloud resource name.
 
 ### Optional
@@ -31,6 +32,45 @@ A representation of a cluster you can deploy to.
 
 - `id` (String) Internal identifier of this cluster.
 - `inserted_at` (String) Creation date of this cluster.
+
+<a id="nestedatt--cloud_settings"></a>
+### Nested Schema for `cloud_settings`
+
+Optional:
+
+- `aws` (Attributes) (see [below for nested schema](#nestedatt--cloud_settings--aws))
+- `azure` (Attributes) (see [below for nested schema](#nestedatt--cloud_settings--azure))
+- `gcp` (Attributes) (see [below for nested schema](#nestedatt--cloud_settings--gcp))
+
+<a id="nestedatt--cloud_settings--aws"></a>
+### Nested Schema for `cloud_settings.aws`
+
+Required:
+
+- `region` (String) AWS region to deploy the cluster to.
+
+
+<a id="nestedatt--cloud_settings--azure"></a>
+### Nested Schema for `cloud_settings.azure`
+
+Required:
+
+- `location` (String) String matching one of the canonical Azure region names, i.e. eastus.
+- `network` (String) Name of the Azure virtual network for this cluster.
+- `resource_group` (String) Name of the Azure resource group for this cluster.
+- `subscription_id` (String) GUID of the Azure subscription to hold this cluster.
+
+
+<a id="nestedatt--cloud_settings--gcp"></a>
+### Nested Schema for `cloud_settings.gcp`
+
+Required:
+
+- `network` (String)
+- `project` (String)
+- `region` (String)
+
+
 
 <a id="nestedatt--kubeconfig"></a>
 ### Nested Schema for `kubeconfig`

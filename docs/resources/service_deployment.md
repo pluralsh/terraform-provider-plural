@@ -25,6 +25,7 @@ ServiceDeployment resource
 ### Optional
 
 - `configuration` (Attributes List) List of [name, value] secrets used to alter this ServiceDeployment configuration. (see [below for nested schema](#nestedatt--configuration))
+- `protect` (Boolean) If true, deletion of this service is not allowed.
 
 ### Read-Only
 

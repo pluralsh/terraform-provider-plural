@@ -6,7 +6,6 @@ import (
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
-	"terraform-provider-plural/internal/provider"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -70,11 +69,11 @@ func (d *clusterDataSource) Configure(_ context.Context, req datasource.Configur
 		return
 	}
 
-	data, ok := req.ProviderData.(*provider.ProviderData)
+	data, ok := req.ProviderData.(*model.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Cluster Resource Configure Type",
-			fmt.Sprintf("Expected *provider.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *model.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}

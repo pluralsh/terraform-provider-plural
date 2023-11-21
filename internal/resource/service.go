@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"terraform-provider-plural/internal/provider"
-
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -115,11 +113,11 @@ func (r *ServiceDeploymentResource) Configure(_ context.Context, req resource.Co
 		return
 	}
 
-	data, ok := req.ProviderData.(*provider.ProviderData)
+	data, ok := req.ProviderData.(*model.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Service Deployment Resource Configure Type",
-			fmt.Sprintf("Expected *provider.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *model.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return

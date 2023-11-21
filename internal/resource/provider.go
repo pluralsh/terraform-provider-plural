@@ -5,9 +5,7 @@ import (
 	"fmt"
 
 	"terraform-provider-plural/internal/client"
-	"terraform-provider-plural/internal/defaults"
 	"terraform-provider-plural/internal/model"
-	"terraform-provider-plural/internal/provider"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -63,15 +61,13 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 						Optional: true,
 						Attributes: map[string]schema.Attribute{
 							"access_key_id": schema.StringAttribute{
-								MarkdownDescription: "Can be sourced from `PLURAL_AWS_ACCESS_KEY_ID`.",
-								Default:             defaults.Env("PLURAL_AWS_ACCESS_KEY_ID", ""),
-								Required:            true, // TODO: Test Default and Required.
+								MarkdownDescription: "",
+								Required:            true,
 								Sensitive:           true,
 							},
 							"secret_access_key": schema.StringAttribute{
-								MarkdownDescription: "Can be sourced from `PLURAL_AWS_SECRET_ACCESS_KEY`.",
-								Default:             defaults.Env("PLURAL_AWS_SECRET_ACCESS_KEY", ""),
-								Required:            true, // TODO: Test Default and Required.
+								MarkdownDescription: "",
+								Required:            true,
 								Sensitive:           true,
 							},
 						},
@@ -89,7 +85,7 @@ func (r *providerResource) Configure(_ context.Context, req resource.ConfigureRe
 		return
 	}
 
-	data, ok := req.ProviderData.(*provider.ProviderData)
+	data, ok := req.ProviderData.(*model.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Provider Resource Configure Type",

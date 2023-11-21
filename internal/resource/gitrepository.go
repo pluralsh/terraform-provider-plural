@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"terraform-provider-plural/internal/provider"
-
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -117,12 +115,12 @@ func (r *GitRepositoryResource) Configure(
 		return
 	}
 
-	data, ok := req.ProviderData.(*provider.ProviderData)
+	data, ok := req.ProviderData.(*model.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Git Repository Resource Configure Type",
 			fmt.Sprintf(
-				"Expected *provider.ProviderData, got: %T. Please report this issue to the provider developers.",
+				"Expected *model.ProviderData, got: %T. Please report this issue to the provider developers.",
 				req.ProviderData,
 			),
 		)
