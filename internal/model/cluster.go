@@ -4,21 +4,21 @@ import "github.com/hashicorp/terraform-plugin-framework/types"
 
 // Cluster describes the cluster resource and data source model.
 type Cluster struct {
-	Id            types.String          `tfsdk:"id"`
-	InseredAt     types.String          `tfsdk:"inserted_at"`
-	Name          types.String          `tfsdk:"name"`
-	Handle        types.String          `tfsdk:"handle"`
-	Cloud         types.String          `tfsdk:"cloud"`
-	CloudSettings *ClusterCloudSettings `tfsdk:"cloud_settings"`
-	Protect       types.Bool            `tfsdk:"protect"`
-	Tags          types.Map             `tfsdk:"tags"`
-	Kubeconfig    Kubeconfig            `tfsdk:"kubeconfig"`
+	Id            types.String         `tfsdk:"id"`
+	InseredAt     types.String         `tfsdk:"inserted_at"`
+	Name          types.String         `tfsdk:"name"`
+	Handle        types.String         `tfsdk:"handle"`
+	Cloud         types.String         `tfsdk:"cloud"`
+	CloudSettings ClusterCloudSettings `tfsdk:"cloud_settings"`
+	Protect       types.Bool           `tfsdk:"protect"`
+	Tags          types.Map            `tfsdk:"tags"`
 }
 
 type ClusterCloudSettings struct {
 	AWS   ClusterCloudSettingsAWS   `tfsdk:"aws"`
 	Azure ClusterCloudSettingsAzure `tfsdk:"azure"`
 	GCP   ClusterCloudSettingsGCP   `tfsdk:"gcp"`
+	BYOK  ClusterCloudSettingsBYOK  `tfsdk:"byok"`
 }
 
 type ClusterCloudSettingsAWS struct {
@@ -36,6 +36,10 @@ type ClusterCloudSettingsGCP struct {
 	Region  types.String `tfsdk:"region"`
 	Network types.String `tfsdk:"network"`
 	Project types.String `tfsdk:"project"`
+}
+
+type ClusterCloudSettingsBYOK struct {
+	Kubeconfig Kubeconfig `tfsdk:"kubeconfig"`
 }
 
 type Kubeconfig struct {

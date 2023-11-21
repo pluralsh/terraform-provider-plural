@@ -1,4 +1,4 @@
-package resource
+package cluster
 
 import (
 	"context"
@@ -40,82 +40,82 @@ type OperatorHandler struct {
 	uninstall     *action.Uninstall
 }
 
-func (this *OperatorHandler) init() error {
-	this.configuration = new(action.Configuration)
+func (oh *OperatorHandler) init() error {
+	oh.configuration = new(action.Configuration)
 
-	kubeconfig, err := newKubeconfig(this.ctx, this.kubeconfig, lo.ToPtr(operatorNamespace))
+	kubeconfig, err := newKubeconfig(oh.ctx, oh.kubeconfig, lo.ToPtr(operatorNamespace))
 	if err != nil {
 		return err
 	}
 
-	err = this.configuration.Init(kubeconfig, operatorNamespace, "", logrus.Debugf)
+	err = oh.configuration.Init(kubeconfig, operatorNamespace, "", logrus.Debugf)
 	if err != nil {
 		return err
 	}
 
-	err = this.initRepo()
+	err = oh.initRepo()
 	if err != nil {
 		return err
 	}
 
-	err = this.initChart()
+	err = oh.initChart()
 	if err != nil {
 		return err
 	}
 
-	this.initInstallAction()
-	this.initUpgradeAction()
-	this.initUninstallAction()
+	oh.initInstallAction()
+	oh.initUpgradeAction()
+	oh.initUninstallAction()
 
 	return nil
 }
 
-func (this *OperatorHandler) initRepo() error {
+func (oh *OperatorHandler) initRepo() error {
 	return helm.AddRepo(releaseName, repoUrl)
 }
 
-func (this *OperatorHandler) initChart() error {
-	client := action.NewInstall(this.configuration)
+func (oh *OperatorHandler) initChart() error {
+	client := action.NewInstall(oh.configuration)
 	locateName := fmt.Sprintf("%s/%s", releaseName, chartName)
 	path, err := client.ChartPathOptions.LocateChart(locateName, cli.New())
 	if err != nil {
 		return err
 	}
 
-	this.chart, err = loader.Load(path)
+	oh.chart, err = loader.Load(path)
 	return err
 }
 
-func (this *OperatorHandler) initInstallAction() {
-	this.install = action.NewInstall(this.configuration)
+func (oh *OperatorHandler) initInstallAction() {
+	oh.install = action.NewInstall(oh.configuration)
 
-	this.install.Namespace = operatorNamespace
-	this.install.ReleaseName = releaseName
-	this.install.Timeout = 5 * time.Minute
-	this.install.Wait = true
-	this.install.CreateNamespace = true
+	oh.install.Namespace = operatorNamespace
+	oh.install.ReleaseName = releaseName
+	oh.install.Timeout = 5 * time.Minute
+	oh.install.Wait = true
+	oh.install.CreateNamespace = true
 }
 
-func (this *OperatorHandler) initUpgradeAction() {
-	this.upgrade = action.NewUpgrade(this.configuration)
+func (oh *OperatorHandler) initUpgradeAction() {
+	oh.upgrade = action.NewUpgrade(oh.configuration)
 
-	this.upgrade.Namespace = operatorNamespace
-	this.upgrade.Timeout = 5 * time.Minute
-	this.upgrade.Wait = true
+	oh.upgrade.Namespace = operatorNamespace
+	oh.upgrade.Timeout = 5 * time.Minute
+	oh.upgrade.Wait = true
 }
 
-func (this *OperatorHandler) initUninstallAction() {
-	this.uninstall = action.NewUninstall(this.configuration)
+func (oh *OperatorHandler) initUninstallAction() {
+	oh.uninstall = action.NewUninstall(oh.configuration)
 
-	this.uninstall.Timeout = 5 * time.Minute
-	this.uninstall.Wait = true
+	oh.uninstall.Timeout = 5 * time.Minute
+	oh.uninstall.Wait = true
 }
 
 // chartExists checks whether a chart is already installed
 // in a namespace or not based on the provided chart spec.
 // Note that this function only considers the contained chart name and namespace.
-func (this *OperatorHandler) chartExists() (bool, error) {
-	releases, err := this.listReleases(action.ListAll)
+func (oh *OperatorHandler) chartExists() (bool, error) {
+	releases, err := oh.listReleases(action.ListAll)
 	if err != nil {
 		return false, err
 	}
@@ -130,47 +130,47 @@ func (this *OperatorHandler) chartExists() (bool, error) {
 }
 
 // listReleases lists all releases that match the given state.
-func (this *OperatorHandler) listReleases(state action.ListStates) ([]*release.Release, error) {
-	client := action.NewList(this.configuration)
+func (oh *OperatorHandler) listReleases(state action.ListStates) ([]*release.Release, error) {
+	client := action.NewList(oh.configuration)
 	client.StateMask = state
 
 	return client.Run()
 }
 
-func (this *OperatorHandler) values(token string) map[string]interface{} {
+func (oh *OperatorHandler) values(token string) map[string]interface{} {
 	return map[string]interface{}{
 		"secrets": map[string]string{
 			"deployToken": token,
 		},
-		"consoleUrl": fmt.Sprintf("%s/ext/gql", this.url),
+		"consoleUrl": fmt.Sprintf("%s/ext/gql", oh.url),
 	}
 }
 
-func (this *OperatorHandler) InstallOrUpgrade(token string) error {
-	exists, err := this.chartExists()
+func (oh *OperatorHandler) InstallOrUpgrade(token string) error {
+	exists, err := oh.chartExists()
 	if err != nil {
 		return err
 	}
 
 	if exists {
-		return this.Upgrade(token)
+		return oh.Upgrade(token)
 	}
 
-	return this.Install(token)
+	return oh.Install(token)
 }
 
-func (this *OperatorHandler) Install(token string) error {
-	_, err := this.install.Run(this.chart, this.values(token))
+func (oh *OperatorHandler) Install(token string) error {
+	_, err := oh.install.Run(oh.chart, oh.values(token))
 	return err
 }
 
-func (this *OperatorHandler) Upgrade(token string) error {
-	_, err := this.upgrade.Run(releaseName, this.chart, this.values(token))
+func (oh *OperatorHandler) Upgrade(token string) error {
+	_, err := oh.upgrade.Run(releaseName, oh.chart, oh.values(token))
 	return err
 }
 
-func (this *OperatorHandler) Uninstall() error {
-	_, err := this.uninstall.Run(releaseName)
+func (oh *OperatorHandler) Uninstall() error {
+	_, err := oh.uninstall.Run(releaseName)
 	return err
 }
 
