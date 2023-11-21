@@ -38,7 +38,6 @@ func (r *ServiceDeploymentResource) Metadata(_ context.Context, req resource.Met
 func (r *ServiceDeploymentResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "ServiceDeployment resource",
-		// TODO: update schema with all model.ServiceDeployment attributes
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -197,8 +196,8 @@ func (r *ServiceDeploymentResource) Schema(_ context.Context, _ resource.SchemaR
 						Optional: true,
 					},
 				},
-				MarkdownDescription: "Repository information used to pull ServiceDeployment.",
-				Required:            true,
+				MarkdownDescription: "Settings for advanced tuning of the sync process.",
+				Optional:            true,
 			},
 		},
 	}
@@ -223,7 +222,7 @@ func (r *ServiceDeploymentResource) Configure(_ context.Context, req resource.Co
 }
 
 func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	data := new(model.ServiceDeployment)
+	data := model.NewServiceDeployment()
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -242,7 +241,7 @@ func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.Cre
 }
 
 func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	data := new(model.ServiceDeployment)
+	data := model.NewServiceDeployment()
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -259,7 +258,7 @@ func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadR
 }
 
 func (r *ServiceDeploymentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	data := new(model.ServiceDeployment)
+	data := model.NewServiceDeployment()
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -275,8 +274,8 @@ func (r *ServiceDeploymentResource) Update(ctx context.Context, req resource.Upd
 }
 
 func (r *ServiceDeploymentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data model.ServiceDeployment
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	data := model.NewServiceDeployment()
+	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}

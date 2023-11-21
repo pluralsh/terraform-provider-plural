@@ -24,6 +24,45 @@ type ServiceDeployment struct {
 	SyncConfig    *ServiceDeploymentSyncConfig      `tfsdk:"sync_config"`
 }
 
+func NewServiceDeployment() *ServiceDeployment {
+	return &ServiceDeployment{
+		Id:            types.String{},
+		Name:          types.String{},
+		Namespace:     types.String{},
+		Version:       types.String{},
+		DocsPath:      types.String{},
+		Protect:       types.Bool{},
+		Kustomize:     &ServiceDeploymentKustomize{},
+		Configuration: []*ServiceDeploymentConfiguration{},
+		Cluster: &ServiceDeploymentCluster{
+			Id:     types.String{},
+			Handle: types.String{},
+		},
+		Repository: &ServiceDeploymentRepository{
+			Id:     types.String{},
+			Ref:    types.String{},
+			Folder: types.String{},
+		},
+		Bindings: &ServiceDeploymentBindings{
+			Read:  []*ServiceDeploymentPolicyBinding{},
+			Write: []*ServiceDeploymentPolicyBinding{},
+		},
+		SyncConfig: &ServiceDeploymentSyncConfig{
+			DiffNormalizer:    &ServiceDeploymentDiffNormalizer{
+				Group:       types.String{},
+				JsonPatches: types.List{},
+				Kind:        types.String{},
+				Name:        types.String{},
+				Namespace:   types.String{},
+			},
+			NamespaceMetadata: &ServiceDeploymentNamespaceMetadata{
+				Annotations: types.Map{},
+				Labels:      types.Map{},
+			},
+		},
+	}
+}
+
 func (this *ServiceDeployment) From(response *gqlclient.GetServiceDeployment) {
 	this.Id = types.StringValue(response.ServiceDeployment.ID)
 	this.Name = types.StringValue(response.ServiceDeployment.Name)
@@ -139,8 +178,8 @@ func (this *ServiceDeploymentKustomize) Attributes() *gqlclient.KustomizeAttribu
 }
 
 type ServiceDeploymentBindings struct {
-	Read  []ServiceDeploymentPolicyBinding `tfsdk:"read"`
-	Write []ServiceDeploymentPolicyBinding `tfsdk:"write"`
+	Read  []*ServiceDeploymentPolicyBinding `tfsdk:"read"`
+	Write []*ServiceDeploymentPolicyBinding `tfsdk:"write"`
 }
 
 func (this *ServiceDeploymentBindings) ReadAttributes() []*gqlclient.PolicyBindingAttributes {
@@ -151,7 +190,7 @@ func (this *ServiceDeploymentBindings) WriteAttributes() []*gqlclient.PolicyBind
 	return this.attributes(this.Write)
 }
 
-func (this *ServiceDeploymentBindings) attributes(bindings []ServiceDeploymentPolicyBinding) []*gqlclient.PolicyBindingAttributes {
+func (this *ServiceDeploymentBindings) attributes(bindings []*ServiceDeploymentPolicyBinding) []*gqlclient.PolicyBindingAttributes {
 	result := make([]*gqlclient.PolicyBindingAttributes, len(bindings))
 	for i, b := range bindings {
 		result[i] = &gqlclient.PolicyBindingAttributes{
@@ -171,8 +210,8 @@ type ServiceDeploymentPolicyBinding struct {
 }
 
 type ServiceDeploymentSyncConfig struct {
-	DiffNormalizer    ServiceDeploymentDiffNormalizer    `tfsdk:"diff_normalizer"`
-	NamespaceMetadata ServiceDeploymentNamespaceMetadata `tfsdk:"namespace_metadata"`
+	DiffNormalizer    *ServiceDeploymentDiffNormalizer    `tfsdk:"diff_normalizer"`
+	NamespaceMetadata *ServiceDeploymentNamespaceMetadata `tfsdk:"namespace_metadata"`
 }
 
 func (this *ServiceDeploymentSyncConfig) Attributes() *gqlclient.SyncConfigAttributes {
