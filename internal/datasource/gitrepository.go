@@ -24,18 +24,6 @@ type GitRepositoryDataSource struct {
 	client *client.Client
 }
 
-// GitRepositoryModel describes the GitRepository data model.
-type GitRepositoryModel struct {
-	Id         types.String `tfsdk:"id"`
-	Url        types.String `tfsdk:"url"`
-	PrivateKey types.String `tfsdk:"private_key"`
-	Passphrase types.String `tfsdk:"passphrase"`
-	Username   types.String `tfsdk:"username"`
-	Password   types.String `tfsdk:"password"`
-	UrlFormat  types.String `tfsdk:"url_format"`
-	HttpsPath  types.String `tfsdk:"https_path"`
-}
-
 func (r *GitRepositoryDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_git_repository"
 }
@@ -112,7 +100,7 @@ func (r *GitRepositoryDataSource) Read(ctx context.Context, req datasource.ReadR
 		return
 	}
 
-	var data GitRepositoryModel
+	var data model.GitRepository
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)

@@ -14,8 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	consoleClient "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/polly/algorithms"
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
@@ -40,6 +38,7 @@ func (r *ServiceDeploymentResource) Metadata(_ context.Context, req resource.Met
 func (r *ServiceDeploymentResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "ServiceDeployment resource",
+		// TODO: update schema with all model.ServiceDeployment attributes
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -127,92 +126,53 @@ func (r *ServiceDeploymentResource) Configure(_ context.Context, req resource.Co
 }
 
 func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data model.ServiceDeployment
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	data := new(model.ServiceDeployment)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	attrs := consoleClient.ServiceDeploymentAttributes{
-		Name:         data.Name.ValueString(),
-		Namespace:    data.Namespace.ValueString(),
-		RepositoryID: data.Repository.Id.ValueString(),
-		Git: consoleClient.GitRefAttributes{
-			Ref:    data.Repository.Ref.ValueString(),
-			Folder: data.Repository.Folder.ValueString(),
-		},
-		Configuration: algorithms.Map(data.Configuration, func(c model.ServiceDeploymentConfiguration) *consoleClient.ConfigAttributes {
-			return &consoleClient.ConfigAttributes{
-				Name:  c.Name.ValueString(),
-				Value: c.Value.ValueStringPointer(),
-			}
-		}),
-	}
-
-	sd, err := r.client.CreateServiceDeployment(ctx, data.Cluster.Id.ValueStringPointer(), data.Cluster.Handle.ValueStringPointer(), attrs)
+	sd, err := r.client.CreateServiceDeployment(ctx, data.Cluster.Id.ValueStringPointer(), data.Cluster.Handle.ValueStringPointer(), data.Attributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create ServiceDeployment, got error: %s", err))
 		return
 	}
 
-	// TODO: figure out what we need to read from response
 	data.Id = types.StringValue(sd.ID)
-	data.Repository.Ref = types.StringValue(sd.Git.Ref)
-	data.Repository.Folder = types.StringValue(sd.Git.Folder)
-	// TODO: use when gql client is updated
-	//data.Protect = sd.Protect
-	data.Configuration = algorithms.Map(sd.Configuration, func(config *struct {
-		Name  string "json:\"name\" graphql:\"name\""
-		Value string "json:\"value\" graphql:\"value\""
-	}) model.ServiceDeploymentConfiguration {
-		return model.ServiceDeploymentConfiguration{
-			Name:  types.StringValue(config.Name),
-			Value: types.StringValue(config.Value),
-		}
-	})
 
 	tflog.Trace(ctx, "created a ServiceDeployment")
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data model.ServiceDeployment
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	data := new(model.ServiceDeployment)
+	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	ServiceDeployment, err := r.client.GetServiceDeployment(ctx, data.Id.ValueString())
+	response, err := r.client.GetServiceDeployment(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read ServiceDeployment, got error: %s", err))
 		return
 	}
 
-	data.Id = types.StringValue(ServiceDeployment.ServiceDeployment.ID)
-	data.Name = types.StringValue(ServiceDeployment.ServiceDeployment.Name)
-	// TODO: read rest of the config
-
+	data.From(response)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *ServiceDeploymentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data model.ServiceDeployment
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	data := new(model.ServiceDeployment)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// TODO: figure out what can be updated
-	//attrs := consoleClient.ServiceDeploymentUpdateAttributes{
-	//	Handle: lo.ToPtr(data.Handle.ValueString()),
-	//}
-	//ServiceDeployment, err := r.client.UpdateServiceDeployment(ctx, data.Id.ValueString(), attrs)
-	//if err != nil {
-	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update ServiceDeployment, got error: %s", err))
-	//	return
-	//}
-	//
-	//data.Handle = types.StringValue(*ServiceDeployment.UpdateServiceDeployment.Handle)
+	_, err := r.client.UpdateServiceDeployment(ctx, data.Id.ValueString(), data.UpdateAttributes())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update ServiceDeployment, got error: %s", err))
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
