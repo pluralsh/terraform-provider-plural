@@ -5,17 +5,16 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	console "github.com/pluralsh/console-client-go"
@@ -66,7 +65,60 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			"cloud": schema.StringAttribute{
 				MarkdownDescription: "The cloud provider used to create this cluster.",
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.OneOfCaseInsensitive(model.CloudBYOK.String())},
+				Validators:          []validator.String{model.CloudValidator},
+			},
+			"cloud_settings": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"aws": schema.SingleNestedAttribute{
+						Optional: true,
+						Attributes: map[string]schema.Attribute{
+							"region": schema.StringAttribute{
+								MarkdownDescription: "AWS region to deploy the cluster to.",
+								Required:            true,
+							},
+						},
+					},
+					"azure": schema.SingleNestedAttribute{
+						Optional: true,
+						Attributes: map[string]schema.Attribute{
+							"resource_group": schema.StringAttribute{
+								MarkdownDescription: "Name of the Azure resource group for this cluster.",
+								Required:            true,
+							},
+							"network": schema.StringAttribute{
+								MarkdownDescription: "Name of the Azure virtual network for this cluster.",
+								Required:            true,
+							},
+							"subscription_id": schema.StringAttribute{
+								MarkdownDescription: "GUID of the Azure subscription to hold this cluster.",
+								Required:            true,
+							},
+							"location": schema.StringAttribute{
+								MarkdownDescription: "String matching one of the canonical Azure region names, i.e. eastus.",
+								Required:            true,
+							},
+						},
+					},
+					"gcp": schema.SingleNestedAttribute{
+						Optional: true,
+						Attributes: map[string]schema.Attribute{
+							"project": schema.StringAttribute{
+								MarkdownDescription: "",
+								Required:            true,
+							},
+							"network": schema.StringAttribute{
+								MarkdownDescription: "",
+								Required:            true,
+							},
+							"region": schema.StringAttribute{
+								MarkdownDescription: "",
+								Required:            true,
+							},
+						},
+					},
+				},
+				MarkdownDescription: "Cloud-specific settings for this cluster.",
+				Required:            true,
 			},
 			"protect": schema.BoolAttribute{
 				MarkdownDescription: "If set to `true` then this cluster cannot be deleted.",
@@ -93,7 +145,7 @@ func (r *clusterResource) Configure(_ context.Context, req resource.ConfigureReq
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Cluster Resource Configure Type",
-			fmt.Sprintf("Expected *client.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *model.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}
@@ -114,7 +166,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		Handle:  data.Handle.ValueStringPointer(),
 		Protect: data.Protect.ValueBoolPointer(),
 	}
-	cluster, err := r.client.CreateCluster(ctx, attrs)
+	result, err := r.client.CreateCluster(ctx, attrs)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create cluster, got error: %s", err))
 		return
@@ -122,25 +174,25 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 
 	tflog.Trace(ctx, "created a cluster")
 
-	data.Name = types.StringValue(cluster.CreateCluster.Name)
-	data.Handle = types.StringPointerValue(cluster.CreateCluster.Handle)
-	data.Id = types.StringValue(cluster.CreateCluster.ID)
-	data.Protect = types.BoolPointerValue(cluster.CreateCluster.Protect)
-	data.InseredAt = types.StringPointerValue(cluster.CreateCluster.InsertedAt)
+	data.Name = types.StringValue(result.CreateCluster.Name)
+	data.Handle = types.StringPointerValue(result.CreateCluster.Handle)
+	data.Id = types.StringValue(result.CreateCluster.ID)
+	data.Protect = types.BoolPointerValue(result.CreateCluster.Protect)
+	data.InseredAt = types.StringPointerValue(result.CreateCluster.InsertedAt)
 
 	if model.IsCloud(data.Cloud.ValueString(), model.CloudBYOK) {
-		if cluster.CreateCluster.DeployToken == nil {
+		if result.CreateCluster.DeployToken == nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to fetch cluster deploy token"))
 			return
 		}
 
 		handler, err := NewOperatorHandler(ctx, &data.Kubeconfig, r.consoleUrl)
 		if err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to init OperatorHandler, got error: %s", err))
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to init operator handler, got error: %s", err))
 			return
 		}
 
-		err = handler.InstallOrUpgrade(*cluster.CreateCluster.DeployToken)
+		err = handler.InstallOrUpgrade(*result.CreateCluster.DeployToken)
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
 			return
@@ -159,17 +211,17 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	cluster, err := r.client.GetCluster(ctx, data.Id.ValueStringPointer())
+	result, err := r.client.GetCluster(ctx, data.Id.ValueStringPointer())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read cluster, got error: %s", err))
 		return
 	}
 
-	data.Id = types.StringValue(cluster.Cluster.ID)
-	data.InseredAt = types.StringPointerValue(cluster.Cluster.InsertedAt)
-	data.Name = types.StringValue(cluster.Cluster.Name)
-	data.Handle = types.StringPointerValue(cluster.Cluster.Handle)
-	data.Protect = types.BoolPointerValue(cluster.Cluster.Protect)
+	data.Id = types.StringValue(result.Cluster.ID)
+	data.InseredAt = types.StringPointerValue(result.Cluster.InsertedAt)
+	data.Name = types.StringValue(result.Cluster.Name)
+	data.Handle = types.StringPointerValue(result.Cluster.Handle)
+	data.Protect = types.BoolPointerValue(result.Cluster.Protect)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -185,14 +237,14 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		Handle:  data.Handle.ValueStringPointer(),
 		Protect: data.Protect.ValueBoolPointer(),
 	}
-	cluster, err := r.client.UpdateCluster(ctx, data.Id.ValueString(), attrs)
+	result, err := r.client.UpdateCluster(ctx, data.Id.ValueString(), attrs)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update cluster, got error: %s", err))
 		return
 	}
 
-	data.Handle = types.StringPointerValue(cluster.UpdateCluster.Handle)
-	data.Protect = types.BoolPointerValue(cluster.UpdateCluster.Protect)
+	data.Handle = types.StringPointerValue(result.UpdateCluster.Handle)
+	data.Protect = types.BoolPointerValue(result.UpdateCluster.Protect)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

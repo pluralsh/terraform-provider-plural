@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"terraform-provider-plural/internal/model"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -12,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"terraform-provider-plural/internal/client"
-	"terraform-provider-plural/internal/model"
 )
 
 func NewGitRepositoryDataSource() datasource.DataSource {
@@ -80,8 +81,8 @@ func (r *GitRepositoryDataSource) Configure(_ context.Context, req datasource.Co
 	data, ok := req.ProviderData.(*model.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected GitRepository Resource Configure Type",
-			fmt.Sprintf("Expected *client.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			"Unexpected Git Repository Resource Configure Type",
+			fmt.Sprintf("Expected *model.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
@@ -91,19 +92,11 @@ func (r *GitRepositoryDataSource) Configure(_ context.Context, req datasource.Co
 }
 
 func (r *GitRepositoryDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	if r.client == nil {
-		resp.Diagnostics.AddError(
-			"Unconfigured HTTP Client",
-			"Expected configured HTTP client. Please report this issue to the provider developers.",
-		)
-
+	var data model.GitRepository
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	var data model.GitRepository
-
-	// Read Terraform configuration data into the model
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
 	response, err := r.client.GetGitRepository(ctx, nil, data.Url.ValueStringPointer())
 	if err != nil {

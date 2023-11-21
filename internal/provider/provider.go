@@ -167,6 +167,7 @@ func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource
 	return []func() resource.Resource{
 		r.NewClusterResource,
 		r.NewGitRepositoryResource,
+		r.NewProviderResource,
 		r.NewServiceDeploymentResource,
 	}
 }
