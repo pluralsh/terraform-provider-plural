@@ -50,6 +50,10 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 				MarkdownDescription: "Human-readable name of this provider. Globally unique.",
 				Required:            true,
 			},
+			"namespace": schema.StringAttribute{
+				MarkdownDescription: "The namespace the Cluster API resources are deployed into.",
+				Required:            true,
+			},
 			"cloud": schema.StringAttribute{
 				MarkdownDescription: "The name of the cloud service for this provider.",
 				Required:            true,
@@ -67,6 +71,42 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 								Sensitive:           true,
 							},
 							"secret_access_key": schema.StringAttribute{
+								MarkdownDescription: "",
+								Required:            true,
+								Sensitive:           true,
+							},
+						},
+					},
+					"azure": schema.SingleNestedAttribute{
+						MarkdownDescription: "Azure cloud settings that will be used by this provider to create clusters.",
+						Optional:            true,
+						Attributes: map[string]schema.Attribute{
+							"subscription_id": schema.StringAttribute{
+								MarkdownDescription: "GUID of the Azure subscription",
+								Required:            true,
+								Sensitive:           true,
+							},
+							"tenant_id": schema.StringAttribute{
+								MarkdownDescription: "The unique identifier of the Azure Active Directory instance.",
+								Required:            true,
+								Sensitive:           true,
+							},
+							"client_id": schema.StringAttribute{
+								MarkdownDescription: "The unique identifier of an application created in the Azure Active Directory.",
+								Required:            true,
+								Sensitive:           true,
+							},
+							"client_secret": schema.StringAttribute{
+								MarkdownDescription: "A string value your app can use in place of a certificate to identity itself. Sometimes called an application password.",
+								Required:            true,
+								Sensitive:           true,
+							},
+						},
+					},
+					"gcp": schema.SingleNestedAttribute{
+						Optional: true,
+						Attributes: map[string]schema.Attribute{
+							"credentials": schema.StringAttribute{
 								MarkdownDescription: "",
 								Required:            true,
 								Sensitive:           true,

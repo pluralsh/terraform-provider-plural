@@ -9,6 +9,7 @@ import (
 type Provider struct {
 	Id            types.String          `tfsdk:"id"`
 	Name          types.String          `tfsdk:"name"`
+	Namespace     types.String          `tfsdk:"name"`
 	Cloud         types.String          `tfsdk:"cloud"`
 	CloudSettings ProviderCloudSettings `tfsdk:"cloud_settings"`
 }
@@ -70,6 +71,7 @@ func (p *Provider) CloudProviderSettingsAttributes() *console.CloudProviderSetti
 func (p *Provider) Attributes() console.ClusterProviderAttributes {
 	return console.ClusterProviderAttributes{
 		Name:          p.Name.ValueString(),
+		Namespace:     p.Namespace.ValueStringPointer(),
 		Cloud:         p.Cloud.ValueStringPointer(),
 		CloudSettings: p.CloudProviderSettingsAttributes(),
 	}
@@ -84,5 +86,6 @@ func (p *Provider) UpdateAttributes() console.ClusterProviderUpdateAttributes {
 func (p *Provider) From(cp *console.ClusterProviderFragment) {
 	p.Id = types.StringValue(cp.ID)
 	p.Name = types.StringValue(cp.Name)
+	p.Namespace = types.StringValue(cp.Namespace)
 	p.Cloud = types.StringValue(cp.Cloud)
 }
