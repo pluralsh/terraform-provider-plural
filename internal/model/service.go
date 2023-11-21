@@ -24,16 +24,25 @@ type ServiceDeployment struct {
 	SyncConfig    *ServiceDeploymentSyncConfig      `tfsdk:"sync_config"`
 }
 
-func (this *ServiceDeployment) From(response *gqlclient.GetServiceDeployment) {
-	this.Id = types.StringValue(response.ServiceDeployment.ID)
-	this.Name = types.StringValue(response.ServiceDeployment.Name)
-	this.Namespace = types.StringValue(response.ServiceDeployment.Namespace)
-	this.Protect = types.BoolPointerValue(response.ServiceDeployment.Protect)
-	this.Version = types.StringValue(response.ServiceDeployment.Version)
-	this.Kustomize.From(response.ServiceDeployment.Kustomize)
-	this.Configuration = ToServiceDeploymentConfiguration(response.ServiceDeployment.Configuration)
-	this.Cluster.From(response.ServiceDeployment.Cluster)
-	this.Repository.From(response.ServiceDeployment)
+func (this *ServiceDeployment) FromCreate(response *gqlclient.ServiceDeploymentFragment) {
+	this.Id = types.StringValue(response.ID)
+	this.Name = types.StringValue(response.Name)
+	this.Namespace = types.StringValue(response.Namespace)
+	this.Protect = types.BoolPointerValue(response.Protect)
+	this.Version = types.StringValue(response.Version)
+	this.Kustomize.From(response.Kustomize)
+	this.Configuration = ToServiceDeploymentConfiguration(response.Configuration)
+	this.Repository.From(response.Repository, &response.Git)
+}
+
+func (this *ServiceDeployment) FromGet(response *gqlclient.ServiceDeploymentExtended) {
+	this.Id = types.StringValue(response.ID)
+	this.Name = types.StringValue(response.Name)
+	this.Namespace = types.StringValue(response.Namespace)
+	this.Protect = types.BoolPointerValue(response.Protect)
+	this.Kustomize.From(response.Kustomize)
+	this.Configuration = ToServiceDeploymentConfiguration(response.Configuration)
+	this.Repository.From(response.Repository, &response.Git)
 }
 
 func (this *ServiceDeployment) Attributes() gqlclient.ServiceDeploymentAttributes {
@@ -123,14 +132,14 @@ type ServiceDeploymentRepository struct {
 	Folder types.String `tfsdk:"folder"`
 }
 
-func (this *ServiceDeploymentRepository) From(deployment *gqlclient.ServiceDeploymentExtended) {
+func (this *ServiceDeploymentRepository) From(repository *gqlclient.GitRepositoryFragment, git *gqlclient.GitRefFragment) {
 	if this == nil {
 		return
 	}
 
-	this.Id = types.StringValue(deployment.Repository.ID)
-	this.Ref = types.StringValue(deployment.Git.Ref)
-	this.Folder = types.StringValue(deployment.Git.Folder)
+	this.Id = types.StringValue(repository.ID)
+	this.Ref = types.StringValue(git.Ref)
+	this.Folder = types.StringValue(git.Folder)
 }
 
 func (this *ServiceDeploymentRepository) Attributes() gqlclient.GitRefAttributes {

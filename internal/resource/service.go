@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -13,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
@@ -49,12 +47,21 @@ func (r *ServiceDeploymentResource) Schema(_ context.Context, _ resource.SchemaR
 			"name": schema.StringAttribute{
 				MarkdownDescription: "Human-readable name of this ServiceDeployment.",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplaceIfConfigured(),
+				},
 			},
 			"namespace": schema.StringAttribute{
 				MarkdownDescription: "Namespace to deploy this ServiceDeployment.",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplaceIfConfigured(),
+				},
 			},
 			"version": schema.StringAttribute{
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 				MarkdownDescription: "Semver version of this service ServiceDeployment.",
 				Optional:            true,
 			},
@@ -98,6 +105,9 @@ func (r *ServiceDeploymentResource) Schema(_ context.Context, _ resource.SchemaR
 							stringvalidator.ConflictsWith(path.MatchRoot("cluster").AtName("handle")),
 							stringvalidator.ExactlyOneOf(path.MatchRoot("cluster").AtName("handle")),
 						},
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 						Optional: true,
 					},
 					"handle": schema.StringAttribute{
@@ -105,17 +115,35 @@ func (r *ServiceDeploymentResource) Schema(_ context.Context, _ resource.SchemaR
 							stringvalidator.ConflictsWith(path.MatchRoot("cluster").AtName("id")),
 							stringvalidator.ExactlyOneOf(path.MatchRoot("cluster").AtName("id")),
 						},
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 						Optional: true,
 					},
 				},
 				MarkdownDescription: "Unique cluster id/handle to deploy this ServiceDeployment",
 				Required:            true,
 			},
-			"repository": schema.ObjectAttribute{
-				AttributeTypes: map[string]attr.Type{
-					"id":     types.StringType,
-					"ref":    types.StringType,
-					"folder": types.StringType,
+			"repository": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"id":     schema.StringAttribute{
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+						Required: true,
+					},
+					"ref":    schema.StringAttribute{
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+						Required: true,
+					},
+					"folder": schema.StringAttribute{
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+						Required: true,
+					},
 				},
 				MarkdownDescription: "Repository information used to pull ServiceDeployment.",
 				Required:            true,
@@ -228,17 +256,13 @@ func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("service attributes: %+v", data.Attributes()))
-
 	sd, err := r.client.CreateServiceDeployment(ctx, data.Cluster.Id.ValueStringPointer(), data.Cluster.Handle.ValueStringPointer(), data.Attributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create ServiceDeployment, got error: %s", err))
 		return
 	}
 
-	data.Id = types.StringValue(sd.ID)
-
-	tflog.Trace(ctx, "created a ServiceDeployment")
+	data.FromCreate(sd)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -255,7 +279,7 @@ func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	data.From(response)
+	data.FromGet(response.ServiceDeployment)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -265,8 +289,6 @@ func (r *ServiceDeploymentResource) Update(ctx context.Context, req resource.Upd
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	tflog.Info(ctx, fmt.Sprintf("service deployment: %+v", data))
 
 	_, err := r.client.UpdateServiceDeployment(ctx, data.Id.ValueString(), data.UpdateAttributes())
 	if err != nil {
