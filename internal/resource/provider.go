@@ -7,15 +7,14 @@ import (
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	console "github.com/pluralsh/console-client-go"
 )
 
 var _ resource.Resource = &providerResource{}
@@ -50,10 +49,15 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 				MarkdownDescription: "Human-readable name of this provider. Globally unique.",
 				Required:            true,
 			},
+			"namespace": schema.StringAttribute{
+				MarkdownDescription: "The namespace the Cluster API resources are deployed into.",
+				Required:            true,
+			},
 			"cloud": schema.StringAttribute{
 				MarkdownDescription: "The name of the cloud service for this provider.",
 				Required:            true,
-				Validators:          []validator.String{model.CloudValidator},
+				Validators: []validator.String{stringvalidator.OneOfCaseInsensitive(
+					model.CloudAWS.String(), model.CloudAzure.String(), model.CloudGCP.String())},
 			},
 			"cloud_settings": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
@@ -66,6 +70,42 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 								Sensitive:           true,
 							},
 							"secret_access_key": schema.StringAttribute{
+								MarkdownDescription: "",
+								Required:            true,
+								Sensitive:           true,
+							},
+						},
+					},
+					"azure": schema.SingleNestedAttribute{
+						MarkdownDescription: "Azure cloud settings that will be used by this provider to create clusters.",
+						Optional:            true,
+						Attributes: map[string]schema.Attribute{
+							"subscription_id": schema.StringAttribute{
+								MarkdownDescription: "GUID of the Azure subscription",
+								Required:            true,
+								Sensitive:           true,
+							},
+							"tenant_id": schema.StringAttribute{
+								MarkdownDescription: "The unique identifier of the Azure Active Directory instance.",
+								Required:            true,
+								Sensitive:           true,
+							},
+							"client_id": schema.StringAttribute{
+								MarkdownDescription: "The unique identifier of an application created in the Azure Active Directory.",
+								Required:            true,
+								Sensitive:           true,
+							},
+							"client_secret": schema.StringAttribute{
+								MarkdownDescription: "A string value your app can use in place of a certificate to identity itself. Sometimes called an application password.",
+								Required:            true,
+								Sensitive:           true,
+							},
+						},
+					},
+					"gcp": schema.SingleNestedAttribute{
+						Optional: true,
+						Attributes: map[string]schema.Attribute{
+							"credentials": schema.StringAttribute{
 								MarkdownDescription: "",
 								Required:            true,
 								Sensitive:           true,
@@ -105,20 +145,7 @@ func (r *providerResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	attrs := console.ClusterProviderAttributes{
-		Name:  data.Name.ValueString(),
-		Cloud: data.Cloud.ValueStringPointer(),
-	}
-	if model.IsCloud(data.Cloud.ValueString(), model.CloudAWS) {
-		attrs.CloudSettings = &console.CloudProviderSettingsAttributes{
-			Aws: &console.AwsSettingsAttributes{
-				AccessKeyID:     data.CloudSettings.AWS.AccessKeyId.ValueString(),
-				SecretAccessKey: data.CloudSettings.AWS.SecretAccessKey.ValueString(),
-			},
-		}
-	}
-
-	result, err := r.client.CreateClusterProvider(ctx, attrs)
+	result, err := r.client.CreateClusterProvider(ctx, data.Attributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create provider, got error: %s", err))
 		return
@@ -126,9 +153,7 @@ func (r *providerResource) Create(ctx context.Context, req resource.CreateReques
 
 	tflog.Trace(ctx, "created a provider")
 
-	data.Name = types.StringValue(result.CreateClusterProvider.Name)
-	data.Id = types.StringValue(result.CreateClusterProvider.ID)
-
+	data.From(result.CreateClusterProvider)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -145,10 +170,7 @@ func (r *providerResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	data.Id = types.StringValue(result.ClusterProvider.ID)
-	data.Name = types.StringValue(result.ClusterProvider.Name)
-	data.Cloud = types.StringValue(result.ClusterProvider.Cloud)
-
+	data.From(result.ClusterProvider)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -159,22 +181,13 @@ func (r *providerResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	attrs := console.ClusterProviderUpdateAttributes{}
-	if model.IsCloud(data.Cloud.ValueString(), model.CloudAWS) {
-		attrs.CloudSettings = &console.CloudProviderSettingsAttributes{
-			Aws: &console.AwsSettingsAttributes{
-				AccessKeyID:     data.CloudSettings.AWS.AccessKeyId.ValueString(),
-				SecretAccessKey: data.CloudSettings.AWS.SecretAccessKey.ValueString(),
-			},
-		}
-	}
-
-	_, err := r.client.UpdateClusterProvider(ctx, data.Id.ValueString(), attrs)
+	result, err := r.client.UpdateClusterProvider(ctx, data.Id.ValueString(), data.UpdateAttributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update provider, got error: %s", err))
 		return
 	}
 
+	data.From(result.UpdateClusterProvider)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 

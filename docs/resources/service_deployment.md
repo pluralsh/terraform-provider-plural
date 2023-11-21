@@ -21,11 +21,16 @@ ServiceDeployment resource
 - `name` (String) Human-readable name of this ServiceDeployment.
 - `namespace` (String) Namespace to deploy this ServiceDeployment.
 - `repository` (Object) Repository information used to pull ServiceDeployment. (see [below for nested schema](#nestedatt--repository))
+- `sync_config` (Attributes) Repository information used to pull ServiceDeployment. (see [below for nested schema](#nestedatt--sync_config))
 
 ### Optional
 
+- `bindings` (Attributes) Read and write policies of this ServiceDeployment. (see [below for nested schema](#nestedatt--bindings))
 - `configuration` (Attributes List) List of [name, value] secrets used to alter this ServiceDeployment configuration. (see [below for nested schema](#nestedatt--configuration))
+- `docs_path` (String) Path to the documentation in the target git repository.
+- `kustomize` (Attributes) Kustomize related service metadata. (see [below for nested schema](#nestedatt--kustomize))
 - `protect` (Boolean) If true, deletion of this service is not allowed.
+- `version` (String) Semver version of this service ServiceDeployment.
 
 ### Read-Only
 
@@ -50,6 +55,85 @@ Required:
 - `ref` (String)
 
 
+<a id="nestedatt--sync_config"></a>
+### Nested Schema for `sync_config`
+
+Optional:
+
+- `diff_normalizer` (Attributes) (see [below for nested schema](#nestedatt--sync_config--diff_normalizer))
+- `namespace_metadata` (Attributes) (see [below for nested schema](#nestedatt--sync_config--namespace_metadata))
+
+<a id="nestedatt--sync_config--diff_normalizer"></a>
+### Nested Schema for `sync_config.diff_normalizer`
+
+Optional:
+
+- `group` (Attributes) (see [below for nested schema](#nestedatt--sync_config--diff_normalizer--group))
+- `json_patches` (Attributes) (see [below for nested schema](#nestedatt--sync_config--diff_normalizer--json_patches))
+- `kind` (Attributes) (see [below for nested schema](#nestedatt--sync_config--diff_normalizer--kind))
+- `name` (Attributes) (see [below for nested schema](#nestedatt--sync_config--diff_normalizer--name))
+- `namespace` (Attributes) (see [below for nested schema](#nestedatt--sync_config--diff_normalizer--namespace))
+
+<a id="nestedatt--sync_config--diff_normalizer--group"></a>
+### Nested Schema for `sync_config.diff_normalizer.group`
+
+
+<a id="nestedatt--sync_config--diff_normalizer--json_patches"></a>
+### Nested Schema for `sync_config.diff_normalizer.json_patches`
+
+
+<a id="nestedatt--sync_config--diff_normalizer--kind"></a>
+### Nested Schema for `sync_config.diff_normalizer.kind`
+
+
+<a id="nestedatt--sync_config--diff_normalizer--name"></a>
+### Nested Schema for `sync_config.diff_normalizer.name`
+
+
+<a id="nestedatt--sync_config--diff_normalizer--namespace"></a>
+### Nested Schema for `sync_config.diff_normalizer.namespace`
+
+
+
+<a id="nestedatt--sync_config--namespace_metadata"></a>
+### Nested Schema for `sync_config.namespace_metadata`
+
+Optional:
+
+- `annotations` (Map of String)
+- `labels` (Map of String)
+
+
+
+<a id="nestedatt--bindings"></a>
+### Nested Schema for `bindings`
+
+Optional:
+
+- `read` (Attributes List) Read policies of this ServiceDeployment. (see [below for nested schema](#nestedatt--bindings--read))
+- `write` (Attributes List) Write policies of this ServiceDeployment. (see [below for nested schema](#nestedatt--bindings--write))
+
+<a id="nestedatt--bindings--read"></a>
+### Nested Schema for `bindings.read`
+
+Optional:
+
+- `group_id` (String)
+- `id` (String)
+- `user_id` (String)
+
+
+<a id="nestedatt--bindings--write"></a>
+### Nested Schema for `bindings.write`
+
+Optional:
+
+- `group_id` (String)
+- `id` (String)
+- `user_id` (String)
+
+
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
@@ -57,3 +141,11 @@ Required:
 
 - `name` (String)
 - `value` (String, Sensitive)
+
+
+<a id="nestedatt--kustomize"></a>
+### Nested Schema for `kustomize`
+
+Required:
+
+- `path` (String) Path to the kustomize file in the target git repository.
