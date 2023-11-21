@@ -18,13 +18,12 @@ A representation of a cluster you can deploy to.
 ### Required
 
 - `cloud` (String) The cloud provider used to create this cluster.
+- `cloud_settings` (Attributes) Cloud-specific settings for this cluster. (see [below for nested schema](#nestedatt--cloud_settings))
 - `name` (String) Human-readable name of this cluster, that also translates to cloud resource name.
 
 ### Optional
 
-- `cloud_settings` (Attributes) Cloud-specific settings for this cluster. (see [below for nested schema](#nestedatt--cloud_settings))
 - `handle` (String) A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.
-- `kubeconfig` (Attributes) (see [below for nested schema](#nestedatt--kubeconfig))
 - `protect` (Boolean) If set to `true` then this cluster cannot be deleted.
 - `tags` (Map of String) Key-value tags used to filter clusters.
 
@@ -40,6 +39,7 @@ Optional:
 
 - `aws` (Attributes) (see [below for nested schema](#nestedatt--cloud_settings--aws))
 - `azure` (Attributes) (see [below for nested schema](#nestedatt--cloud_settings--azure))
+- `byok` (Attributes) (see [below for nested schema](#nestedatt--cloud_settings--byok))
 - `gcp` (Attributes) (see [below for nested schema](#nestedatt--cloud_settings--gcp))
 
 <a id="nestedatt--cloud_settings--aws"></a>
@@ -61,19 +61,15 @@ Required:
 - `subscription_id` (String) GUID of the Azure subscription to hold this cluster.
 
 
-<a id="nestedatt--cloud_settings--gcp"></a>
-### Nested Schema for `cloud_settings.gcp`
+<a id="nestedatt--cloud_settings--byok"></a>
+### Nested Schema for `cloud_settings.byok`
 
-Required:
+Optional:
 
-- `network` (String)
-- `project` (String)
-- `region` (String)
+- `kubeconfig` (Attributes) (see [below for nested schema](#nestedatt--cloud_settings--byok--kubeconfig))
 
-
-
-<a id="nestedatt--kubeconfig"></a>
-### Nested Schema for `kubeconfig`
+<a id="nestedatt--cloud_settings--byok--kubeconfig"></a>
+### Nested Schema for `cloud_settings.byok.kubeconfig`
 
 Optional:
 
@@ -84,7 +80,7 @@ Optional:
 - `config_context_auth_info` (String) Can be sourced from `PLURAL_KUBE_CTX_AUTH_INFO`.
 - `config_context_cluster` (String) Can be sourced from `PLURAL_KUBE_CTX_CLUSTER`.
 - `config_path` (String) Path to the kubeconfig file. Can be sourced from `PLURAL_KUBE_CONFIG_PATH`.
-- `exec` (Attributes List) Specifies a command to provide client credentials (see [below for nested schema](#nestedatt--kubeconfig--exec))
+- `exec` (Attributes List) Specifies a command to provide client credentials (see [below for nested schema](#nestedatt--cloud_settings--byok--kubeconfig--exec))
 - `host` (String) The complete address of the Kubernetes cluster, using scheme://hostname:port format. Can be sourced from `PLURAL_KUBE_HOST`.
 - `insecure` (Boolean) Skips the validity check for the server's certificate. This will make your HTTPS connections insecure. Can be sourced from `PLURAL_KUBE_INSECURE`.
 - `password` (String, Sensitive) The password for basic authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_PASSWORD`.
@@ -93,8 +89,8 @@ Optional:
 - `token` (String, Sensitive) Token is the bearer token for authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_TOKEN`.
 - `username` (String) The username for basic authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_USER`.
 
-<a id="nestedatt--kubeconfig--exec"></a>
-### Nested Schema for `kubeconfig.exec`
+<a id="nestedatt--cloud_settings--byok--kubeconfig--exec"></a>
+### Nested Schema for `cloud_settings.byok.kubeconfig.username`
 
 Required:
 
@@ -105,3 +101,15 @@ Optional:
 
 - `args` (List of String) Arguments to pass to the command when executing it.
 - `env` (Map of String) Defines  environment variables to expose to the process.
+
+
+
+
+<a id="nestedatt--cloud_settings--gcp"></a>
+### Nested Schema for `cloud_settings.gcp`
+
+Required:
+
+- `network` (String)
+- `project` (String)
+- `region` (String)
