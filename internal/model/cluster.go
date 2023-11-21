@@ -12,13 +12,13 @@ type Cluster struct {
 	CloudSettings ClusterCloudSettings `tfsdk:"cloud_settings"`
 	Protect       types.Bool           `tfsdk:"protect"`
 	Tags          types.Map            `tfsdk:"tags"`
-	Kubeconfig    Kubeconfig           `tfsdk:"kubeconfig"`
 }
 
 type ClusterCloudSettings struct {
 	AWS   ClusterCloudSettingsAWS   `tfsdk:"aws"`
 	Azure ClusterCloudSettingsAzure `tfsdk:"azure"`
 	GCP   ClusterCloudSettingsGCP   `tfsdk:"gcp"`
+	BYOK  ClusterCloudSettingsBYOK  `tfsdk:"byok"`
 }
 
 type ClusterCloudSettingsAWS struct {
@@ -36,6 +36,10 @@ type ClusterCloudSettingsGCP struct {
 	Region  types.String `tfsdk:"region"`
 	Network types.String `tfsdk:"network"`
 	Project types.String `tfsdk:"project"`
+}
+
+type ClusterCloudSettingsBYOK struct {
+	Kubeconfig Kubeconfig `tfsdk:"kubeconfig"`
 }
 
 type Kubeconfig struct {

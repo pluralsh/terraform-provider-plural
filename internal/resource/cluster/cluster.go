@@ -1,11 +1,8 @@
-package resource
+package cluster
 
 import (
 	"context"
 	"fmt"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
@@ -13,8 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	console "github.com/pluralsh/console-client-go"
@@ -69,53 +68,10 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			},
 			"cloud_settings": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"aws": schema.SingleNestedAttribute{
-						Optional: true,
-						Attributes: map[string]schema.Attribute{
-							"region": schema.StringAttribute{
-								MarkdownDescription: "AWS region to deploy the cluster to.",
-								Required:            true,
-							},
-						},
-					},
-					"azure": schema.SingleNestedAttribute{
-						Optional: true,
-						Attributes: map[string]schema.Attribute{
-							"resource_group": schema.StringAttribute{
-								MarkdownDescription: "Name of the Azure resource group for this cluster.",
-								Required:            true,
-							},
-							"network": schema.StringAttribute{
-								MarkdownDescription: "Name of the Azure virtual network for this cluster.",
-								Required:            true,
-							},
-							"subscription_id": schema.StringAttribute{
-								MarkdownDescription: "GUID of the Azure subscription to hold this cluster.",
-								Required:            true,
-							},
-							"location": schema.StringAttribute{
-								MarkdownDescription: "String matching one of the canonical Azure region names, i.e. eastus.",
-								Required:            true,
-							},
-						},
-					},
-					"gcp": schema.SingleNestedAttribute{
-						Optional: true,
-						Attributes: map[string]schema.Attribute{
-							"project": schema.StringAttribute{
-								MarkdownDescription: "",
-								Required:            true,
-							},
-							"network": schema.StringAttribute{
-								MarkdownDescription: "",
-								Required:            true,
-							},
-							"region": schema.StringAttribute{
-								MarkdownDescription: "",
-								Required:            true,
-							},
-						},
-					},
+					"aws":   AWSCloudSettingsSchema(),
+					"azure": AzureCloudSettingsSchema(),
+					"gcp":   GCPCloudSettingsSchema(),
+					"byok":  BYOKCloudSettingsSchema(),
 				},
 				MarkdownDescription: "Cloud-specific settings for this cluster.",
 				Required:            true,
@@ -131,7 +87,6 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Optional:            true,
 				ElementType:         types.StringType,
 			},
-			"kubeconfig": kubeconfigAttribute(),
 		},
 	}
 }
@@ -166,6 +121,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		Handle:  data.Handle.ValueStringPointer(),
 		Protect: data.Protect.ValueBoolPointer(),
 	}
+
 	result, err := r.client.CreateCluster(ctx, attrs)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create cluster, got error: %s", err))
@@ -186,7 +142,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 			return
 		}
 
-		handler, err := NewOperatorHandler(ctx, &data.Kubeconfig, r.consoleUrl)
+		handler, err := NewOperatorHandler(ctx, &data.CloudSettings.BYOK.Kubeconfig, r.consoleUrl)
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to init operator handler, got error: %s", err))
 			return
@@ -237,6 +193,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		Handle:  data.Handle.ValueStringPointer(),
 		Protect: data.Protect.ValueBoolPointer(),
 	}
+
 	result, err := r.client.UpdateCluster(ctx, data.Id.ValueString(), attrs)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update cluster, got error: %s", err))
