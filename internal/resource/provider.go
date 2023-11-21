@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -154,9 +153,7 @@ func (r *providerResource) Create(ctx context.Context, req resource.CreateReques
 
 	tflog.Trace(ctx, "created a provider")
 
-	data.Name = types.StringValue(result.CreateClusterProvider.Name)
-	data.Id = types.StringValue(result.CreateClusterProvider.ID)
-
+	data.From(result.CreateClusterProvider)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -184,12 +181,13 @@ func (r *providerResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	_, err := r.client.UpdateClusterProvider(ctx, data.Id.ValueString(), data.UpdateAttributes())
+	result, err := r.client.UpdateClusterProvider(ctx, data.Id.ValueString(), data.UpdateAttributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update provider, got error: %s", err))
 		return
 	}
 
+	data.From(result.UpdateClusterProvider)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
