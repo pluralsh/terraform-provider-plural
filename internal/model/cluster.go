@@ -15,10 +15,10 @@ type Cluster struct {
 }
 
 type ClusterCloudSettings struct {
-	AWS   ClusterCloudSettingsAWS   `tfsdk:"aws"`
-	Azure ClusterCloudSettingsAzure `tfsdk:"azure"`
-	GCP   ClusterCloudSettingsGCP   `tfsdk:"gcp"`
-	BYOK  ClusterCloudSettingsBYOK  `tfsdk:"byok"`
+	AWS   *ClusterCloudSettingsAWS   `tfsdk:"aws"`
+	Azure *ClusterCloudSettingsAzure `tfsdk:"azure"`
+	GCP   *ClusterCloudSettingsGCP   `tfsdk:"gcp"`
+	BYOK  *ClusterCloudSettingsBYOK  `tfsdk:"byok"`
 }
 
 type ClusterCloudSettingsAWS struct {

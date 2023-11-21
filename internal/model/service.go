@@ -24,50 +24,11 @@ type ServiceDeployment struct {
 	SyncConfig    *ServiceDeploymentSyncConfig      `tfsdk:"sync_config"`
 }
 
-func NewServiceDeployment() *ServiceDeployment {
-	return &ServiceDeployment{
-		Id:            types.String{},
-		Name:          types.String{},
-		Namespace:     types.String{},
-		Version:       types.String{},
-		DocsPath:      types.String{},
-		Protect:       types.Bool{},
-		Kustomize:     &ServiceDeploymentKustomize{},
-		Configuration: []*ServiceDeploymentConfiguration{},
-		Cluster: &ServiceDeploymentCluster{
-			Id:     types.String{},
-			Handle: types.String{},
-		},
-		Repository: &ServiceDeploymentRepository{
-			Id:     types.String{},
-			Ref:    types.String{},
-			Folder: types.String{},
-		},
-		Bindings: &ServiceDeploymentBindings{
-			Read:  []*ServiceDeploymentPolicyBinding{},
-			Write: []*ServiceDeploymentPolicyBinding{},
-		},
-		SyncConfig: &ServiceDeploymentSyncConfig{
-			DiffNormalizer:    &ServiceDeploymentDiffNormalizer{
-				Group:       types.String{},
-				JsonPatches: types.List{},
-				Kind:        types.String{},
-				Name:        types.String{},
-				Namespace:   types.String{},
-			},
-			NamespaceMetadata: &ServiceDeploymentNamespaceMetadata{
-				Annotations: types.Map{},
-				Labels:      types.Map{},
-			},
-		},
-	}
-}
-
 func (this *ServiceDeployment) From(response *gqlclient.GetServiceDeployment) {
 	this.Id = types.StringValue(response.ServiceDeployment.ID)
 	this.Name = types.StringValue(response.ServiceDeployment.Name)
 	this.Namespace = types.StringValue(response.ServiceDeployment.Namespace)
-	//this.Protect = types.BoolValue(response.ServiceDeployment.Protect)
+	this.Protect = types.BoolPointerValue(response.ServiceDeployment.Protect)
 	this.Version = types.StringValue(response.ServiceDeployment.Version)
 	this.Kustomize.From(response.ServiceDeployment.Kustomize)
 	this.Configuration = ToServiceDeploymentConfiguration(response.ServiceDeployment.Configuration)
@@ -76,6 +37,10 @@ func (this *ServiceDeployment) From(response *gqlclient.GetServiceDeployment) {
 }
 
 func (this *ServiceDeployment) Attributes() gqlclient.ServiceDeploymentAttributes {
+	if this == nil {
+		return gqlclient.ServiceDeploymentAttributes{}
+	}
+
 	return gqlclient.ServiceDeploymentAttributes{
 		Name:          this.Name.ValueString(),
 		Namespace:     this.Namespace.ValueString(),
@@ -93,6 +58,10 @@ func (this *ServiceDeployment) Attributes() gqlclient.ServiceDeploymentAttribute
 }
 
 func (this *ServiceDeployment) UpdateAttributes() gqlclient.ServiceUpdateAttributes {
+	if this == nil {
+		return gqlclient.ServiceUpdateAttributes{}
+	}
+
 	return gqlclient.ServiceUpdateAttributes{
 		Version:       this.Version.ValueStringPointer(),
 		Protect:       this.Protect.ValueBoolPointer(),
@@ -140,6 +109,10 @@ type ServiceDeploymentCluster struct {
 }
 
 func (this *ServiceDeploymentCluster) From(cluster *gqlclient.BaseClusterFragment) {
+	if this == nil {
+		return
+	}
+
 	this.Id = types.StringValue(cluster.ID)
 	this.Handle = types.StringPointerValue(cluster.Handle)
 }
@@ -151,12 +124,20 @@ type ServiceDeploymentRepository struct {
 }
 
 func (this *ServiceDeploymentRepository) From(deployment *gqlclient.ServiceDeploymentExtended) {
+	if this == nil {
+		return
+	}
+
 	this.Id = types.StringValue(deployment.Repository.ID)
 	this.Ref = types.StringValue(deployment.Git.Ref)
 	this.Folder = types.StringValue(deployment.Git.Folder)
 }
 
 func (this *ServiceDeploymentRepository) Attributes() gqlclient.GitRefAttributes {
+	if this == nil {
+		return gqlclient.GitRefAttributes{}
+	}
+
 	return gqlclient.GitRefAttributes{
 		Ref:    this.Ref.ValueString(),
 		Folder: this.Folder.ValueString(),
@@ -168,10 +149,18 @@ type ServiceDeploymentKustomize struct {
 }
 
 func (this *ServiceDeploymentKustomize) From(kustomize *gqlclient.KustomizeFragment) {
+	if this == nil {
+		return
+	}
+
 	this.Path = types.StringValue(kustomize.Path)
 }
 
 func (this *ServiceDeploymentKustomize) Attributes() *gqlclient.KustomizeAttributes {
+	if this == nil {
+		return nil
+	}
+
 	return &gqlclient.KustomizeAttributes{
 		Path: this.Path.ValueString(),
 	}
@@ -183,10 +172,18 @@ type ServiceDeploymentBindings struct {
 }
 
 func (this *ServiceDeploymentBindings) ReadAttributes() []*gqlclient.PolicyBindingAttributes {
+	if this == nil {
+		return []*gqlclient.PolicyBindingAttributes{}
+	}
+
 	return this.attributes(this.Read)
 }
 
 func (this *ServiceDeploymentBindings) WriteAttributes() []*gqlclient.PolicyBindingAttributes {
+	if this == nil {
+		return []*gqlclient.PolicyBindingAttributes{}
+	}
+
 	return this.attributes(this.Write)
 }
 
@@ -215,6 +212,10 @@ type ServiceDeploymentSyncConfig struct {
 }
 
 func (this *ServiceDeploymentSyncConfig) Attributes() *gqlclient.SyncConfigAttributes {
+	if this == nil {
+		return nil
+	}
+
 	return &gqlclient.SyncConfigAttributes{
 		DiffNormalizer:    this.DiffNormalizer.Attributes(),
 		NamespaceMetadata: this.NamespaceMetadata.Attributes(),
@@ -230,6 +231,10 @@ type ServiceDeploymentDiffNormalizer struct {
 }
 
 func (this *ServiceDeploymentDiffNormalizer) Attributes() *gqlclient.DiffNormalizerAttributes {
+	if this == nil {
+		return nil
+	}
+
 	return &gqlclient.DiffNormalizerAttributes{
 		Group:     this.Group.ValueString(),
 		Kind:      this.Kind.ValueString(),
@@ -247,6 +252,10 @@ type ServiceDeploymentNamespaceMetadata struct {
 }
 
 func (this *ServiceDeploymentNamespaceMetadata) Attributes() *gqlclient.MetadataAttributes {
+	if this == nil {
+		return nil
+	}
+
 	return &gqlclient.MetadataAttributes{
 		Annotations: this.toAttributesMap(this.Annotations.Elements()),
 		Labels:      this.toAttributesMap(this.Labels.Elements()),

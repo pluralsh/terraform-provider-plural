@@ -222,11 +222,13 @@ func (r *ServiceDeploymentResource) Configure(_ context.Context, req resource.Co
 }
 
 func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	data := model.NewServiceDeployment()
+	data := new(model.ServiceDeployment)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	tflog.Info(ctx, fmt.Sprintf("service attributes: %+v", data.Attributes()))
 
 	sd, err := r.client.CreateServiceDeployment(ctx, data.Cluster.Id.ValueStringPointer(), data.Cluster.Handle.ValueStringPointer(), data.Attributes())
 	if err != nil {
@@ -241,7 +243,7 @@ func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.Cre
 }
 
 func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	data := model.NewServiceDeployment()
+	data := new(model.ServiceDeployment)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -258,11 +260,13 @@ func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadR
 }
 
 func (r *ServiceDeploymentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	data := model.NewServiceDeployment()
+	data := new(model.ServiceDeployment)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	tflog.Info(ctx, fmt.Sprintf("service deployment: %+v", data))
 
 	_, err := r.client.UpdateServiceDeployment(ctx, data.Id.ValueString(), data.UpdateAttributes())
 	if err != nil {
@@ -274,7 +278,7 @@ func (r *ServiceDeploymentResource) Update(ctx context.Context, req resource.Upd
 }
 
 func (r *ServiceDeploymentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	data := model.NewServiceDeployment()
+	data := new(model.ServiceDeployment)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
