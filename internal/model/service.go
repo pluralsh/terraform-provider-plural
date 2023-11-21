@@ -4,7 +4,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// ServiceDeployment describes the ServiceDeployment resource and data source model.
+// ServiceDeployment describes the service deployment resource and data source model.
 type ServiceDeployment struct {
 	Id            types.String                     `tfsdk:"id"`
 	Name          types.String                     `tfsdk:"name"`

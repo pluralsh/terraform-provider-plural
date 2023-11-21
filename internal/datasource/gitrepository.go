@@ -92,19 +92,11 @@ func (r *GitRepositoryDataSource) Configure(_ context.Context, req datasource.Co
 }
 
 func (r *GitRepositoryDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	if r.client == nil {
-		resp.Diagnostics.AddError(
-			"Unconfigured HTTP Client",
-			"Expected configured HTTP client. Please report this issue to the provider developers.",
-		)
-
+	var data model.GitRepository
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	var data model.GitRepository
-
-	// Read Terraform configuration data into the model
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
 	response, err := r.client.GetGitRepository(ctx, nil, data.Url.ValueStringPointer())
 	if err != nil {

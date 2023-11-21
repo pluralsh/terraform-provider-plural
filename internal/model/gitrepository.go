@@ -4,7 +4,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// GitRepository describes the GitRepository resource and data source model.
+// GitRepository describes the Git repository resource and data source model.
 type GitRepository struct {
 	Id         types.String `tfsdk:"id"`
 	Url        types.String `tfsdk:"url"`

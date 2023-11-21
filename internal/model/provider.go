@@ -2,7 +2,7 @@ package model
 
 import "github.com/hashicorp/terraform-plugin-framework/types"
 
-// Provider describes the Provider resource and data source model.
+// Provider describes the provider resource and data source model.
 type Provider struct {
 	Id            types.String          `tfsdk:"id"`
 	Name          types.String          `tfsdk:"name"`
