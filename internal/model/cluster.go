@@ -1,6 +1,8 @@
 package model
 
 import (
+	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	console "github.com/pluralsh/console-client-go"
 )
@@ -103,13 +105,27 @@ func (c *Cluster) CloudSettingsAttributes() *console.CloudSettingsAttributes {
 	return nil
 }
 
+func (c *Cluster) TagsAttribute() (result []*console.TagAttributes) {
+	elements := make(map[string]types.String, len(c.Tags.Elements()))
+	_ = c.Tags.ElementsAs(context.TODO(), &elements, false) // TODO: Context and skipped diagnostics.
+
+	for k, v := range elements {
+		result = append(result, &console.TagAttributes{
+			Name:  k,
+			Value: v.ValueString(),
+		})
+	}
+
+	return
+}
+
 func (c *Cluster) CreateAttributes() console.ClusterAttributes {
 	return console.ClusterAttributes{
 		Name:          c.Name.ValueString(),
 		Handle:        c.Handle.ValueStringPointer(),
 		Protect:       c.Protect.ValueBoolPointer(),
-		Tags:          []*console.TagAttributes{}, // TODO
 		CloudSettings: c.CloudSettingsAttributes(),
+		Tags:          c.TagsAttribute(),
 	}
 }
 
