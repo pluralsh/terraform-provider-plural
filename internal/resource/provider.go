@@ -57,7 +57,7 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 				MarkdownDescription: "The namespace the Cluster API resources are deployed into.",
 				Optional:            true,
 				Computed:            true,
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplaceIfConfigured()},
 			},
 			"cloud": schema.StringAttribute{
 				MarkdownDescription: "The name of the cloud service for this provider.",
