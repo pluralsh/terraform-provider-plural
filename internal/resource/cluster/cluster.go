@@ -61,6 +61,15 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Optional:            true,
 				Computed:            true,
 			},
+			"version": schema.StringAttribute{
+				MarkdownDescription: "",
+				Optional:            true,
+				Computed:            true,
+			},
+			"provider_id": schema.StringAttribute{
+				MarkdownDescription: "",
+				Required:            true,
+			},
 			"cloud": schema.StringAttribute{
 				MarkdownDescription: "The cloud provider used to create this cluster.",
 				Required:            true,
