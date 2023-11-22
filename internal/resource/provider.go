@@ -41,9 +41,7 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Internal identifier of this provider.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"editable": schema.BoolAttribute{
 				MarkdownDescription: "Whether this provider is editable.",
@@ -52,15 +50,18 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 			"name": schema.StringAttribute{
 				MarkdownDescription: "Human-readable name of this provider. Globally unique.",
 				Required:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"namespace": schema.StringAttribute{
 				MarkdownDescription: "The namespace the Cluster API resources are deployed into.",
 				Optional:            true,
 				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"cloud": schema.StringAttribute{
 				MarkdownDescription: "The name of the cloud service for this provider.",
 				Required:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Validators: []validator.String{stringvalidator.OneOfCaseInsensitive(
 					model.CloudAWS.String(), model.CloudAzure.String(), model.CloudGCP.String())},
 			},
