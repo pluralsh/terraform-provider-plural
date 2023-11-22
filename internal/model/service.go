@@ -1,7 +1,8 @@
 package model
 
 import (
-	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	gqlclient "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/polly/algorithms"
@@ -22,6 +23,15 @@ type ServiceDeployment struct {
 	Repository    *ServiceDeploymentRepository      `tfsdk:"repository"`
 	Bindings      *ServiceDeploymentBindings        `tfsdk:"bindings"`
 	SyncConfig    *ServiceDeploymentSyncConfig      `tfsdk:"sync_config"`
+}
+
+func (this *ServiceDeployment) VersionString() *string {
+	result := this.Version.ValueStringPointer()
+	if result != nil && len(*result) == 0 {
+		result = nil
+	}
+
+	return result
 }
 
 func (this *ServiceDeployment) FromCreate(response *gqlclient.ServiceDeploymentFragment) {
@@ -53,7 +63,7 @@ func (this *ServiceDeployment) Attributes() gqlclient.ServiceDeploymentAttribute
 	return gqlclient.ServiceDeploymentAttributes{
 		Name:          this.Name.ValueString(),
 		Namespace:     this.Namespace.ValueString(),
-		Version:       this.Version.ValueStringPointer(),
+		Version:       this.VersionString(),
 		DocsPath:      this.DocsPath.ValueStringPointer(),
 		SyncConfig:    this.SyncConfig.Attributes(),
 		Protect:       this.Protect.ValueBoolPointer(),
@@ -244,13 +254,16 @@ func (this *ServiceDeploymentDiffNormalizer) Attributes() *gqlclient.DiffNormali
 		return nil
 	}
 
+	jsonPatches := make([]types.String, len(this.JsonPatches.Elements()))
+	this.JsonPatches.ElementsAs(context.Background(), &jsonPatches, false)
+
 	return &gqlclient.DiffNormalizerAttributes{
 		Group:     this.Group.ValueString(),
 		Kind:      this.Kind.ValueString(),
 		Name:      this.Name.ValueString(),
 		Namespace: this.Namespace.ValueString(),
-		JSONPatches: algorithms.Map(this.JsonPatches.Elements(), func(v attr.Value) string {
-			return v.String()
+		JSONPatches: algorithms.Map(jsonPatches, func(v types.String) string {
+			return v.ValueString()
 		}),
 	}
 }
@@ -265,16 +278,22 @@ func (this *ServiceDeploymentNamespaceMetadata) Attributes() *gqlclient.Metadata
 		return nil
 	}
 
+	annotations := make(map[string]types.String, len(this.Annotations.Elements()))
+	labels := make(map[string]types.String, len(this.Labels.Elements()))
+
+	this.Annotations.ElementsAs(context.Background(), &annotations, false)
+	this.Labels.ElementsAs(context.Background(), &labels, false)
+
 	return &gqlclient.MetadataAttributes{
-		Annotations: this.toAttributesMap(this.Annotations.Elements()),
-		Labels:      this.toAttributesMap(this.Labels.Elements()),
+		Annotations: this.toAttributesMap(annotations),
+		Labels:      this.toAttributesMap(labels),
 	}
 }
 
-func (this *ServiceDeploymentNamespaceMetadata) toAttributesMap(m map[string]attr.Value) map[string]interface{} {
+func (this *ServiceDeploymentNamespaceMetadata) toAttributesMap(m map[string]types.String) map[string]interface{} {
 	result := map[string]interface{}{}
 	for key, val := range m {
-		result[key] = val.String()
+		result[key] = val.ValueString()
 	}
 
 	return result

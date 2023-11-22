@@ -20,8 +20,7 @@ ServiceDeployment resource
 - `cluster` (Attributes) Unique cluster id/handle to deploy this ServiceDeployment (see [below for nested schema](#nestedatt--cluster))
 - `name` (String) Human-readable name of this ServiceDeployment.
 - `namespace` (String) Namespace to deploy this ServiceDeployment.
-- `repository` (Object) Repository information used to pull ServiceDeployment. (see [below for nested schema](#nestedatt--repository))
-- `sync_config` (Attributes) Repository information used to pull ServiceDeployment. (see [below for nested schema](#nestedatt--sync_config))
+- `repository` (Attributes) Repository information used to pull ServiceDeployment. (see [below for nested schema](#nestedatt--repository))
 
 ### Optional
 
@@ -30,6 +29,7 @@ ServiceDeployment resource
 - `docs_path` (String) Path to the documentation in the target git repository.
 - `kustomize` (Attributes) Kustomize related service metadata. (see [below for nested schema](#nestedatt--kustomize))
 - `protect` (Boolean) If true, deletion of this service is not allowed.
+- `sync_config` (Attributes) Settings for advanced tuning of the sync process. (see [below for nested schema](#nestedatt--sync_config))
 - `version` (String) Semver version of this service ServiceDeployment.
 
 ### Read-Only
@@ -53,6 +53,52 @@ Required:
 - `folder` (String)
 - `id` (String)
 - `ref` (String)
+
+
+<a id="nestedatt--bindings"></a>
+### Nested Schema for `bindings`
+
+Optional:
+
+- `read` (Attributes List) Read policies of this ServiceDeployment. (see [below for nested schema](#nestedatt--bindings--read))
+- `write` (Attributes List) Write policies of this ServiceDeployment. (see [below for nested schema](#nestedatt--bindings--write))
+
+<a id="nestedatt--bindings--read"></a>
+### Nested Schema for `bindings.read`
+
+Optional:
+
+- `group_id` (String)
+- `id` (String)
+- `user_id` (String)
+
+
+<a id="nestedatt--bindings--write"></a>
+### Nested Schema for `bindings.write`
+
+Optional:
+
+- `group_id` (String)
+- `id` (String)
+- `user_id` (String)
+
+
+
+<a id="nestedatt--configuration"></a>
+### Nested Schema for `configuration`
+
+Required:
+
+- `name` (String)
+- `value` (String, Sensitive)
+
+
+<a id="nestedatt--kustomize"></a>
+### Nested Schema for `kustomize`
+
+Required:
+
+- `path` (String) Path to the kustomize file in the target git repository.
 
 
 <a id="nestedatt--sync_config"></a>
@@ -102,50 +148,3 @@ Optional:
 
 - `annotations` (Map of String)
 - `labels` (Map of String)
-
-
-
-<a id="nestedatt--bindings"></a>
-### Nested Schema for `bindings`
-
-Optional:
-
-- `read` (Attributes List) Read policies of this ServiceDeployment. (see [below for nested schema](#nestedatt--bindings--read))
-- `write` (Attributes List) Write policies of this ServiceDeployment. (see [below for nested schema](#nestedatt--bindings--write))
-
-<a id="nestedatt--bindings--read"></a>
-### Nested Schema for `bindings.read`
-
-Optional:
-
-- `group_id` (String)
-- `id` (String)
-- `user_id` (String)
-
-
-<a id="nestedatt--bindings--write"></a>
-### Nested Schema for `bindings.write`
-
-Optional:
-
-- `group_id` (String)
-- `id` (String)
-- `user_id` (String)
-
-
-
-<a id="nestedatt--configuration"></a>
-### Nested Schema for `configuration`
-
-Required:
-
-- `name` (String)
-- `value` (String, Sensitive)
-
-
-<a id="nestedatt--kustomize"></a>
-### Nested Schema for `kustomize`
-
-Required:
-
-- `path` (String) Path to the kustomize file in the target git repository.
