@@ -56,6 +56,7 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 			"namespace": schema.StringAttribute{
 				MarkdownDescription: "The namespace the Cluster API resources are deployed into.",
 				Optional:            true,
+				Computed:            true,
 			},
 			"cloud": schema.StringAttribute{
 				MarkdownDescription: "The name of the cloud service for this provider.",

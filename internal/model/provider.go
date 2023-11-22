@@ -16,9 +16,9 @@ type Provider struct {
 }
 
 type ProviderCloudSettings struct {
-	AWS   ProviderCloudSettingsAWS   `tfsdk:"aws"`
-	Azure ProviderCloudSettingsAzure `tfsdk:"azure"`
-	GCP   ProviderCloudSettingsGCP   `tfsdk:"gcp"`
+	AWS   *ProviderCloudSettingsAWS   `tfsdk:"aws"`
+	Azure *ProviderCloudSettingsAzure `tfsdk:"azure"`
+	GCP   *ProviderCloudSettingsGCP   `tfsdk:"gcp"`
 }
 
 type ProviderCloudSettingsAWS struct {
