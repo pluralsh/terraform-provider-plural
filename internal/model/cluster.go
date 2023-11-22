@@ -70,11 +70,46 @@ type KubeconfigExec struct {
 	APIVersion types.String `tfsdk:"api_version"`
 }
 
+func (c *Cluster) CloudSettingsAttributes() *console.CloudSettingsAttributes {
+	if IsCloud(c.Cloud.ValueString(), CloudAWS) {
+		return &console.CloudSettingsAttributes{
+			Aws: &console.AwsCloudAttributes{
+				Region: c.CloudSettings.AWS.Region.ValueStringPointer(),
+			},
+		}
+	}
+
+	if IsCloud(c.Cloud.ValueString(), CloudAzure) {
+		return &console.CloudSettingsAttributes{
+			Azure: &console.AzureCloudAttributes{
+				Location:       c.CloudSettings.Azure.Location.ValueStringPointer(),
+				SubscriptionID: c.CloudSettings.Azure.SubscriptionId.ValueStringPointer(),
+				ResourceGroup:  c.CloudSettings.Azure.ResourceGroup.ValueStringPointer(),
+				Network:        c.CloudSettings.Azure.Network.ValueStringPointer(),
+			},
+		}
+	}
+
+	if IsCloud(c.Cloud.ValueString(), CloudGCP) {
+		return &console.CloudSettingsAttributes{
+			Gcp: &console.GcpCloudAttributes{
+				Project: c.CloudSettings.GCP.Project.ValueStringPointer(),
+				Network: c.CloudSettings.GCP.Network.ValueStringPointer(),
+				Region:  c.CloudSettings.GCP.Region.ValueStringPointer(),
+			},
+		}
+	}
+
+	return nil
+}
+
 func (c *Cluster) CreateAttributes() console.ClusterAttributes {
 	return console.ClusterAttributes{
-		Name:    c.Name.ValueString(),
-		Handle:  c.Handle.ValueStringPointer(),
-		Protect: c.Protect.ValueBoolPointer(),
+		Name:          c.Name.ValueString(),
+		Handle:        c.Handle.ValueStringPointer(),
+		Protect:       c.Protect.ValueBoolPointer(),
+		Tags:          []*console.TagAttributes{}, // TODO
+		CloudSettings: c.CloudSettingsAttributes(),
 	}
 }
 
