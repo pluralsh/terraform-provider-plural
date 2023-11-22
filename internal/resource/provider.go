@@ -7,6 +7,7 @@ import (
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -41,25 +42,33 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Internal identifier of this provider.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			},
+			"editable": schema.BoolAttribute{
+				MarkdownDescription: "Whether this provider is editable.",
+				Computed:            true,
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: "Human-readable name of this provider. Globally unique.",
 				Required:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"namespace": schema.StringAttribute{
 				MarkdownDescription: "The namespace the Cluster API resources are deployed into.",
-				Required:            true,
+				Optional:            true,
+				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplaceIfConfigured()},
 			},
 			"cloud": schema.StringAttribute{
 				MarkdownDescription: "The name of the cloud service for this provider.",
 				Required:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Validators: []validator.String{stringvalidator.OneOfCaseInsensitive(
 					model.CloudAWS.String(), model.CloudAzure.String(), model.CloudGCP.String())},
 			},
 			"cloud_settings": schema.SingleNestedAttribute{
+				MarkdownDescription: "Cloud-specific settings for a provider.",
+				Required:            true,
 				Attributes: map[string]schema.Attribute{
 					"aws": schema.SingleNestedAttribute{
 						Optional: true,
@@ -74,6 +83,12 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 								Required:            true,
 								Sensitive:           true,
 							},
+						},
+						Validators: []validator.Object{
+							objectvalidator.ExactlyOneOf(
+								path.MatchRelative().AtParent().AtName("azure"),
+								path.MatchRelative().AtParent().AtName("gcp"),
+							),
 						},
 					},
 					"azure": schema.SingleNestedAttribute{
@@ -101,6 +116,12 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 								Sensitive:           true,
 							},
 						},
+						Validators: []validator.Object{
+							objectvalidator.ExactlyOneOf(
+								path.MatchRelative().AtParent().AtName("aws"),
+								path.MatchRelative().AtParent().AtName("gcp"),
+							),
+						},
 					},
 					"gcp": schema.SingleNestedAttribute{
 						Optional: true,
@@ -111,10 +132,14 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 								Sensitive:           true,
 							},
 						},
+						Validators: []validator.Object{
+							objectvalidator.ExactlyOneOf(
+								path.MatchRelative().AtParent().AtName("aws"),
+								path.MatchRelative().AtParent().AtName("azure"),
+							),
+						},
 					},
 				},
-				MarkdownDescription: "Cloud-specific settings for a provider.",
-				Required:            true,
 			},
 		},
 	}
@@ -145,7 +170,7 @@ func (r *providerResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	result, err := r.client.CreateClusterProvider(ctx, data.Attributes())
+	result, err := r.client.CreateClusterProvider(ctx, data.CreateAttributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create provider, got error: %s", err))
 		return

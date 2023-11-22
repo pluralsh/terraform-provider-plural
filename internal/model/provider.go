@@ -9,15 +9,16 @@ import (
 type Provider struct {
 	Id            types.String          `tfsdk:"id"`
 	Name          types.String          `tfsdk:"name"`
-	Namespace     types.String          `tfsdk:"name"`
+	Namespace     types.String          `tfsdk:"namespace"`
+	Editable      types.Bool            `tfsdk:"editable"`
 	Cloud         types.String          `tfsdk:"cloud"`
 	CloudSettings ProviderCloudSettings `tfsdk:"cloud_settings"`
 }
 
 type ProviderCloudSettings struct {
-	AWS   ProviderCloudSettingsAWS   `tfsdk:"aws"`
-	Azure ProviderCloudSettingsAzure `tfsdk:"azure"`
-	GCP   ProviderCloudSettingsGCP   `tfsdk:"gcp"`
+	AWS   *ProviderCloudSettingsAWS   `tfsdk:"aws"`
+	Azure *ProviderCloudSettingsAzure `tfsdk:"azure"`
+	GCP   *ProviderCloudSettingsGCP   `tfsdk:"gcp"`
 }
 
 type ProviderCloudSettingsAWS struct {
@@ -68,7 +69,7 @@ func (p *Provider) CloudProviderSettingsAttributes() *console.CloudProviderSetti
 	return nil
 }
 
-func (p *Provider) Attributes() console.ClusterProviderAttributes {
+func (p *Provider) CreateAttributes() console.ClusterProviderAttributes {
 	return console.ClusterProviderAttributes{
 		Name:          p.Name.ValueString(),
 		Namespace:     p.Namespace.ValueStringPointer(),
@@ -87,5 +88,6 @@ func (p *Provider) From(cp *console.ClusterProviderFragment) {
 	p.Id = types.StringValue(cp.ID)
 	p.Name = types.StringValue(cp.Name)
 	p.Namespace = types.StringValue(cp.Namespace)
+	p.Editable = types.BoolPointerValue(cp.Editable)
 	p.Cloud = types.StringValue(cp.Cloud)
 }
