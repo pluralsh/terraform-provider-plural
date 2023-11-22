@@ -17,7 +17,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	console "github.com/pluralsh/console-client-go"
 )
 
 var _ resource.Resource = &clusterResource{}
@@ -118,13 +117,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	attrs := console.ClusterAttributes{
-		Name:    data.Name.ValueString(),
-		Handle:  data.Handle.ValueStringPointer(),
-		Protect: data.Protect.ValueBoolPointer(),
-	}
-
-	result, err := r.client.CreateCluster(ctx, attrs)
+	result, err := r.client.CreateCluster(ctx, data.Attributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create cluster, got error: %s", err))
 		return
@@ -175,12 +168,7 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	data.Id = types.StringValue(result.Cluster.ID)
-	data.InseredAt = types.StringPointerValue(result.Cluster.InsertedAt)
-	data.Name = types.StringValue(result.Cluster.Name)
-	data.Handle = types.StringPointerValue(result.Cluster.Handle)
-	data.Protect = types.BoolPointerValue(result.Cluster.Protect)
-
+	data.From(result.Cluster)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -191,19 +179,11 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	attrs := console.ClusterUpdateAttributes{
-		Handle:  data.Handle.ValueStringPointer(),
-		Protect: data.Protect.ValueBoolPointer(),
-	}
-
-	result, err := r.client.UpdateCluster(ctx, data.Id.ValueString(), attrs)
+	_, err := r.client.UpdateCluster(ctx, data.Id.ValueString(), data.UpdateAttributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update cluster, got error: %s", err))
 		return
 	}
-
-	data.Handle = types.StringPointerValue(result.UpdateCluster.Handle)
-	data.Protect = types.BoolPointerValue(result.UpdateCluster.Protect)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

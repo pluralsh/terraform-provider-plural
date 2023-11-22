@@ -1,6 +1,9 @@
 package model
 
-import "github.com/hashicorp/terraform-plugin-framework/types"
+import (
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	console "github.com/pluralsh/console-client-go"
+)
 
 // Cluster describes the cluster resource and data source model.
 type Cluster struct {
@@ -65,4 +68,27 @@ type KubeconfigExec struct {
 	Args       types.String `tfsdk:"args"`
 	Env        types.String `tfsdk:"env"`
 	APIVersion types.String `tfsdk:"api_version"`
+}
+
+func (c *Cluster) Attributes() console.ClusterAttributes {
+	return console.ClusterAttributes{
+		Name:    c.Name.ValueString(),
+		Handle:  c.Handle.ValueStringPointer(),
+		Protect: c.Protect.ValueBoolPointer(),
+	}
+}
+
+func (c *Cluster) UpdateAttributes() console.ClusterUpdateAttributes {
+	return console.ClusterUpdateAttributes{
+		Handle:  c.Handle.ValueStringPointer(),
+		Protect: c.Protect.ValueBoolPointer(),
+	}
+}
+
+func (c *Cluster) From(cl *console.ClusterFragment) {
+	c.Id = types.StringValue(cl.ID)
+	c.InseredAt = types.StringPointerValue(cl.InsertedAt)
+	c.Name = types.StringValue(cl.Name)
+	c.Handle = types.StringPointerValue(cl.Handle)
+	c.Protect = types.BoolPointerValue(cl.Protect)
 }
