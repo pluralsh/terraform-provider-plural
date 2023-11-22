@@ -125,12 +125,6 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 
 	tflog.Trace(ctx, "created a cluster")
 
-	data.Name = types.StringValue(result.CreateCluster.Name)
-	data.Handle = types.StringPointerValue(result.CreateCluster.Handle)
-	data.Id = types.StringValue(result.CreateCluster.ID)
-	data.Protect = types.BoolPointerValue(result.CreateCluster.Protect)
-	data.InseredAt = types.StringPointerValue(result.CreateCluster.InsertedAt)
-
 	if model.IsCloud(data.Cloud.ValueString(), model.CloudBYOK) {
 		if result.CreateCluster.DeployToken == nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to fetch cluster deploy token"))
@@ -152,6 +146,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		tflog.Trace(ctx, "installed the cluster operator")
 	}
 
+	data.FromCreate(result)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 

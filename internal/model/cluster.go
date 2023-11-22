@@ -92,3 +92,11 @@ func (c *Cluster) From(cl *console.ClusterFragment) {
 	c.Handle = types.StringPointerValue(cl.Handle)
 	c.Protect = types.BoolPointerValue(cl.Protect)
 }
+
+func (c *Cluster) FromCreate(cc *console.CreateCluster) {
+	c.Id = types.StringValue(cc.CreateCluster.ID)
+	c.InseredAt = types.StringPointerValue(cc.CreateCluster.InsertedAt)
+	c.Name = types.StringValue(cc.CreateCluster.Name)
+	c.Handle = types.StringPointerValue(cc.CreateCluster.Handle)
+	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
+}
