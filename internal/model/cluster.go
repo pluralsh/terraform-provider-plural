@@ -142,6 +142,15 @@ func (c *Cluster) From(cl *console.ClusterFragment) {
 	c.TagsFrom(cl.Tags)
 }
 
+func (c *Cluster) FromCreate(cc *console.CreateCluster) {
+	c.Id = types.StringValue(cc.CreateCluster.ID)
+	c.InseredAt = types.StringPointerValue(cc.CreateCluster.InsertedAt)
+	c.Name = types.StringValue(cc.CreateCluster.Name)
+	c.Handle = types.StringPointerValue(cc.CreateCluster.Handle)
+	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
+	c.TagsFrom(cc.CreateCluster.Tags)
+}
+
 func (c *Cluster) TagsFrom(tags []*console.ClusterTags) {
 	elements := map[string]attr.Value{}
 	for _, v := range tags {
@@ -150,12 +159,4 @@ func (c *Cluster) TagsFrom(tags []*console.ClusterTags) {
 
 	tagsValue, _ := types.MapValue(types.StringType, elements) // TODO: Skipped diagnostics.
 	c.Tags = tagsValue
-}
-
-func (c *Cluster) FromCreate(cc *console.CreateCluster) {
-	c.Id = types.StringValue(cc.CreateCluster.ID)
-	c.InseredAt = types.StringPointerValue(cc.CreateCluster.InsertedAt)
-	c.Name = types.StringValue(cc.CreateCluster.Name)
-	c.Handle = types.StringPointerValue(cc.CreateCluster.Handle)
-	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
 }
