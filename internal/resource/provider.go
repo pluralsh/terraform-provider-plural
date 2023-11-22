@@ -7,6 +7,7 @@ import (
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -66,6 +67,8 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 					model.CloudAWS.String(), model.CloudAzure.String(), model.CloudGCP.String())},
 			},
 			"cloud_settings": schema.SingleNestedAttribute{
+				MarkdownDescription: "Cloud-specific settings for a provider.",
+				Required:            true,
 				Attributes: map[string]schema.Attribute{
 					"aws": schema.SingleNestedAttribute{
 						Optional: true,
@@ -80,6 +83,12 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 								Required:            true,
 								Sensitive:           true,
 							},
+						},
+						Validators: []validator.Object{
+							objectvalidator.ExactlyOneOf(
+								path.MatchRelative().AtParent().AtName("azure"),
+								path.MatchRelative().AtParent().AtName("gcp"),
+							),
 						},
 					},
 					"azure": schema.SingleNestedAttribute{
@@ -107,6 +116,12 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 								Sensitive:           true,
 							},
 						},
+						Validators: []validator.Object{
+							objectvalidator.ExactlyOneOf(
+								path.MatchRelative().AtParent().AtName("aws"),
+								path.MatchRelative().AtParent().AtName("gcp"),
+							),
+						},
 					},
 					"gcp": schema.SingleNestedAttribute{
 						Optional: true,
@@ -117,10 +132,14 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 								Sensitive:           true,
 							},
 						},
+						Validators: []validator.Object{
+							objectvalidator.ExactlyOneOf(
+								path.MatchRelative().AtParent().AtName("aws"),
+								path.MatchRelative().AtParent().AtName("azure"),
+							),
+						},
 					},
 				},
-				MarkdownDescription: "Cloud-specific settings for a provider.",
-				Required:            true,
 			},
 		},
 	}
