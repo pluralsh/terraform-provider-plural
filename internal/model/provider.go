@@ -10,6 +10,7 @@ type Provider struct {
 	Id            types.String          `tfsdk:"id"`
 	Name          types.String          `tfsdk:"name"`
 	Namespace     types.String          `tfsdk:"name"`
+	Editable      types.Bool            `tfsdk:"editable"`
 	Cloud         types.String          `tfsdk:"cloud"`
 	CloudSettings ProviderCloudSettings `tfsdk:"cloud_settings"`
 }
@@ -87,5 +88,6 @@ func (p *Provider) From(cp *console.ClusterProviderFragment) {
 	p.Id = types.StringValue(cp.ID)
 	p.Name = types.StringValue(cp.Name)
 	p.Namespace = types.StringValue(cp.Namespace)
+	p.Editable = types.BoolPointerValue(cp.Editable)
 	p.Cloud = types.StringValue(cp.Cloud)
 }

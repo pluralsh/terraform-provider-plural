@@ -45,6 +45,10 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"editable": schema.StringAttribute{
+				MarkdownDescription: "Whether this provider is editable.",
+				Computed:            true,
+			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: "Human-readable name of this provider. Globally unique.",
 				Required:            true,
