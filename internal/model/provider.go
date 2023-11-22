@@ -69,7 +69,7 @@ func (p *Provider) CloudProviderSettingsAttributes() *console.CloudProviderSetti
 	return nil
 }
 
-func (p *Provider) Attributes() console.ClusterProviderAttributes {
+func (p *Provider) CreateAttributes() console.ClusterProviderAttributes {
 	return console.ClusterProviderAttributes{
 		Name:          p.Name.ValueString(),
 		Namespace:     p.Namespace.ValueStringPointer(),

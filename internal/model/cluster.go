@@ -70,7 +70,7 @@ type KubeconfigExec struct {
 	APIVersion types.String `tfsdk:"api_version"`
 }
 
-func (c *Cluster) Attributes() console.ClusterAttributes {
+func (c *Cluster) CreateAttributes() console.ClusterAttributes {
 	return console.ClusterAttributes{
 		Name:    c.Name.ValueString(),
 		Handle:  c.Handle.ValueStringPointer(),

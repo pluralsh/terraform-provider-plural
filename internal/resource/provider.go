@@ -170,7 +170,7 @@ func (r *providerResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	result, err := r.client.CreateClusterProvider(ctx, data.Attributes())
+	result, err := r.client.CreateClusterProvider(ctx, data.CreateAttributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create provider, got error: %s", err))
 		return
