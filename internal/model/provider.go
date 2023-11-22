@@ -9,7 +9,7 @@ import (
 type Provider struct {
 	Id            types.String          `tfsdk:"id"`
 	Name          types.String          `tfsdk:"name"`
-	Namespace     types.String          `tfsdk:"name"`
+	Namespace     types.String          `tfsdk:"namespace"`
 	Editable      types.Bool            `tfsdk:"editable"`
 	Cloud         types.String          `tfsdk:"cloud"`
 	CloudSettings ProviderCloudSettings `tfsdk:"cloud_settings"`
