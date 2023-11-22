@@ -45,7 +45,7 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"editable": schema.StringAttribute{
+			"editable": schema.BoolAttribute{
 				MarkdownDescription: "Whether this provider is editable.",
 				Computed:            true,
 			},
