@@ -19,10 +19,10 @@ type Cluster struct {
 	ProviderId    types.String          `tfsdk:"provider_id"`
 	Cloud         types.String          `tfsdk:"cloud"`
 	CloudSettings *ClusterCloudSettings `tfsdk:"cloud_settings"`
-	// NodePools     []*ClusterNodePool    `tfsdk:"node_pools"` TODO: Uncomment when added to schema.
-	Protect  types.Bool       `tfsdk:"protect"`
-	Tags     types.Map        `tfsdk:"tags"`
-	Bindings *ClusterBindings `tfsdk:"bindings"`
+	NodePools     []*ClusterNodePool    `tfsdk:"node_pools"`
+	Protect       types.Bool            `tfsdk:"protect"`
+	Tags          types.Map             `tfsdk:"tags"`
+	Bindings      *ClusterBindings      `tfsdk:"bindings"`
 }
 
 func (c *Cluster) CloudSettingsAttributes() *console.CloudSettingsAttributes {

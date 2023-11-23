@@ -93,14 +93,88 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			"cloud_settings": schema.SingleNestedAttribute{
 				Description:         "Cloud-specific settings for this cluster.",
 				MarkdownDescription: "Cloud-specific settings for this cluster.",
+				Required:            true,
 				Attributes: map[string]schema.Attribute{
 					"aws":   AWSCloudSettingsSchema(),
 					"azure": AzureCloudSettingsSchema(),
 					"gcp":   GCPCloudSettingsSchema(),
 					"byok":  BYOKCloudSettingsSchema(),
 				},
-				Required:      true,
 				PlanModifiers: []planmodifier.Object{objectplanmodifier.RequiresReplace()},
+			},
+			"node_pools": schema.ListNestedAttribute{
+				Description:         "",
+				MarkdownDescription: "",
+				Optional:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description:         "",
+							MarkdownDescription: "",
+							Required:            true,
+						},
+						"min_size": schema.Int64Attribute{
+							Description:         "",
+							MarkdownDescription: "",
+							Required:            true,
+						},
+						"max_size": schema.Int64Attribute{
+							Description:         "",
+							MarkdownDescription: "",
+							Required:            true,
+						},
+						"instance_type": schema.StringAttribute{
+							Description:         "",
+							MarkdownDescription: "",
+							Required:            true,
+						},
+						"labels": schema.MapAttribute{
+							ElementType: types.StringType,
+							Optional:    true,
+						},
+						"taints": schema.ListNestedAttribute{
+							Description:         "",
+							MarkdownDescription: "",
+							Optional:            true,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+									"key": schema.MapAttribute{
+										ElementType: types.StringType,
+										Required:    true,
+									},
+									"value": schema.MapAttribute{
+										ElementType: types.StringType,
+										Required:    true,
+									},
+									"effect": schema.MapAttribute{
+										ElementType: types.StringType,
+										Required:    true,
+									},
+								},
+							},
+						},
+						"cloud_settings": schema.SingleNestedAttribute{
+							Description:         "Cloud-specific settings for this node pool.",
+							MarkdownDescription: "Cloud-specific settings for this node pool.",
+							Optional:            true,
+							Attributes: map[string]schema.Attribute{
+								"aws": schema.SingleNestedAttribute{
+									Description:         "",
+									MarkdownDescription: "",
+									Optional:            true,
+									Attributes: map[string]schema.Attribute{
+										"launch_template_id": schema.StringAttribute{
+											Description:         "",
+											MarkdownDescription: "",
+											Optional:            true,
+										},
+									},
+								},
+							},
+							PlanModifiers: []planmodifier.Object{objectplanmodifier.RequiresReplace()},
+						},
+					},
+				},
 			},
 			"protect": schema.BoolAttribute{
 				Description:         "If set to `true` then this cluster cannot be deleted.",
