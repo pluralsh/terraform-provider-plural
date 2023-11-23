@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -40,64 +41,133 @@ func (r *clusterResource) Metadata(_ context.Context, req resource.MetadataReque
 
 func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description:         "A representation of a cluster you can deploy to.",
 		MarkdownDescription: "A representation of a cluster you can deploy to.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Computed:            true,
+				Description:         "Internal identifier of this cluster.",
 				MarkdownDescription: "Internal identifier of this cluster.",
+				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"inserted_at": schema.StringAttribute{
+				Description:         "Creation date of this cluster.",
 				MarkdownDescription: "Creation date of this cluster.",
 				Computed:            true,
 			},
 			"name": schema.StringAttribute{
+				Description:         "Human-readable name of this cluster, that also translates to cloud resource name.",
 				MarkdownDescription: "Human-readable name of this cluster, that also translates to cloud resource name.",
 				Required:            true,
 			},
 			"handle": schema.StringAttribute{
+				Description:         "A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.",
 				MarkdownDescription: "A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.",
 				Optional:            true,
 				Computed:            true,
 			},
 			"version": schema.StringAttribute{
+				Description:         "",
 				MarkdownDescription: "",
 				Optional:            true,
 				Computed:            true,
 			},
 			"provider_id": schema.StringAttribute{
+				Description:         "",
 				MarkdownDescription: "",
 				Optional:            true,
 				Computed:            true,
 			},
 			"cloud": schema.StringAttribute{
+				Description:         "The cloud provider used to create this cluster.",
 				MarkdownDescription: "The cloud provider used to create this cluster.",
 				Required:            true,
 				Validators: []validator.String{stringvalidator.OneOfCaseInsensitive(
 					model.CloudBYOK.String(), model.CloudAWS.String(), model.CloudAzure.String(), model.CloudGCP.String())},
 			},
 			"cloud_settings": schema.SingleNestedAttribute{
+				Description:         "Cloud-specific settings for this cluster.",
+				MarkdownDescription: "Cloud-specific settings for this cluster.",
 				Attributes: map[string]schema.Attribute{
 					"aws":   AWSCloudSettingsSchema(),
 					"azure": AzureCloudSettingsSchema(),
 					"gcp":   GCPCloudSettingsSchema(),
 					"byok":  BYOKCloudSettingsSchema(),
 				},
-				MarkdownDescription: "Cloud-specific settings for this cluster.",
-				Required:            true,
+				Required: true,
 			},
 			"protect": schema.BoolAttribute{
+				Description:         "If set to `true` then this cluster cannot be deleted.",
 				MarkdownDescription: "If set to `true` then this cluster cannot be deleted.",
 				Optional:            true,
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
 			},
 			"tags": schema.MapAttribute{
+				Description:         "Key-value tags used to filter clusters.",
 				MarkdownDescription: "Key-value tags used to filter clusters.",
 				Optional:            true,
 				ElementType:         types.StringType,
+			},
+			"bindings": schema.SingleNestedAttribute{
+				Description:         "Read and write policies of this cluster.",
+				MarkdownDescription: "Read and write policies of this cluster.",
+				Optional:            true,
+				Attributes: map[string]schema.Attribute{
+					"read": schema.ListNestedAttribute{
+						Optional:            true,
+						Description:         "Read policies of this cluster.",
+						MarkdownDescription: "Read policies of this cluster.",
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"group_id": schema.StringAttribute{
+									Description:         "",
+									MarkdownDescription: "",
+									Optional:            true,
+								},
+								"id": schema.StringAttribute{
+									Description:         "",
+									MarkdownDescription: "",
+									Optional:            true,
+								},
+								"user_id": schema.StringAttribute{
+									Description:         "",
+									MarkdownDescription: "",
+									Optional:            true,
+								},
+							},
+						},
+					},
+					"write": schema.ListNestedAttribute{
+						Optional:            true,
+						Description:         "Write policies of this cluster.",
+						MarkdownDescription: "Write policies of this cluster.",
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"group_id": schema.StringAttribute{
+									Description:         "",
+									MarkdownDescription: "",
+									Optional:            true,
+								},
+								"id": schema.StringAttribute{
+									Description:         "",
+									MarkdownDescription: "",
+									Optional:            true,
+								},
+								"user_id": schema.StringAttribute{
+									Description:         "",
+									MarkdownDescription: "",
+									Optional:            true,
+								},
+							},
+						},
+					},
+				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.RequiresReplace(),
+				},
 			},
 		},
 	}
@@ -128,7 +198,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	result, err := r.client.CreateCluster(ctx, data.CreateAttributes(resp.Diagnostics))
+	result, err := r.client.CreateCluster(ctx, data.CreateAttributes(ctx, resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create cluster, got error: %s", err))
 		return
