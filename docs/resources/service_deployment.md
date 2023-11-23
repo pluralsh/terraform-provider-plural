@@ -3,12 +3,12 @@
 page_title: "plural_service_deployment Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  ServiceDeployment resource
+  
 ---
 
 # plural_service_deployment (Resource)
 
-ServiceDeployment resource
+
 
 
 

@@ -17,7 +17,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -128,13 +127,11 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	result, err := r.client.CreateCluster(ctx, data.CreateAttributes())
+	result, err := r.client.CreateCluster(ctx, data.CreateAttributes(resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create cluster, got error: %s", err))
 		return
 	}
-
-	tflog.Trace(ctx, "created a cluster")
 
 	if model.IsCloud(data.Cloud.ValueString(), model.CloudBYOK) {
 		if result.CreateCluster.DeployToken == nil {
@@ -153,11 +150,9 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
 			return
 		}
-
-		tflog.Trace(ctx, "installed the cluster operator")
 	}
 
-	data.FromCreate(result)
+	data.FromCreate(result, resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -174,7 +169,7 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	data.From(result.Cluster)
+	data.From(result.Cluster, resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 

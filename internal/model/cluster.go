@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	console "github.com/pluralsh/console-client-go"
 )
@@ -75,6 +76,24 @@ type KubeconfigExec struct {
 	APIVersion types.String `tfsdk:"api_version"`
 }
 
+type NodePoolAttributes struct {
+	Name          types.String          `tfsdk:"name"`
+	MinSize       types.Int64           `tfsdk:"min_size"`
+	MaxSize       types.Int64           `tfsdk:"max_size"`
+	InstanceType  types.String          `tfsdk:"instance_type"`
+	Labels        types.Map             `tfsdk:"labels"`
+	Taints        types.List            `tfsdk:"taints"`
+	CloudSettings NodePoolCloudSettings `tfsdk:"cloud_settings"`
+}
+
+type NodePoolCloudSettings struct {
+	AWS *NodePoolCloudSettingsAWS `tfsdk:"aws"`
+}
+
+type NodePoolCloudSettingsAWS struct {
+	LaunchTemplateId types.String `tfsdk:"launch_template_id"`
+}
+
 func (c *Cluster) CloudSettingsAttributes() *console.CloudSettingsAttributes {
 	if IsCloud(c.Cloud.ValueString(), CloudAWS) {
 		return &console.CloudSettingsAttributes{
@@ -108,9 +127,9 @@ func (c *Cluster) CloudSettingsAttributes() *console.CloudSettingsAttributes {
 	return nil
 }
 
-func (c *Cluster) TagsAttribute() (result []*console.TagAttributes) {
+func (c *Cluster) TagsAttribute(d diag.Diagnostics) (result []*console.TagAttributes) {
 	elements := make(map[string]types.String, len(c.Tags.Elements()))
-	_ = c.Tags.ElementsAs(context.TODO(), &elements, false) // TODO: Context and skipped diagnostics.
+	d.Append(c.Tags.ElementsAs(context.TODO(), &elements, false)...)
 	for k, v := range elements {
 		result = append(result, &console.TagAttributes{Name: k, Value: v.ValueString()})
 	}
@@ -118,14 +137,14 @@ func (c *Cluster) TagsAttribute() (result []*console.TagAttributes) {
 	return
 }
 
-func (c *Cluster) CreateAttributes() console.ClusterAttributes {
+func (c *Cluster) CreateAttributes(d diag.Diagnostics) console.ClusterAttributes {
 	return console.ClusterAttributes{
 		Name:          c.Name.ValueString(),
 		Handle:        c.Handle.ValueStringPointer(),
 		Version:       c.Version.ValueStringPointer(),
 		ProviderID:    c.ProviderId.ValueStringPointer(),
 		CloudSettings: c.CloudSettingsAttributes(),
-		Tags:          c.TagsAttribute(),
+		Tags:          c.TagsAttribute(d),
 		Protect:       c.Protect.ValueBoolPointer(),
 	}
 }
@@ -138,17 +157,18 @@ func (c *Cluster) UpdateAttributes() console.ClusterUpdateAttributes {
 	}
 }
 
-func (c *Cluster) TagsFrom(tags []*console.ClusterTags) {
+func (c *Cluster) TagsFrom(tags []*console.ClusterTags, d diag.Diagnostics) {
 	elements := map[string]attr.Value{}
 	for _, v := range tags {
 		elements[v.Name] = types.StringValue(v.Value)
 	}
 
-	tagsValue, _ := types.MapValue(types.StringType, elements) // TODO: Skipped diagnostics.
+	tagsValue, tagsDiagnostics := types.MapValue(types.StringType, elements)
 	c.Tags = tagsValue
+	d.Append(tagsDiagnostics...)
 }
 
-func (c *Cluster) From(cl *console.ClusterFragment) {
+func (c *Cluster) From(cl *console.ClusterFragment, d diag.Diagnostics) {
 	c.Id = types.StringValue(cl.ID)
 	c.InseredAt = types.StringPointerValue(cl.InsertedAt)
 	c.Name = types.StringValue(cl.Name)
@@ -156,10 +176,10 @@ func (c *Cluster) From(cl *console.ClusterFragment) {
 	c.Version = types.StringPointerValue(cl.Version)
 	c.ProviderId = types.StringValue(cl.Provider.ID)
 	c.Protect = types.BoolPointerValue(cl.Protect)
-	c.TagsFrom(cl.Tags)
+	c.TagsFrom(cl.Tags, d)
 }
 
-func (c *Cluster) FromCreate(cc *console.CreateCluster) {
+func (c *Cluster) FromCreate(cc *console.CreateCluster, d diag.Diagnostics) {
 	c.Id = types.StringValue(cc.CreateCluster.ID)
 	c.InseredAt = types.StringPointerValue(cc.CreateCluster.InsertedAt)
 	c.Name = types.StringValue(cc.CreateCluster.Name)
@@ -167,5 +187,5 @@ func (c *Cluster) FromCreate(cc *console.CreateCluster) {
 	c.Version = types.StringPointerValue(cc.CreateCluster.Version)
 	c.ProviderId = types.StringValue(cc.CreateCluster.Provider.ID)
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
-	c.TagsFrom(cc.CreateCluster.Tags)
+	c.TagsFrom(cc.CreateCluster.Tags, d)
 }
