@@ -3,13 +3,14 @@ module terraform-provider-plural
 go 1.21
 
 require (
+	github.com/Yamashou/gqlgenc v0.14.0
 	github.com/golangci/golangci-lint v1.55.2
 	github.com/hashicorp/terraform-plugin-docs v0.16.0
 	github.com/hashicorp/terraform-plugin-framework v1.4.2
 	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/pluralsh/console-client-go v0.0.42
+	github.com/pluralsh/console-client-go v0.0.43
 	github.com/pluralsh/plural-cli v0.8.1-0.20231114161007-183eafb99b03
 	github.com/pluralsh/polly v0.1.4
 	github.com/samber/lo v1.38.1
@@ -41,7 +42,6 @@ require (
 	github.com/Microsoft/go-winio v0.6.0 // indirect
 	github.com/OpenPeeDeeP/depguard/v2 v2.1.0 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8 // indirect
-	github.com/Yamashou/gqlgenc v0.14.0 // indirect
 	github.com/acomagu/bufpipe v1.0.4 // indirect
 	github.com/alecthomas/go-check-sumtype v0.1.3 // indirect
 	github.com/alexkohler/nakedret/v2 v2.0.2 // indirect
