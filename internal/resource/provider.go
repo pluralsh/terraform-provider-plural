@@ -3,6 +3,7 @@ package resource
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
@@ -16,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 var _ resource.Resource = &providerResource{}
@@ -41,25 +43,30 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
+				Description:         "Internal identifier of this provider.",
 				MarkdownDescription: "Internal identifier of this provider.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"editable": schema.BoolAttribute{
+				Description:         "Whether this provider is editable.",
 				MarkdownDescription: "Whether this provider is editable.",
 				Computed:            true,
 			},
 			"name": schema.StringAttribute{
+				Description:         "Human-readable name of this provider. Globally unique.",
 				MarkdownDescription: "Human-readable name of this provider. Globally unique.",
 				Required:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"namespace": schema.StringAttribute{
+				Description:         "The namespace the Cluster API resources are deployed into.",
 				MarkdownDescription: "The namespace the Cluster API resources are deployed into.",
 				Optional:            true,
 				Computed:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplaceIfConfigured()},
 			},
 			"cloud": schema.StringAttribute{
+				Description:         "The name of the cloud service for this provider.",
 				MarkdownDescription: "The name of the cloud service for this provider.",
 				Required:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
@@ -67,6 +74,7 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 					model.CloudAWS.String(), model.CloudAzure.String(), model.CloudGCP.String())},
 			},
 			"cloud_settings": schema.SingleNestedAttribute{
+				Description:         "Cloud-specific settings for a provider.",
 				MarkdownDescription: "Cloud-specific settings for a provider.",
 				Required:            true,
 				Attributes: map[string]schema.Attribute{
@@ -74,11 +82,13 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 						Optional: true,
 						Attributes: map[string]schema.Attribute{
 							"access_key_id": schema.StringAttribute{
+								Description:         "",
 								MarkdownDescription: "",
 								Required:            true,
 								Sensitive:           true,
 							},
 							"secret_access_key": schema.StringAttribute{
+								Description:         "",
 								MarkdownDescription: "",
 								Required:            true,
 								Sensitive:           true,
@@ -92,6 +102,7 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 						},
 					},
 					"azure": schema.SingleNestedAttribute{
+						Description:         "Azure cloud settings that will be used by this provider to create clusters.",
 						MarkdownDescription: "Azure cloud settings that will be used by this provider to create clusters.",
 						Optional:            true,
 						Attributes: map[string]schema.Attribute{
@@ -124,7 +135,9 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 						},
 					},
 					"gcp": schema.SingleNestedAttribute{
-						Optional: true,
+						Description:         "",
+						MarkdownDescription: "",
+						Optional:            true,
 						Attributes: map[string]schema.Attribute{
 							"credentials": schema.StringAttribute{
 								MarkdownDescription: "",
@@ -225,6 +238,19 @@ func (r *providerResource) Delete(ctx context.Context, req resource.DeleteReques
 	_, err := r.client.DeleteCluster(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete provider, got error: %s", err))
+		return
+	}
+
+	err = wait.WaitForWithContext(ctx, client.Ticker(5*time.Second), func(ctx context.Context) (bool, error) {
+		_, err := r.client.GetCluster(ctx, data.Id.ValueStringPointer())
+		if client.IsNotFound(err) {
+			return true, nil
+		}
+
+		return false, err
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while watiting for provider to be deleted, got error: %s", err))
 		return
 	}
 
