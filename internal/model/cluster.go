@@ -19,6 +19,7 @@ type Cluster struct {
 	ProviderId    types.String         `tfsdk:"provider_id"`
 	Cloud         types.String         `tfsdk:"cloud"`
 	CloudSettings ClusterCloudSettings `tfsdk:"cloud_settings"`
+	NodePools     types.List           `tfsdk:"node_pools"`
 	Protect       types.Bool           `tfsdk:"protect"`
 	Tags          types.Map            `tfsdk:"tags"`
 }
@@ -157,6 +158,16 @@ func (c *Cluster) UpdateAttributes() console.ClusterUpdateAttributes {
 	}
 }
 
+func (c *Cluster) ProviderFrom(provider *console.ClusterProviderFragment) {
+	if provider != nil {
+		c.ProviderId = types.StringValue(provider.ID)
+	}
+}
+
+func (c *Cluster) NodePoolsFrom(nodepools []*console.NodePoolFragment, d diag.Diagnostics) {
+	// TODO
+}
+
 func (c *Cluster) TagsFrom(tags []*console.ClusterTags, d diag.Diagnostics) {
 	elements := map[string]attr.Value{}
 	for _, v := range tags {
@@ -174,8 +185,9 @@ func (c *Cluster) From(cl *console.ClusterFragment, d diag.Diagnostics) {
 	c.Name = types.StringValue(cl.Name)
 	c.Handle = types.StringPointerValue(cl.Handle)
 	c.Version = types.StringPointerValue(cl.Version)
-	c.ProviderId = types.StringValue(cl.Provider.ID)
 	c.Protect = types.BoolPointerValue(cl.Protect)
+	c.ProviderFrom(cl.Provider)
+	c.NodePoolsFrom(cl.NodePools, d)
 	c.TagsFrom(cl.Tags, d)
 }
 
@@ -185,7 +197,8 @@ func (c *Cluster) FromCreate(cc *console.CreateCluster, d diag.Diagnostics) {
 	c.Name = types.StringValue(cc.CreateCluster.Name)
 	c.Handle = types.StringPointerValue(cc.CreateCluster.Handle)
 	c.Version = types.StringPointerValue(cc.CreateCluster.Version)
-	c.ProviderId = types.StringValue(cc.CreateCluster.Provider.ID)
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
+	c.ProviderFrom(cc.CreateCluster.Provider)
+	c.NodePoolsFrom(cc.CreateCluster.NodePools, d)
 	c.TagsFrom(cc.CreateCluster.Tags, d)
 }
