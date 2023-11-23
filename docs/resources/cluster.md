@@ -20,12 +20,14 @@ A representation of a cluster you can deploy to.
 - `cloud` (String) The cloud provider used to create this cluster.
 - `cloud_settings` (Attributes) Cloud-specific settings for this cluster. (see [below for nested schema](#nestedatt--cloud_settings))
 - `name` (String) Human-readable name of this cluster, that also translates to cloud resource name.
-- `provider_id` (String)
 
 ### Optional
 
+- `bindings` (Attributes) Read and write policies of this cluster. (see [below for nested schema](#nestedatt--bindings))
 - `handle` (String) A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.
+- `node_pools` (Attributes List) (see [below for nested schema](#nestedatt--node_pools))
 - `protect` (Boolean) If set to `true` then this cluster cannot be deleted.
+- `provider_id` (String)
 - `tags` (Map of String) Key-value tags used to filter clusters.
 - `version` (String)
 
@@ -115,3 +117,75 @@ Required:
 - `network` (String)
 - `project` (String)
 - `region` (String)
+
+
+
+<a id="nestedatt--bindings"></a>
+### Nested Schema for `bindings`
+
+Optional:
+
+- `read` (Attributes List) Read policies of this cluster. (see [below for nested schema](#nestedatt--bindings--read))
+- `write` (Attributes List) Write policies of this cluster. (see [below for nested schema](#nestedatt--bindings--write))
+
+<a id="nestedatt--bindings--read"></a>
+### Nested Schema for `bindings.read`
+
+Optional:
+
+- `group_id` (String)
+- `id` (String)
+- `user_id` (String)
+
+
+<a id="nestedatt--bindings--write"></a>
+### Nested Schema for `bindings.write`
+
+Optional:
+
+- `group_id` (String)
+- `id` (String)
+- `user_id` (String)
+
+
+
+<a id="nestedatt--node_pools"></a>
+### Nested Schema for `node_pools`
+
+Required:
+
+- `instance_type` (String)
+- `max_size` (Number)
+- `min_size` (Number)
+- `name` (String)
+
+Optional:
+
+- `cloud_settings` (Attributes) Cloud-specific settings for this node pool. (see [below for nested schema](#nestedatt--node_pools--cloud_settings))
+- `labels` (Map of String)
+- `taints` (Attributes List) (see [below for nested schema](#nestedatt--node_pools--taints))
+
+<a id="nestedatt--node_pools--cloud_settings"></a>
+### Nested Schema for `node_pools.cloud_settings`
+
+Optional:
+
+- `aws` (Attributes) (see [below for nested schema](#nestedatt--node_pools--cloud_settings--aws))
+
+<a id="nestedatt--node_pools--cloud_settings--aws"></a>
+### Nested Schema for `node_pools.cloud_settings.aws`
+
+Optional:
+
+- `launch_template_id` (String)
+
+
+
+<a id="nestedatt--node_pools--taints"></a>
+### Nested Schema for `node_pools.taints`
+
+Required:
+
+- `effect` (Map of String)
+- `key` (Map of String)
+- `value` (Map of String)
