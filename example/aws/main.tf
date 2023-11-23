@@ -26,6 +26,7 @@ resource "plural_cluster" "aws_cluster" {
   name = "workload-cluster-tf"
   handle = "wctf"
   version = "1.23"
+  provider_id = plural_provider.aws_provider.id
   cloud = "aws"
   protect = "false"
   cloud_settings = {
@@ -33,8 +34,13 @@ resource "plural_cluster" "aws_cluster" {
       region = "us-east-1"
     }
   }
+  node_pools = []
   tags = {
     "managed-by" = "terraform-provider-plural"
+  }
+  bindings = {
+    read = []
+    write = []
   }
 }
 
