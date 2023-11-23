@@ -11,10 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
-	consoleClient "github.com/pluralsh/console-client-go"
-	"github.com/samber/lo"
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
@@ -44,16 +40,21 @@ func (r *GitRepositoryResource) Schema(_ context.Context, _ resource.SchemaReque
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
+				Description:         "Internal identifier of this GitRepository.",
 				MarkdownDescription: "Internal identifier of this GitRepository.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"url": schema.StringAttribute{
-				MarkdownDescription: "URL of this repository.",
 				Required:            true,
+				Description:         "URL of this repository.",
+				MarkdownDescription: "URL of this repository.",
 			},
 			"private_key": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				Description:         "SSH private key to use with this repo if an ssh url was given.",
 				MarkdownDescription: "SSH private key to use with this repo if an ssh url was given.",
 				Validators: []validator.String{
 					stringvalidator.ConflictsWith(
@@ -61,10 +62,11 @@ func (r *GitRepositoryResource) Schema(_ context.Context, _ resource.SchemaReque
 					),
 					stringvalidator.AlsoRequires(path.MatchRoot("passphrase")),
 				},
-				Optional:  true,
-				Sensitive: true,
 			},
 			"passphrase": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				Description:         "Passphrase to decrypt the given private key.",
 				MarkdownDescription: "Passphrase to decrypt the given private key.",
 				Validators: []validator.String{
 					stringvalidator.ConflictsWith(
@@ -72,10 +74,10 @@ func (r *GitRepositoryResource) Schema(_ context.Context, _ resource.SchemaReque
 					),
 					stringvalidator.AlsoRequires(path.MatchRoot("private_key")),
 				},
-				Optional:  true,
-				Sensitive: true,
 			},
 			"username": schema.StringAttribute{
+				Optional:            true,
+				Description:         "HTTP username for authenticated http repos, defaults to apiKey for GitHub.",
 				MarkdownDescription: "HTTP username for authenticated http repos, defaults to apiKey for GitHub.",
 				Validators: []validator.String{
 					stringvalidator.ConflictsWith(
@@ -83,9 +85,11 @@ func (r *GitRepositoryResource) Schema(_ context.Context, _ resource.SchemaReque
 					),
 					stringvalidator.AlsoRequires(path.MatchRoot("password")),
 				},
-				Optional: true,
 			},
 			"password": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				Description:         "HTTP password for http authenticated repos.",
 				MarkdownDescription: "HTTP password for http authenticated repos.",
 				Validators: []validator.String{
 					stringvalidator.ConflictsWith(
@@ -93,16 +97,16 @@ func (r *GitRepositoryResource) Schema(_ context.Context, _ resource.SchemaReque
 					),
 					stringvalidator.AlsoRequires(path.MatchRoot("username")),
 				},
-				Optional:  true,
-				Sensitive: true,
 			},
 			"url_format": schema.StringAttribute{
-				MarkdownDescription: "Similar to https_Path, a manually supplied url format for custom git. Should be something like {url}/tree/{ref}/{folder}.",
 				Optional:            true,
+				Description:         "Similar to https_Path, a manually supplied url format for custom git. Should be something like {url}/tree/{ref}/{folder}.",
+				MarkdownDescription: "Similar to https_Path, a manually supplied url format for custom git. Should be something like {url}/tree/{ref}/{folder}.",
 			},
 			"https_path": schema.StringAttribute{
-				MarkdownDescription: "Manually supplied https path for non standard git setups. This is auto-inferred in many cases.",
 				Optional:            true,
+				Description:         "Manually supplied https path for non standard git setups. This is auto-inferred in many cases.",
+				MarkdownDescription: "Manually supplied https path for non standard git setups. This is auto-inferred in many cases.",
 			},
 		},
 	}
@@ -132,86 +136,58 @@ func (r *GitRepositoryResource) Configure(
 }
 
 func (r *GitRepositoryResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data model.GitRepository
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	data := new(model.GitRepository)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	attrs := consoleClient.GitAttributes{
-		URL:        data.Url.ValueString(),
-		PrivateKey: lo.ToPtr(data.PrivateKey.ValueString()),
-		Passphrase: lo.ToPtr(data.Passphrase.ValueString()),
-		Username:   lo.ToPtr(data.Username.ValueString()),
-		Password:   lo.ToPtr(data.Password.ValueString()),
-		HTTPSPath:  lo.ToPtr(data.HttpsPath.ValueString()),
-		URLFormat:  lo.ToPtr(data.UrlFormat.ValueString()),
-	}
-
-	result, err := r.client.CreateGitRepository(ctx, attrs)
+	response, err := r.client.CreateGitRepository(ctx, data.Attributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create GitRepository, got error: %s", err))
 		return
 	}
 
-	// TODO: figure out if we need to read response and update state
-	data.Id = types.StringValue(result.CreateGitRepository.ID)
-
-	tflog.Trace(ctx, "created a GitRepository")
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	data.From(response.CreateGitRepository)
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
 func (r *GitRepositoryResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data model.GitRepository
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	data := new(model.GitRepository)
+	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	result, err := r.client.GetGitRepository(ctx, data.Id.ValueStringPointer(), nil)
+	response, err := r.client.GetGitRepository(ctx, data.Id.ValueStringPointer(), data.Url.ValueStringPointer())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get GitRepository, got error: %s", err))
 		return
 	}
 
-	data.Id = types.StringValue(result.GitRepository.ID)
-	data.Url = types.StringValue(result.GitRepository.URL)
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	data.From(response.GitRepository)
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
 func (r *GitRepositoryResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data model.GitRepository
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	data := new(model.GitRepository)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	attrs := consoleClient.GitAttributes{
-		URL:        data.Url.ValueString(),
-		Username:   data.Username.ValueStringPointer(),
-		Password:   data.Password.ValueStringPointer(),
-		PrivateKey: data.PrivateKey.ValueStringPointer(),
-		Passphrase: data.Passphrase.ValueStringPointer(),
-		HTTPSPath:  data.HttpsPath.ValueStringPointer(),
-		URLFormat:  data.UrlFormat.ValueStringPointer(),
-	}
-
-	result, err := r.client.UpdateGitRepository(ctx, data.Id.String(), attrs)
+	_, err := r.client.UpdateGitRepository(ctx, data.Id.String(), data.Attributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update GitRepository, got error: %s", err))
 		return
 	}
 
-	data.Id = types.StringValue(result.UpdateGitRepository.ID)
-	data.Url = types.StringValue(result.UpdateGitRepository.URL)
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
 func (r *GitRepositoryResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data model.GitRepository
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	data := new(model.GitRepository)
+	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}

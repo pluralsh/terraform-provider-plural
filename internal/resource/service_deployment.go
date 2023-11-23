@@ -65,7 +65,7 @@ func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	data.FromCreate(sd)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
 func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -82,7 +82,7 @@ func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	data.FromGet(response.ServiceDeployment)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
 func (r *ServiceDeploymentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -98,7 +98,7 @@ func (r *ServiceDeploymentResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
 func (r *ServiceDeploymentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
