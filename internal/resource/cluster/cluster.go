@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -61,6 +62,7 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Description:         "Human-readable name of this cluster, that also translates to cloud resource name.",
 				MarkdownDescription: "Human-readable name of this cluster, that also translates to cloud resource name.",
 				Required:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"handle": schema.StringAttribute{
 				Description:         "A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.",
@@ -78,12 +80,13 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Description:         "",
 				MarkdownDescription: "",
 				Optional:            true,
-				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"cloud": schema.StringAttribute{
 				Description:         "The cloud provider used to create this cluster.",
 				MarkdownDescription: "The cloud provider used to create this cluster.",
 				Required:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Validators: []validator.String{stringvalidator.OneOfCaseInsensitive(
 					model.CloudBYOK.String(), model.CloudAWS.String(), model.CloudAzure.String(), model.CloudGCP.String())},
 			},
@@ -96,7 +99,8 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 					"gcp":   GCPCloudSettingsSchema(),
 					"byok":  BYOKCloudSettingsSchema(),
 				},
-				Required: true,
+				Required:      true,
+				PlanModifiers: []planmodifier.Object{objectplanmodifier.RequiresReplace()},
 			},
 			"protect": schema.BoolAttribute{
 				Description:         "If set to `true` then this cluster cannot be deleted.",
@@ -110,6 +114,7 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				MarkdownDescription: "Key-value tags used to filter clusters.",
 				Optional:            true,
 				ElementType:         types.StringType,
+				PlanModifiers:       []planmodifier.Map{mapplanmodifier.RequiresReplace()},
 			},
 			"bindings": schema.SingleNestedAttribute{
 				Description:         "Read and write policies of this cluster.",
@@ -165,9 +170,7 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 						},
 					},
 				},
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.RequiresReplace(),
-				},
+				PlanModifiers: []planmodifier.Object{objectplanmodifier.RequiresReplace()},
 			},
 		},
 	}
