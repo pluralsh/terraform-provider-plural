@@ -16,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -189,8 +188,6 @@ func (r *providerResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	tflog.Trace(ctx, "created a provider")
-
 	data.From(result.CreateClusterProvider)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -235,14 +232,14 @@ func (r *providerResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	_, err := r.client.DeleteCluster(ctx, data.Id.ValueString())
+	_, err := r.client.DeleteClusterProvider(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete provider, got error: %s", err))
 		return
 	}
 
 	err = wait.WaitForWithContext(ctx, client.Ticker(5*time.Second), func(ctx context.Context) (bool, error) {
-		_, err := r.client.GetCluster(ctx, data.Id.ValueStringPointer())
+		_, err := r.client.GetClusterProvider(ctx, data.Id.ValueString())
 		if client.IsNotFound(err) {
 			return true, nil
 		}
@@ -253,8 +250,6 @@ func (r *providerResource) Delete(ctx context.Context, req resource.DeleteReques
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while watiting for provider to be deleted, got error: %s", err))
 		return
 	}
-
-	tflog.Trace(ctx, "deleted the provider")
 }
 
 func (r *providerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
