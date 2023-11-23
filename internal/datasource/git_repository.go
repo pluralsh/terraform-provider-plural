@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"terraform-provider-plural/internal/model"
-
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"terraform-provider-plural/internal/model"
+
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 
 	"terraform-provider-plural/internal/client"
 )
@@ -34,40 +34,20 @@ func (r *GitRepositoryDataSource) Schema(_ context.Context, _ datasource.SchemaR
 		MarkdownDescription: "GitRepository resource",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Computed:            true,
+				Optional:            true,
+				Description:         "Internal identifier of this GitRepository.",
 				MarkdownDescription: "Internal identifier of this GitRepository.",
+				Validators: []validator.String{
+					stringvalidator.ConflictsWith(path.MatchRoot("url")),
+				},
 			},
 			"url": schema.StringAttribute{
-				MarkdownDescription: "URL of this repository.",
-				Required:            true,
-			},
-			"private_key": schema.StringAttribute{
-				MarkdownDescription: "SSH private key to use with this repo if an ssh url was given.",
-				Validators:          []validator.String{stringvalidator.ConflictsWith(path.MatchRoot("username"), path.MatchRoot("password"))},
 				Optional:            true,
-			},
-			"passphrase": schema.StringAttribute{
-				MarkdownDescription: "Passphrase to decrypt the given private key.",
-				Validators:          []validator.String{stringvalidator.ConflictsWith(path.MatchRoot("username"), path.MatchRoot("password"))},
-				Optional:            true,
-			},
-			"username": schema.StringAttribute{
-				MarkdownDescription: "HTTP username for authenticated http repos, defaults to apiKey for GitHub.",
-				Validators:          []validator.String{stringvalidator.ConflictsWith(path.MatchRoot("private_key"), path.MatchRoot("passphrase"))},
-				Optional:            true,
-			},
-			"password": schema.StringAttribute{
-				MarkdownDescription: "HTTP password for http authenticated repos.",
-				Validators:          []validator.String{stringvalidator.ConflictsWith(path.MatchRoot("private_key"), path.MatchRoot("passphrase"))},
-				Optional:            true,
-			},
-			"url_format": schema.StringAttribute{
-				MarkdownDescription: "Similar to https_Path, a manually supplied url format for custom git. Should be something like {url}/tree/{ref}/{folder}.",
-				Optional:            true,
-			},
-			"https_path": schema.StringAttribute{
-				MarkdownDescription: "Manually supplied https path for non standard git setups. This is auto-inferred in many cases.",
-				Optional:            true,
+				Description:         "URL of this GitRepository.",
+				MarkdownDescription: "URL of this GitRepository.",
+				Validators: []validator.String{
+					stringvalidator.ConflictsWith(path.MatchRoot("id")),
+				},
 			},
 		},
 	}
@@ -92,20 +72,18 @@ func (r *GitRepositoryDataSource) Configure(_ context.Context, req datasource.Co
 }
 
 func (r *GitRepositoryDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data model.GitRepository
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	data := new(model.GitRepositoryBase)
+	resp.Diagnostics.Append(req.Config.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	response, err := r.client.GetGitRepository(ctx, nil, data.Url.ValueStringPointer())
+	response, err := r.client.GetGitRepository(ctx, data.Id.ValueStringPointer(), data.Url.ValueStringPointer())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get GitRepository, got error: %s", err))
 		return
 	}
 
-	data.Id = types.StringValue(response.GitRepository.ID)
-	data.Url = types.StringValue(response.GitRepository.URL)
-
+	data.From(response.GitRepository)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

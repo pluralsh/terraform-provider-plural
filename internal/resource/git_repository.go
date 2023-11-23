@@ -48,8 +48,8 @@ func (r *GitRepositoryResource) Schema(_ context.Context, _ resource.SchemaReque
 			},
 			"url": schema.StringAttribute{
 				Required:            true,
-				Description:         "URL of this repository.",
-				MarkdownDescription: "URL of this repository.",
+				Description:         "URL of this GitRepository.",
+				MarkdownDescription: "URL of this GitRepository.",
 			},
 			"private_key": schema.StringAttribute{
 				Optional:            true,
