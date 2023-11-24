@@ -45,6 +45,10 @@ type ProviderCloudSettings struct {
 }
 
 func (p *ProviderCloudSettings) Attributes() *console.CloudProviderSettingsAttributes {
+	if p == nil {
+		return nil
+	}
+
 	if p.GCP != nil {
 		return &console.CloudProviderSettingsAttributes{Aws: p.AWS.Attributes()}
 	}

@@ -71,14 +71,14 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Computed:            true,
 			},
 			"version": schema.StringAttribute{
-				Description:         "",
-				MarkdownDescription: "",
+				Description:         "Desired Kubernetes version for this cluster. Leave empty for bring your own cluster.",
+				MarkdownDescription: "Desired Kubernetes version for this cluster. Leave empty for bring your own cluster.",
 				Optional:            true,
 				Computed:            true,
 			},
 			"provider_id": schema.StringAttribute{
-				Description:         "",
-				MarkdownDescription: "",
+				Description:         "Provider used to create this cluster. Leave empty for bring your own cluster.",
+				MarkdownDescription: "Provider used to create this cluster. Leave empty for bring your own cluster.",
 				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
@@ -103,38 +103,40 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				PlanModifiers: []planmodifier.Object{objectplanmodifier.RequiresReplace()},
 			},
 			"node_pools": schema.ListNestedAttribute{
-				Description:         "",
-				MarkdownDescription: "",
+				Description:         "List of node pool specs managed by this cluster. Leave empty for bring your own cluster.",
+				MarkdownDescription: "List of node pool specs managed by this cluster. Leave empty for bring your own cluster.",
 				Optional:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
+							Description:         "Node pool name. Must be unique.",
+							MarkdownDescription: "Node pool name. Must be unique.",
 							Required:            true,
 						},
 						"min_size": schema.Int64Attribute{
-							Description:         "",
-							MarkdownDescription: "",
+							Description:         "Minimum number of instances in this node pool.",
+							MarkdownDescription: "Minimum number of instances in this node pool.",
 							Required:            true,
 						},
 						"max_size": schema.Int64Attribute{
-							Description:         "",
-							MarkdownDescription: "",
+							Description:         "Maximum number of instances in this node pool.",
+							MarkdownDescription: "Maximum number of instances in this node pool.",
 							Required:            true,
 						},
 						"instance_type": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
+							Description:         "The type of node to use. Usually cloud-specific.",
+							MarkdownDescription: "The type of node to use. Usually cloud-specific.",
 							Required:            true,
 						},
 						"labels": schema.MapAttribute{
-							ElementType: types.StringType,
-							Optional:    true,
+							Description:         "Kubernetes labels to apply to the nodes in this pool. Useful for node selectors.",
+							MarkdownDescription: "Kubernetes labels to apply to the nodes in this pool. Useful for node selectors.",
+							ElementType:         types.StringType,
+							Optional:            true,
 						},
 						"taints": schema.ListNestedAttribute{
-							Description:         "",
-							MarkdownDescription: "",
+							Description:         "Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances.",
+							MarkdownDescription: "Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances.",
 							Optional:            true,
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
@@ -159,13 +161,13 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 							Optional:            true,
 							Attributes: map[string]schema.Attribute{
 								"aws": schema.SingleNestedAttribute{
-									Description:         "",
-									MarkdownDescription: "",
+									Description:         "AWS node pool customizations.",
+									MarkdownDescription: "AWS node pool customizations.",
 									Optional:            true,
 									Attributes: map[string]schema.Attribute{
 										"launch_template_id": schema.StringAttribute{
-											Description:         "",
-											MarkdownDescription: "",
+											Description:         "Custom launch template for your nodes. Useful for Golden AMI setups.",
+											MarkdownDescription: "Custom launch template for your nodes. Useful for Golden AMI setups.",
 											Optional:            true,
 										},
 									},
@@ -177,7 +179,7 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				},
 			},
 			"protect": schema.BoolAttribute{
-				Description:         "If set to `true` then this cluster cannot be deleted.",
+				Description:         "If set to \"true\" then this cluster cannot be deleted.",
 				MarkdownDescription: "If set to `true` then this cluster cannot be deleted.",
 				Optional:            true,
 				Computed:            true,
@@ -275,7 +277,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	result, err := r.client.CreateCluster(ctx, data.CreateAttributes(ctx, resp.Diagnostics))
+	result, err := r.client.CreateCluster(ctx, data.Attributes(ctx, resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create cluster, got error: %s", err))
 		return

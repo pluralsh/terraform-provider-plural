@@ -25,22 +25,6 @@ type Cluster struct {
 	Bindings      *ClusterBindings      `tfsdk:"bindings"`
 }
 
-func (c *Cluster) CloudSettingsAttributes() *console.CloudSettingsAttributes {
-	if IsCloud(c.Cloud.ValueString(), CloudAWS) {
-		return &console.CloudSettingsAttributes{Aws: c.CloudSettings.AWS.Attributes()}
-	}
-
-	if IsCloud(c.Cloud.ValueString(), CloudAzure) {
-		return &console.CloudSettingsAttributes{Azure: c.CloudSettings.Azure.Attributes()}
-	}
-
-	if IsCloud(c.Cloud.ValueString(), CloudGCP) {
-		return &console.CloudSettingsAttributes{Gcp: c.CloudSettings.GCP.Attributes()}
-	}
-
-	return nil
-}
-
 type ClusterNodePool struct {
 	Name          types.String           `tfsdk:"name"`
 	MinSize       types.Int64            `tfsdk:"min_size"`
@@ -73,14 +57,14 @@ func (c *Cluster) TagsAttribute(ctx context.Context, d diag.Diagnostics) (result
 	return
 }
 
-func (c *Cluster) CreateAttributes(ctx context.Context, d diag.Diagnostics) console.ClusterAttributes {
+func (c *Cluster) Attributes(ctx context.Context, d diag.Diagnostics) console.ClusterAttributes {
 	return console.ClusterAttributes{
 		Name:          c.Name.ValueString(),
 		Handle:        c.Handle.ValueStringPointer(),
 		ProviderID:    c.ProviderId.ValueStringPointer(),
 		Version:       c.Version.ValueStringPointer(),
 		Protect:       c.Protect.ValueBoolPointer(),
-		CloudSettings: c.CloudSettingsAttributes(),
+		CloudSettings: c.CloudSettings.Attributes(),
 		NodePools:     c.NodePoolsAttribute(),
 		ReadBindings:  c.Bindings.ReadAttributes(),
 		WriteBindings: c.Bindings.WriteAttributes(),

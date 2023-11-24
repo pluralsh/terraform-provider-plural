@@ -12,6 +12,26 @@ type ClusterCloudSettings struct {
 	BYOK  *ClusterCloudSettingsBYOK  `tfsdk:"byok"`
 }
 
+func (c *ClusterCloudSettings) Attributes() *console.CloudSettingsAttributes {
+	if c == nil {
+		return nil
+	}
+
+	if c.AWS != nil {
+		return &console.CloudSettingsAttributes{Aws: c.AWS.Attributes()}
+	}
+
+	if c.Azure != nil {
+		return &console.CloudSettingsAttributes{Azure: c.Azure.Attributes()}
+	}
+
+	if c.GCP != nil {
+		return &console.CloudSettingsAttributes{Gcp: c.GCP.Attributes()}
+	}
+
+	return nil
+}
+
 type ClusterCloudSettingsAWS struct {
 	Region types.String `tfsdk:"region"`
 }
