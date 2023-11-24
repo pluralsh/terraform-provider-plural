@@ -25,11 +25,11 @@ A representation of a cluster you can deploy to.
 
 - `bindings` (Attributes) Read and write policies of this cluster. (see [below for nested schema](#nestedatt--bindings))
 - `handle` (String) A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.
-- `node_pools` (Attributes List) (see [below for nested schema](#nestedatt--node_pools))
+- `node_pools` (Attributes List) List of node pool specs managed by this cluster. Leave empty for bring your own cluster. (see [below for nested schema](#nestedatt--node_pools))
 - `protect` (Boolean) If set to `true` then this cluster cannot be deleted.
-- `provider_id` (String)
+- `provider_id` (String) Provider used to create this cluster. Leave empty for bring your own cluster.
 - `tags` (Map of String) Key-value tags used to filter clusters.
-- `version` (String)
+- `version` (String) Desired Kubernetes version for this cluster. Leave empty for bring your own cluster.
 
 ### Read-Only
 
@@ -154,30 +154,30 @@ Optional:
 
 Required:
 
-- `instance_type` (String)
-- `max_size` (Number)
-- `min_size` (Number)
-- `name` (String)
+- `instance_type` (String) The type of node to use. Usually cloud-specific.
+- `max_size` (Number) Maximum number of instances in this node pool.
+- `min_size` (Number) Minimum number of instances in this node pool.
+- `name` (String) Node pool name. Must be unique.
 
 Optional:
 
 - `cloud_settings` (Attributes) Cloud-specific settings for this node pool. (see [below for nested schema](#nestedatt--node_pools--cloud_settings))
-- `labels` (Map of String)
-- `taints` (Attributes List) (see [below for nested schema](#nestedatt--node_pools--taints))
+- `labels` (Map of String) Kubernetes labels to apply to the nodes in this pool. Useful for node selectors.
+- `taints` (Attributes List) Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances. (see [below for nested schema](#nestedatt--node_pools--taints))
 
 <a id="nestedatt--node_pools--cloud_settings"></a>
 ### Nested Schema for `node_pools.cloud_settings`
 
 Optional:
 
-- `aws` (Attributes) (see [below for nested schema](#nestedatt--node_pools--cloud_settings--aws))
+- `aws` (Attributes) AWS node pool customizations. (see [below for nested schema](#nestedatt--node_pools--cloud_settings--aws))
 
 <a id="nestedatt--node_pools--cloud_settings--aws"></a>
 ### Nested Schema for `node_pools.cloud_settings.aws`
 
 Optional:
 
-- `launch_template_id` (String)
+- `launch_template_id` (String) Custom launch template for your nodes. Useful for Golden AMI setups.
 
 
 

@@ -42,7 +42,7 @@ func (r *GitRepositoryDataSource) Schema(_ context.Context, _ datasource.SchemaR
 				Required:            true,
 			},
 			"private_key": schema.StringAttribute{
-				MarkdownDescription: "SSH private key to use with this repo if an ssh url was given.",
+				MarkdownDescription: "SSH private key to use with this repo if an SSH URL was given.",
 				Validators:          []validator.String{stringvalidator.ConflictsWith(path.MatchRoot("username"), path.MatchRoot("password"))},
 				Optional:            true,
 			},
@@ -52,7 +52,7 @@ func (r *GitRepositoryDataSource) Schema(_ context.Context, _ datasource.SchemaR
 				Optional:            true,
 			},
 			"username": schema.StringAttribute{
-				MarkdownDescription: "HTTP username for authenticated http repos, defaults to apiKey for GitHub.",
+				MarkdownDescription: "HTTP username for authenticated HTTP repos, defaults to apiKey for GitHub.",
 				Validators:          []validator.String{stringvalidator.ConflictsWith(path.MatchRoot("private_key"), path.MatchRoot("passphrase"))},
 				Optional:            true,
 			},
@@ -62,11 +62,11 @@ func (r *GitRepositoryDataSource) Schema(_ context.Context, _ datasource.SchemaR
 				Optional:            true,
 			},
 			"url_format": schema.StringAttribute{
-				MarkdownDescription: "Similar to https_Path, a manually supplied url format for custom git. Should be something like {url}/tree/{ref}/{folder}.",
+				MarkdownDescription: "Similar to `https_path`, a manually supplied url format for custom Git. Should be something like `{url}/tree/{ref}/{folder}`.",
 				Optional:            true,
 			},
 			"https_path": schema.StringAttribute{
-				MarkdownDescription: "Manually supplied https path for non standard git setups. This is auto-inferred in many cases.",
+				MarkdownDescription: "Manually supplied https path for non standard Git setups. This is auto-inferred in many cases.",
 				Optional:            true,
 			},
 		},
