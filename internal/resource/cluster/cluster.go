@@ -316,6 +316,10 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read cluster, got error: %s", err))
 		return
 	}
+	if result == nil || result.Cluster == nil {
+		resp.Diagnostics.AddError("Not Found", fmt.Sprintf("Unable to find cluster, it looks like it was deleted manually"))
+		return
+	}
 
 	data.From(result.Cluster, resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

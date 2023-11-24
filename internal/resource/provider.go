@@ -182,7 +182,7 @@ func (r *providerResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	result, err := r.client.CreateClusterProvider(ctx, data.CreateAttributes())
+	result, err := r.client.CreateClusterProvider(ctx, data.Attributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create provider, got error: %s", err))
 		return
@@ -202,6 +202,10 @@ func (r *providerResource) Read(ctx context.Context, req resource.ReadRequest, r
 	result, err := r.client.GetClusterProvider(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read provider, got error: %s", err))
+		return
+	}
+	if result == nil || result.ClusterProvider == nil {
+		resp.Diagnostics.AddError("Not Found", fmt.Sprintf("Unable to find provider, it looks like it was deleted manually"))
 		return
 	}
 
