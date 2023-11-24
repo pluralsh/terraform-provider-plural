@@ -97,11 +97,11 @@ func (r *GitRepositoryResource) Schema(_ context.Context, _ resource.SchemaReque
 				Sensitive: true,
 			},
 			"url_format": schema.StringAttribute{
-				MarkdownDescription: "Similar to https_Path, a manually supplied url format for custom git. Should be something like {url}/tree/{ref}/{folder}.",
+				MarkdownDescription: "Similar to `https_path`, a manually supplied url format for custom Git. Should be something like `{url}/tree/{ref}/{folder}`.",
 				Optional:            true,
 			},
 			"https_path": schema.StringAttribute{
-				MarkdownDescription: "Manually supplied https path for non standard git setups. This is auto-inferred in many cases.",
+				MarkdownDescription: "Manually supplied https path for non standard Git setups. This is auto-inferred in many cases.",
 				Optional:            true,
 			},
 		},
