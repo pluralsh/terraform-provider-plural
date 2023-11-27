@@ -7,6 +7,7 @@ import (
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
+	internalvalidator "terraform-provider-plural/internal/validator"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -75,12 +76,20 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				MarkdownDescription: "Desired Kubernetes version for this cluster. Leave empty for bring your own cluster.",
 				Optional:            true,
 				Computed:            true,
+				Validators: []validator.String{
+					internalvalidator.ConflictsWithIf(internalvalidator.ConflictsIfTargetValueOneOf([]string{model.CloudBYOK.String()}),
+						path.MatchRoot("cloud")),
+				},
 			},
 			"provider_id": schema.StringAttribute{
 				Description:         "Provider used to create this cluster. Leave empty for bring your own cluster.",
 				MarkdownDescription: "Provider used to create this cluster. Leave empty for bring your own cluster.",
 				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				Validators: []validator.String{
+					internalvalidator.ConflictsWithIf(internalvalidator.ConflictsIfTargetValueOneOf([]string{model.CloudBYOK.String()}),
+						path.MatchRoot("cloud")),
+				},
 			},
 			"cloud": schema.StringAttribute{
 				Description:         "The cloud provider used to create this cluster.",
@@ -88,7 +97,13 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Required:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Validators: []validator.String{stringvalidator.OneOfCaseInsensitive(
-					model.CloudBYOK.String(), model.CloudAWS.String(), model.CloudAzure.String(), model.CloudGCP.String())},
+					model.CloudBYOK.String(), model.CloudAWS.String(), model.CloudAzure.String(), model.CloudGCP.String()),
+					internalvalidator.AlsoRequiresIf(internalvalidator.RequiresIfSourceValueOneOf([]string{
+						model.CloudAWS.String(),
+						model.CloudAzure.String(),
+						model.CloudGCP.String(),
+					}), path.MatchRoot("provider_id")),
+				},
 			},
 			"cloud_settings": schema.SingleNestedAttribute{
 				Description:         "Cloud-specific settings for this cluster.",
@@ -357,8 +372,8 @@ func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 	}
 
 	err = wait.WaitForWithContext(ctx, client.Ticker(5*time.Second), func(ctx context.Context) (bool, error) {
-		_, err := r.client.GetCluster(ctx, data.Id.ValueStringPointer())
-		if client.IsNotFound(err) {
+		response, err := r.client.GetCluster(ctx, data.Id.ValueStringPointer())
+		if client.IsNotFound(err) || response.Cluster == nil {
 			return true, nil
 		}
 
