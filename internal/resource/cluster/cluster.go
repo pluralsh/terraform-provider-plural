@@ -13,6 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -40,64 +42,211 @@ func (r *clusterResource) Metadata(_ context.Context, req resource.MetadataReque
 
 func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description:         "A representation of a cluster you can deploy to.",
 		MarkdownDescription: "A representation of a cluster you can deploy to.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Computed:            true,
+				Description:         "Internal identifier of this cluster.",
 				MarkdownDescription: "Internal identifier of this cluster.",
+				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"inserted_at": schema.StringAttribute{
+				Description:         "Creation date of this cluster.",
 				MarkdownDescription: "Creation date of this cluster.",
 				Computed:            true,
 			},
 			"name": schema.StringAttribute{
+				Description:         "Human-readable name of this cluster, that also translates to cloud resource name.",
 				MarkdownDescription: "Human-readable name of this cluster, that also translates to cloud resource name.",
 				Required:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"handle": schema.StringAttribute{
+				Description:         "A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.",
 				MarkdownDescription: "A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.",
 				Optional:            true,
 				Computed:            true,
 			},
 			"version": schema.StringAttribute{
-				MarkdownDescription: "",
+				Description:         "Desired Kubernetes version for this cluster. Leave empty for bring your own cluster.",
+				MarkdownDescription: "Desired Kubernetes version for this cluster. Leave empty for bring your own cluster.",
 				Optional:            true,
 				Computed:            true,
 			},
 			"provider_id": schema.StringAttribute{
-				MarkdownDescription: "",
+				Description:         "Provider used to create this cluster. Leave empty for bring your own cluster.",
+				MarkdownDescription: "Provider used to create this cluster. Leave empty for bring your own cluster.",
 				Optional:            true,
-				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"cloud": schema.StringAttribute{
+				Description:         "The cloud provider used to create this cluster.",
 				MarkdownDescription: "The cloud provider used to create this cluster.",
 				Required:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Validators: []validator.String{stringvalidator.OneOfCaseInsensitive(
 					model.CloudBYOK.String(), model.CloudAWS.String(), model.CloudAzure.String(), model.CloudGCP.String())},
 			},
 			"cloud_settings": schema.SingleNestedAttribute{
+				Description:         "Cloud-specific settings for this cluster.",
+				MarkdownDescription: "Cloud-specific settings for this cluster.",
+				Required:            true,
 				Attributes: map[string]schema.Attribute{
 					"aws":   AWSCloudSettingsSchema(),
 					"azure": AzureCloudSettingsSchema(),
 					"gcp":   GCPCloudSettingsSchema(),
 					"byok":  BYOKCloudSettingsSchema(),
 				},
-				MarkdownDescription: "Cloud-specific settings for this cluster.",
-				Required:            true,
+				PlanModifiers: []planmodifier.Object{objectplanmodifier.RequiresReplace()},
+			},
+			"node_pools": schema.ListNestedAttribute{
+				Description:         "List of node pool specs managed by this cluster. Leave empty for bring your own cluster.",
+				MarkdownDescription: "List of node pool specs managed by this cluster. Leave empty for bring your own cluster.",
+				Optional:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description:         "Node pool name. Must be unique.",
+							MarkdownDescription: "Node pool name. Must be unique.",
+							Required:            true,
+						},
+						"min_size": schema.Int64Attribute{
+							Description:         "Minimum number of instances in this node pool.",
+							MarkdownDescription: "Minimum number of instances in this node pool.",
+							Required:            true,
+						},
+						"max_size": schema.Int64Attribute{
+							Description:         "Maximum number of instances in this node pool.",
+							MarkdownDescription: "Maximum number of instances in this node pool.",
+							Required:            true,
+						},
+						"instance_type": schema.StringAttribute{
+							Description:         "The type of node to use. Usually cloud-specific.",
+							MarkdownDescription: "The type of node to use. Usually cloud-specific.",
+							Required:            true,
+						},
+						"labels": schema.MapAttribute{
+							Description:         "Kubernetes labels to apply to the nodes in this pool. Useful for node selectors.",
+							MarkdownDescription: "Kubernetes labels to apply to the nodes in this pool. Useful for node selectors.",
+							ElementType:         types.StringType,
+							Optional:            true,
+						},
+						"taints": schema.ListNestedAttribute{
+							Description:         "Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances.",
+							MarkdownDescription: "Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances.",
+							Optional:            true,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+									"key": schema.MapAttribute{
+										ElementType: types.StringType,
+										Required:    true,
+									},
+									"value": schema.MapAttribute{
+										ElementType: types.StringType,
+										Required:    true,
+									},
+									"effect": schema.MapAttribute{
+										ElementType: types.StringType,
+										Required:    true,
+									},
+								},
+							},
+						},
+						"cloud_settings": schema.SingleNestedAttribute{
+							Description:         "Cloud-specific settings for this node pool.",
+							MarkdownDescription: "Cloud-specific settings for this node pool.",
+							Optional:            true,
+							Attributes: map[string]schema.Attribute{
+								"aws": schema.SingleNestedAttribute{
+									Description:         "AWS node pool customizations.",
+									MarkdownDescription: "AWS node pool customizations.",
+									Optional:            true,
+									Attributes: map[string]schema.Attribute{
+										"launch_template_id": schema.StringAttribute{
+											Description:         "Custom launch template for your nodes. Useful for Golden AMI setups.",
+											MarkdownDescription: "Custom launch template for your nodes. Useful for Golden AMI setups.",
+											Optional:            true,
+										},
+									},
+								},
+							},
+							PlanModifiers: []planmodifier.Object{objectplanmodifier.RequiresReplace()},
+						},
+					},
+				},
 			},
 			"protect": schema.BoolAttribute{
+				Description:         "If set to \"true\" then this cluster cannot be deleted.",
 				MarkdownDescription: "If set to `true` then this cluster cannot be deleted.",
 				Optional:            true,
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
 			},
 			"tags": schema.MapAttribute{
+				Description:         "Key-value tags used to filter clusters.",
 				MarkdownDescription: "Key-value tags used to filter clusters.",
 				Optional:            true,
 				ElementType:         types.StringType,
+				PlanModifiers:       []planmodifier.Map{mapplanmodifier.RequiresReplace()},
+			},
+			"bindings": schema.SingleNestedAttribute{
+				Description:         "Read and write policies of this cluster.",
+				MarkdownDescription: "Read and write policies of this cluster.",
+				Optional:            true,
+				Attributes: map[string]schema.Attribute{
+					"read": schema.ListNestedAttribute{
+						Optional:            true,
+						Description:         "Read policies of this cluster.",
+						MarkdownDescription: "Read policies of this cluster.",
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"group_id": schema.StringAttribute{
+									Description:         "",
+									MarkdownDescription: "",
+									Optional:            true,
+								},
+								"id": schema.StringAttribute{
+									Description:         "",
+									MarkdownDescription: "",
+									Optional:            true,
+								},
+								"user_id": schema.StringAttribute{
+									Description:         "",
+									MarkdownDescription: "",
+									Optional:            true,
+								},
+							},
+						},
+					},
+					"write": schema.ListNestedAttribute{
+						Optional:            true,
+						Description:         "Write policies of this cluster.",
+						MarkdownDescription: "Write policies of this cluster.",
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"group_id": schema.StringAttribute{
+									Description:         "",
+									MarkdownDescription: "",
+									Optional:            true,
+								},
+								"id": schema.StringAttribute{
+									Description:         "",
+									MarkdownDescription: "",
+									Optional:            true,
+								},
+								"user_id": schema.StringAttribute{
+									Description:         "",
+									MarkdownDescription: "",
+									Optional:            true,
+								},
+							},
+						},
+					},
+				},
+				PlanModifiers: []planmodifier.Object{objectplanmodifier.RequiresReplace()},
 			},
 		},
 	}
@@ -128,7 +277,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	result, err := r.client.CreateCluster(ctx, data.CreateAttributes(resp.Diagnostics))
+	result, err := r.client.CreateCluster(ctx, data.Attributes(ctx, resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create cluster, got error: %s", err))
 		return
@@ -167,6 +316,10 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 	result, err := r.client.GetCluster(ctx, data.Id.ValueStringPointer())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read cluster, got error: %s", err))
+		return
+	}
+	if result == nil || result.Cluster == nil {
+		resp.Diagnostics.AddError("Not Found", fmt.Sprintf("Unable to find cluster, it looks like it was deleted manually"))
 		return
 	}
 
