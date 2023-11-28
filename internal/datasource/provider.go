@@ -7,9 +7,12 @@ import (
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 func NewProviderDataSource() datasource.DataSource {
@@ -29,9 +32,11 @@ func (p *providerDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 		MarkdownDescription: "A representation of a provider you can deploy your clusters to.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Required:            true,
+				Optional:            true,
+				Computed:            true,
 				Description:         "Internal identifier of this provider.",
 				MarkdownDescription: "Internal identifier of this provider.",
+				Validators:          []validator.String{stringvalidator.ExactlyOneOf(path.MatchRoot("cloud"))},
 			},
 			"editable": schema.BoolAttribute{
 				Description:         "Whether this provider is editable.",
@@ -51,7 +56,9 @@ func (p *providerDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 			"cloud": schema.StringAttribute{
 				Description:         "The name of the cloud service for this provider.",
 				MarkdownDescription: "The name of the cloud service for this provider.",
+				Optional:            true,
 				Computed:            true,
+				Validators:          []validator.String{stringvalidator.ExactlyOneOf(path.MatchRoot("id"))},
 			},
 		},
 	}
@@ -81,19 +88,40 @@ func (p *providerDataSource) Read(ctx context.Context, req datasource.ReadReques
 		return
 	}
 
-	if data.Id.IsNull() {
+	if data.Id.IsNull() && data.Cloud.IsNull() {
 		resp.Diagnostics.AddError(
-			"Missing Provider ID",
-			"The provider could not read provider data. ID needs to be specified.",
+			"Missing Provider ID and Cloud",
+			"The provider could not read provider data. ID or cloud needs to be specified.",
 		)
+		return
 	}
 
-	result, err := p.client.GetClusterProvider(ctx, data.Id.ValueString())
+	var id string
+	if !data.Id.IsNull() {
+		id = data.Id.ValueString()
+	} else {
+		if providers, err := p.client.ListProviders(ctx); err != nil {
+			for _, prov := range providers.ClusterProviders.Edges {
+				if prov.Node.Cloud == data.Cloud.ValueString() {
+					id = prov.Node.ID
+					break
+				}
+			}
+		} else {
+			resp.Diagnostics.AddWarning("Client Error", fmt.Sprintf("Unable to get providers, got error: %s", err))
+		}
+	}
+	if id == "" {
+		resp.Diagnostics.AddError("Client Error", "Unable to determine provider ID")
+		return
+	}
+
+	result, err := p.client.GetClusterProvider(ctx, id)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read provider, got error: %s", err))
 		return
 	}
-	if result == nil || result.ClusterProvider == nil {
+	if result == nil && result.ClusterProvider == nil {
 		resp.Diagnostics.AddError("Not Found", fmt.Sprintf("Unable to find provider"))
 		return
 	}

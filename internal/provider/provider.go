@@ -177,6 +177,7 @@ func (p *PluralProvider) DataSources(_ context.Context) []func() datasource.Data
 	return []func() datasource.DataSource{
 		ds.NewClusterDataSource,
 		ds.NewGitRepositoryDataSource,
+		ds.NewProviderDataSource,
 	}
 }
 
