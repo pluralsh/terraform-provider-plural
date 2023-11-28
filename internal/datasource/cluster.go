@@ -120,7 +120,7 @@ func (d *clusterDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	}
 
 	data.Id = types.StringValue(cluster.ID)
-	data.InseredAt = types.StringPointerValue(cluster.InsertedAt)
+	data.InsertedAt = types.StringPointerValue(cluster.InsertedAt)
 	data.Name = types.StringValue(cluster.Name)
 	data.Handle = types.StringPointerValue(cluster.Handle)
 	data.Protect = types.BoolPointerValue(cluster.Protect)

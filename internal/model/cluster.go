@@ -12,7 +12,7 @@ import (
 // Cluster describes the cluster resource and data source model.
 type Cluster struct {
 	Id            types.String          `tfsdk:"id"`
-	InseredAt     types.String          `tfsdk:"inserted_at"`
+	InsertedAt    types.String          `tfsdk:"inserted_at"`
 	Name          types.String          `tfsdk:"name"`
 	Handle        types.String          `tfsdk:"handle"`
 	Version       types.String          `tfsdk:"version"`
@@ -100,7 +100,7 @@ func (c *Cluster) TagsFrom(tags []*console.ClusterTags, d diag.Diagnostics) {
 
 func (c *Cluster) From(cl *console.ClusterFragment, d diag.Diagnostics) {
 	c.Id = types.StringValue(cl.ID)
-	c.InseredAt = types.StringPointerValue(cl.InsertedAt)
+	c.InsertedAt = types.StringPointerValue(cl.InsertedAt)
 	c.Name = types.StringValue(cl.Name)
 	c.Handle = types.StringPointerValue(cl.Handle)
 	c.Version = types.StringPointerValue(cl.Version)
@@ -112,7 +112,7 @@ func (c *Cluster) From(cl *console.ClusterFragment, d diag.Diagnostics) {
 
 func (c *Cluster) FromCreate(cc *console.CreateCluster, d diag.Diagnostics) {
 	c.Id = types.StringValue(cc.CreateCluster.ID)
-	c.InseredAt = types.StringPointerValue(cc.CreateCluster.InsertedAt)
+	c.InsertedAt = types.StringPointerValue(cc.CreateCluster.InsertedAt)
 	c.Name = types.StringValue(cc.CreateCluster.Name)
 	c.Handle = types.StringPointerValue(cc.CreateCluster.Handle)
 	c.Version = types.StringPointerValue(cc.CreateCluster.Version)
