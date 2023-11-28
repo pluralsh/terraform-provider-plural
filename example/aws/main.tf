@@ -16,16 +16,16 @@ resource "plural_provider" "aws_provider" {
   cloud = "aws"
   cloud_settings = {
     aws = {
-      access_key_id = ""
-      secret_access_key = ""
+      access_key_id = "" # Provide before use
+      secret_access_key = "" # Provide before use
     }
   }
 }
 
 resource "plural_cluster" "aws_cluster" {
-  name = "workload-cluster-tf"
-  handle = "wctf"
-  version = "1.23"
+  name = "aws-cluster-tf"
+  handle = "awstf"
+  version = "1.24"
   provider_id = plural_provider.aws_provider.id
   cloud = "aws"
   protect = "false"
@@ -43,8 +43,3 @@ resource "plural_cluster" "aws_cluster" {
     write = []
   }
 }
-
-data "plural_cluster" "byok_workload_cluster" {
-  handle = "wctf"
-}
-
