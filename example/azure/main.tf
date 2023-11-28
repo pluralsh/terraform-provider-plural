@@ -39,7 +39,7 @@ resource "plural_cluster" "azure_cluster" {
       location = "eastus"
     }
   }
-  node_pools = []
+#  node_pools = []
   tags = {
     "managed-by" = "terraform-provider-plural"
   }

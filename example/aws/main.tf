@@ -22,6 +22,10 @@ resource "plural_provider" "aws_provider" {
   }
 }
 
+data "plural_provider" "aws_provider" {
+  cloud = "aws"
+}
+
 resource "plural_cluster" "aws_cluster" {
   name = "aws-cluster-tf"
   handle = "awstf"
@@ -34,7 +38,7 @@ resource "plural_cluster" "aws_cluster" {
       region = "us-east-1"
     }
   }
-  node_pools = []
+#  node_pools = []
   tags = {
     "managed-by" = "terraform-provider-plural"
   }
