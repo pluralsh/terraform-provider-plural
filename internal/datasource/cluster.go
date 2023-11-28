@@ -172,7 +172,7 @@ func (d *clusterDataSource) Configure(_ context.Context, req datasource.Configur
 }
 
 func (d *clusterDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data model.Cluster
+	var data model.ClusterDataSource
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return

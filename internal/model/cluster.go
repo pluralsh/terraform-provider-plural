@@ -9,20 +9,23 @@ import (
 	console "github.com/pluralsh/console-client-go"
 )
 
-// Cluster describes the cluster resource and data source model.
-type Cluster struct {
-	Id            types.String          `tfsdk:"id"`
-	InsertedAt    types.String          `tfsdk:"inserted_at"`
-	Name          types.String          `tfsdk:"name"`
-	Handle        types.String          `tfsdk:"handle"`
-	Version       types.String          `tfsdk:"version"`
-	ProviderId    types.String          `tfsdk:"provider_id"`
-	Cloud         types.String          `tfsdk:"cloud"`
-	CloudSettings *ClusterCloudSettings `tfsdk:"cloud_settings"`
-	Protect       types.Bool            `tfsdk:"protect"`
-	Tags          types.Map             `tfsdk:"tags"`
-	Bindings      *ClusterBindings      `tfsdk:"bindings"`
+type ClusterBase struct {
+	Id         types.String     `tfsdk:"id"`
+	InsertedAt types.String     `tfsdk:"inserted_at"`
+	Name       types.String     `tfsdk:"name"`
+	Handle     types.String     `tfsdk:"handle"`
+	Version    types.String     `tfsdk:"version"`
+	ProviderId types.String     `tfsdk:"provider_id"`
+	Cloud      types.String     `tfsdk:"cloud"`
+	Protect    types.Bool       `tfsdk:"protect"`
+	Tags       types.Map        `tfsdk:"tags"`
+	Bindings   *ClusterBindings `tfsdk:"bindings"`
 	//NodePools     []*ClusterNodePool    `tfsdk:"node_pools"`
+}
+
+type ClusterResource struct {
+	ClusterBase
+	CloudSettings *ClusterCloudSettings `tfsdk:"cloud_settings"`
 }
 
 type ClusterNodePool struct {
@@ -47,7 +50,7 @@ type NodePoolCloudSettingsAWS struct {
 //	return nil
 //}
 
-func (c *Cluster) TagsAttribute(ctx context.Context, d diag.Diagnostics) (result []*console.TagAttributes) {
+func (c *ClusterResource) TagsAttribute(ctx context.Context, d diag.Diagnostics) (result []*console.TagAttributes) {
 	elements := make(map[string]types.String, len(c.Tags.Elements()))
 	d.Append(c.Tags.ElementsAs(context.TODO(), &elements, false)...)
 	for k, v := range elements {
@@ -57,7 +60,7 @@ func (c *Cluster) TagsAttribute(ctx context.Context, d diag.Diagnostics) (result
 	return
 }
 
-func (c *Cluster) Attributes(ctx context.Context, d diag.Diagnostics) console.ClusterAttributes {
+func (c *ClusterResource) Attributes(ctx context.Context, d diag.Diagnostics) console.ClusterAttributes {
 	return console.ClusterAttributes{
 		Name:          c.Name.ValueString(),
 		Handle:        c.Handle.ValueStringPointer(),
@@ -72,7 +75,7 @@ func (c *Cluster) Attributes(ctx context.Context, d diag.Diagnostics) console.Cl
 	}
 }
 
-func (c *Cluster) UpdateAttributes() console.ClusterUpdateAttributes {
+func (c *ClusterResource) UpdateAttributes() console.ClusterUpdateAttributes {
 	return console.ClusterUpdateAttributes{
 		Version: c.Version.ValueStringPointer(),
 		Handle:  c.Handle.ValueStringPointer(),
@@ -81,13 +84,13 @@ func (c *Cluster) UpdateAttributes() console.ClusterUpdateAttributes {
 	}
 }
 
-func (c *Cluster) ProviderFrom(provider *console.ClusterProviderFragment) {
+func (c *ClusterResource) ProviderFrom(provider *console.ClusterProviderFragment) {
 	if provider != nil {
 		c.ProviderId = types.StringValue(provider.ID)
 	}
 }
 
-func (c *Cluster) TagsFrom(tags []*console.ClusterTags, d diag.Diagnostics) {
+func (c *ClusterResource) TagsFrom(tags []*console.ClusterTags, d diag.Diagnostics) {
 	elements := map[string]attr.Value{}
 	for _, v := range tags {
 		elements[v.Name] = types.StringValue(v.Value)
@@ -98,7 +101,7 @@ func (c *Cluster) TagsFrom(tags []*console.ClusterTags, d diag.Diagnostics) {
 	d.Append(tagsDiagnostics...)
 }
 
-func (c *Cluster) From(cl *console.ClusterFragment, d diag.Diagnostics) {
+func (c *ClusterResource) From(cl *console.ClusterFragment, d diag.Diagnostics) {
 	c.Id = types.StringValue(cl.ID)
 	c.InsertedAt = types.StringPointerValue(cl.InsertedAt)
 	c.Name = types.StringValue(cl.Name)
@@ -110,7 +113,7 @@ func (c *Cluster) From(cl *console.ClusterFragment, d diag.Diagnostics) {
 	c.TagsFrom(cl.Tags, d)
 }
 
-func (c *Cluster) FromCreate(cc *console.CreateCluster, d diag.Diagnostics) {
+func (c *ClusterResource) FromCreate(cc *console.CreateCluster, d diag.Diagnostics) {
 	c.Id = types.StringValue(cc.CreateCluster.ID)
 	c.InsertedAt = types.StringPointerValue(cc.CreateCluster.InsertedAt)
 	c.Name = types.StringValue(cc.CreateCluster.Name)
@@ -122,6 +125,39 @@ func (c *Cluster) FromCreate(cc *console.CreateCluster, d diag.Diagnostics) {
 	c.TagsFrom(cc.CreateCluster.Tags, d)
 }
 
-func (c *Cluster) NodePoolsFrom(nodepools []*console.NodePoolFragment, d diag.Diagnostics) {
+func (c *ClusterResource) NodePoolsFrom(nodepools []*console.NodePoolFragment, d diag.Diagnostics) {
 	// TODO
+}
+
+type ClusterDataSource struct {
+	ClusterBase
+}
+
+func (c *ClusterDataSource) ProviderFrom(provider *console.ClusterProviderFragment) { // TODO: Dedupe.
+	if provider != nil {
+		c.ProviderId = types.StringValue(provider.ID)
+	}
+}
+
+func (c *ClusterDataSource) TagsFrom(tags []*console.ClusterTags, d diag.Diagnostics) { // TODO: Dedupe.
+	elements := map[string]attr.Value{}
+	for _, v := range tags {
+		elements[v.Name] = types.StringValue(v.Value)
+	}
+
+	tagsValue, tagsDiagnostics := types.MapValue(types.StringType, elements)
+	c.Tags = tagsValue
+	d.Append(tagsDiagnostics...)
+}
+
+func (c *ClusterDataSource) From(cl *console.ClusterFragment, d diag.Diagnostics) { // TODO: Dedupe.
+	c.Id = types.StringValue(cl.ID)
+	c.InsertedAt = types.StringPointerValue(cl.InsertedAt)
+	c.Name = types.StringValue(cl.Name)
+	c.Handle = types.StringPointerValue(cl.Handle)
+	c.Version = types.StringPointerValue(cl.Version)
+	c.Protect = types.BoolPointerValue(cl.Protect)
+	c.ProviderFrom(cl.Provider)
+	// c.NodePoolsFrom(cl.NodePools, d)
+	c.TagsFrom(cl.Tags, d)
 }
