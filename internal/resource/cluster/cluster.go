@@ -72,8 +72,8 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Computed:            true,
 			},
 			"version": schema.StringAttribute{
-				Description:         "Desired Kubernetes version for this cluster. Leave empty for bring your own cluster.",
-				MarkdownDescription: "Desired Kubernetes version for this cluster. Leave empty for bring your own cluster.",
+				Description:         "Desired Kubernetes version for this cluster. Leave empty for bring your own cluster. Supported version ranges can be found at https://github.com/pluralsh/console/tree/master/static/k8s-versions.",
+				MarkdownDescription: "Desired Kubernetes version for this cluster. Leave empty for bring your own cluster. Supported version ranges can be found at https://github.com/pluralsh/console/tree/master/static/k8s-versions.",
 				Optional:            true,
 				Computed:            true,
 				Validators: []validator.String{
