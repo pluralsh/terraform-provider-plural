@@ -19,10 +19,10 @@ type Cluster struct {
 	ProviderId    types.String          `tfsdk:"provider_id"`
 	Cloud         types.String          `tfsdk:"cloud"`
 	CloudSettings *ClusterCloudSettings `tfsdk:"cloud_settings"`
-	NodePools     []*ClusterNodePool    `tfsdk:"node_pools"`
 	Protect       types.Bool            `tfsdk:"protect"`
 	Tags          types.Map             `tfsdk:"tags"`
 	Bindings      *ClusterBindings      `tfsdk:"bindings"`
+	//NodePools     []*ClusterNodePool    `tfsdk:"node_pools"`
 }
 
 type ClusterNodePool struct {
@@ -43,9 +43,9 @@ type NodePoolCloudSettingsAWS struct {
 	LaunchTemplateId types.String `tfsdk:"launch_template_id"`
 }
 
-func (c *Cluster) NodePoolsAttribute() (result []*console.NodePoolAttributes) {
-	return nil // TODO
-}
+//func (c *Cluster) NodePoolsAttribute() (result []*console.NodePoolAttributes) {
+//	return nil
+//}
 
 func (c *Cluster) TagsAttribute(ctx context.Context, d diag.Diagnostics) (result []*console.TagAttributes) {
 	elements := make(map[string]types.String, len(c.Tags.Elements()))
@@ -65,19 +65,19 @@ func (c *Cluster) Attributes(ctx context.Context, d diag.Diagnostics) console.Cl
 		Version:       c.Version.ValueStringPointer(),
 		Protect:       c.Protect.ValueBoolPointer(),
 		CloudSettings: c.CloudSettings.Attributes(),
-		NodePools:     c.NodePoolsAttribute(),
 		ReadBindings:  c.Bindings.ReadAttributes(),
 		WriteBindings: c.Bindings.WriteAttributes(),
 		Tags:          c.TagsAttribute(ctx, d),
+		//NodePools:     c.NodePoolsAttribute(),
 	}
 }
 
 func (c *Cluster) UpdateAttributes() console.ClusterUpdateAttributes {
 	return console.ClusterUpdateAttributes{
-		Version:   c.Version.ValueStringPointer(),
-		Handle:    c.Handle.ValueStringPointer(),
-		Protect:   c.Protect.ValueBoolPointer(),
-		NodePools: c.NodePoolsAttribute(),
+		Version: c.Version.ValueStringPointer(),
+		Handle:  c.Handle.ValueStringPointer(),
+		Protect: c.Protect.ValueBoolPointer(),
+		//NodePools: c.NodePoolsAttribute(),
 	}
 }
 
@@ -106,7 +106,7 @@ func (c *Cluster) From(cl *console.ClusterFragment, d diag.Diagnostics) {
 	c.Version = types.StringPointerValue(cl.Version)
 	c.Protect = types.BoolPointerValue(cl.Protect)
 	c.ProviderFrom(cl.Provider)
-	c.NodePoolsFrom(cl.NodePools, d)
+	// c.NodePoolsFrom(cl.NodePools, d)
 	c.TagsFrom(cl.Tags, d)
 }
 
@@ -118,7 +118,7 @@ func (c *Cluster) FromCreate(cc *console.CreateCluster, d diag.Diagnostics) {
 	c.Version = types.StringPointerValue(cc.CreateCluster.Version)
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
 	c.ProviderFrom(cc.CreateCluster.Provider)
-	c.NodePoolsFrom(cc.CreateCluster.NodePools, d)
+	// c.NodePoolsFrom(cc.CreateCluster.NodePools, d)
 	c.TagsFrom(cc.CreateCluster.Tags, d)
 }
 

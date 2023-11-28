@@ -26,4 +26,6 @@ A representation of a cluster you can deploy to.
 - `inserted_at` (String) Creation date of this cluster.
 - `name` (String) Human-readable name of this cluster, that also translates to cloud resource name.
 - `protect` (Boolean) If set to `true` then this cluster cannot be deleted.
+- `provider_id` (String) Provider used to create this cluster.
 - `tags` (Map of String) Key-value tags used to filter clusters.
+- `version` (String) Desired Kubernetes version for this cluster.

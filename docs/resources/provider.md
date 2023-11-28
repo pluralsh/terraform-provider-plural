@@ -20,10 +20,14 @@ A representation of a provider you can deploy your clusters to.
 - `cloud` (String) The name of the cloud service for this provider.
 - `cloud_settings` (Attributes) Cloud-specific settings for a provider. (see [below for nested schema](#nestedatt--cloud_settings))
 - `name` (String) Human-readable name of this provider. Globally unique.
+
+### Optional
+
 - `namespace` (String) The namespace the Cluster API resources are deployed into.
 
 ### Read-Only
 
+- `editable` (Boolean) Whether this provider is editable.
 - `id` (String) Internal identifier of this provider.
 
 <a id="nestedatt--cloud_settings"></a>
@@ -33,7 +37,7 @@ Optional:
 
 - `aws` (Attributes) (see [below for nested schema](#nestedatt--cloud_settings--aws))
 - `azure` (Attributes) Azure cloud settings that will be used by this provider to create clusters. (see [below for nested schema](#nestedatt--cloud_settings--azure))
-- `gcp` (Attributes) (see [below for nested schema](#nestedatt--cloud_settings--gcp))
+- `gcp` (Attributes) GCP cloud settings that will be used by this provider to create clusters. (see [below for nested schema](#nestedatt--cloud_settings--gcp))
 
 <a id="nestedatt--cloud_settings--aws"></a>
 ### Nested Schema for `cloud_settings.aws`
@@ -60,4 +64,4 @@ Required:
 
 Required:
 
-- `credentials` (String, Sensitive)
+- `credentials` (String, Sensitive) Base64 encoded GCP credentials.json file. It's recommended to use custom Service Account.
