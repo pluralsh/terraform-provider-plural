@@ -7,8 +7,11 @@ import (
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	console "github.com/pluralsh/console-client-go"
 )
@@ -33,6 +36,7 @@ func (d *clusterDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 				Optional:            true,
 				Computed:            true,
 				MarkdownDescription: "Internal identifier of this cluster.",
+				Validators:          []validator.String{stringvalidator.ExactlyOneOf(path.MatchRoot("handle"))},
 			},
 			"inserted_at": schema.StringAttribute{
 				MarkdownDescription: "Creation date of this cluster.",
@@ -46,6 +50,7 @@ func (d *clusterDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 				MarkdownDescription: "A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.",
 				Optional:            true,
 				Computed:            true,
+				Validators:          []validator.String{stringvalidator.ExactlyOneOf(path.MatchRoot("id"))},
 			},
 			"version": schema.StringAttribute{
 				Description:         "Desired Kubernetes version for this cluster.",
