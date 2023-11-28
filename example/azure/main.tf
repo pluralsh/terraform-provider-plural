@@ -27,7 +27,7 @@ resource "plural_provider" "azure_provider" {
 resource "plural_cluster" "azure_cluster" {
   name = "azure-cluster-tf"
   handle = "aztf"
-  version = "1.26.3"
+  version = "1.25.11"
   provider_id = plural_provider.azure_provider.id
   cloud = "azure"
   protect = "false"
