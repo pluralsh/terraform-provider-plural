@@ -49,7 +49,7 @@ func (p *ProviderCloudSettings) Attributes() *console.CloudProviderSettingsAttri
 		return nil
 	}
 
-	if p.GCP != nil {
+	if p.AWS != nil {
 		return &console.CloudProviderSettingsAttributes{Aws: p.AWS.Attributes()}
 	}
 

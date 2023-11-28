@@ -134,14 +134,16 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 						},
 					},
 					"gcp": schema.SingleNestedAttribute{
-						Description:         "",
-						MarkdownDescription: "",
 						Optional:            true,
+						Description:         "GCP cloud settings that will be used by this provider to create clusters.",
+						MarkdownDescription: "GCP cloud settings that will be used by this provider to create clusters.",
 						Attributes: map[string]schema.Attribute{
 							"credentials": schema.StringAttribute{
-								MarkdownDescription: "",
 								Required:            true,
 								Sensitive:           true,
+								// TODO: point to documentation with requires list of permissions
+								Description:         "Base64 encoded GCP credentials.json file. It's recommended to use custom Service Account.",
+								MarkdownDescription: "Base64 encoded GCP credentials.json file. It's recommended to use custom Service Account.",
 							},
 						},
 						Validators: []validator.Object{
