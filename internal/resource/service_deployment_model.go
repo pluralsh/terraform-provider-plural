@@ -3,6 +3,8 @@ package resource
 import (
 	"context"
 
+	"terraform-provider-plural/internal/common"
+
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	gqlclient "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/polly/algorithms"
@@ -284,16 +286,7 @@ func (this *ServiceDeploymentNamespaceMetadata) Attributes() *gqlclient.Metadata
 	this.Labels.ElementsAs(context.Background(), &labels, false)
 
 	return &gqlclient.MetadataAttributes{
-		Annotations: this.toAttributesMap(annotations),
-		Labels:      this.toAttributesMap(labels),
+		Annotations: common.ToAttributesMap(annotations),
+		Labels:      common.ToAttributesMap(labels),
 	}
-}
-
-func (this *ServiceDeploymentNamespaceMetadata) toAttributesMap(m map[string]types.String) map[string]interface{} {
-	result := map[string]interface{}{}
-	for key, val := range m {
-		result[key] = val.ValueString()
-	}
-
-	return result
 }

@@ -17,7 +17,9 @@ resource "plural_cluster" "byok_workload_cluster" {
   cloud = "byok"
   protect = "false"
   cloud_settings = {
-    byok = {}
+    byok = {
+      # Provide before use
+    }
   }
   tags = {
     "managed-by" = "terraform-provider-plural"

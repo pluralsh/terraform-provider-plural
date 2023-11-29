@@ -11,45 +11,40 @@ import (
 )
 
 type cluster struct {
-	Id         types.String            `tfsdk:"id"`
-	InsertedAt types.String            `tfsdk:"inserted_at"`
-	Name       types.String            `tfsdk:"name"`
-	Handle     types.String            `tfsdk:"handle"`
-	Version    types.String            `tfsdk:"version"`
-	ProviderId types.String            `tfsdk:"provider_id"`
-	Cloud      types.String            `tfsdk:"cloud"`
-	Protect    types.Bool              `tfsdk:"protect"`
-	Tags       types.Map               `tfsdk:"tags"`
-	Bindings   *common.ClusterBindings `tfsdk:"bindings"`
-	//NodePools     []*ClusterNodePool    `tfsdk:"node_pools"`
-	CloudSettings *ClusterCloudSettings `tfsdk:"cloud_settings"`
+	Id            types.String              `tfsdk:"id"`
+	InsertedAt    types.String              `tfsdk:"inserted_at"`
+	Name          types.String              `tfsdk:"name"`
+	Handle        types.String              `tfsdk:"handle"`
+	Version       types.String              `tfsdk:"version"`
+	ProviderId    types.String              `tfsdk:"provider_id"`
+	Cloud         types.String              `tfsdk:"cloud"`
+	Protect       types.Bool                `tfsdk:"protect"`
+	Tags          types.Map                 `tfsdk:"tags"`
+	Bindings      *common.ClusterBindings   `tfsdk:"bindings"`
+	NodePools     []*common.ClusterNodePool `tfsdk:"node_pools"`
+	CloudSettings *ClusterCloudSettings     `tfsdk:"cloud_settings"`
 }
 
-type ClusterNodePool struct {
-	Name          types.String           `tfsdk:"name"`
-	MinSize       types.Int64            `tfsdk:"min_size"`
-	MaxSize       types.Int64            `tfsdk:"max_size"`
-	InstanceType  types.String           `tfsdk:"instance_type"`
-	Labels        types.Map              `tfsdk:"labels"`
-	Taints        types.List             `tfsdk:"taints"`
-	CloudSettings *NodePoolCloudSettings `tfsdk:"cloud_settings"`
-}
+func (c *cluster) NodePoolsAttribute(ctx context.Context, d diag.Diagnostics) []*console.NodePoolAttributes {
+	result := make([]*console.NodePoolAttributes, 0, len(c.NodePools))
+	for _, np := range c.NodePools {
+		result = append(result, &console.NodePoolAttributes{
+			Name:          np.Name.ValueString(),
+			MinSize:       np.MinSize.ValueInt64(),
+			MaxSize:       np.MaxSize.ValueInt64(),
+			InstanceType:  np.InstanceType.ValueString(),
+			Labels:        np.LabelsAttribute(ctx, d),
+			Taints:        nil,
+			CloudSettings: nil,
+		})
+	}
 
-type NodePoolCloudSettings struct {
-	AWS *NodePoolCloudSettingsAWS `tfsdk:"aws"`
+	return nil
 }
-
-type NodePoolCloudSettingsAWS struct {
-	LaunchTemplateId types.String `tfsdk:"launch_template_id"`
-}
-
-//func (c *Cluster) NodePoolsAttribute() (result []*console.NodePoolAttributes) {
-//	return nil
-//}
 
 func (c *cluster) TagsAttribute(ctx context.Context, d diag.Diagnostics) (result []*console.TagAttributes) {
 	elements := make(map[string]types.String, len(c.Tags.Elements()))
-	d.Append(c.Tags.ElementsAs(context.TODO(), &elements, false)...)
+	d.Append(c.Tags.ElementsAs(ctx, &elements, false)...)
 	for k, v := range elements {
 		result = append(result, &console.TagAttributes{Name: k, Value: v.ValueString()})
 	}
@@ -68,29 +63,17 @@ func (c *cluster) Attributes(ctx context.Context, d diag.Diagnostics) console.Cl
 		ReadBindings:  c.Bindings.ReadAttributes(),
 		WriteBindings: c.Bindings.WriteAttributes(),
 		Tags:          c.TagsAttribute(ctx, d),
-		//NodePools:     c.NodePoolsAttribute(),
+		NodePools:     c.NodePoolsAttribute(ctx, d),
 	}
 }
 
-func (c *cluster) UpdateAttributes() console.ClusterUpdateAttributes {
+func (c *cluster) UpdateAttributes(ctx context.Context, d diag.Diagnostics) console.ClusterUpdateAttributes {
 	return console.ClusterUpdateAttributes{
-		Version: c.Version.ValueStringPointer(),
-		Handle:  c.Handle.ValueStringPointer(),
-		Protect: c.Protect.ValueBoolPointer(),
-		//NodePools: c.NodePoolsAttribute(),
+		Version:   c.Version.ValueStringPointer(),
+		Handle:    c.Handle.ValueStringPointer(),
+		Protect:   c.Protect.ValueBoolPointer(),
+		NodePools: c.NodePoolsAttribute(ctx, d),
 	}
-}
-
-func (c *cluster) ProviderFrom(provider *console.ClusterProviderFragment) {
-	if provider != nil {
-		c.ProviderId = types.StringValue(provider.ID)
-	}
-}
-
-func (c *cluster) TagsFrom(tags []*console.ClusterTags, d diag.Diagnostics) {
-	tagsValue, tagsDiagnostics := types.MapValue(types.StringType, common.ClusterTagsMap(tags))
-	c.Tags = tagsValue
-	d.Append(tagsDiagnostics...)
 }
 
 func (c *cluster) From(cl *console.ClusterFragment, d diag.Diagnostics) {
@@ -100,9 +83,9 @@ func (c *cluster) From(cl *console.ClusterFragment, d diag.Diagnostics) {
 	c.Handle = types.StringPointerValue(cl.Handle)
 	c.Version = types.StringPointerValue(cl.Version)
 	c.Protect = types.BoolPointerValue(cl.Protect)
-	c.ProviderFrom(cl.Provider)
-	// c.NodePoolsFrom(cl.NodePools, d)
-	c.TagsFrom(cl.Tags, d)
+	c.NodePools = common.ClusterNodePoolsFrom(cl.NodePools)
+	c.Tags = common.ClusterTagsFrom(cl.Tags, d)
+	c.ProviderId = common.ClusterProviderIdFrom(cl.Provider)
 }
 
 func (c *cluster) FromCreate(cc *console.CreateCluster, d diag.Diagnostics) {
@@ -112,11 +95,7 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, d diag.Diagnostics) {
 	c.Handle = types.StringPointerValue(cc.CreateCluster.Handle)
 	c.Version = types.StringPointerValue(cc.CreateCluster.Version)
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
-	c.ProviderFrom(cc.CreateCluster.Provider)
-	// c.NodePoolsFrom(cc.CreateCluster.NodePools, d)
-	c.TagsFrom(cc.CreateCluster.Tags, d)
-}
-
-func (c *cluster) NodePoolsFrom(nodepools []*console.NodePoolFragment, d diag.Diagnostics) {
-	// TODO
+	c.NodePools = common.ClusterNodePoolsFrom(cc.CreateCluster.NodePools)
+	c.Tags = common.ClusterTagsFrom(cc.CreateCluster.Tags, d)
+	c.ProviderId = common.ClusterProviderIdFrom(cc.CreateCluster.Provider)
 }

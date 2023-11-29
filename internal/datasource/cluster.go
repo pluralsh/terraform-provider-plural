@@ -75,81 +75,81 @@ func (d *clusterDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 				Computed:            true,
 				ElementType:         types.StringType,
 			},
-			//"node_pools": schema.ListNestedAttribute{
-			//	Description:         "List of node pool specs managed by this cluster.",
-			//	MarkdownDescription: "List of node pool specs managed by this cluster.",
-			//	Computed:            true,
-			//	NestedObject: schema.NestedAttributeObject{
-			//		Attributes: map[string]schema.Attribute{
-			//			"name": schema.StringAttribute{
-			//				Description:         "Node pool name.",
-			//				MarkdownDescription: "Node pool name.",
-			//				Computed:            true,
-			//			},
-			//			"min_size": schema.Int64Attribute{
-			//				Description:         "Minimum number of instances in this node pool.",
-			//				MarkdownDescription: "Minimum number of instances in this node pool.",
-			//				Computed:            true,
-			//			},
-			//			"max_size": schema.Int64Attribute{
-			//				Description:         "Maximum number of instances in this node pool.",
-			//				MarkdownDescription: "Maximum number of instances in this node pool.",
-			//				Computed:            true,
-			//			},
-			//			"instance_type": schema.StringAttribute{
-			//				Description:         "The type of used node. Usually cloud-specific.",
-			//				MarkdownDescription: "The type of used node. Usually cloud-specific.",
-			//				Computed:            true,
-			//			},
-			//			"labels": schema.MapAttribute{
-			//				Description:         "Kubernetes labels applied to the nodes in this pool.",
-			//				MarkdownDescription: "Kubernetes labels applied to the nodes in this pool.",
-			//				ElementType:         types.StringType,
-			//				Computed:            true,
-			//			},
-			//			"taints": schema.ListNestedAttribute{
-			//				Description:         "Taints applied to a node.",
-			//				MarkdownDescription: "Taints applied to a node.",
-			//				Computed:            true,
-			//				NestedObject: schema.NestedAttributeObject{
-			//					Attributes: map[string]schema.Attribute{
-			//						"key": schema.MapAttribute{
-			//							ElementType: types.StringType,
-			//							Computed:    true,
-			//						},
-			//						"value": schema.MapAttribute{
-			//							ElementType: types.StringType,
-			//							Computed:    true,
-			//						},
-			//						"effect": schema.MapAttribute{
-			//							ElementType: types.StringType,
-			//							Computed:    true,
-			//						},
-			//					},
-			//				},
-			//			},
-			//			"cloud_settings": schema.SingleNestedAttribute{
-			//				Description:         "Cloud-specific settings for this node pool.",
-			//				MarkdownDescription: "Cloud-specific settings for this node pool.",
-			//				Computed:            true,
-			//				Attributes: map[string]schema.Attribute{
-			//					"aws": schema.SingleNestedAttribute{
-			//						Description:         "AWS node pool customizations.",
-			//						MarkdownDescription: "AWS node pool customizations.",
-			//						Computed:            true,
-			//						Attributes: map[string]schema.Attribute{
-			//							"launch_template_id": schema.StringAttribute{
-			//								Description:         "Custom launch template for your nodes. Useful for Golden AMI setups.",
-			//								MarkdownDescription: "Custom launch template for your nodes. Useful for Golden AMI setups.",
-			//								Computed:            true,
-			//							},
-			//						},
-			//					},
-			//				},
-			//			},
-			//		},
-			//	},
-			//},
+			"node_pools": schema.ListNestedAttribute{
+				Description:         "List of node pool specs managed by this cluster.",
+				MarkdownDescription: "List of node pool specs managed by this cluster.",
+				Computed:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description:         "Node pool name.",
+							MarkdownDescription: "Node pool name.",
+							Computed:            true,
+						},
+						"min_size": schema.Int64Attribute{
+							Description:         "Minimum number of instances in this node pool.",
+							MarkdownDescription: "Minimum number of instances in this node pool.",
+							Computed:            true,
+						},
+						"max_size": schema.Int64Attribute{
+							Description:         "Maximum number of instances in this node pool.",
+							MarkdownDescription: "Maximum number of instances in this node pool.",
+							Computed:            true,
+						},
+						"instance_type": schema.StringAttribute{
+							Description:         "The type of used node. Usually cloud-specific.",
+							MarkdownDescription: "The type of used node. Usually cloud-specific.",
+							Computed:            true,
+						},
+						"labels": schema.MapAttribute{
+							Description:         "Kubernetes labels applied to the nodes in this pool.",
+							MarkdownDescription: "Kubernetes labels applied to the nodes in this pool.",
+							ElementType:         types.StringType,
+							Computed:            true,
+						},
+						"taints": schema.ListNestedAttribute{
+							Description:         "Taints applied to a node.",
+							MarkdownDescription: "Taints applied to a node.",
+							Computed:            true,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+									"key": schema.MapAttribute{
+										ElementType: types.StringType,
+										Computed:    true,
+									},
+									"value": schema.MapAttribute{
+										ElementType: types.StringType,
+										Computed:    true,
+									},
+									"effect": schema.MapAttribute{
+										ElementType: types.StringType,
+										Computed:    true,
+									},
+								},
+							},
+						},
+						"cloud_settings": schema.SingleNestedAttribute{
+							Description:         "Cloud-specific settings for this node pool.",
+							MarkdownDescription: "Cloud-specific settings for this node pool.",
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+								"aws": schema.SingleNestedAttribute{
+									Description:         "AWS node pool customizations.",
+									MarkdownDescription: "AWS node pool customizations.",
+									Computed:            true,
+									Attributes: map[string]schema.Attribute{
+										"launch_template_id": schema.StringAttribute{
+											Description:         "Custom launch template for your nodes. Useful for Golden AMI setups.",
+											MarkdownDescription: "Custom launch template for your nodes. Useful for Golden AMI setups.",
+											Computed:            true,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }

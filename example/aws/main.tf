@@ -38,12 +38,7 @@ resource "plural_cluster" "aws_cluster" {
       region = "us-east-1"
     }
   }
-#  node_pools = []
   tags = {
     "managed-by" = "terraform-provider-plural"
-  }
-  bindings = {
-    read = []
-    write = []
   }
 }
