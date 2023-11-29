@@ -23,7 +23,7 @@ type cluster struct {
 	Protect        types.Bool                `tfsdk:"protect"`
 	Tags           types.Map                 `tfsdk:"tags"`
 	Bindings       *common.ClusterBindings   `tfsdk:"bindings"`
-	NodePools      []*common.ClusterNodePool `tfsdk:"node_pools"`
+	NodePools      []*common.ClusterNodePool `tfsdk:"node_pools"` // TODO: Fix type and mark as experimental in schema.
 	CloudSettings  *ClusterCloudSettings     `tfsdk:"cloud_settings"`
 }
 
