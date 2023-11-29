@@ -30,7 +30,7 @@ resource "plural_cluster" "aws_cluster" {
   name = "aws-cluster-tf"
   handle = "awstf"
   version = "1.24"
-  provider_id = plural_provider.aws_provider.id
+  provider_id = data.plural_provider.aws_provider.id
   cloud = "aws"
   protect = "false"
   cloud_settings = {

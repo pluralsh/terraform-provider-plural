@@ -6,10 +6,11 @@ import (
 	console "github.com/pluralsh/console-client-go"
 )
 
-func ClusterTagsMap(tags []*console.ClusterTags) (result map[string]attr.Value) {
+func ClusterTagsMap(tags []*console.ClusterTags) map[string]attr.Value {
+	result := map[string]attr.Value{}
 	for _, v := range tags {
 		result[v.Name] = types.StringValue(v.Value)
 	}
 
-	return
+	return result
 }

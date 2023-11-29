@@ -24,11 +24,15 @@ resource "plural_provider" "azure_provider" {
   }
 }
 
+data "plural_provider" "azure_provider" {
+  cloud = "aws"
+}
+
 resource "plural_cluster" "azure_cluster" {
   name = "azure-cluster-tf"
   handle = "aztf"
   version = "1.25.11"
-  provider_id = plural_provider.azure_provider.id
+  provider_id = data.plural_provider.azure_provider.id
   cloud = "azure"
   protect = "false"
   cloud_settings = {
