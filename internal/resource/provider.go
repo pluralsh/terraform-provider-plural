@@ -139,8 +139,8 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 						MarkdownDescription: "GCP cloud settings that will be used by this provider to create clusters.",
 						Attributes: map[string]schema.Attribute{
 							"credentials": schema.StringAttribute{
-								Required:            true,
-								Sensitive:           true,
+								Required:  true,
+								Sensitive: true,
 								// TODO: point to documentation with requires list of permissions
 								Description:         "Base64 encoded GCP credentials.json file. It's recommended to use custom Service Account.",
 								MarkdownDescription: "Base64 encoded GCP credentials.json file. It's recommended to use custom Service Account.",
@@ -178,7 +178,7 @@ func (r *providerResource) Configure(_ context.Context, req resource.ConfigureRe
 }
 
 func (r *providerResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data model.Provider
+	var data model.ProviderResource
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -195,7 +195,7 @@ func (r *providerResource) Create(ctx context.Context, req resource.CreateReques
 }
 
 func (r *providerResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data model.Provider
+	var data model.ProviderResource
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -216,7 +216,7 @@ func (r *providerResource) Read(ctx context.Context, req resource.ReadRequest, r
 }
 
 func (r *providerResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data model.Provider
+	var data model.ProviderResource
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -232,7 +232,7 @@ func (r *providerResource) Update(ctx context.Context, req resource.UpdateReques
 }
 
 func (r *providerResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data model.Provider
+	var data model.ProviderResource
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return

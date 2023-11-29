@@ -9,7 +9,7 @@ import (
 	console "github.com/pluralsh/console-client-go"
 )
 
-type ClusterBase struct {
+type clusterBase struct {
 	Id         types.String     `tfsdk:"id"`
 	InsertedAt types.String     `tfsdk:"inserted_at"`
 	Name       types.String     `tfsdk:"name"`
@@ -24,7 +24,7 @@ type ClusterBase struct {
 }
 
 type ClusterResource struct {
-	ClusterBase
+	clusterBase
 	CloudSettings *ClusterCloudSettings `tfsdk:"cloud_settings"`
 }
 
@@ -130,7 +130,7 @@ func (c *ClusterResource) NodePoolsFrom(nodepools []*console.NodePoolFragment, d
 }
 
 type ClusterDataSource struct {
-	ClusterBase
+	clusterBase
 }
 
 func (c *ClusterDataSource) ProviderFrom(provider *console.ClusterProviderFragment) { // TODO: Dedupe.

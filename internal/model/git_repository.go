@@ -5,19 +5,19 @@ import (
 	gqlclient "github.com/pluralsh/console-client-go"
 )
 
-type GitRepositoryBase struct {
-	Id         types.String `tfsdk:"id"`
-	Url        types.String `tfsdk:"url"`
+type gitRepositoryBase struct {
+	Id  types.String `tfsdk:"id"`
+	Url types.String `tfsdk:"url"`
 }
 
-func (this *GitRepositoryBase) From(response *gqlclient.GitRepositoryFragment) {
+func (this *gitRepositoryBase) From(response *gqlclient.GitRepositoryFragment) {
 	this.Id = types.StringValue(response.ID)
 	this.Url = types.StringValue(response.URL)
 }
 
 // GitRepository describes the Git repository resource and data source model.
 type GitRepository struct {
-	GitRepositoryBase
+	gitRepositoryBase
 
 	PrivateKey types.String `tfsdk:"private_key"`
 	Passphrase types.String `tfsdk:"passphrase"`
@@ -37,4 +37,8 @@ func (this *GitRepository) Attributes() gqlclient.GitAttributes {
 		HTTPSPath:  this.HttpsPath.ValueStringPointer(),
 		URLFormat:  this.UrlFormat.ValueStringPointer(),
 	}
+}
+
+type GitRepositoryDataSource struct {
+	gitRepositoryBase
 }
