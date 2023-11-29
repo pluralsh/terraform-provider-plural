@@ -5,12 +5,12 @@ import (
 	gqlclient "github.com/pluralsh/console-client-go"
 )
 
-type GitRepository struct {
+type gitRepository struct {
 	Id  types.String `tfsdk:"id"`
 	Url types.String `tfsdk:"url"`
 }
 
-func (g *GitRepository) From(response *gqlclient.GitRepositoryFragment) {
+func (g *gitRepository) From(response *gqlclient.GitRepositoryFragment) {
 	g.Id = types.StringValue(response.ID)
 	g.Url = types.StringValue(response.URL)
 }

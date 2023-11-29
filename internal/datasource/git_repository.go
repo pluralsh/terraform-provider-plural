@@ -70,7 +70,7 @@ func (r *GitRepositoryDataSource) Configure(_ context.Context, req datasource.Co
 }
 
 func (r *GitRepositoryDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	data := new(GitRepository)
+	data := new(gitRepository)
 	resp.Diagnostics.Append(req.Config.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return

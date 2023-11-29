@@ -1,4 +1,4 @@
-package cluster
+package common
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"

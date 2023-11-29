@@ -88,19 +88,11 @@ func (p *providerDataSource) Read(ctx context.Context, req datasource.ReadReques
 		return
 	}
 
-	if data.Id.IsNull() && data.Cloud.IsNull() {
-		resp.Diagnostics.AddError(
-			"Missing Provider ID and Cloud",
-			"The provider could not read provider data. ID or cloud needs to be specified.",
-		)
-		return
-	}
-
 	var id string
 	if !data.Id.IsNull() {
 		id = data.Id.ValueString()
 	} else {
-		if providers, err := p.client.ListProviders(ctx); err != nil {
+		if providers, err := p.client.ListProviders(ctx); err == nil {
 			for _, pv := range providers.ClusterProviders.Edges {
 				if pv.Node.Cloud == data.Cloud.ValueString() {
 					id = pv.Node.ID

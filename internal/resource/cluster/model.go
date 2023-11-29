@@ -3,23 +3,24 @@ package cluster
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"terraform-provider-plural/internal/common"
+
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	console "github.com/pluralsh/console-client-go"
 )
 
 type cluster struct {
-	Id         types.String     `tfsdk:"id"`
-	InsertedAt types.String     `tfsdk:"inserted_at"`
-	Name       types.String     `tfsdk:"name"`
-	Handle     types.String     `tfsdk:"handle"`
-	Version    types.String     `tfsdk:"version"`
-	ProviderId types.String     `tfsdk:"provider_id"`
-	Cloud      types.String     `tfsdk:"cloud"`
-	Protect    types.Bool       `tfsdk:"protect"`
-	Tags       types.Map        `tfsdk:"tags"`
-	Bindings   *ClusterBindings `tfsdk:"bindings"`
+	Id         types.String            `tfsdk:"id"`
+	InsertedAt types.String            `tfsdk:"inserted_at"`
+	Name       types.String            `tfsdk:"name"`
+	Handle     types.String            `tfsdk:"handle"`
+	Version    types.String            `tfsdk:"version"`
+	ProviderId types.String            `tfsdk:"provider_id"`
+	Cloud      types.String            `tfsdk:"cloud"`
+	Protect    types.Bool              `tfsdk:"protect"`
+	Tags       types.Map               `tfsdk:"tags"`
+	Bindings   *common.ClusterBindings `tfsdk:"bindings"`
 	//NodePools     []*ClusterNodePool    `tfsdk:"node_pools"`
 	CloudSettings *ClusterCloudSettings `tfsdk:"cloud_settings"`
 }
@@ -87,12 +88,7 @@ func (c *cluster) ProviderFrom(provider *console.ClusterProviderFragment) {
 }
 
 func (c *cluster) TagsFrom(tags []*console.ClusterTags, d diag.Diagnostics) {
-	elements := map[string]attr.Value{}
-	for _, v := range tags {
-		elements[v.Name] = types.StringValue(v.Value)
-	}
-
-	tagsValue, tagsDiagnostics := types.MapValue(types.StringType, elements)
+	tagsValue, tagsDiagnostics := types.MapValue(types.StringType, common.ClusterTagsMap(tags))
 	c.Tags = tagsValue
 	d.Append(tagsDiagnostics...)
 }
