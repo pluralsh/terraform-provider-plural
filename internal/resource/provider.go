@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"terraform-provider-plural/internal/client"
-	"terraform-provider-plural/internal/common"
-
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -17,6 +14,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"k8s.io/apimachinery/pkg/util/wait"
+
+	"terraform-provider-plural/internal/client"
+	"terraform-provider-plural/internal/common"
+	"terraform-provider-plural/internal/defaults"
 )
 
 var _ resource.Resource = &providerResource{}
@@ -139,9 +140,11 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 						MarkdownDescription: "GCP cloud settings that will be used by this provider to create clusters.",
 						Attributes: map[string]schema.Attribute{
 							"credentials": schema.StringAttribute{
-								Required:  true,
+								Computed:  true,
+								Optional:  true,
 								Sensitive: true,
-								// TODO: point to documentation with requires list of permissions
+								Default:   defaults.Env("PLURAL_GCP_CREDENTIALS", ""),
+								// TODO: point to documentation with required list of permissions
 								Description:         "Base64 encoded GCP credentials.json file. It's recommended to use custom Service Account.",
 								MarkdownDescription: "Base64 encoded GCP credentials.json file. It's recommended to use custom Service Account.",
 							},

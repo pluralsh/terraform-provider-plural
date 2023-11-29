@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -66,6 +67,7 @@ func (r *ServiceDeploymentResource) schema() schema.Schema {
 			"repository":    r.schemaRepository(),
 			"bindings":      r.schemaBindings(),
 			"sync_config":   r.schemaSyncConfig(),
+			"helm":          r.schemaHelm(),
 		},
 	}
 }
@@ -138,7 +140,7 @@ func (r *ServiceDeploymentResource) schemaCluster() schema.SingleNestedAttribute
 
 func (r *ServiceDeploymentResource) schemaRepository() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
-		Required:            true,
+		Optional:            true,
 		Description:         "Repository information used to pull ServiceDeployment.",
 		MarkdownDescription: "Repository information used to pull ServiceDeployment.",
 		Attributes: map[string]schema.Attribute{
@@ -154,6 +156,9 @@ func (r *ServiceDeploymentResource) schemaRepository() schema.SingleNestedAttrib
 			"folder": schema.StringAttribute{
 				Required: true,
 			},
+		},
+		Validators: []validator.Object{
+			objectvalidator.AtLeastOneOf(path.MatchRoot("helm")),
 		},
 	}
 }
@@ -249,6 +254,58 @@ func (r *ServiceDeploymentResource) schemaSyncConfig() schema.SingleNestedAttrib
 		},
 		PlanModifiers: []planmodifier.Object{
 			objectplanmodifier.RequiresReplace(),
+		},
+	}
+}
+
+func (r *ServiceDeploymentResource) schemaHelm() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Optional:            true,
+		Description:         "Settings defining how Helm charts should be applied.",
+		MarkdownDescription: "Settings defining how Helm charts should be applied.",
+		Attributes: map[string]schema.Attribute{
+			"chart": schema.StringAttribute{
+				Optional:            true,
+				Description:         "The name of the chart to use.",
+				MarkdownDescription: "The name of the chart to use.",
+			},
+			"repository": schema.SingleNestedAttribute{
+				Optional:            true,
+				Description:         "Resource reference to the flux Helm repository used by this chart.",
+				MarkdownDescription: "Resource reference to the flux Helm repository used by this chart.",
+				Attributes: map[string]schema.Attribute{
+					"name": schema.MapAttribute{
+						ElementType:         types.StringType,
+						Optional:            true,
+						Description:         "Name of the flux Helm repository resource used by this chart.",
+						MarkdownDescription: "Name of the flux Helm repository resource used by this chart.",
+					},
+					"namespace": schema.MapAttribute{
+						ElementType:         types.StringType,
+						Optional:            true,
+						Description:         "Namespace of the flux Helm repository resource used by this chart.",
+						MarkdownDescription: "Namespace of the flux Helm repository resource used by this chart.",
+					},
+				},
+			},
+			"values": schema.StringAttribute{
+				Optional:            true,
+				Description:         "Helm values file to use with this service",
+				MarkdownDescription: "Helm values file to use with this service",
+			},
+			"values_files": schema.StringAttribute{
+				Optional:            true,
+				Description:         "List of relative paths to values files to use form Helm applies.",
+				MarkdownDescription: "List of relative paths to values files to use form Helm applies.",
+			},
+			"version": schema.StringAttribute{
+				Optional:            true,
+				Description:         "Chart version to use",
+				MarkdownDescription: "Chart version to use",
+			},
+		},
+		Validators: []validator.Object{
+			objectvalidator.AtLeastOneOf(path.MatchRoot("helm")),
 		},
 	}
 }

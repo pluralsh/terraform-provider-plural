@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	gqlclient "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/polly/algorithms"
-	"github.com/samber/lo"
 )
 
 type ServiceDeployment struct {
@@ -24,6 +23,7 @@ type ServiceDeployment struct {
 	Repository    *ServiceDeploymentRepository      `tfsdk:"repository"`
 	Bindings      *ServiceDeploymentBindings        `tfsdk:"bindings"`
 	SyncConfig    *ServiceDeploymentSyncConfig      `tfsdk:"sync_config"`
+	Helm          *ServiceDeploymentHelm            `tfsdk:"helm"`
 }
 
 func (this *ServiceDeployment) VersionString() *string {
@@ -43,7 +43,7 @@ func (this *ServiceDeployment) FromCreate(response *gqlclient.ServiceDeploymentF
 	this.Version = types.StringValue(response.Version)
 	this.Kustomize.From(response.Kustomize)
 	this.Configuration = ToServiceDeploymentConfiguration(response.Configuration)
-	this.Repository.From(response.Repository, &response.Git)
+	this.Repository.From(response.Repository, response.Git)
 }
 
 func (this *ServiceDeployment) FromGet(response *gqlclient.ServiceDeploymentExtended) {
@@ -53,7 +53,7 @@ func (this *ServiceDeployment) FromGet(response *gqlclient.ServiceDeploymentExte
 	this.Protect = types.BoolPointerValue(response.Protect)
 	this.Kustomize.From(response.Kustomize)
 	this.Configuration = ToServiceDeploymentConfiguration(response.Configuration)
-	this.Repository.From(response.Repository, &response.Git)
+	this.Repository.From(response.Repository, response.Git)
 }
 
 func (this *ServiceDeployment) Attributes() gqlclient.ServiceDeploymentAttributes {
@@ -74,6 +74,7 @@ func (this *ServiceDeployment) Attributes() gqlclient.ServiceDeploymentAttribute
 		Configuration: ToServiceDeploymentConfigAttributes(this.Configuration),
 		ReadBindings:  this.Bindings.ReadAttributes(),
 		WriteBindings: this.Bindings.WriteAttributes(),
+		Helm:          this.Helm.Attributes(),
 	}
 }
 
@@ -85,7 +86,7 @@ func (this *ServiceDeployment) UpdateAttributes() gqlclient.ServiceUpdateAttribu
 	return gqlclient.ServiceUpdateAttributes{
 		Version:       this.Version.ValueStringPointer(),
 		Protect:       this.Protect.ValueBoolPointer(),
-		Git:           lo.ToPtr(this.Repository.Attributes()),
+		Git:           this.Repository.Attributes(),
 		Configuration: ToServiceDeploymentConfigAttributes(this.Configuration),
 		Kustomize:     this.Kustomize.Attributes(),
 	}
@@ -153,12 +154,12 @@ func (this *ServiceDeploymentRepository) From(repository *gqlclient.GitRepositor
 	this.Folder = types.StringValue(git.Folder)
 }
 
-func (this *ServiceDeploymentRepository) Attributes() gqlclient.GitRefAttributes {
+func (this *ServiceDeploymentRepository) Attributes() *gqlclient.GitRefAttributes {
 	if this == nil {
-		return gqlclient.GitRefAttributes{}
+		return &gqlclient.GitRefAttributes{}
 	}
 
-	return gqlclient.GitRefAttributes{
+	return &gqlclient.GitRefAttributes{
 		Ref:    this.Ref.ValueString(),
 		Folder: this.Folder.ValueString(),
 	}
@@ -288,5 +289,48 @@ func (this *ServiceDeploymentNamespaceMetadata) Attributes() *gqlclient.Metadata
 	return &gqlclient.MetadataAttributes{
 		Annotations: common.ToAttributesMap(annotations),
 		Labels:      common.ToAttributesMap(labels),
+	}
+}
+
+type ServiceDeploymentHelm struct {
+	Chart       types.String                     `tfsdk:"chart"`
+	Repository  *ServiceDeploymentNamespacedName `tfsdk:"repository"`
+	Values      types.String                     `tfsdk:"values"`
+	ValuesFiles types.List                       `tfsdk:"values_files"`
+	Version     types.String                     `tfsdk:"version"`
+}
+
+func (this *ServiceDeploymentHelm) Attributes() *gqlclient.HelmConfigAttributes {
+	if this == nil {
+		return nil
+	}
+
+	valuesFiles := make([]types.String, len(this.ValuesFiles.Elements()))
+	this.ValuesFiles.ElementsAs(context.Background(), &valuesFiles, false)
+
+	return &gqlclient.HelmConfigAttributes{
+		Values: this.Values.ValueStringPointer(),
+		ValuesFiles: algorithms.Map(valuesFiles, func(v types.String) *string {
+			return v.ValueStringPointer()
+		}),
+		Chart:      this.Chart.ValueStringPointer(),
+		Version:    this.Version.ValueStringPointer(),
+		Repository: this.Repository.Attributes(),
+	}
+}
+
+type ServiceDeploymentNamespacedName struct {
+	Name      types.String `tfsdk:"name"`
+	Namespace types.String `tfsdk:"namespace"`
+}
+
+func (this *ServiceDeploymentNamespacedName) Attributes() *gqlclient.NamespacedName {
+	if this == nil {
+		return nil
+	}
+
+	return &gqlclient.NamespacedName{
+		Name:      this.Name.ValueString(),
+		Namespace: this.Namespace.ValueString(),
 	}
 }
