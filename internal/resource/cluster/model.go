@@ -41,7 +41,7 @@ func (c *cluster) NodePoolsAttribute(ctx context.Context, d diag.Diagnostics) []
 		})
 	}
 
-	return nil
+	return result
 }
 
 func (c *cluster) TagsAttribute(ctx context.Context, d diag.Diagnostics) (result []*console.TagAttributes) {
