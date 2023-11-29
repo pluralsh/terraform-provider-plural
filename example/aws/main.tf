@@ -38,6 +38,14 @@ resource "plural_cluster" "aws_cluster" {
       region = "us-east-1"
     }
   }
+  node_pools = [
+    {
+      name = "pool"
+      min_size = 1
+      max_size = 5
+      instance_type = "t5.large"
+    }
+  ]
   tags = {
     "managed-by" = "terraform-provider-plural"
   }

@@ -11,25 +11,28 @@ import (
 )
 
 type cluster struct {
-	Id             types.String              `tfsdk:"id"`
-	InsertedAt     types.String              `tfsdk:"inserted_at"`
-	Name           types.String              `tfsdk:"name"`
-	Handle         types.String              `tfsdk:"handle"`
-	Version        types.String              `tfsdk:"version"`
-	CurrentVersion types.String              `tfsdk:"current_version"`
-	DesiredVersion types.String              `tfsdk:"desired_version"`
-	ProviderId     types.String              `tfsdk:"provider_id"`
-	Cloud          types.String              `tfsdk:"cloud"`
-	Protect        types.Bool                `tfsdk:"protect"`
-	Tags           types.Map                 `tfsdk:"tags"`
-	Bindings       *common.ClusterBindings   `tfsdk:"bindings"`
-	NodePools      []*common.ClusterNodePool `tfsdk:"node_pools"` // TODO: Fix type and mark as experimental in schema.
-	CloudSettings  *ClusterCloudSettings     `tfsdk:"cloud_settings"`
+	Id             types.String            `tfsdk:"id"`
+	InsertedAt     types.String            `tfsdk:"inserted_at"`
+	Name           types.String            `tfsdk:"name"`
+	Handle         types.String            `tfsdk:"handle"`
+	Version        types.String            `tfsdk:"version"`
+	CurrentVersion types.String            `tfsdk:"current_version"`
+	DesiredVersion types.String            `tfsdk:"desired_version"`
+	ProviderId     types.String            `tfsdk:"provider_id"`
+	Cloud          types.String            `tfsdk:"cloud"`
+	Protect        types.Bool              `tfsdk:"protect"`
+	Tags           types.Map               `tfsdk:"tags"`
+	Bindings       *common.ClusterBindings `tfsdk:"bindings"`
+	NodePools      types.List              `tfsdk:"node_pools"`
+	CloudSettings  *ClusterCloudSettings   `tfsdk:"cloud_settings"`
 }
 
 func (c *cluster) NodePoolsAttribute(ctx context.Context, d diag.Diagnostics) []*console.NodePoolAttributes {
-	result := make([]*console.NodePoolAttributes, 0, len(c.NodePools))
-	for _, np := range c.NodePools {
+	result := make([]*console.NodePoolAttributes, len(c.NodePools.Elements()))
+	nodePools := make([]common.ClusterNodePool, len(c.NodePools.Elements())) // TODO: []* pointer?
+	c.NodePools.ElementsAs(context.Background(), &nodePools, false)
+
+	for _, np := range nodePools {
 		result = append(result, &console.NodePoolAttributes{
 			Name:         np.Name.ValueString(),
 			MinSize:      np.MinSize.ValueInt64(),
@@ -86,7 +89,7 @@ func (c *cluster) From(cl *console.ClusterFragment, d diag.Diagnostics) {
 	c.DesiredVersion = types.StringPointerValue(cl.Version)
 	c.CurrentVersion = types.StringPointerValue(cl.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cl.Protect)
-	c.NodePools = common.ClusterNodePoolsFrom(cl.NodePools)
+	//c.NodePools = common.ClusterNodePoolsFrom(cl.NodePools)
 	c.Tags = common.ClusterTagsFrom(cl.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cl.Provider)
 }
@@ -99,7 +102,7 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, d diag.Diagnostics) {
 	c.DesiredVersion = types.StringPointerValue(cc.CreateCluster.Version)
 	c.CurrentVersion = types.StringPointerValue(cc.CreateCluster.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
-	c.NodePools = common.ClusterNodePoolsFrom(cc.CreateCluster.NodePools)
+	// c.NodePools = types.ListNull(types.ObjectType{})
 	c.Tags = common.ClusterTagsFrom(cc.CreateCluster.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cc.CreateCluster.Provider)
 }
