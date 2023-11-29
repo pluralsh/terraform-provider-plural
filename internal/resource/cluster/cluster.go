@@ -130,6 +130,7 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Description:         "List of node pool specs managed by this cluster. Leave empty for bring your own cluster.",
 				MarkdownDescription: "List of node pool specs managed by this cluster. Leave empty for bring your own cluster.",
 				Optional:            true,
+				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
