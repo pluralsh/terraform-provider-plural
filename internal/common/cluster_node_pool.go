@@ -48,8 +48,26 @@ type NodePoolCloudSettings struct {
 	AWS *NodePoolCloudSettingsAWS `tfsdk:"aws"`
 }
 
+func (c *NodePoolCloudSettings) Attributes() *console.CloudSettings {
+	if c == nil {
+		return nil
+	}
+
+	if c.AWS != nil {
+		return &console.CloudSettings{Aws: c.AWS.Attributes()}
+	}
+
+	return nil
+}
+
 type NodePoolCloudSettingsAWS struct {
 	LaunchTemplateId types.String `tfsdk:"launch_template_id"`
+}
+
+func (c *NodePoolCloudSettingsAWS) Attributes() *console.AwsCloud {
+	return &console.AwsCloud{
+		LaunchTemplateID: c.LaunchTemplateId.ValueStringPointer(),
+	}
 }
 
 func ClusterNodePoolsFrom(nodepools []*console.NodePoolFragment) []*ClusterNodePool {
