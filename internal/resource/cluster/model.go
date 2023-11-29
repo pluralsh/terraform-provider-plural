@@ -11,18 +11,20 @@ import (
 )
 
 type cluster struct {
-	Id            types.String              `tfsdk:"id"`
-	InsertedAt    types.String              `tfsdk:"inserted_at"`
-	Name          types.String              `tfsdk:"name"`
-	Handle        types.String              `tfsdk:"handle"`
-	Version       types.String              `tfsdk:"version"`
-	ProviderId    types.String              `tfsdk:"provider_id"`
-	Cloud         types.String              `tfsdk:"cloud"`
-	Protect       types.Bool                `tfsdk:"protect"`
-	Tags          types.Map                 `tfsdk:"tags"`
-	Bindings      *common.ClusterBindings   `tfsdk:"bindings"`
-	NodePools     []*common.ClusterNodePool `tfsdk:"node_pools"`
-	CloudSettings *ClusterCloudSettings     `tfsdk:"cloud_settings"`
+	Id             types.String              `tfsdk:"id"`
+	InsertedAt     types.String              `tfsdk:"inserted_at"`
+	Name           types.String              `tfsdk:"name"`
+	Handle         types.String              `tfsdk:"handle"`
+	Version        types.String              `tfsdk:"version"`
+	CurrentVersion types.String              `tfsdk:"current_version"`
+	DesiredVersion types.String              `tfsdk:"desired_version"`
+	ProviderId     types.String              `tfsdk:"provider_id"`
+	Cloud          types.String              `tfsdk:"cloud"`
+	Protect        types.Bool                `tfsdk:"protect"`
+	Tags           types.Map                 `tfsdk:"tags"`
+	Bindings       *common.ClusterBindings   `tfsdk:"bindings"`
+	NodePools      []*common.ClusterNodePool `tfsdk:"node_pools"`
+	CloudSettings  *ClusterCloudSettings     `tfsdk:"cloud_settings"`
 }
 
 func (c *cluster) NodePoolsAttribute(ctx context.Context, d diag.Diagnostics) []*console.NodePoolAttributes {
@@ -81,7 +83,8 @@ func (c *cluster) From(cl *console.ClusterFragment, d diag.Diagnostics) {
 	c.InsertedAt = types.StringPointerValue(cl.InsertedAt)
 	c.Name = types.StringValue(cl.Name)
 	c.Handle = types.StringPointerValue(cl.Handle)
-	c.Version = types.StringPointerValue(cl.Version)
+	c.DesiredVersion = types.StringPointerValue(cl.Version)
+	c.CurrentVersion = types.StringPointerValue(cl.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cl.Protect)
 	c.NodePools = common.ClusterNodePoolsFrom(cl.NodePools)
 	c.Tags = common.ClusterTagsFrom(cl.Tags, d)
@@ -93,7 +96,8 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, d diag.Diagnostics) {
 	c.InsertedAt = types.StringPointerValue(cc.CreateCluster.InsertedAt)
 	c.Name = types.StringValue(cc.CreateCluster.Name)
 	c.Handle = types.StringPointerValue(cc.CreateCluster.Handle)
-	c.Version = types.StringPointerValue(cc.CreateCluster.Version)
+	c.DesiredVersion = types.StringPointerValue(cc.CreateCluster.Version)
+	c.CurrentVersion = types.StringPointerValue(cc.CreateCluster.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
 	c.NodePools = common.ClusterNodePoolsFrom(cc.CreateCluster.NodePools)
 	c.Tags = common.ClusterTagsFrom(cc.CreateCluster.Tags, d)
