@@ -72,14 +72,23 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Computed:            true,
 			},
 			"version": schema.StringAttribute{
-				Description:         "Desired Kubernetes version for this cluster. Leave empty for bring your own cluster. Supported version ranges can be found at https://github.com/pluralsh/console/tree/master/static/k8s-versions.",
-				MarkdownDescription: "Desired Kubernetes version for this cluster. Leave empty for bring your own cluster. Supported version ranges can be found at https://github.com/pluralsh/console/tree/master/static/k8s-versions.",
+				Description:         "Kubernetes version to use for this cluster. Leave empty for bring your own cluster. Supported version ranges can be found at https://github.com/pluralsh/console/tree/master/static/k8s-versions.",
+				MarkdownDescription: "Kubernetes version to use for this cluster. Leave empty for bring your own cluster. Supported version ranges can be found at https://github.com/pluralsh/console/tree/master/static/k8s-versions.",
 				Optional:            true,
-				Computed:            true,
 				Validators: []validator.String{
 					internalvalidator.ConflictsWithIf(internalvalidator.ConflictsIfTargetValueOneOf([]string{common.CloudBYOK.String()}),
 						path.MatchRoot("cloud")),
 				},
+			},
+			"desired_version": schema.StringAttribute{
+				Description:         "Desired Kubernetes version for this cluster.",
+				MarkdownDescription: "Desired Kubernetes version for this cluster.",
+				Computed:            true,
+			},
+			"current_version": schema.StringAttribute{
+				Description:         "Current Kubernetes version for this cluster.",
+				MarkdownDescription: "Current Kubernetes version for this cluster.",
+				Computed:            true,
 			},
 			"provider_id": schema.StringAttribute{
 				Description:         "Provider used to create this cluster. Leave empty for bring your own cluster.",
@@ -118,9 +127,10 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				PlanModifiers: []planmodifier.Object{objectplanmodifier.RequiresReplace()},
 			},
 			"node_pools": schema.ListNestedAttribute{
-				Description:         "List of node pool specs managed by this cluster. Leave empty for bring your own cluster.",
-				MarkdownDescription: "List of node pool specs managed by this cluster. Leave empty for bring your own cluster.",
+				Description:         "Experimental, not ready for production use. List of node pool specs managed by this cluster. Leave empty for bring your own cluster.",
+				MarkdownDescription: "Experimental, not ready for production use. List of node pool specs managed by this cluster. Leave empty for bring your own cluster.",
 				Optional:            true,
+				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{

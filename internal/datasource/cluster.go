@@ -52,9 +52,14 @@ func (d *clusterDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 				Computed:            true,
 				Validators:          []validator.String{stringvalidator.ExactlyOneOf(path.MatchRoot("id"))},
 			},
-			"version": schema.StringAttribute{
+			"desired_version": schema.StringAttribute{
 				Description:         "Desired Kubernetes version for this cluster.",
 				MarkdownDescription: "Desired Kubernetes version for this cluster.",
+				Computed:            true,
+			},
+			"current_version": schema.StringAttribute{
+				Description:         "Current Kubernetes version for this cluster.",
+				MarkdownDescription: "Current Kubernetes version for this cluster.",
 				Computed:            true,
 			},
 			"provider_id": schema.StringAttribute{
