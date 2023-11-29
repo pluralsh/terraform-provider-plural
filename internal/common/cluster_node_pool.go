@@ -25,7 +25,7 @@ func (c *ClusterNodePool) LabelsAttribute(ctx context.Context, d diag.Diagnostic
 	return ToAttributesMap(elements)
 }
 
-func (c *ClusterNodePool) TaintsAttribute(ctx context.Context, d diag.Diagnostics) []*console.TaintAttributes {
+func (c *ClusterNodePool) TaintsAttribute() []*console.TaintAttributes {
 	result := make([]*console.TaintAttributes, 0, len(c.Taints))
 	for _, np := range c.Taints {
 		result = append(result, &console.TaintAttributes{
@@ -34,6 +34,8 @@ func (c *ClusterNodePool) TaintsAttribute(ctx context.Context, d diag.Diagnostic
 			Effect: np.Effect.ValueString(),
 		})
 	}
+
+	return result
 }
 
 type NodePoolTaint struct {
