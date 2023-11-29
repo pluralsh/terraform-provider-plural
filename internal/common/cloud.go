@@ -1,4 +1,4 @@
-package model
+package common
 
 // Cloud represents supported providers.
 type Cloud string

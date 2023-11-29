@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"terraform-provider-plural/internal/client"
-	"terraform-provider-plural/internal/model"
+	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -69,11 +69,11 @@ func (p *providerDataSource) Configure(_ context.Context, req resource.Configure
 		return
 	}
 
-	data, ok := req.ProviderData.(*model.ProviderData)
+	data, ok := req.ProviderData.(*common.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Provider Resource Configure Type",
-			fmt.Sprintf("Expected *model.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *common.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}
@@ -82,7 +82,7 @@ func (p *providerDataSource) Configure(_ context.Context, req resource.Configure
 }
 
 func (p *providerDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data model.ProviderDataSource
+	var data provider
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -101,9 +101,9 @@ func (p *providerDataSource) Read(ctx context.Context, req datasource.ReadReques
 		id = data.Id.ValueString()
 	} else {
 		if providers, err := p.client.ListProviders(ctx); err != nil {
-			for _, prov := range providers.ClusterProviders.Edges {
-				if prov.Node.Cloud == data.Cloud.ValueString() {
-					id = prov.Node.ID
+			for _, pv := range providers.ClusterProviders.Edges {
+				if pv.Node.Cloud == data.Cloud.ValueString() {
+					id = pv.Node.ID
 					break
 				}
 			}

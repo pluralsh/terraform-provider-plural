@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"terraform-provider-plural/internal/client"
-	"terraform-provider-plural/internal/model"
+	"terraform-provider-plural/internal/common"
 	internalvalidator "terraform-provider-plural/internal/validator"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -77,7 +77,7 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Optional:            true,
 				Computed:            true,
 				Validators: []validator.String{
-					internalvalidator.ConflictsWithIf(internalvalidator.ConflictsIfTargetValueOneOf([]string{model.CloudBYOK.String()}),
+					internalvalidator.ConflictsWithIf(internalvalidator.ConflictsIfTargetValueOneOf([]string{common.CloudBYOK.String()}),
 						path.MatchRoot("cloud")),
 				},
 			},
@@ -87,7 +87,7 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Validators: []validator.String{
-					internalvalidator.ConflictsWithIf(internalvalidator.ConflictsIfTargetValueOneOf([]string{model.CloudBYOK.String()}),
+					internalvalidator.ConflictsWithIf(internalvalidator.ConflictsIfTargetValueOneOf([]string{common.CloudBYOK.String()}),
 						path.MatchRoot("cloud")),
 				},
 			},
@@ -97,11 +97,11 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Required:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Validators: []validator.String{stringvalidator.OneOfCaseInsensitive(
-					model.CloudBYOK.String(), model.CloudAWS.String(), model.CloudAzure.String(), model.CloudGCP.String()),
+					common.CloudBYOK.String(), common.CloudAWS.String(), common.CloudAzure.String(), common.CloudGCP.String()),
 					internalvalidator.AlsoRequiresIf(internalvalidator.RequiresIfSourceValueOneOf([]string{
-						model.CloudAWS.String(),
-						model.CloudAzure.String(),
-						model.CloudGCP.String(),
+						common.CloudAWS.String(),
+						common.CloudAzure.String(),
+						common.CloudGCP.String(),
 					}), path.MatchRoot("provider_id")),
 				},
 			},
@@ -272,11 +272,11 @@ func (r *clusterResource) Configure(_ context.Context, req resource.ConfigureReq
 		return
 	}
 
-	data, ok := req.ProviderData.(*model.ProviderData)
+	data, ok := req.ProviderData.(*common.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Cluster Resource Configure Type",
-			fmt.Sprintf("Expected *model.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *common.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}
@@ -286,7 +286,7 @@ func (r *clusterResource) Configure(_ context.Context, req resource.ConfigureReq
 }
 
 func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data model.ClusterResource
+	var data cluster
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -298,7 +298,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	if model.IsCloud(data.Cloud.ValueString(), model.CloudBYOK) {
+	if common.IsCloud(data.Cloud.ValueString(), common.CloudBYOK) {
 		if result.CreateCluster.DeployToken == nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to fetch cluster deploy token"))
 			return
@@ -322,7 +322,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 }
 
 func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data model.ClusterResource
+	var data cluster
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -343,7 +343,7 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 }
 
 func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data model.ClusterResource
+	var data cluster
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -359,7 +359,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 }
 
 func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data model.ClusterResource
+	var data cluster
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return

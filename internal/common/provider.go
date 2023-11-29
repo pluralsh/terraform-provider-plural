@@ -1,4 +1,4 @@
-package model
+package common
 
 import internalclient "terraform-provider-plural/internal/client"
 

@@ -4,16 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"terraform-provider-plural/internal/client"
+	"terraform-provider-plural/internal/common"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-
-	"terraform-provider-plural/internal/model"
-
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-
-	"terraform-provider-plural/internal/client"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 func NewGitRepositoryDataSource() datasource.DataSource {
@@ -58,11 +56,11 @@ func (r *GitRepositoryDataSource) Configure(_ context.Context, req datasource.Co
 		return
 	}
 
-	data, ok := req.ProviderData.(*model.ProviderData)
+	data, ok := req.ProviderData.(*common.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Git Repository Resource Configure Type",
-			fmt.Sprintf("Expected *model.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *common.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
@@ -72,7 +70,7 @@ func (r *GitRepositoryDataSource) Configure(_ context.Context, req datasource.Co
 }
 
 func (r *GitRepositoryDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	data := new(model.GitRepositoryDataSource)
+	data := new(GitRepository)
 	resp.Diagnostics.Append(req.Config.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return

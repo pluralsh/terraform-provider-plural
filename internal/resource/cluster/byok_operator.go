@@ -13,8 +13,6 @@ import (
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/release"
-
-	"terraform-provider-plural/internal/model"
 )
 
 const (
@@ -28,7 +26,7 @@ const (
 type OperatorHandler struct {
 	ctx context.Context
 	// kubeconfig is a model.Kubeconfig data model read from terraform
-	kubeconfig *model.Kubeconfig
+	kubeconfig *Kubeconfig
 	// url is an url to the Console API, i.e. https://console.mycluster.onplural.sh
 	url string
 
@@ -174,7 +172,7 @@ func (oh *OperatorHandler) Uninstall() error {
 	return err
 }
 
-func NewOperatorHandler(ctx context.Context, kubeconfig *model.Kubeconfig, consoleUrl string) (*OperatorHandler, error) {
+func NewOperatorHandler(ctx context.Context, kubeconfig *Kubeconfig, consoleUrl string) (*OperatorHandler, error) {
 	handler := &OperatorHandler{
 		ctx:        ctx,
 		kubeconfig: kubeconfig,

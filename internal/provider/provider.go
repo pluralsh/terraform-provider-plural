@@ -8,8 +8,8 @@ import (
 	"strconv"
 
 	internalclient "terraform-provider-plural/internal/client"
+	"terraform-provider-plural/internal/common"
 	ds "terraform-provider-plural/internal/datasource"
-	"terraform-provider-plural/internal/model"
 	r "terraform-provider-plural/internal/resource"
 	"terraform-provider-plural/internal/resource/cluster"
 
@@ -160,8 +160,8 @@ func (p *PluralProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 	internalClient := internalclient.NewClient(consoleClient)
 
-	resp.ResourceData = model.NewProviderData(internalClient, consoleUrl)
-	resp.DataSourceData = model.NewProviderData(internalClient, consoleUrl)
+	resp.ResourceData = common.NewProviderData(internalClient, consoleUrl)
+	resp.DataSourceData = common.NewProviderData(internalClient, consoleUrl)
 }
 
 func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource {

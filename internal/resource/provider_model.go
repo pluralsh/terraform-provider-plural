@@ -1,19 +1,20 @@
-package model
+package resource
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	console "github.com/pluralsh/console-client-go"
 )
 
-type providerBase struct {
-	Id        types.String `tfsdk:"id"`
-	Name      types.String `tfsdk:"name"`
-	Namespace types.String `tfsdk:"namespace"`
-	Editable  types.Bool   `tfsdk:"editable"`
-	Cloud     types.String `tfsdk:"cloud"`
+type provider struct {
+	Id            types.String          `tfsdk:"id"`
+	Name          types.String          `tfsdk:"name"`
+	Namespace     types.String          `tfsdk:"namespace"`
+	Editable      types.Bool            `tfsdk:"editable"`
+	Cloud         types.String          `tfsdk:"cloud"`
+	CloudSettings ProviderCloudSettings `tfsdk:"cloud_settings"`
 }
 
-func (p *providerBase) From(cp *console.ClusterProviderFragment) {
+func (p *provider) From(cp *console.ClusterProviderFragment) {
 	p.Id = types.StringValue(cp.ID)
 	p.Name = types.StringValue(cp.Name)
 	p.Namespace = types.StringValue(cp.Namespace)
@@ -21,12 +22,7 @@ func (p *providerBase) From(cp *console.ClusterProviderFragment) {
 	p.Cloud = types.StringValue(cp.Cloud)
 }
 
-type ProviderResource struct {
-	providerBase
-	CloudSettings ProviderCloudSettings `tfsdk:"cloud_settings"`
-}
-
-func (p *ProviderResource) Attributes() console.ClusterProviderAttributes {
+func (p *provider) Attributes() console.ClusterProviderAttributes {
 	return console.ClusterProviderAttributes{
 		Name:          p.Name.ValueString(),
 		Namespace:     p.Namespace.ValueStringPointer(),
@@ -35,7 +31,7 @@ func (p *ProviderResource) Attributes() console.ClusterProviderAttributes {
 	}
 }
 
-func (p *ProviderResource) UpdateAttributes() console.ClusterProviderUpdateAttributes {
+func (p *provider) UpdateAttributes() console.ClusterProviderUpdateAttributes {
 	return console.ClusterProviderUpdateAttributes{
 		CloudSettings: p.CloudSettings.Attributes(),
 	}
@@ -103,8 +99,4 @@ func (p *ProviderCloudSettingsGCP) Attributes() *console.GcpSettingsAttributes {
 	return &console.GcpSettingsAttributes{
 		ApplicationCredentials: p.Credentials.ValueString(),
 	}
-}
-
-type ProviderDataSource struct {
-	providerBase
 }

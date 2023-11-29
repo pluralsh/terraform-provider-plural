@@ -9,8 +9,6 @@ import (
 	"github.com/samber/lo"
 	"k8s.io/client-go/discovery/cached/disk"
 
-	"terraform-provider-plural/internal/model"
-
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/go-homedir"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -55,7 +53,7 @@ func (k *KubeConfig) ToRawKubeConfigLoader() clientcmd.ClientConfig {
 	return k.ClientConfig
 }
 
-func newKubeconfig(ctx context.Context, kubeconfig *model.Kubeconfig, namespace *string) (*KubeConfig, error) {
+func newKubeconfig(ctx context.Context, kubeconfig *Kubeconfig, namespace *string) (*KubeConfig, error) {
 	overrides := &clientcmd.ConfigOverrides{}
 	loader := &clientcmd.ClientConfigLoadingRules{}
 

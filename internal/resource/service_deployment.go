@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"time"
 
+	"terraform-provider-plural/internal/common"
+
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	"terraform-provider-plural/internal/client"
-	"terraform-provider-plural/internal/model"
 )
 
 var _ resource.Resource = &ServiceDeploymentResource{}
@@ -38,11 +39,11 @@ func (r *ServiceDeploymentResource) Configure(_ context.Context, req resource.Co
 		return
 	}
 
-	data, ok := req.ProviderData.(*model.ProviderData)
+	data, ok := req.ProviderData.(*common.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected ServiceDeployment Resource Configure Type",
-			fmt.Sprintf("Expected *client.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *common.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
@@ -52,7 +53,7 @@ func (r *ServiceDeploymentResource) Configure(_ context.Context, req resource.Co
 }
 
 func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	data := new(model.ServiceDeployment)
+	data := new(ServiceDeployment)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -69,7 +70,7 @@ func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.Cre
 }
 
 func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	data := new(model.ServiceDeployment)
+	data := new(ServiceDeployment)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -86,7 +87,7 @@ func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadR
 }
 
 func (r *ServiceDeploymentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	data := new(model.ServiceDeployment)
+	data := new(ServiceDeployment)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -102,7 +103,7 @@ func (r *ServiceDeploymentResource) Update(ctx context.Context, req resource.Upd
 }
 
 func (r *ServiceDeploymentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	data := new(model.ServiceDeployment)
+	data := new(ServiceDeployment)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -114,7 +115,7 @@ func (r *ServiceDeploymentResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	err = wait.WaitForWithContext(ctx, client.Ticker(5 * time.Second), func(ctx context.Context) (bool, error) {
+	err = wait.WaitForWithContext(ctx, client.Ticker(5*time.Second), func(ctx context.Context) (bool, error) {
 		_, err := r.client.GetServiceDeployment(ctx, data.Id.ValueString())
 		if client.IsNotFound(err) {
 			return true, nil

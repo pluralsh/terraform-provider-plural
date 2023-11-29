@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"terraform-provider-plural/internal/common"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -13,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"terraform-provider-plural/internal/client"
-	"terraform-provider-plural/internal/model"
 )
 
 var _ resource.Resource = &GitRepositoryResource{}
@@ -119,12 +120,12 @@ func (r *GitRepositoryResource) Configure(
 		return
 	}
 
-	data, ok := req.ProviderData.(*model.ProviderData)
+	data, ok := req.ProviderData.(*common.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Git Repository Resource Configure Type",
 			fmt.Sprintf(
-				"Expected *model.ProviderData, got: %T. Please report this issue to the provider developers.",
+				"Expected *common.ProviderData, got: %T. Please report this issue to the provider developers.",
 				req.ProviderData,
 			),
 		)
@@ -136,7 +137,7 @@ func (r *GitRepositoryResource) Configure(
 }
 
 func (r *GitRepositoryResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	data := new(model.GitRepository)
+	data := new(gitRepository)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -153,7 +154,7 @@ func (r *GitRepositoryResource) Create(ctx context.Context, req resource.CreateR
 }
 
 func (r *GitRepositoryResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	data := new(model.GitRepository)
+	data := new(gitRepository)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -170,7 +171,7 @@ func (r *GitRepositoryResource) Read(ctx context.Context, req resource.ReadReque
 }
 
 func (r *GitRepositoryResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	data := new(model.GitRepository)
+	data := new(gitRepository)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -186,7 +187,7 @@ func (r *GitRepositoryResource) Update(ctx context.Context, req resource.UpdateR
 }
 
 func (r *GitRepositoryResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	data := new(model.GitRepository)
+	data := new(gitRepository)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
