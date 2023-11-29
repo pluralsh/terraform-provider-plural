@@ -29,13 +29,13 @@ func (c *cluster) NodePoolsAttribute(ctx context.Context, d diag.Diagnostics) []
 	result := make([]*console.NodePoolAttributes, 0, len(c.NodePools))
 	for _, np := range c.NodePools {
 		result = append(result, &console.NodePoolAttributes{
-			Name:          np.Name.ValueString(),
-			MinSize:       np.MinSize.ValueInt64(),
-			MaxSize:       np.MaxSize.ValueInt64(),
-			InstanceType:  np.InstanceType.ValueString(),
-			Labels:        np.LabelsAttribute(ctx, d),
-			Taints:        nil,
-			CloudSettings: nil,
+			Name:         np.Name.ValueString(),
+			MinSize:      np.MinSize.ValueInt64(),
+			MaxSize:      np.MaxSize.ValueInt64(),
+			InstanceType: np.InstanceType.ValueString(),
+			Labels:       np.LabelsAttribute(ctx, d),
+			Taints:       np.TaintsAttribute(),
+			//CloudSettings: np.CloudSettings.Attributes(), TODO
 		})
 	}
 
