@@ -147,34 +147,35 @@ func (c *NodePoolCloudSettingsAWS) Attributes() *console.AwsNodeCloudAttributes 
 	}
 }
 
-func ClusterNodePoolsFrom(nodepools []*console.NodePoolFragment) []*ClusterNodePool {
-	result := make([]*ClusterNodePool, 0, len(nodepools))
-	for _, np := range nodepools {
-		result = append(result, &ClusterNodePool{
-			Name:         types.StringValue(np.Name),
-			MinSize:      types.Int64Value(np.MinSize),
-			MaxSize:      types.Int64Value(np.MaxSize),
-			InstanceType: types.StringValue(np.InstanceType),
-			Labels:       clusterNodePoolLabelsFrom(np),
-			Taints:       clusterNodePoolTaintsFrom(np),
-		})
+func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment) []*ClusterNodePool {
+	result := make([]*ClusterNodePool, len(nodePools))
+	for i, nodePool := range nodePools {
+		result[i] = &ClusterNodePool{
+			Name:          types.StringValue(nodePool.Name),
+			MinSize:       types.Int64Value(nodePool.MinSize),
+			MaxSize:       types.Int64Value(nodePool.MaxSize),
+			InstanceType:  types.StringValue(nodePool.InstanceType),
+			Labels:        clusterNodePoolLabelsFrom(nodePool),
+			Taints:        clusterNodePoolTaintsFrom(nodePool),
+			CloudSettings: nil,
+		}
 	}
 
 	return result
 }
 
-func clusterNodePoolLabelsFrom(np *console.NodePoolFragment) types.Map {
+func clusterNodePoolLabelsFrom(nodePool *console.NodePoolFragment) types.Map {
 	labels := make(map[string]attr.Value)
-	for k, v := range np.Labels {
+	for k, v := range nodePool.Labels {
 		labels[k] = types.StringValue(v.(string))
 	}
 
 	return types.MapValueMust(types.StringType, labels)
 }
 
-func clusterNodePoolTaintsFrom(np *console.NodePoolFragment) []NodePoolTaint {
+func clusterNodePoolTaintsFrom(nodePool *console.NodePoolFragment) []NodePoolTaint {
 	taints := make([]NodePoolTaint, 0)
-	for _, taint := range np.Taints {
+	for _, taint := range nodePool.Taints {
 		taints = append(taints, NodePoolTaint{
 			Key:    types.StringValue(taint.Key),
 			Value:  types.StringValue(taint.Value),
