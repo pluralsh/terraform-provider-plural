@@ -97,13 +97,13 @@ type NodePoolCloudSettings struct {
 	AWS *NodePoolCloudSettingsAWS `tfsdk:"aws"`
 }
 
-func (c *NodePoolCloudSettings) Attributes() *console.CloudSettings {
+func (c *NodePoolCloudSettings) Attributes() *console.NodePoolCloudAttributes {
 	if c == nil {
 		return nil
 	}
 
 	if c.AWS != nil {
-		return &console.CloudSettings{Aws: c.AWS.Attributes()}
+		return &console.NodePoolCloudAttributes{Aws: c.AWS.Attributes()}
 	}
 
 	return nil
@@ -113,8 +113,8 @@ type NodePoolCloudSettingsAWS struct {
 	LaunchTemplateId types.String `tfsdk:"launch_template_id"`
 }
 
-func (c *NodePoolCloudSettingsAWS) Attributes() *console.AwsCloud {
-	return &console.AwsCloud{
+func (c *NodePoolCloudSettingsAWS) Attributes() *console.AwsNodeCloudAttributes {
+	return &console.AwsNodeCloudAttributes{
 		LaunchTemplateID: c.LaunchTemplateId.ValueStringPointer(),
 	}
 }

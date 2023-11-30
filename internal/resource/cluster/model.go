@@ -32,20 +32,20 @@ type cluster struct {
 }
 
 func (c *cluster) NodePoolsAttribute(ctx context.Context, d diag.Diagnostics) []*console.NodePoolAttributes {
-	result := make([]*console.NodePoolAttributes, len(c.NodePools.Elements()))
-	nodePools := make([]common.ClusterNodePool, len(c.NodePools.Elements())) // TODO: []* pointer?
+	result := make([]*console.NodePoolAttributes, 0, len(c.NodePools.Elements()))
+	nodePools := make([]common.ClusterNodePool, 0, len(c.NodePools.Elements()))
 	c.NodePools.ElementsAs(context.Background(), &nodePools, false)
 
-	for i, np := range nodePools {
-		result[i] = &console.NodePoolAttributes{
-			Name:         np.Name.ValueString(),
-			MinSize:      np.MinSize.ValueInt64(),
-			MaxSize:      np.MaxSize.ValueInt64(),
-			InstanceType: np.InstanceType.ValueString(),
-			Labels:       np.LabelsAttribute(ctx, d),
-			Taints:       np.TaintsAttribute(),
-			//CloudSettings: np.CloudSettings.Attributes(), TODO
-		}
+	for _, np := range nodePools {
+		result = append(result, &console.NodePoolAttributes{
+			Name:          np.Name.ValueString(),
+			MinSize:       np.MinSize.ValueInt64(),
+			MaxSize:       np.MaxSize.ValueInt64(),
+			InstanceType:  np.InstanceType.ValueString(),
+			Labels:        np.LabelsAttribute(ctx, d),
+			Taints:        np.TaintsAttribute(),
+			CloudSettings: np.CloudSettings.Attributes(),
+		})
 	}
 
 	return result
