@@ -93,9 +93,9 @@ func (c *cluster) From(cl *console.ClusterFragment, d diag.Diagnostics) {
 	c.DesiredVersion = types.StringPointerValue(cl.Version)
 	c.CurrentVersion = types.StringPointerValue(cl.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cl.Protect)
-	//c.NodePools = common.ClusterNodePoolsFrom(cl.NodePools)
 	c.Tags = common.ClusterTagsFrom(cl.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cl.Provider)
+	c.NodePoolsFrom(cl.NodePools, d)
 }
 
 func (c *cluster) FromCreate(cc *console.CreateCluster, d diag.Diagnostics) {
@@ -106,21 +106,22 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, d diag.Diagnostics) {
 	c.DesiredVersion = types.StringPointerValue(cc.CreateCluster.Version)
 	c.CurrentVersion = types.StringPointerValue(cc.CreateCluster.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
-	//c.NodePools = types.ListNull(types.ObjectType{})
-	c.fromNodePools(cc.CreateCluster.NodePools)
 	c.Tags = common.ClusterTagsFrom(cc.CreateCluster.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cc.CreateCluster.Provider)
+	c.NodePoolsFrom(cc.CreateCluster.NodePools, d)
 }
 
-func (c *cluster) fromNodePools(nodePools []*console.NodePoolFragment) {
+func (c *cluster) NodePoolsFrom(nodePools []*console.NodePoolFragment, d diag.Diagnostics) {
 	commonNodePools := algorithms.Map(common.ClusterNodePoolsFrom(nodePools), func(nodePool *common.ClusterNodePool) attr.Value {
 		return nodePool.Element()
 	})
 
-	c.NodePools = types.ListValueMust(basetypes.ObjectType{AttrTypes: map[string]attr.Type{
+	listValue, diagnostics := types.ListValue(basetypes.ObjectType{AttrTypes: map[string]attr.Type{
 		"name":          types.StringType,
 		"min_size":      types.Int64Type,
 		"max_size":      types.Int64Type,
 		"instance_type": types.StringType,
 	}}, commonNodePools)
+	d.Append(diagnostics...)
+	c.NodePools = listValue
 }
