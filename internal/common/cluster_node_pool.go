@@ -174,13 +174,13 @@ func clusterNodePoolLabelsFrom(nodePool *console.NodePoolFragment) types.Map {
 }
 
 func clusterNodePoolTaintsFrom(nodePool *console.NodePoolFragment) []NodePoolTaint {
-	taints := make([]NodePoolTaint, 0)
-	for _, taint := range nodePool.Taints {
-		taints = append(taints, NodePoolTaint{
+	taints := make([]NodePoolTaint, len(nodePool.Taints))
+	for i, taint := range nodePool.Taints {
+		taints[i] = NodePoolTaint{
 			Key:    types.StringValue(taint.Key),
 			Value:  types.StringValue(taint.Value),
 			Effect: types.StringValue(taint.Effect),
-		})
+		}
 	}
 	return taints
 }
