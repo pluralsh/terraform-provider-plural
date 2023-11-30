@@ -116,12 +116,7 @@ func (c *cluster) NodePoolsFrom(nodePools []*console.NodePoolFragment, d diag.Di
 		return nodePool.Element()
 	})
 
-	listValue, diagnostics := types.ListValue(basetypes.ObjectType{AttrTypes: map[string]attr.Type{
-		"name":          types.StringType,
-		"min_size":      types.Int64Type,
-		"max_size":      types.Int64Type,
-		"instance_type": types.StringType,
-	}}, commonNodePools)
+	listValue, diagnostics := types.ListValue(basetypes.ObjectType{AttrTypes: common.ClusterNodePoolAttrTypes}, commonNodePools)
 	d.Append(diagnostics...)
 	c.NodePools = listValue
 }

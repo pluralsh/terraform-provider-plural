@@ -160,21 +160,23 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 							MarkdownDescription: "Kubernetes labels to apply to the nodes in this pool. Useful for node selectors.",
 							ElementType:         types.StringType,
 							Optional:            true,
+							Computed:            true,
 						},
 						"taints": schema.ListNestedAttribute{
 							Description:         "Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances.",
 							MarkdownDescription: "Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances.",
 							Optional:            true,
+							Computed:            true,
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 									"key": schema.StringAttribute{
-										Required:    true,
+										Required: true,
 									},
 									"value": schema.StringAttribute{
-										Required:    true,
+										Required: true,
 									},
 									"effect": schema.StringAttribute{
-										Required:    true,
+										Required: true,
 									},
 								},
 							},
@@ -183,16 +185,19 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 							Description:         "Cloud-specific settings for this node pool.",
 							MarkdownDescription: "Cloud-specific settings for this node pool.",
 							Optional:            true,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 								"aws": schema.SingleNestedAttribute{
 									Description:         "AWS node pool customizations.",
 									MarkdownDescription: "AWS node pool customizations.",
 									Optional:            true,
+									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 										"launch_template_id": schema.StringAttribute{
 											Description:         "Custom launch template for your nodes. Useful for Golden AMI setups.",
 											MarkdownDescription: "Custom launch template for your nodes. Useful for Golden AMI setups.",
 											Optional:            true,
+											Computed:            true,
 										},
 									},
 								},

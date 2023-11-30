@@ -19,6 +19,16 @@ type ClusterNodePool struct {
 	CloudSettings *NodePoolCloudSettings `tfsdk:"cloud_settings"`
 }
 
+var ClusterNodePoolAttrTypes = map[string]attr.Type{
+	"name":           types.StringType,
+	"min_size":       types.Int64Type,
+	"max_size":       types.Int64Type,
+	"instance_type":  types.StringType,
+	"labels":         types.MapType{ElemType: types.StringType},
+	"taints":         types.ListType{ElemType: types.ObjectType{AttrTypes: NodePoolTaintAttrTypes}},
+	"cloud_settings": types.ObjectType{AttrTypes: NodePoolCloudSettingsAttrTypes},
+}
+
 func (c *ClusterNodePool) LabelsAttribute(ctx context.Context, d diag.Diagnostics) map[string]interface{} {
 	elements := make(map[string]types.String, len(c.Labels.Elements()))
 	d.Append(c.Labels.ElementsAs(ctx, &elements, false)...)
@@ -39,52 +49,56 @@ func (c *ClusterNodePool) TaintsAttribute() []*console.TaintAttributes {
 	return result
 }
 
-func (c *ClusterNodePool) TerraformTypes() map[string]attr.Type {
-	return map[string]attr.Type{
-		"name":          types.StringType,
-		"min_size":      types.Int64Type,
-		"max_size":      types.Int64Type,
-		"instance_type": types.StringType,
-		"labels":        types.MapType{ElemType: types.StringType},
-		"taints": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{
-			"key":    types.StringType,
-			"value":  types.StringType,
-			"effect": types.StringType,
-		}}},
-		"cloud_settings": types.ObjectType{AttrTypes: map[string]attr.Type{
-			"aws": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"launch_template_id": types.StringType,
-				},
-			},
-		}},
+func (c *ClusterNodePool) terraformAttributes() map[string]attr.Value {
+	return map[string]attr.Value{
+		"name":           c.Name,
+		"min_size":       c.MinSize,
+		"max_size":       c.MaxSize,
+		"instance_type":  c.InstanceType,
+		"labels":         c.TerraformAttributesLabels(),
+		"taints":         c.TerraformAttributesTaints(),
+		"cloud_settings": c.TerraformAttributesCloudSettings(),
 	}
 }
 
-func (c *ClusterNodePool) TerraformAttributes() map[string]attr.Value {
-	return map[string]attr.Value{
-		"name":          c.Name,
-		"min_size":      c.MinSize,
-		"max_size":      c.MaxSize,
-		"instance_type": c.InstanceType,
-		"labels":        types.MapNull(types.StringType),
-		"taints": types.ListNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-			"key":    types.StringType,
-			"value":  types.StringType,
-			"effect": types.StringType,
-		}}),
-		"cloud_settings": types.ObjectNull(map[string]attr.Type{
-			"aws": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"launch_template_id": types.StringType,
-				},
-			},
-		}),
+func (c *ClusterNodePool) TerraformAttributesLabels() attr.Value {
+	if c.Labels.IsNull() {
+		return types.MapNull(types.StringType)
 	}
+
+	return types.MapValueMust(types.StringType, c.Labels.Elements())
+}
+
+func (c *ClusterNodePool) TerraformAttributesTaints() attr.Value {
+	if len(c.Taints) == 0 {
+		return types.ListNull(types.ObjectType{AttrTypes: NodePoolTaintAttrTypes})
+	}
+
+	taints := make([]attr.Value, len(c.Taints))
+	for i, taint := range c.Taints {
+		taints[i] = types.ObjectValueMust(NodePoolTaintAttrTypes,
+			map[string]attr.Value{"key": taint.Key, "value": taint.Value, "effect": taint.Effect})
+	}
+
+	return types.ListValueMust(types.ObjectType{AttrTypes: NodePoolTaintAttrTypes}, taints)
+}
+
+func (c *ClusterNodePool) TerraformAttributesCloudSettings() attr.Value {
+	if c.CloudSettings == nil {
+		return types.ObjectNull(NodePoolCloudSettingsAttrTypes)
+	}
+
+	if c.CloudSettings.AWS != nil {
+		return types.ObjectValueMust(NodePoolCloudSettingsAttrTypes,
+			map[string]attr.Value{"aws": types.ObjectValueMust(NodePoolCloudSettingsAWSAttrTypes,
+				map[string]attr.Value{"launch_template_id": c.CloudSettings.AWS.LaunchTemplateId})})
+	}
+
+	return types.ObjectNull(NodePoolCloudSettingsAttrTypes)
 }
 
 func (c *ClusterNodePool) Element() attr.Value {
-	return types.ObjectValueMust(c.TerraformTypes(), c.TerraformAttributes())
+	return types.ObjectValueMust(ClusterNodePoolAttrTypes, c.terraformAttributes())
 }
 
 type NodePoolTaint struct {
@@ -93,8 +107,18 @@ type NodePoolTaint struct {
 	Effect types.String `tfsdk:"effect"`
 }
 
+var NodePoolTaintAttrTypes = map[string]attr.Type{
+	"key":    types.StringType,
+	"value":  types.StringType,
+	"effect": types.StringType,
+}
+
 type NodePoolCloudSettings struct {
 	AWS *NodePoolCloudSettingsAWS `tfsdk:"aws"`
+}
+
+var NodePoolCloudSettingsAttrTypes = map[string]attr.Type{
+	"aws": types.ObjectType{AttrTypes: NodePoolCloudSettingsAWSAttrTypes},
 }
 
 func (c *NodePoolCloudSettings) Attributes() *console.NodePoolCloudAttributes {
@@ -113,6 +137,10 @@ type NodePoolCloudSettingsAWS struct {
 	LaunchTemplateId types.String `tfsdk:"launch_template_id"`
 }
 
+var NodePoolCloudSettingsAWSAttrTypes = map[string]attr.Type{
+	"launch_template_id": types.StringType,
+}
+
 func (c *NodePoolCloudSettingsAWS) Attributes() *console.AwsNodeCloudAttributes {
 	return &console.AwsNodeCloudAttributes{
 		LaunchTemplateID: c.LaunchTemplateId.ValueStringPointer(),
@@ -127,8 +155,31 @@ func ClusterNodePoolsFrom(nodepools []*console.NodePoolFragment) []*ClusterNodeP
 			MinSize:      types.Int64Value(np.MinSize),
 			MaxSize:      types.Int64Value(np.MaxSize),
 			InstanceType: types.StringValue(np.InstanceType),
+			Labels:       clusterNodePoolLabelsFrom(np),
+			Taints:       clusterNodePoolTaintsFrom(np),
 		})
 	}
 
 	return result
+}
+
+func clusterNodePoolLabelsFrom(np *console.NodePoolFragment) types.Map {
+	labels := make(map[string]attr.Value)
+	for k, v := range np.Labels {
+		labels[k] = types.StringValue(v.(string))
+	}
+
+	return types.MapValueMust(types.StringType, labels)
+}
+
+func clusterNodePoolTaintsFrom(np *console.NodePoolFragment) []NodePoolTaint {
+	taints := make([]NodePoolTaint, 0)
+	for _, taint := range np.Taints {
+		taints = append(taints, NodePoolTaint{
+			Key:    types.StringValue(taint.Key),
+			Value:  types.StringValue(taint.Value),
+			Effect: types.StringValue(taint.Effect),
+		})
+	}
+	return taints
 }
