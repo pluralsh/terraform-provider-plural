@@ -3,6 +3,10 @@ package cluster
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/pluralsh/polly/algorithms"
+
 	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -32,8 +36,8 @@ func (c *cluster) NodePoolsAttribute(ctx context.Context, d diag.Diagnostics) []
 	nodePools := make([]common.ClusterNodePool, len(c.NodePools.Elements())) // TODO: []* pointer?
 	c.NodePools.ElementsAs(context.Background(), &nodePools, false)
 
-	for _, np := range nodePools {
-		result = append(result, &console.NodePoolAttributes{
+	for i, np := range nodePools {
+		result[i] = &console.NodePoolAttributes{
 			Name:         np.Name.ValueString(),
 			MinSize:      np.MinSize.ValueInt64(),
 			MaxSize:      np.MaxSize.ValueInt64(),
@@ -41,7 +45,7 @@ func (c *cluster) NodePoolsAttribute(ctx context.Context, d diag.Diagnostics) []
 			Labels:       np.LabelsAttribute(ctx, d),
 			Taints:       np.TaintsAttribute(),
 			//CloudSettings: np.CloudSettings.Attributes(), TODO
-		})
+		}
 	}
 
 	return result
@@ -102,7 +106,21 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, d diag.Diagnostics) {
 	c.DesiredVersion = types.StringPointerValue(cc.CreateCluster.Version)
 	c.CurrentVersion = types.StringPointerValue(cc.CreateCluster.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
-	// c.NodePools = types.ListNull(types.ObjectType{})
+	//c.NodePools = types.ListNull(types.ObjectType{})
+	c.fromNodePools(cc.CreateCluster.NodePools)
 	c.Tags = common.ClusterTagsFrom(cc.CreateCluster.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cc.CreateCluster.Provider)
+}
+
+func (c *cluster) fromNodePools(nodePools []*console.NodePoolFragment) {
+	commonNodePools := algorithms.Map(common.ClusterNodePoolsFrom(nodePools), func(nodePool *common.ClusterNodePool) attr.Value {
+		return nodePool.Element()
+	})
+
+	c.NodePools = types.ListValueMust(basetypes.ObjectType{AttrTypes: map[string]attr.Type{
+		"name":          types.StringType,
+		"min_size":      types.Int64Type,
+		"max_size":      types.Int64Type,
+		"instance_type": types.StringType,
+	}}, commonNodePools)
 }

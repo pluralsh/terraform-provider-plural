@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
 	internalvalidator "terraform-provider-plural/internal/validator"
@@ -165,16 +167,13 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 							Optional:            true,
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
-									"key": schema.MapAttribute{
-										ElementType: types.StringType,
+									"key": schema.StringAttribute{
 										Required:    true,
 									},
-									"value": schema.MapAttribute{
-										ElementType: types.StringType,
+									"value": schema.StringAttribute{
 										Required:    true,
 									},
-									"effect": schema.MapAttribute{
-										ElementType: types.StringType,
+									"effect": schema.StringAttribute{
 										Required:    true,
 									},
 								},
@@ -301,6 +300,8 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	tflog.Info(ctx, fmt.Sprintf("attributes: %+v", data.Attributes(ctx, resp.Diagnostics)))
 
 	result, err := r.client.CreateCluster(ctx, data.Attributes(ctx, resp.Diagnostics))
 	if err != nil {

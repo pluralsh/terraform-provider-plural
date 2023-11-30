@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	console "github.com/pluralsh/console-client-go"
@@ -36,6 +37,54 @@ func (c *ClusterNodePool) TaintsAttribute() []*console.TaintAttributes {
 	}
 
 	return result
+}
+
+func (c *ClusterNodePool) TerraformTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"name":          types.StringType,
+		"min_size":      types.Int64Type,
+		"max_size":      types.Int64Type,
+		"instance_type": types.StringType,
+		"labels":        types.MapType{ElemType: types.StringType},
+		"taints": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{
+			"key":    types.StringType,
+			"value":  types.StringType,
+			"effect": types.StringType,
+		}}},
+		"cloud_settings": types.ObjectType{AttrTypes: map[string]attr.Type{
+			"aws": types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"launch_template_id": types.StringType,
+				},
+			},
+		}},
+	}
+}
+
+func (c *ClusterNodePool) TerraformAttributes() map[string]attr.Value {
+	return map[string]attr.Value{
+		"name":          c.Name,
+		"min_size":      c.MinSize,
+		"max_size":      c.MaxSize,
+		"instance_type": c.InstanceType,
+		"labels":        types.MapNull(types.StringType),
+		"taints": types.ListNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			"key":    types.StringType,
+			"value":  types.StringType,
+			"effect": types.StringType,
+		}}),
+		"cloud_settings": types.ObjectNull(map[string]attr.Type{
+			"aws": types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"launch_template_id": types.StringType,
+				},
+			},
+		}),
+	}
+}
+
+func (c *ClusterNodePool) Element() attr.Value {
+	return types.ObjectValueMust(c.TerraformTypes(), c.TerraformAttributes())
 }
 
 type NodePoolTaint struct {
