@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-log/tflog"
-
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
 	internalvalidator "terraform-provider-plural/internal/validator"
@@ -305,8 +303,6 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	tflog.Info(ctx, fmt.Sprintf("attributes: %+v", data.Attributes(ctx, resp.Diagnostics)))
 
 	result, err := r.client.CreateCluster(ctx, data.Attributes(ctx, resp.Diagnostics))
 	if err != nil {

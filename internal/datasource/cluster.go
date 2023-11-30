@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-log/tflog"
-
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
 
@@ -182,8 +180,6 @@ func (d *clusterDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("test"))
-
 	if data.Id.IsNull() && data.Handle.IsNull() {
 		resp.Diagnostics.AddError(
 			"Missing Cluster ID and Handle",
@@ -200,8 +196,6 @@ func (d *clusterDataSource) Read(ctx context.Context, req datasource.ReadRequest
 			cluster = c.Cluster
 		}
 	}
-
-	tflog.Info(ctx, fmt.Sprintf("cluster: %+v", cluster))
 
 	// If cluster was not fetched yet and handle was provided then try to use it to fetch cluster.
 	if cluster == nil && !data.Handle.IsNull() {

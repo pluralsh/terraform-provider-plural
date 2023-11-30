@@ -30,6 +30,10 @@ var ClusterNodePoolAttrTypes = map[string]attr.Type{
 }
 
 func (c *ClusterNodePool) LabelsAttribute(ctx context.Context, d diag.Diagnostics) map[string]interface{} {
+	if c.Labels.IsNull() {
+		return map[string]any{}
+	}
+
 	elements := make(map[string]types.String, len(c.Labels.Elements()))
 	d.Append(c.Labels.ElementsAs(ctx, &elements, false)...)
 

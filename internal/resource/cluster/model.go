@@ -2,9 +2,11 @@ package cluster
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/pluralsh/polly/algorithms"
 
 	"terraform-provider-plural/internal/common"
@@ -33,8 +35,11 @@ type cluster struct {
 
 func (c *cluster) NodePoolsAttribute(ctx context.Context, d diag.Diagnostics) []*console.NodePoolAttributes {
 	result := make([]*console.NodePoolAttributes, 0, len(c.NodePools.Elements()))
-	nodePools := make([]common.ClusterNodePool, 0, len(c.NodePools.Elements()))
-	c.NodePools.ElementsAs(context.Background(), &nodePools, false)
+	nodePools := make([]common.ClusterNodePool, len(c.NodePools.Elements()))
+	c.NodePools.ElementsAs(ctx, &nodePools, false)
+
+	tflog.Info(ctx, fmt.Sprintf("data: %+v", c.NodePools.String())) // TODO: Remove.
+	tflog.Info(ctx, fmt.Sprintf("elements: %+v", nodePools))        // TODO: Remove.
 
 	for _, np := range nodePools {
 		result = append(result, &console.NodePoolAttributes{
