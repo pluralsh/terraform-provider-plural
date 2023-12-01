@@ -126,7 +126,7 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				},
 				PlanModifiers: []planmodifier.Object{objectplanmodifier.RequiresReplace()},
 			},
-			"node_pools": schema.ListNestedAttribute{
+			"node_pools": schema.SetNestedAttribute{
 				Description:         "Experimental, not ready for production use. List of node pool specs managed by this cluster. Leave empty for bring your own cluster.",
 				MarkdownDescription: "Experimental, not ready for production use. List of node pool specs managed by this cluster. Leave empty for bring your own cluster.",
 				Optional:            true,

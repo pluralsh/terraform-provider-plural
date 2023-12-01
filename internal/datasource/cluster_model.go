@@ -26,7 +26,7 @@ type cluster struct {
 	Protect        types.Bool   `tfsdk:"protect"`
 	Tags           types.Map    `tfsdk:"tags"`
 	//Bindings       *common.ClusterBindings   `tfsdk:"bindings"`
-	NodePools types.List `tfsdk:"node_pools"`
+	NodePools types.Set `tfsdk:"node_pools"`
 }
 
 func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.Diagnostics) {
@@ -47,7 +47,7 @@ func (c *cluster) fromNodePools(nodePools []*console.NodePoolFragment, ctx conte
 		return nodePool.Element()
 	})
 
-	c.NodePools = types.ListValueMust(basetypes.ObjectType{AttrTypes: map[string]attr.Type{
+	c.NodePools = types.SetValueMust(basetypes.ObjectType{AttrTypes: map[string]attr.Type{
 		"name":          types.StringType,
 		"min_size":      types.Int64Type,
 		"max_size":      types.Int64Type,

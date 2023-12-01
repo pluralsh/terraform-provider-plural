@@ -27,7 +27,7 @@ type cluster struct {
 	Protect        types.Bool              `tfsdk:"protect"`
 	Tags           types.Map               `tfsdk:"tags"`
 	Bindings       *common.ClusterBindings `tfsdk:"bindings"`
-	NodePools      types.List              `tfsdk:"node_pools"`
+	NodePools      types.Set               `tfsdk:"node_pools"`
 	CloudSettings  *ClusterCloudSettings   `tfsdk:"cloud_settings"`
 }
 
@@ -121,7 +121,7 @@ func (c *cluster) NodePoolsFrom(nodePools []*console.NodePoolFragment, ctx conte
 		return nodePool.Element()
 	})
 
-	listValue, diagnostics := types.ListValue(basetypes.ObjectType{AttrTypes: common.ClusterNodePoolAttrTypes}, commonNodePools)
+	setValue, diagnostics := types.SetValue(basetypes.ObjectType{AttrTypes: common.ClusterNodePoolAttrTypes}, commonNodePools)
 	d.Append(diagnostics...)
-	c.NodePools = listValue
+	c.NodePools = setValue
 }

@@ -32,7 +32,7 @@ var ClusterNodePoolAttrTypes = map[string]attr.Type{
 
 func (c *ClusterNodePool) LabelsAttribute(ctx context.Context, d diag.Diagnostics) map[string]interface{} {
 	if c.Labels.IsNull() {
-		return map[string]any{}
+		return nil
 	}
 
 	elements := make(map[string]types.String, len(c.Labels.Elements()))
@@ -130,27 +130,21 @@ func (c *NodePoolCloudSettingsAWS) Attributes() *console.AwsNodeCloudAttributes 
 func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) []*ClusterNodePool {
 	result := make([]*ClusterNodePool, len(nodePools))
 	for i, nodePool := range nodePools {
+		clusterNodePoolLabels, diags := types.MapValueFrom(ctx, types.StringType, nodePool.Labels)
+		d.Append(diags...)
+
 		result[i] = &ClusterNodePool{
 			Name:          types.StringValue(nodePool.Name),
 			MinSize:       types.Int64Value(nodePool.MinSize),
 			MaxSize:       types.Int64Value(nodePool.MaxSize),
 			InstanceType:  types.StringValue(nodePool.InstanceType),
-			Labels:        clusterNodePoolLabelsFrom(nodePool),
+			Labels:        clusterNodePoolLabels,
 			Taints:        clusterNodePoolTaintsFrom(nodePool, ctx, d),
 			CloudSettings: types.ObjectNull(NodePoolCloudSettingsAttrTypes),
 		}
 	}
 
 	return result
-}
-
-func clusterNodePoolLabelsFrom(nodePool *console.NodePoolFragment) types.Map {
-	labels := make(map[string]attr.Value)
-	for k, v := range nodePool.Labels {
-		labels[k] = types.StringValue(v.(string))
-	}
-
-	return types.MapValueMust(types.StringType, labels)
 }
 
 func clusterNodePoolTaintsFrom(nodePool *console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) types.List {
@@ -167,6 +161,5 @@ func clusterNodePoolTaintsFrom(nodePool *console.NodePoolFragment, ctx context.C
 
 	listValue, diagnostics := types.ListValue(basetypes.ObjectType{AttrTypes: NodePoolTaintAttrTypes}, taints)
 	d.Append(diagnostics...)
-
 	return listValue
 }

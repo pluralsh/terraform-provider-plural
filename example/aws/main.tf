@@ -44,6 +44,43 @@ resource "plural_cluster" "aws_cluster" {
       min_size = 1
       max_size = 5
       instance_type = "t5.large"
+    },
+    {
+      name = "pool-with-empty-labels"
+      min_size = 1
+      max_size = 5
+      instance_type = "t5.large"
+      labels = {}
+    },
+    {
+      name = "pool-with-labels"
+      min_size = 1
+      max_size = 5
+      instance_type = "t5.large"
+      labels = {
+        "key1" = "value1"
+        "key2" = "value2"
+      },
+    },
+    {
+      name = "pool-with-empty-taints"
+      min_size = 1
+      max_size = 5
+      instance_type = "t5.large"
+      taints = []
+    },
+    {
+      name = "pool-with-taints"
+      min_size = 1
+      max_size = 5
+      instance_type = "t5.large"
+      taints = [
+        {
+          key = "test"
+          value = "test"
+          effect = "NoSchedule"
+        }
+      ]
     }
   ]
   tags = {
