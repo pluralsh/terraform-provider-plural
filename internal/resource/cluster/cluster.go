@@ -329,7 +329,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		}
 	}
 
-	data.FromCreate(result, resp.Diagnostics)
+	data.FromCreate(result, ctx, resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -350,7 +350,7 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	data.From(result.Cluster, resp.Diagnostics)
+	data.From(result.Cluster, ctx, resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 

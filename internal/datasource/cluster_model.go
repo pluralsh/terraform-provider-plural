@@ -1,6 +1,8 @@
 package datasource
 
 import (
+	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/pluralsh/polly/algorithms"
@@ -27,7 +29,7 @@ type cluster struct {
 	NodePools types.List `tfsdk:"node_pools"`
 }
 
-func (c *cluster) From(cl *console.ClusterFragment, d diag.Diagnostics) {
+func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.Diagnostics) {
 	c.Id = types.StringValue(cl.ID)
 	c.InsertedAt = types.StringPointerValue(cl.InsertedAt)
 	c.Name = types.StringValue(cl.Name)
@@ -35,13 +37,13 @@ func (c *cluster) From(cl *console.ClusterFragment, d diag.Diagnostics) {
 	c.DesiredVersion = types.StringPointerValue(cl.Version)
 	c.CurrentVersion = types.StringPointerValue(cl.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cl.Protect)
-	c.fromNodePools(cl.NodePools)
+	c.fromNodePools(cl.NodePools, ctx, d)
 	c.Tags = common.ClusterTagsFrom(cl.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cl.Provider)
 }
 
-func (c *cluster) fromNodePools(nodePools []*console.NodePoolFragment) {
-	commonNodePools := algorithms.Map(common.ClusterNodePoolsFrom(nodePools), func(nodePool *common.ClusterNodePool) attr.Value {
+func (c *cluster) fromNodePools(nodePools []*console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) {
+	commonNodePools := algorithms.Map(common.ClusterNodePoolsFrom(nodePools, ctx, d), func(nodePool *common.ClusterNodePool) attr.Value {
 		return nodePool.Element()
 	})
 

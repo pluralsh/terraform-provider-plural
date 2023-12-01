@@ -211,6 +211,6 @@ func (d *clusterDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	data.From(cluster, resp.Diagnostics)
+	data.From(cluster, ctx, resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

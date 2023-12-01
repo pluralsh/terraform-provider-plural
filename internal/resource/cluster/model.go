@@ -46,7 +46,7 @@ func (c *cluster) NodePoolsAttribute(ctx context.Context, d diag.Diagnostics) []
 			MaxSize:       nodePool.MaxSize.ValueInt64(),
 			InstanceType:  nodePool.InstanceType.ValueString(),
 			Labels:        nodePool.LabelsAttribute(ctx, d),
-			Taints:        nodePool.TaintsAttribute(),
+			Taints:        nodePool.TaintsAttribute(ctx, d),
 			CloudSettings: nodePoolCloudSettings.Attributes(),
 		})
 	}
@@ -90,7 +90,7 @@ func (c *cluster) UpdateAttributes(ctx context.Context, d diag.Diagnostics) cons
 	}
 }
 
-func (c *cluster) From(cl *console.ClusterFragment, d diag.Diagnostics) {
+func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.Diagnostics) {
 	c.Id = types.StringValue(cl.ID)
 	c.InsertedAt = types.StringPointerValue(cl.InsertedAt)
 	c.Name = types.StringValue(cl.Name)
@@ -100,10 +100,10 @@ func (c *cluster) From(cl *console.ClusterFragment, d diag.Diagnostics) {
 	c.Protect = types.BoolPointerValue(cl.Protect)
 	c.Tags = common.ClusterTagsFrom(cl.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cl.Provider)
-	c.NodePoolsFrom(cl.NodePools, d)
+	c.NodePoolsFrom(cl.NodePools, ctx, d)
 }
 
-func (c *cluster) FromCreate(cc *console.CreateCluster, d diag.Diagnostics) {
+func (c *cluster) FromCreate(cc *console.CreateCluster, ctx context.Context, d diag.Diagnostics) {
 	c.Id = types.StringValue(cc.CreateCluster.ID)
 	c.InsertedAt = types.StringPointerValue(cc.CreateCluster.InsertedAt)
 	c.Name = types.StringValue(cc.CreateCluster.Name)
@@ -113,11 +113,11 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, d diag.Diagnostics) {
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
 	c.Tags = common.ClusterTagsFrom(cc.CreateCluster.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cc.CreateCluster.Provider)
-	c.NodePoolsFrom(cc.CreateCluster.NodePools, d)
+	c.NodePoolsFrom(cc.CreateCluster.NodePools, ctx, d)
 }
 
-func (c *cluster) NodePoolsFrom(nodePools []*console.NodePoolFragment, d diag.Diagnostics) {
-	commonNodePools := algorithms.Map(common.ClusterNodePoolsFrom(nodePools), func(nodePool *common.ClusterNodePool) attr.Value {
+func (c *cluster) NodePoolsFrom(nodePools []*console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) {
+	commonNodePools := algorithms.Map(common.ClusterNodePoolsFrom(nodePools, ctx, d), func(nodePool *common.ClusterNodePool) attr.Value {
 		return nodePool.Element()
 	})
 

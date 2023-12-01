@@ -6,17 +6,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	console "github.com/pluralsh/console-client-go"
 )
 
 type ClusterNodePool struct {
-	Name          types.String    `tfsdk:"name"`
-	MinSize       types.Int64     `tfsdk:"min_size"`
-	MaxSize       types.Int64     `tfsdk:"max_size"`
-	InstanceType  types.String    `tfsdk:"instance_type"`
-	Labels        types.Map       `tfsdk:"labels"`
-	Taints        []NodePoolTaint `tfsdk:"taints"`
-	CloudSettings types.Object    `tfsdk:"cloud_settings"`
+	Name          types.String `tfsdk:"name"`
+	MinSize       types.Int64  `tfsdk:"min_size"`
+	MaxSize       types.Int64  `tfsdk:"max_size"`
+	InstanceType  types.String `tfsdk:"instance_type"`
+	Labels        types.Map    `tfsdk:"labels"`
+	Taints        types.List   `tfsdk:"taints"`
+	CloudSettings types.Object `tfsdk:"cloud_settings"`
 }
 
 var ClusterNodePoolAttrTypes = map[string]attr.Type{
@@ -40,9 +41,12 @@ func (c *ClusterNodePool) LabelsAttribute(ctx context.Context, d diag.Diagnostic
 	return ToAttributesMap(elements)
 }
 
-func (c *ClusterNodePool) TaintsAttribute() []*console.TaintAttributes {
-	result := make([]*console.TaintAttributes, 0, len(c.Taints))
-	for _, np := range c.Taints {
+func (c *ClusterNodePool) TaintsAttribute(ctx context.Context, d diag.Diagnostics) []*console.TaintAttributes {
+	result := make([]*console.TaintAttributes, 0, len(c.Taints.Elements()))
+	elements := make([]NodePoolTaint, len(c.Taints.Elements()))
+	d.Append(c.Taints.ElementsAs(ctx, &elements, false)...)
+
+	for _, np := range elements {
 		result = append(result, &console.TaintAttributes{
 			Key:    np.Key.ValueString(),
 			Value:  np.Value.ValueString(),
@@ -60,7 +64,7 @@ func (c *ClusterNodePool) terraformAttributes() map[string]attr.Value {
 		"max_size":       c.MaxSize,
 		"instance_type":  c.InstanceType,
 		"labels":         c.TerraformAttributesLabels(),
-		"taints":         c.TerraformAttributesTaints(),
+		"taints":         c.Taints,
 		"cloud_settings": c.CloudSettings,
 	}
 }
@@ -71,20 +75,6 @@ func (c *ClusterNodePool) TerraformAttributesLabels() attr.Value {
 	}
 
 	return types.MapValueMust(types.StringType, c.Labels.Elements())
-}
-
-func (c *ClusterNodePool) TerraformAttributesTaints() attr.Value {
-	if len(c.Taints) == 0 {
-		return types.ListNull(types.ObjectType{AttrTypes: NodePoolTaintAttrTypes})
-	}
-
-	taints := make([]attr.Value, len(c.Taints))
-	for i, taint := range c.Taints {
-		taints[i] = types.ObjectValueMust(NodePoolTaintAttrTypes,
-			map[string]attr.Value{"key": taint.Key, "value": taint.Value, "effect": taint.Effect})
-	}
-
-	return types.ListValueMust(types.ObjectType{AttrTypes: NodePoolTaintAttrTypes}, taints)
 }
 
 func (c *ClusterNodePool) Element() attr.Value {
@@ -137,7 +127,7 @@ func (c *NodePoolCloudSettingsAWS) Attributes() *console.AwsNodeCloudAttributes 
 	}
 }
 
-func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment) []*ClusterNodePool {
+func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) []*ClusterNodePool {
 	result := make([]*ClusterNodePool, len(nodePools))
 	for i, nodePool := range nodePools {
 		result[i] = &ClusterNodePool{
@@ -146,7 +136,7 @@ func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment) []*ClusterNodeP
 			MaxSize:       types.Int64Value(nodePool.MaxSize),
 			InstanceType:  types.StringValue(nodePool.InstanceType),
 			Labels:        clusterNodePoolLabelsFrom(nodePool),
-			Taints:        clusterNodePoolTaintsFrom(nodePool),
+			Taints:        clusterNodePoolTaintsFrom(nodePool, ctx, d),
 			CloudSettings: types.ObjectNull(NodePoolCloudSettingsAttrTypes),
 		}
 	}
@@ -163,14 +153,20 @@ func clusterNodePoolLabelsFrom(nodePool *console.NodePoolFragment) types.Map {
 	return types.MapValueMust(types.StringType, labels)
 }
 
-func clusterNodePoolTaintsFrom(nodePool *console.NodePoolFragment) []NodePoolTaint {
-	taints := make([]NodePoolTaint, len(nodePool.Taints))
+func clusterNodePoolTaintsFrom(nodePool *console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) types.List {
+	taints := make([]attr.Value, len(nodePool.Taints))
 	for i, taint := range nodePool.Taints {
-		taints[i] = NodePoolTaint{
+		objValue, diags := types.ObjectValueFrom(ctx, NodePoolTaintAttrTypes, NodePoolTaint{
 			Key:    types.StringValue(taint.Key),
 			Value:  types.StringValue(taint.Value),
 			Effect: types.StringValue(taint.Effect),
-		}
+		})
+		taints[i] = objValue
+		d.Append(diags...)
 	}
-	return taints
+
+	listValue, diagnostics := types.ListValue(basetypes.ObjectType{AttrTypes: NodePoolTaintAttrTypes}, taints)
+	d.Append(diagnostics...)
+
+	return listValue
 }
