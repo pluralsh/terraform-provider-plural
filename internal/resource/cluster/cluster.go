@@ -200,7 +200,6 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 									},
 								},
 							},
-							PlanModifiers: []planmodifier.Object{objectplanmodifier.RequiresReplace()},
 						},
 					},
 				},
