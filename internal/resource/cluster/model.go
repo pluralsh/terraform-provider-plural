@@ -2,11 +2,9 @@ package cluster
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/pluralsh/polly/algorithms"
 
 	"terraform-provider-plural/internal/common"
@@ -36,34 +34,36 @@ type cluster struct {
 func (c *cluster) NodePoolsAttribute(ctx context.Context, d diag.Diagnostics) []*console.NodePoolAttributes {
 	result := make([]*console.NodePoolAttributes, 0, len(c.NodePools.Elements()))
 	nodePools := make([]common.ClusterNodePool, len(c.NodePools.Elements()))
-	c.NodePools.ElementsAs(ctx, &nodePools, false)
+	d.Append(c.NodePools.ElementsAs(ctx, &nodePools, false)...)
 
-	tflog.Info(ctx, fmt.Sprintf("data: %+v", c.NodePools.String())) // TODO: Remove.
-	tflog.Info(ctx, fmt.Sprintf("elements: %+v", nodePools))        // TODO: Remove.
+	for _, nodePool := range nodePools {
+		var nodePoolCloudSettings *common.NodePoolCloudSettings
+		d.Append(nodePool.CloudSettings.As(ctx, nodePoolCloudSettings, basetypes.ObjectAsOptions{})...)
 
-	for _, np := range nodePools {
 		result = append(result, &console.NodePoolAttributes{
-			Name:          np.Name.ValueString(),
-			MinSize:       np.MinSize.ValueInt64(),
-			MaxSize:       np.MaxSize.ValueInt64(),
-			InstanceType:  np.InstanceType.ValueString(),
-			Labels:        np.LabelsAttribute(ctx, d),
-			Taints:        np.TaintsAttribute(),
-			CloudSettings: np.CloudSettings.Attributes(),
+			Name:          nodePool.Name.ValueString(),
+			MinSize:       nodePool.MinSize.ValueInt64(),
+			MaxSize:       nodePool.MaxSize.ValueInt64(),
+			InstanceType:  nodePool.InstanceType.ValueString(),
+			Labels:        nodePool.LabelsAttribute(ctx, d),
+			Taints:        nodePool.TaintsAttribute(),
+			CloudSettings: nodePoolCloudSettings.Attributes(),
 		})
 	}
 
 	return result
 }
 
-func (c *cluster) TagsAttribute(ctx context.Context, d diag.Diagnostics) (result []*console.TagAttributes) {
+func (c *cluster) TagsAttribute(ctx context.Context, d diag.Diagnostics) []*console.TagAttributes {
+	result := make([]*console.TagAttributes, 0)
 	elements := make(map[string]types.String, len(c.Tags.Elements()))
 	d.Append(c.Tags.ElementsAs(ctx, &elements, false)...)
+
 	for k, v := range elements {
 		result = append(result, &console.TagAttributes{Name: k, Value: v.ValueString()})
 	}
 
-	return
+	return result
 }
 
 func (c *cluster) Attributes(ctx context.Context, d diag.Diagnostics) console.ClusterAttributes {

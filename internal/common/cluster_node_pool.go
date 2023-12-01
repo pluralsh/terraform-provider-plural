@@ -10,13 +10,13 @@ import (
 )
 
 type ClusterNodePool struct {
-	Name          types.String           `tfsdk:"name"`
-	MinSize       types.Int64            `tfsdk:"min_size"`
-	MaxSize       types.Int64            `tfsdk:"max_size"`
-	InstanceType  types.String           `tfsdk:"instance_type"`
-	Labels        types.Map              `tfsdk:"labels"`
-	Taints        []NodePoolTaint        `tfsdk:"taints"`
-	CloudSettings *NodePoolCloudSettings `tfsdk:"cloud_settings"`
+	Name          types.String    `tfsdk:"name"`
+	MinSize       types.Int64     `tfsdk:"min_size"`
+	MaxSize       types.Int64     `tfsdk:"max_size"`
+	InstanceType  types.String    `tfsdk:"instance_type"`
+	Labels        types.Map       `tfsdk:"labels"`
+	Taints        []NodePoolTaint `tfsdk:"taints"`
+	CloudSettings types.Object    `tfsdk:"cloud_settings"`
 }
 
 var ClusterNodePoolAttrTypes = map[string]attr.Type{
@@ -61,7 +61,7 @@ func (c *ClusterNodePool) terraformAttributes() map[string]attr.Value {
 		"instance_type":  c.InstanceType,
 		"labels":         c.TerraformAttributesLabels(),
 		"taints":         c.TerraformAttributesTaints(),
-		"cloud_settings": c.TerraformAttributesCloudSettings(),
+		"cloud_settings": c.CloudSettings,
 	}
 }
 
@@ -85,20 +85,6 @@ func (c *ClusterNodePool) TerraformAttributesTaints() attr.Value {
 	}
 
 	return types.ListValueMust(types.ObjectType{AttrTypes: NodePoolTaintAttrTypes}, taints)
-}
-
-func (c *ClusterNodePool) TerraformAttributesCloudSettings() attr.Value {
-	if c.CloudSettings == nil {
-		return types.ObjectNull(NodePoolCloudSettingsAttrTypes)
-	}
-
-	if c.CloudSettings.AWS != nil {
-		return types.ObjectValueMust(NodePoolCloudSettingsAttrTypes,
-			map[string]attr.Value{"aws": types.ObjectValueMust(NodePoolCloudSettingsAWSAttrTypes,
-				map[string]attr.Value{"launch_template_id": c.CloudSettings.AWS.LaunchTemplateId})})
-	}
-
-	return types.ObjectNull(NodePoolCloudSettingsAttrTypes)
 }
 
 func (c *ClusterNodePool) Element() attr.Value {
@@ -161,7 +147,7 @@ func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment) []*ClusterNodeP
 			InstanceType:  types.StringValue(nodePool.InstanceType),
 			Labels:        clusterNodePoolLabelsFrom(nodePool),
 			Taints:        clusterNodePoolTaintsFrom(nodePool),
-			CloudSettings: nil,
+			CloudSettings: types.ObjectNull(NodePoolCloudSettingsAttrTypes),
 		}
 	}
 
