@@ -170,7 +170,7 @@ func clusterNodePoolTaintsFrom(nodePool *console.NodePoolFragment, ctx context.C
 		d.Append(diags...)
 	}
 
-	listValue, diagnostics := types.ListValue(basetypes.ObjectType{AttrTypes: NodePoolTaintAttrTypes}, taints)
-	d.Append(diagnostics...)
+	listValue, diags := types.ListValue(basetypes.ObjectType{AttrTypes: NodePoolTaintAttrTypes}, taints)
+	d.Append(diags...)
 	return listValue
 }
