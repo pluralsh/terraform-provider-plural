@@ -166,6 +166,11 @@ func (r *GitRepositoryResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
+	if response == nil || response.GitRepository == nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to find GitRepository"))
+		return
+	}
+
 	data.From(response.GitRepository)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
@@ -177,7 +182,7 @@ func (r *GitRepositoryResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	_, err := r.client.UpdateGitRepository(ctx, data.Id.String(), data.Attributes())
+	_, err := r.client.UpdateGitRepository(ctx, data.Id.ValueString(), data.Attributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update GitRepository, got error: %s", err))
 		return
@@ -193,7 +198,7 @@ func (r *GitRepositoryResource) Delete(ctx context.Context, req resource.DeleteR
 		return
 	}
 
-	_, err := r.client.DeleteGitRepository(ctx, data.Id.String())
+	_, err := r.client.DeleteGitRepository(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete GitRepository, got error: %s", err))
 		return

@@ -89,6 +89,7 @@ func (this *ServiceDeployment) UpdateAttributes() gqlclient.ServiceUpdateAttribu
 		Git:           this.Repository.Attributes(),
 		Configuration: ToServiceDeploymentConfigAttributes(this.Configuration),
 		Kustomize:     this.Kustomize.Attributes(),
+		Helm:          this.Helm.Attributes(),
 	}
 }
 
@@ -150,13 +151,22 @@ func (this *ServiceDeploymentRepository) From(repository *gqlclient.GitRepositor
 	}
 
 	this.Id = types.StringValue(repository.ID)
+
+	if git == nil {
+		return
+	}
+
 	this.Ref = types.StringValue(git.Ref)
 	this.Folder = types.StringValue(git.Folder)
 }
 
 func (this *ServiceDeploymentRepository) Attributes() *gqlclient.GitRefAttributes {
 	if this == nil {
-		return &gqlclient.GitRefAttributes{}
+		return nil
+	}
+
+	if len(this.Ref.ValueString()) == 0 && len(this.Folder.ValueString()) == 0 {
+		return nil
 	}
 
 	return &gqlclient.GitRefAttributes{
@@ -245,7 +255,7 @@ func (this *ServiceDeploymentSyncConfig) Attributes() *gqlclient.SyncConfigAttri
 
 type ServiceDeploymentDiffNormalizer struct {
 	Group       types.String `tfsdk:"group"`
-	JsonPatches types.List   `tfsdk:"json_patches"`
+	JsonPatches types.Set    `tfsdk:"json_patches"`
 	Kind        types.String `tfsdk:"kind"`
 	Name        types.String `tfsdk:"name"`
 	Namespace   types.String `tfsdk:"namespace"`
@@ -296,7 +306,7 @@ type ServiceDeploymentHelm struct {
 	Chart       types.String                     `tfsdk:"chart"`
 	Repository  *ServiceDeploymentNamespacedName `tfsdk:"repository"`
 	Values      types.String                     `tfsdk:"values"`
-	ValuesFiles types.List                       `tfsdk:"values_files"`
+	ValuesFiles types.Set                        `tfsdk:"values_files"`
 	Version     types.String                     `tfsdk:"version"`
 }
 

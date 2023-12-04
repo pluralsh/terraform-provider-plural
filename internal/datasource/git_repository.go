@@ -82,6 +82,11 @@ func (r *GitRepositoryDataSource) Read(ctx context.Context, req datasource.ReadR
 		return
 	}
 
+	if response == nil || response.GitRepository == nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to find GitRepository"))
+		return
+	}
+
 	data.From(response.GitRepository)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
