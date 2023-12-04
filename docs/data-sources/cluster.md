@@ -43,7 +43,7 @@ Read-Only:
 - `max_size` (Number) Maximum number of instances in this node pool.
 - `min_size` (Number) Minimum number of instances in this node pool.
 - `name` (String) Node pool name.
-- `taints` (Attributes List) Taints applied to a node. (see [below for nested schema](#nestedatt--node_pools--taints))
+- `taints` (Attributes Set) Taints applied to a node. (see [below for nested schema](#nestedatt--node_pools--taints))
 
 <a id="nestedatt--node_pools--cloud_settings"></a>
 ### Nested Schema for `node_pools.cloud_settings`

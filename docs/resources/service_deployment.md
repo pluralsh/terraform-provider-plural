@@ -25,7 +25,7 @@ description: |-
 ### Optional
 
 - `bindings` (Attributes) Read and write policies of this ServiceDeployment. (see [below for nested schema](#nestedatt--bindings))
-- `configuration` (Attributes List) List of [name, value] secrets used to alter this ServiceDeployment configuration. (see [below for nested schema](#nestedatt--configuration))
+- `configuration` (Attributes Set) List of [name, value] secrets used to alter this ServiceDeployment configuration. (see [below for nested schema](#nestedatt--configuration))
 - `docs_path` (String) Path to the documentation in the target git repository.
 - `helm` (Attributes) Settings defining how Helm charts should be applied. (see [below for nested schema](#nestedatt--helm))
 - `kustomize` (Attributes) Kustomize related service metadata. (see [below for nested schema](#nestedatt--kustomize))
@@ -64,8 +64,8 @@ Optional:
 
 Optional:
 
-- `read` (Attributes List) Read policies of this ServiceDeployment. (see [below for nested schema](#nestedatt--bindings--read))
-- `write` (Attributes List) Write policies of this ServiceDeployment. (see [below for nested schema](#nestedatt--bindings--write))
+- `read` (Attributes Set) Read policies of this ServiceDeployment. (see [below for nested schema](#nestedatt--bindings--read))
+- `write` (Attributes Set) Write policies of this ServiceDeployment. (see [below for nested schema](#nestedatt--bindings--write))
 
 <a id="nestedatt--bindings--read"></a>
 ### Nested Schema for `bindings.read`
@@ -131,20 +131,7 @@ Required:
 
 Optional:
 
-- `diff_normalizer` (Attributes) (see [below for nested schema](#nestedatt--sync_config--diff_normalizer))
 - `namespace_metadata` (Attributes) (see [below for nested schema](#nestedatt--sync_config--namespace_metadata))
-
-<a id="nestedatt--sync_config--diff_normalizer"></a>
-### Nested Schema for `sync_config.diff_normalizer`
-
-Optional:
-
-- `group` (String)
-- `json_patches` (Set of String)
-- `kind` (String)
-- `name` (String)
-- `namespace` (String)
-
 
 <a id="nestedatt--sync_config--namespace_metadata"></a>
 ### Nested Schema for `sync_config.namespace_metadata`

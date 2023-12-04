@@ -25,7 +25,7 @@ A representation of a cluster you can deploy to.
 
 - `bindings` (Attributes) Read and write policies of this cluster. (see [below for nested schema](#nestedatt--bindings))
 - `handle` (String) A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.
-- `node_pools` (Attributes Set) Experimental, not ready for production use. List of node pool specs managed by this cluster. Leave empty for bring your own cluster. (see [below for nested schema](#nestedatt--node_pools))
+- `node_pools` (Attributes Set) **Experimental, not ready for production use.** List of node pool specs managed by this cluster. Leave empty for bring your own cluster. (see [below for nested schema](#nestedatt--node_pools))
 - `protect` (Boolean) If set to `true` then this cluster cannot be deleted.
 - `provider_id` (String) Provider used to create this cluster. Leave empty for bring your own cluster.
 - `tags` (Map of String) Key-value tags used to filter clusters.
@@ -127,8 +127,8 @@ Required:
 
 Optional:
 
-- `read` (Attributes List) Read policies of this cluster. (see [below for nested schema](#nestedatt--bindings--read))
-- `write` (Attributes List) Write policies of this cluster. (see [below for nested schema](#nestedatt--bindings--write))
+- `read` (Attributes Set) Read policies of this cluster. (see [below for nested schema](#nestedatt--bindings--read))
+- `write` (Attributes Set) Write policies of this cluster. (see [below for nested schema](#nestedatt--bindings--write))
 
 <a id="nestedatt--bindings--read"></a>
 ### Nested Schema for `bindings.read`
@@ -165,7 +165,7 @@ Optional:
 
 - `cloud_settings` (Attributes) Cloud-specific settings for this node pool. (see [below for nested schema](#nestedatt--node_pools--cloud_settings))
 - `labels` (Map of String) Kubernetes labels to apply to the nodes in this pool. Useful for node selectors.
-- `taints` (Attributes List) Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances. (see [below for nested schema](#nestedatt--node_pools--taints))
+- `taints` (Attributes Set) Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances. (see [below for nested schema](#nestedatt--node_pools--taints))
 
 <a id="nestedatt--node_pools--cloud_settings"></a>
 ### Nested Schema for `node_pools.cloud_settings`
