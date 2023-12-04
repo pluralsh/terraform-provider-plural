@@ -238,7 +238,6 @@ type ServiceDeploymentPolicyBinding struct {
 }
 
 type ServiceDeploymentSyncConfig struct {
-	DiffNormalizer    *ServiceDeploymentDiffNormalizer    `tfsdk:"diff_normalizer"`
 	NamespaceMetadata *ServiceDeploymentNamespaceMetadata `tfsdk:"namespace_metadata"`
 }
 
@@ -248,35 +247,7 @@ func (this *ServiceDeploymentSyncConfig) Attributes() *gqlclient.SyncConfigAttri
 	}
 
 	return &gqlclient.SyncConfigAttributes{
-		DiffNormalizer:    this.DiffNormalizer.Attributes(),
 		NamespaceMetadata: this.NamespaceMetadata.Attributes(),
-	}
-}
-
-type ServiceDeploymentDiffNormalizer struct {
-	Group       types.String `tfsdk:"group"`
-	JsonPatches types.Set    `tfsdk:"json_patches"`
-	Kind        types.String `tfsdk:"kind"`
-	Name        types.String `tfsdk:"name"`
-	Namespace   types.String `tfsdk:"namespace"`
-}
-
-func (this *ServiceDeploymentDiffNormalizer) Attributes() *gqlclient.DiffNormalizerAttributes {
-	if this == nil {
-		return nil
-	}
-
-	jsonPatches := make([]types.String, len(this.JsonPatches.Elements()))
-	this.JsonPatches.ElementsAs(context.Background(), &jsonPatches, false)
-
-	return &gqlclient.DiffNormalizerAttributes{
-		Group:     this.Group.ValueString(),
-		Kind:      this.Kind.ValueString(),
-		Name:      this.Name.ValueString(),
-		Namespace: this.Namespace.ValueString(),
-		JSONPatches: algorithms.Map(jsonPatches, func(v types.String) string {
-			return v.ValueString()
-		}),
 	}
 }
 

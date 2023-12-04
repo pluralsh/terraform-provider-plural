@@ -85,8 +85,8 @@ func (r *ServiceDeploymentResource) schemaKustomize() schema.SingleNestedAttribu
 	}
 }
 
-func (r *ServiceDeploymentResource) schemaConfiguration() schema.ListNestedAttribute {
-	return schema.ListNestedAttribute{
+func (r *ServiceDeploymentResource) schemaConfiguration() schema.SetNestedAttribute {
+	return schema.SetNestedAttribute{
 		Optional:            true,
 		Description:         "List of [name, value] secrets used to alter this ServiceDeployment configuration.",
 		MarkdownDescription: "List of [name, value] secrets used to alter this ServiceDeployment configuration.",
@@ -165,7 +165,7 @@ func (r *ServiceDeploymentResource) schemaBindings() schema.SingleNestedAttribut
 		Description:         "Read and write policies of this ServiceDeployment.",
 		MarkdownDescription: "Read and write policies of this ServiceDeployment.",
 		Attributes: map[string]schema.Attribute{
-			"read": schema.ListNestedAttribute{
+			"read": schema.SetNestedAttribute{
 				Optional:            true,
 				Description:         "Read policies of this ServiceDeployment.",
 				MarkdownDescription: "Read policies of this ServiceDeployment.",
@@ -183,7 +183,7 @@ func (r *ServiceDeploymentResource) schemaBindings() schema.SingleNestedAttribut
 					},
 				},
 			},
-			"write": schema.ListNestedAttribute{
+			"write": schema.SetNestedAttribute{
 				Optional:            true,
 				Description:         "Write policies of this ServiceDeployment.",
 				MarkdownDescription: "Write policies of this ServiceDeployment.",
@@ -214,27 +214,6 @@ func (r *ServiceDeploymentResource) schemaSyncConfig() schema.SingleNestedAttrib
 		Description:         "Settings for advanced tuning of the sync process.",
 		MarkdownDescription: "Settings for advanced tuning of the sync process.",
 		Attributes: map[string]schema.Attribute{
-			"diff_normalizer": schema.SingleNestedAttribute{
-				Optional: true,
-				Attributes: map[string]schema.Attribute{
-					"group": schema.StringAttribute{
-						Optional: true,
-					},
-					"json_patches": schema.SetAttribute{
-						ElementType: types.StringType,
-						Optional:    true,
-					},
-					"kind": schema.StringAttribute{
-						Optional: true,
-					},
-					"name": schema.StringAttribute{
-						Optional: true,
-					},
-					"namespace": schema.StringAttribute{
-						Optional: true,
-					},
-				},
-			},
 			"namespace_metadata": schema.SingleNestedAttribute{
 				Optional: true,
 				Attributes: map[string]schema.Attribute{
