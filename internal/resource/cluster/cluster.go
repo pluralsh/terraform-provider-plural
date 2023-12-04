@@ -183,19 +183,19 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 							Description:         "Cloud-specific settings for this node pool.",
 							MarkdownDescription: "Cloud-specific settings for this node pool.",
 							Optional:            true,
-							Computed:            true,
+							PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 							Attributes: map[string]schema.Attribute{
 								"aws": schema.SingleNestedAttribute{
 									Description:         "AWS node pool customizations.",
 									MarkdownDescription: "AWS node pool customizations.",
 									Optional:            true,
-									Computed:            true,
+									PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 									Attributes: map[string]schema.Attribute{
 										"launch_template_id": schema.StringAttribute{
 											Description:         "Custom launch template for your nodes. Useful for Golden AMI setups.",
 											MarkdownDescription: "Custom launch template for your nodes. Useful for Golden AMI setups.",
 											Optional:            true,
-											Computed:            true,
+											PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 										},
 									},
 								},
