@@ -112,7 +112,7 @@ func (d *clusterDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 							ElementType:         types.StringType,
 							Computed:            true,
 						},
-						"taints": schema.ListNestedAttribute{
+						"taints": schema.SetNestedAttribute{
 							Description:         "Taints applied to a node.",
 							MarkdownDescription: "Taints applied to a node.",
 							Computed:            true,

@@ -160,7 +160,7 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 							Optional:            true,
 							Computed:            true,
 						},
-						"taints": schema.ListNestedAttribute{
+						"taints": schema.SetNestedAttribute{
 							Description:         "Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances.",
 							MarkdownDescription: "Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances.",
 							Optional:            true,
@@ -223,7 +223,7 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				MarkdownDescription: "Read and write policies of this cluster.",
 				Optional:            true,
 				Attributes: map[string]schema.Attribute{
-					"read": schema.ListNestedAttribute{
+					"read": schema.SetNestedAttribute{
 						Optional:            true,
 						Description:         "Read policies of this cluster.",
 						MarkdownDescription: "Read policies of this cluster.",
@@ -247,7 +247,7 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 							},
 						},
 					},
-					"write": schema.ListNestedAttribute{
+					"write": schema.SetNestedAttribute{
 						Optional:            true,
 						Description:         "Write policies of this cluster.",
 						MarkdownDescription: "Write policies of this cluster.",

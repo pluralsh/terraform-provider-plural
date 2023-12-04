@@ -19,7 +19,7 @@ type ClusterNodePool struct {
 	MaxSize       types.Int64  `tfsdk:"max_size"`
 	InstanceType  types.String `tfsdk:"instance_type"`
 	Labels        types.Map    `tfsdk:"labels"`
-	Taints        types.List   `tfsdk:"taints"`
+	Taints        types.Set    `tfsdk:"taints"`
 	CloudSettings types.Object `tfsdk:"cloud_settings"`
 }
 
@@ -158,7 +158,7 @@ func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment, ctx context.Con
 	return result
 }
 
-func clusterNodePoolTaintsFrom(nodePool *console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) types.List {
+func clusterNodePoolTaintsFrom(nodePool *console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) types.Set {
 	taints := make([]attr.Value, len(nodePool.Taints))
 	for i, taint := range nodePool.Taints {
 		objValue, diags := types.ObjectValueFrom(ctx, NodePoolTaintAttrTypes, NodePoolTaint{
@@ -170,7 +170,7 @@ func clusterNodePoolTaintsFrom(nodePool *console.NodePoolFragment, ctx context.C
 		d.Append(diags...)
 	}
 
-	listValue, diags := types.ListValue(basetypes.ObjectType{AttrTypes: NodePoolTaintAttrTypes}, taints)
+	setValue, diags := types.SetValue(basetypes.ObjectType{AttrTypes: NodePoolTaintAttrTypes}, taints)
 	d.Append(diags...)
-	return listValue
+	return setValue
 }
