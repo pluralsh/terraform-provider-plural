@@ -117,7 +117,12 @@ func (a conflictsWithIfValidator) ValidateString(ctx context.Context, req valida
 	resp.Diagnostics.Append(validateResp.Diagnostics...)
 }
 
-// ConflictsWithIf todo
+// ConflictsWithIf checks that a set of path.Expression,
+// including the attribute the validator is applied to,
+// do not have a value simultaneously and specified condition is met.
+//
+// Relative path.Expression will be resolved using the attribute being
+// validated.
 func ConflictsWithIf(f ConflictsIf, expressions ...path.Expression) validator.String {
 	return &conflictsWithIfValidator{
 		PathExpressions: expressions,
