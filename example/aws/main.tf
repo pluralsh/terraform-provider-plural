@@ -46,14 +46,7 @@ resource "plural_cluster" "aws_cluster" {
       instance_type = "t5.large"
     },
     {
-      name = "pool-with-empty-labels"
-      min_size = 1
-      max_size = 5
-      instance_type = "t5.large"
-      labels = {}
-    },
-    {
-      name = "pool-with-labels"
+      name = "pool-with-labels-and-taints"
       min_size = 1
       max_size = 5
       instance_type = "t5.large"
@@ -61,19 +54,6 @@ resource "plural_cluster" "aws_cluster" {
         "key1" = "value1"
         "key2" = "value2"
       },
-    },
-    {
-      name = "pool-with-empty-taints"
-      min_size = 1
-      max_size = 5
-      instance_type = "t5.large"
-      taints = []
-    },
-    {
-      name = "pool-with-taints"
-      min_size = 1
-      max_size = 5
-      instance_type = "t5.large"
       taints = [
         {
           key = "test"
@@ -81,7 +61,18 @@ resource "plural_cluster" "aws_cluster" {
           effect = "NoSchedule"
         }
       ]
-    }
+    },
+    {
+      name = "pool-with-cloud-settings"
+      min_size = 1
+      max_size = 5
+      instance_type = "t5.large"
+      cloud_settings = {
+        aws = {
+          launch_template_id = "test"
+        }
+      }
+    },
   ]
   tags = {
     "managed-by" = "terraform-provider-plural"
