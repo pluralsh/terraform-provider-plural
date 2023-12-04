@@ -29,7 +29,7 @@ var ClusterNodePoolAttrTypes = map[string]attr.Type{
 	"max_size":       types.Int64Type,
 	"instance_type":  types.StringType,
 	"labels":         types.MapType{ElemType: types.StringType},
-	"taints":         types.ListType{ElemType: types.ObjectType{AttrTypes: NodePoolTaintAttrTypes}},
+	"taints":         types.SetType{ElemType: types.ObjectType{AttrTypes: NodePoolTaintAttrTypes}},
 	"cloud_settings": types.ObjectType{AttrTypes: NodePoolCloudSettingsAttrTypes},
 }
 
