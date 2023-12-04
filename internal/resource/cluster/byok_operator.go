@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pluralsh/plural-cli/cmd/plural"
+	"github.com/pluralsh/plural-cli/pkg/console"
 	"github.com/pluralsh/plural-cli/pkg/helm"
 	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
@@ -13,14 +15,6 @@ import (
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/release"
-)
-
-const (
-	// TODO: read from CLI pkg?
-	operatorNamespace = "plrl-deploy-operator"
-	releaseName       = "deploy-operator"
-	chartName         = "deployment-operator"
-	repoUrl           = "https://pluralsh.github.io/deployment-operator"
 )
 
 type OperatorHandler struct {
@@ -41,12 +35,12 @@ type OperatorHandler struct {
 func (oh *OperatorHandler) init() error {
 	oh.configuration = new(action.Configuration)
 
-	kubeconfig, err := newKubeconfig(oh.ctx, oh.kubeconfig, lo.ToPtr(operatorNamespace))
+	kubeconfig, err := newKubeconfig(oh.ctx, oh.kubeconfig, lo.ToPtr(plural.OperatorNamespace))
 	if err != nil {
 		return err
 	}
 
-	err = oh.configuration.Init(kubeconfig, operatorNamespace, "", logrus.Debugf)
+	err = oh.configuration.Init(kubeconfig, plural.OperatorNamespace, "", logrus.Debugf)
 	if err != nil {
 		return err
 	}
@@ -69,12 +63,12 @@ func (oh *OperatorHandler) init() error {
 }
 
 func (oh *OperatorHandler) initRepo() error {
-	return helm.AddRepo(releaseName, repoUrl)
+	return helm.AddRepo(console.ReleaseName, console.RepoUrl)
 }
 
 func (oh *OperatorHandler) initChart() error {
 	client := action.NewInstall(oh.configuration)
-	locateName := fmt.Sprintf("%s/%s", releaseName, chartName)
+	locateName := fmt.Sprintf("%s/%s", console.ReleaseName, console.ChartName)
 	path, err := client.ChartPathOptions.LocateChart(locateName, cli.New())
 	if err != nil {
 		return err
@@ -87,8 +81,8 @@ func (oh *OperatorHandler) initChart() error {
 func (oh *OperatorHandler) initInstallAction() {
 	oh.install = action.NewInstall(oh.configuration)
 
-	oh.install.Namespace = operatorNamespace
-	oh.install.ReleaseName = releaseName
+	oh.install.Namespace = plural.OperatorNamespace
+	oh.install.ReleaseName = console.ReleaseName
 	oh.install.Timeout = 5 * time.Minute
 	oh.install.Wait = true
 	oh.install.CreateNamespace = true
@@ -97,7 +91,7 @@ func (oh *OperatorHandler) initInstallAction() {
 func (oh *OperatorHandler) initUpgradeAction() {
 	oh.upgrade = action.NewUpgrade(oh.configuration)
 
-	oh.upgrade.Namespace = operatorNamespace
+	oh.upgrade.Namespace = plural.OperatorNamespace
 	oh.upgrade.Timeout = 5 * time.Minute
 	oh.upgrade.Wait = true
 }
@@ -119,7 +113,7 @@ func (oh *OperatorHandler) chartExists() (bool, error) {
 	}
 
 	for _, r := range releases {
-		if r.Name == releaseName && r.Namespace == operatorNamespace {
+		if r.Name == console.ReleaseName && r.Namespace == plural.OperatorNamespace {
 			return true, nil
 		}
 	}
@@ -163,12 +157,12 @@ func (oh *OperatorHandler) Install(token string) error {
 }
 
 func (oh *OperatorHandler) Upgrade(token string) error {
-	_, err := oh.upgrade.Run(releaseName, oh.chart, oh.values(token))
+	_, err := oh.upgrade.Run(console.ReleaseName, oh.chart, oh.values(token))
 	return err
 }
 
 func (oh *OperatorHandler) Uninstall() error {
-	_, err := oh.uninstall.Run(releaseName)
+	_, err := oh.uninstall.Run(console.ReleaseName)
 	return err
 }
 
