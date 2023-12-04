@@ -1,7 +1,6 @@
 package resource
 
 import (
-	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -140,7 +139,7 @@ func (r *ServiceDeploymentResource) schemaCluster() schema.SingleNestedAttribute
 
 func (r *ServiceDeploymentResource) schemaRepository() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
-		Optional:            true,
+		Required:            true,
 		Description:         "Repository information used to pull ServiceDeployment.",
 		MarkdownDescription: "Repository information used to pull ServiceDeployment.",
 		Attributes: map[string]schema.Attribute{
@@ -151,14 +150,11 @@ func (r *ServiceDeploymentResource) schemaRepository() schema.SingleNestedAttrib
 				Required: true,
 			},
 			"ref": schema.StringAttribute{
-				Required: true,
+				Optional: true,
 			},
 			"folder": schema.StringAttribute{
-				Required: true,
+				Optional: true,
 			},
-		},
-		Validators: []validator.Object{
-			objectvalidator.AtLeastOneOf(path.MatchRoot("helm")),
 		},
 	}
 }
@@ -221,19 +217,20 @@ func (r *ServiceDeploymentResource) schemaSyncConfig() schema.SingleNestedAttrib
 			"diff_normalizer": schema.SingleNestedAttribute{
 				Optional: true,
 				Attributes: map[string]schema.Attribute{
-					"group": schema.SingleNestedAttribute{
+					"group": schema.StringAttribute{
 						Optional: true,
 					},
-					"json_patches": schema.SingleNestedAttribute{
+					"json_patches": schema.SetAttribute{
+						ElementType: types.StringType,
+						Optional:    true,
+					},
+					"kind": schema.StringAttribute{
 						Optional: true,
 					},
-					"kind": schema.SingleNestedAttribute{
+					"name": schema.StringAttribute{
 						Optional: true,
 					},
-					"name": schema.SingleNestedAttribute{
-						Optional: true,
-					},
-					"namespace": schema.SingleNestedAttribute{
+					"namespace": schema.StringAttribute{
 						Optional: true,
 					},
 				},
@@ -274,14 +271,12 @@ func (r *ServiceDeploymentResource) schemaHelm() schema.SingleNestedAttribute {
 				Description:         "Resource reference to the flux Helm repository used by this chart.",
 				MarkdownDescription: "Resource reference to the flux Helm repository used by this chart.",
 				Attributes: map[string]schema.Attribute{
-					"name": schema.MapAttribute{
-						ElementType:         types.StringType,
+					"name": schema.StringAttribute{
 						Optional:            true,
 						Description:         "Name of the flux Helm repository resource used by this chart.",
 						MarkdownDescription: "Name of the flux Helm repository resource used by this chart.",
 					},
-					"namespace": schema.MapAttribute{
-						ElementType:         types.StringType,
+					"namespace": schema.StringAttribute{
 						Optional:            true,
 						Description:         "Namespace of the flux Helm repository resource used by this chart.",
 						MarkdownDescription: "Namespace of the flux Helm repository resource used by this chart.",
@@ -293,7 +288,8 @@ func (r *ServiceDeploymentResource) schemaHelm() schema.SingleNestedAttribute {
 				Description:         "Helm values file to use with this service",
 				MarkdownDescription: "Helm values file to use with this service",
 			},
-			"values_files": schema.StringAttribute{
+			"values_files": schema.SetAttribute{
+				ElementType:         types.StringType,
 				Optional:            true,
 				Description:         "List of relative paths to values files to use form Helm applies.",
 				MarkdownDescription: "List of relative paths to values files to use form Helm applies.",
@@ -303,9 +299,6 @@ func (r *ServiceDeploymentResource) schemaHelm() schema.SingleNestedAttribute {
 				Description:         "Chart version to use",
 				MarkdownDescription: "Chart version to use",
 			},
-		},
-		Validators: []validator.Object{
-			objectvalidator.AtLeastOneOf(path.MatchRoot("helm")),
 		},
 	}
 }
