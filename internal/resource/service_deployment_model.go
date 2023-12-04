@@ -68,7 +68,7 @@ func (this *ServiceDeployment) Attributes() gqlclient.ServiceDeploymentAttribute
 		DocsPath:      this.DocsPath.ValueStringPointer(),
 		SyncConfig:    this.SyncConfig.Attributes(),
 		Protect:       this.Protect.ValueBoolPointer(),
-		RepositoryID:  this.Repository.Id.ValueString(),
+		RepositoryID:  this.Repository.Id.ValueStringPointer(),
 		Git:           this.Repository.Attributes(),
 		Kustomize:     this.Kustomize.Attributes(),
 		Configuration: ToServiceDeploymentConfigAttributes(this.Configuration),
