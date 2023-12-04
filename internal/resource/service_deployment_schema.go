@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -139,7 +140,7 @@ func (r *ServiceDeploymentResource) schemaCluster() schema.SingleNestedAttribute
 
 func (r *ServiceDeploymentResource) schemaRepository() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
-		Required:            true,
+		Optional:            true,
 		Description:         "Repository information used to pull ServiceDeployment.",
 		MarkdownDescription: "Repository information used to pull ServiceDeployment.",
 		Attributes: map[string]schema.Attribute{
@@ -147,7 +148,7 @@ func (r *ServiceDeploymentResource) schemaRepository() schema.SingleNestedAttrib
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
-				Required: true,
+				Optional: true,
 			},
 			"ref": schema.StringAttribute{
 				Optional: true,
@@ -155,6 +156,9 @@ func (r *ServiceDeploymentResource) schemaRepository() schema.SingleNestedAttrib
 			"folder": schema.StringAttribute{
 				Optional: true,
 			},
+		},
+		Validators: []validator.Object{
+			objectvalidator.AtLeastOneOf(path.MatchRoot("helm")),
 		},
 	}
 }
@@ -278,6 +282,9 @@ func (r *ServiceDeploymentResource) schemaHelm() schema.SingleNestedAttribute {
 				Description:         "Chart version to use",
 				MarkdownDescription: "Chart version to use",
 			},
+		},
+		Validators: []validator.Object{
+			objectvalidator.AtLeastOneOf(path.MatchRoot("repository")),
 		},
 	}
 }
