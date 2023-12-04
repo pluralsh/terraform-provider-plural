@@ -62,6 +62,6 @@ Required:
 <a id="nestedatt--cloud_settings--gcp"></a>
 ### Nested Schema for `cloud_settings.gcp`
 
-Required:
+Optional:
 
 - `credentials` (String, Sensitive) Base64 encoded GCP credentials.json file. It's recommended to use custom Service Account.

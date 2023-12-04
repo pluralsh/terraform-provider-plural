@@ -23,9 +23,49 @@ A representation of a cluster you can deploy to.
 ### Read-Only
 
 - `cloud` (String) The cloud provider used to create this cluster.
+- `current_version` (String) Current Kubernetes version for this cluster.
+- `desired_version` (String) Desired Kubernetes version for this cluster.
 - `inserted_at` (String) Creation date of this cluster.
 - `name` (String) Human-readable name of this cluster, that also translates to cloud resource name.
+- `node_pools` (Attributes Set) List of node pool specs managed by this cluster. (see [below for nested schema](#nestedatt--node_pools))
 - `protect` (Boolean) If set to `true` then this cluster cannot be deleted.
 - `provider_id` (String) Provider used to create this cluster.
 - `tags` (Map of String) Key-value tags used to filter clusters.
-- `version` (String) Desired Kubernetes version for this cluster.
+
+<a id="nestedatt--node_pools"></a>
+### Nested Schema for `node_pools`
+
+Read-Only:
+
+- `cloud_settings` (Attributes) Cloud-specific settings for this node pool. (see [below for nested schema](#nestedatt--node_pools--cloud_settings))
+- `instance_type` (String) The type of used node. Usually cloud-specific.
+- `labels` (Map of String) Kubernetes labels applied to the nodes in this pool.
+- `max_size` (Number) Maximum number of instances in this node pool.
+- `min_size` (Number) Minimum number of instances in this node pool.
+- `name` (String) Node pool name.
+- `taints` (Attributes List) Taints applied to a node. (see [below for nested schema](#nestedatt--node_pools--taints))
+
+<a id="nestedatt--node_pools--cloud_settings"></a>
+### Nested Schema for `node_pools.cloud_settings`
+
+Read-Only:
+
+- `aws` (Attributes) AWS node pool customizations. (see [below for nested schema](#nestedatt--node_pools--cloud_settings--aws))
+
+<a id="nestedatt--node_pools--cloud_settings--aws"></a>
+### Nested Schema for `node_pools.cloud_settings.aws`
+
+Read-Only:
+
+- `launch_template_id` (String) Custom launch template for your nodes. Useful for Golden AMI setups.
+
+
+
+<a id="nestedatt--node_pools--taints"></a>
+### Nested Schema for `node_pools.taints`
+
+Read-Only:
+
+- `effect` (String)
+- `key` (String)
+- `value` (String)

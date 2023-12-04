@@ -27,6 +27,7 @@ description: |-
 - `bindings` (Attributes) Read and write policies of this ServiceDeployment. (see [below for nested schema](#nestedatt--bindings))
 - `configuration` (Attributes List) List of [name, value] secrets used to alter this ServiceDeployment configuration. (see [below for nested schema](#nestedatt--configuration))
 - `docs_path` (String) Path to the documentation in the target git repository.
+- `helm` (Attributes) Settings defining how Helm charts should be applied. (see [below for nested schema](#nestedatt--helm))
 - `kustomize` (Attributes) Kustomize related service metadata. (see [below for nested schema](#nestedatt--kustomize))
 - `protect` (Boolean) If true, deletion of this service is not allowed.
 - `sync_config` (Attributes) Settings for advanced tuning of the sync process. (see [below for nested schema](#nestedatt--sync_config))
@@ -50,8 +51,11 @@ Optional:
 
 Required:
 
-- `folder` (String)
 - `id` (String)
+
+Optional:
+
+- `folder` (String)
 - `ref` (String)
 
 
@@ -93,6 +97,27 @@ Required:
 - `value` (String, Sensitive)
 
 
+<a id="nestedatt--helm"></a>
+### Nested Schema for `helm`
+
+Optional:
+
+- `chart` (String) The name of the chart to use.
+- `repository` (Attributes) Resource reference to the flux Helm repository used by this chart. (see [below for nested schema](#nestedatt--helm--repository))
+- `values` (String) Helm values file to use with this service
+- `values_files` (Set of String) List of relative paths to values files to use form Helm applies.
+- `version` (String) Chart version to use
+
+<a id="nestedatt--helm--repository"></a>
+### Nested Schema for `helm.repository`
+
+Optional:
+
+- `name` (String) Name of the flux Helm repository resource used by this chart.
+- `namespace` (String) Namespace of the flux Helm repository resource used by this chart.
+
+
+
 <a id="nestedatt--kustomize"></a>
 ### Nested Schema for `kustomize`
 
@@ -114,31 +139,11 @@ Optional:
 
 Optional:
 
-- `group` (Attributes) (see [below for nested schema](#nestedatt--sync_config--diff_normalizer--group))
-- `json_patches` (Attributes) (see [below for nested schema](#nestedatt--sync_config--diff_normalizer--json_patches))
-- `kind` (Attributes) (see [below for nested schema](#nestedatt--sync_config--diff_normalizer--kind))
-- `name` (Attributes) (see [below for nested schema](#nestedatt--sync_config--diff_normalizer--name))
-- `namespace` (Attributes) (see [below for nested schema](#nestedatt--sync_config--diff_normalizer--namespace))
-
-<a id="nestedatt--sync_config--diff_normalizer--group"></a>
-### Nested Schema for `sync_config.diff_normalizer.group`
-
-
-<a id="nestedatt--sync_config--diff_normalizer--json_patches"></a>
-### Nested Schema for `sync_config.diff_normalizer.json_patches`
-
-
-<a id="nestedatt--sync_config--diff_normalizer--kind"></a>
-### Nested Schema for `sync_config.diff_normalizer.kind`
-
-
-<a id="nestedatt--sync_config--diff_normalizer--name"></a>
-### Nested Schema for `sync_config.diff_normalizer.name`
-
-
-<a id="nestedatt--sync_config--diff_normalizer--namespace"></a>
-### Nested Schema for `sync_config.diff_normalizer.namespace`
-
+- `group` (String)
+- `json_patches` (Set of String)
+- `kind` (String)
+- `name` (String)
+- `namespace` (String)
 
 
 <a id="nestedatt--sync_config--namespace_metadata"></a>

@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pluralsh/console-client-go v0.0.51
-	github.com/pluralsh/plural-cli v0.8.3-0.20231204130326-6bfc028f0e8d
+	github.com/pluralsh/plural-cli v0.8.3-0.20231204142546-98d50a1936d3
 	github.com/pluralsh/polly v0.1.4
 	github.com/samber/lo v1.38.1
 	github.com/sirupsen/logrus v1.9.3

@@ -1661,8 +1661,8 @@ github.com/pluralsh/gqlclient v1.11.0 h1:FfXW7FiEJLHOfTAa7NxDb8jb3aMZNIpCAcG+bg8
 github.com/pluralsh/gqlclient v1.11.0/go.mod h1:qSXKUlio1F2DRPy8el4oFYsmpKbkUYspgPB87T4it5I=
 github.com/pluralsh/oauth v0.9.2 h1:tM9hBK4tCnJUeCOgX0ctxBBCS3hiCDPoxkJLODtedmQ=
 github.com/pluralsh/oauth v0.9.2/go.mod h1:aTUw/75rzcsbvW+/TLvWtHVDXFIdtFrDtUncOq9vHyM=
-github.com/pluralsh/plural-cli v0.8.3-0.20231204130326-6bfc028f0e8d h1:gOQIIfodWIAo0lfUUwgtO7nirh2PplJ/yB3dFVbL1gc=
-github.com/pluralsh/plural-cli v0.8.3-0.20231204130326-6bfc028f0e8d/go.mod h1:Cj5ZD6kf9OLd+333rdkUVvqFxcnKOecLxoy+nx8h22g=
+github.com/pluralsh/plural-cli v0.8.3-0.20231204142546-98d50a1936d3 h1:zGbRWvgu4eQ1gygIbLiWfAQl+MR6Z11MJTIxN8H0hRo=
+github.com/pluralsh/plural-cli v0.8.3-0.20231204142546-98d50a1936d3/go.mod h1:rq/54O2rPq8Muzc1ooDBSTmSZzq/g9J9VQxnZe5C89I=
 github.com/pluralsh/plural-operator v0.5.5 h1:57GxniNjUa3hpHgvFr9oDonFgvDUC8XDD5B0e7Xduzk=
 github.com/pluralsh/plural-operator v0.5.5/go.mod h1:WIXiz26/WDcUn0FA7Q1jPxmfsm98U1/JL8YpIdKVLX0=
 github.com/pluralsh/polly v0.1.4 h1:Kz90peCgvsfF3ERt8cujr5TR9z4wUlqQE60Eg09ZItY=
