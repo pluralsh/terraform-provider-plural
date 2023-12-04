@@ -864,6 +864,8 @@ github.com/pluralsh/plural-cli v0.8.1-0.20231114161007-183eafb99b03 h1:toUJzv4+4
 github.com/pluralsh/plural-cli v0.8.1-0.20231114161007-183eafb99b03/go.mod h1:Cj5ZD6kf9OLd+333rdkUVvqFxcnKOecLxoy+nx8h22g=
 github.com/pluralsh/plural-cli v0.8.3-0.20231204130326-6bfc028f0e8d h1:gOQIIfodWIAo0lfUUwgtO7nirh2PplJ/yB3dFVbL1gc=
 github.com/pluralsh/plural-cli v0.8.3-0.20231204130326-6bfc028f0e8d/go.mod h1:Cj5ZD6kf9OLd+333rdkUVvqFxcnKOecLxoy+nx8h22g=
+github.com/pluralsh/plural-cli v0.8.3-0.20231204140616-edc064b6c1ab h1:/9A9Vyoxm8u4Q9jA/ahhcysEi8ieJcp6AX+hIBMubxw=
+github.com/pluralsh/plural-cli v0.8.3-0.20231204140616-edc064b6c1ab/go.mod h1:Cj5ZD6kf9OLd+333rdkUVvqFxcnKOecLxoy+nx8h22g=
 github.com/pluralsh/polly v0.1.4 h1:Kz90peCgvsfF3ERt8cujr5TR9z4wUlqQE60Eg09ZItY=
 github.com/pluralsh/polly v0.1.4/go.mod h1:Yo1/jcW+4xwhWG+ZJikZy4J4HJkMNPZ7sq5auL2c/tY=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

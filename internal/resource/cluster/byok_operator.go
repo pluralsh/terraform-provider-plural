@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pluralsh/plural-cli/cmd/plural"
 	"github.com/pluralsh/plural-cli/pkg/console"
 	"github.com/pluralsh/plural-cli/pkg/helm"
 	"github.com/samber/lo"
@@ -35,12 +34,12 @@ type OperatorHandler struct {
 func (oh *OperatorHandler) init() error {
 	oh.configuration = new(action.Configuration)
 
-	kubeconfig, err := newKubeconfig(oh.ctx, oh.kubeconfig, lo.ToPtr(plural.OperatorNamespace))
+	kubeconfig, err := newKubeconfig(oh.ctx, oh.kubeconfig, lo.ToPtr(console.OperatorNamespace))
 	if err != nil {
 		return err
 	}
 
-	err = oh.configuration.Init(kubeconfig, plural.OperatorNamespace, "", logrus.Debugf)
+	err = oh.configuration.Init(kubeconfig, console.OperatorNamespace, "", logrus.Debugf)
 	if err != nil {
 		return err
 	}
@@ -81,7 +80,7 @@ func (oh *OperatorHandler) initChart() error {
 func (oh *OperatorHandler) initInstallAction() {
 	oh.install = action.NewInstall(oh.configuration)
 
-	oh.install.Namespace = plural.OperatorNamespace
+	oh.install.Namespace = console.OperatorNamespace
 	oh.install.ReleaseName = console.ReleaseName
 	oh.install.Timeout = 5 * time.Minute
 	oh.install.Wait = true
@@ -91,7 +90,7 @@ func (oh *OperatorHandler) initInstallAction() {
 func (oh *OperatorHandler) initUpgradeAction() {
 	oh.upgrade = action.NewUpgrade(oh.configuration)
 
-	oh.upgrade.Namespace = plural.OperatorNamespace
+	oh.upgrade.Namespace = console.OperatorNamespace
 	oh.upgrade.Timeout = 5 * time.Minute
 	oh.upgrade.Wait = true
 }
@@ -113,7 +112,7 @@ func (oh *OperatorHandler) chartExists() (bool, error) {
 	}
 
 	for _, r := range releases {
-		if r.Name == console.ReleaseName && r.Namespace == plural.OperatorNamespace {
+		if r.Name == console.ReleaseName && r.Namespace == console.OperatorNamespace {
 			return true, nil
 		}
 	}
