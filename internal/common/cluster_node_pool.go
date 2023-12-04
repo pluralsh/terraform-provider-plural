@@ -1,16 +1,13 @@
 package common
 
 import (
-	"bytes"
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	console "github.com/pluralsh/console-client-go"
-	"k8s.io/apimachinery/pkg/util/json"
 )
 
 type ClusterNodePool struct {
@@ -40,16 +37,7 @@ func (c *ClusterNodePool) LabelsAttribute(ctx context.Context, d diag.Diagnostic
 
 	elements := make(map[string]types.String, len(c.Labels.Elements()))
 	d.Append(c.Labels.ElementsAs(ctx, &elements, false)...)
-
-	attrsMap := ToAttributesMap(elements)
-	marshalledMap, err := json.Marshal(attrsMap)
-	if err != nil {
-		d.AddError("Provider Error", fmt.Sprintf("Cannot marshall labels, got error: %s", err))
-		return nil
-	}
-
-	result := bytes.NewBuffer(marshalledMap).String()
-	return &result
+	return AttributesJson(elements, d)
 }
 
 func (c *ClusterNodePool) TaintsAttribute(ctx context.Context, d diag.Diagnostics) []*console.TaintAttributes {
