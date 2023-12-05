@@ -156,19 +156,25 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 							Optional:            true,
 						},
 						"taints": schema.SetNestedAttribute{
-							Description:         "Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances.",
-							MarkdownDescription: "Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances.",
+							Description:         "Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances. See https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ for more information.",
+							MarkdownDescription: "Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances. See [Kubernetes docs](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) for more information.",
 							Optional:            true,
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 									"key": schema.StringAttribute{
-										Required: true,
+										Description:         "Taint key.",
+										MarkdownDescription: "Taint key.",
+										Required:            true,
 									},
 									"value": schema.StringAttribute{
-										Required: true,
+										Description:         "Taint value.",
+										MarkdownDescription: "Taint value.",
+										Required:            true,
 									},
 									"effect": schema.StringAttribute{
-										Required: true,
+										Description:         "Taint effect, allowed values include NoExecute, NoSchedule and PreferNoSchedule.",
+										MarkdownDescription: "Taint effect, allowed values include `NoExecute`, `NoSchedule` and `PreferNoSchedule`.",
+										Required:            true,
 									},
 								},
 							},

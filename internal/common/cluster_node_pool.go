@@ -136,21 +136,28 @@ func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment, configNodePools
 
 	result := make(map[string]attr.Value)
 	for _, nodePool := range nodePools {
-		clusterNodePoolLabels, diags := types.MapValueFrom(ctx, types.StringType, nodePool.Labels)
-		d.Append(diags...)
-
 		result[nodePool.Name] = (&ClusterNodePool{
 			Name:          types.StringValue(nodePool.Name),
 			MinSize:       types.Int64Value(nodePool.MinSize),
 			MaxSize:       types.Int64Value(nodePool.MaxSize),
 			InstanceType:  types.StringValue(nodePool.InstanceType),
-			Labels:        clusterNodePoolLabels,
+			Labels:        clusterNodePoolLabelsFrom(nodePool, ctx, d),
 			Taints:        clusterNodePoolTaintsFrom(nodePool, ctx, d),
 			CloudSettings: configNodePoolsElements[nodePool.Name].CloudSettings, // Rewriting config to state to avoid unknown values.
 		}).Element()
 	}
 
 	return result
+}
+
+func clusterNodePoolLabelsFrom(nodePool *console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) types.Map {
+	if len(nodePool.Labels) == 0 {
+		return types.MapNull(types.StringType)
+	}
+
+	mapValue, diags := types.MapValueFrom(ctx, types.StringType, nodePool.Labels)
+	d.Append(diags...)
+	return mapValue
 }
 
 func clusterNodePoolTaintsFrom(nodePool *console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) types.Set {
