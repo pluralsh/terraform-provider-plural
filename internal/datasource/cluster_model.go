@@ -41,7 +41,7 @@ func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.
 
 func (c *cluster) fromNodePools(nodePools []*console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) {
 	mapValue, diags := types.MapValue(basetypes.ObjectType{AttrTypes: common.ClusterNodePoolAttrTypes},
-		common.ClusterNodePoolsFrom(nodePools, ctx, d))
+		common.ClusterNodePoolsFrom(nodePools, c.NodePools, ctx, d))
 	d.Append(diags...)
 	c.NodePools = mapValue
 }
