@@ -18,7 +18,7 @@ A representation of a provider you can deploy your clusters to.
 ### Required
 
 - `cloud` (String) The name of the cloud service for this provider.
-- `cloud_settings` (Attributes) Cloud-specific settings for a provider. (see [below for nested schema](#nestedatt--cloud_settings))
+- `cloud_settings` (Attributes) Cloud-specific settings for a provider. See [our docs](https://docs.plural.sh/reference/configuring-cloud-provider#permissions) for more information about required permissions. (see [below for nested schema](#nestedatt--cloud_settings))
 - `name` (String) Human-readable name of this provider. Globally unique.
 
 ### Optional
@@ -44,8 +44,8 @@ Optional:
 
 Required:
 
-- `access_key_id` (String, Sensitive)
-- `secret_access_key` (String, Sensitive)
+- `access_key_id` (String, Sensitive) ID of an access key for an IAM user or the AWS account root user.
+- `secret_access_key` (String, Sensitive) Secret of an access key for an IAM user or the AWS account root user.
 
 
 <a id="nestedatt--cloud_settings--azure"></a>
@@ -64,4 +64,4 @@ Required:
 
 Optional:
 
-- `credentials` (String, Sensitive) Base64 encoded GCP credentials.json file. It's recommended to use custom Service Account.
+- `credentials` (String, Sensitive) Base64 encoded GCP credentials.json file. It's recommended to use custom service account.

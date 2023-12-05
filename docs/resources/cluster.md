@@ -164,7 +164,7 @@ Optional:
 
 - `cloud_settings` (Attributes) Cloud-specific settings for this node pool. (see [below for nested schema](#nestedatt--node_pools--cloud_settings))
 - `labels` (Map of String) Kubernetes labels to apply to the nodes in this pool. Useful for node selectors.
-- `taints` (Attributes Set) Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances. (see [below for nested schema](#nestedatt--node_pools--taints))
+- `taints` (Attributes Set) Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances. See [Kubernetes docs](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) for more information. (see [below for nested schema](#nestedatt--node_pools--taints))
 
 <a id="nestedatt--node_pools--cloud_settings"></a>
 ### Nested Schema for `node_pools.cloud_settings`
@@ -187,6 +187,6 @@ Optional:
 
 Required:
 
-- `effect` (String)
-- `key` (String)
-- `value` (String)
+- `effect` (String) Taint effect, allowed values include `NoExecute`, `NoSchedule` and `PreferNoSchedule`.
+- `key` (String) Taint key.
+- `value` (String) Taint value.

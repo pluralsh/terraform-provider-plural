@@ -7,6 +7,7 @@ func AWSCloudSettingsSchema() schema.SingleNestedAttribute {
 		Optional: true,
 		Attributes: map[string]schema.Attribute{
 			"region": schema.StringAttribute{
+				Description:         "AWS region to deploy the cluster to.",
 				MarkdownDescription: "AWS region to deploy the cluster to.",
 				Required:            true,
 			},

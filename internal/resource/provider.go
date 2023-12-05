@@ -74,22 +74,22 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 					common.CloudAWS.String(), common.CloudAzure.String(), common.CloudGCP.String())},
 			},
 			"cloud_settings": schema.SingleNestedAttribute{
-				Description:         "Cloud-specific settings for a provider.",
-				MarkdownDescription: "Cloud-specific settings for a provider.",
+				Description:         "Cloud-specific settings for a provider. See https://docs.plural.sh/reference/configuring-cloud-provider#permissions for more information about required permissions.",
+				MarkdownDescription: "Cloud-specific settings for a provider. See [our docs](https://docs.plural.sh/reference/configuring-cloud-provider#permissions) for more information about required permissions.",
 				Required:            true,
 				Attributes: map[string]schema.Attribute{
 					"aws": schema.SingleNestedAttribute{
 						Optional: true,
 						Attributes: map[string]schema.Attribute{
 							"access_key_id": schema.StringAttribute{
-								Description:         "",
-								MarkdownDescription: "",
+								Description:         "ID of an access key for an IAM user or the AWS account root user.",
+								MarkdownDescription: "ID of an access key for an IAM user or the AWS account root user.",
 								Required:            true,
 								Sensitive:           true,
 							},
 							"secret_access_key": schema.StringAttribute{
-								Description:         "",
-								MarkdownDescription: "",
+								Description:         "Secret of an access key for an IAM user or the AWS account root user.",
+								MarkdownDescription: "Secret of an access key for an IAM user or the AWS account root user.",
 								Required:            true,
 								Sensitive:           true,
 							},
@@ -107,21 +107,25 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 						Optional:            true,
 						Attributes: map[string]schema.Attribute{
 							"subscription_id": schema.StringAttribute{
+								Description:         "GUID of the Azure subscription",
 								MarkdownDescription: "GUID of the Azure subscription",
 								Required:            true,
 								Sensitive:           true,
 							},
 							"tenant_id": schema.StringAttribute{
+								Description:         "The unique identifier of the Azure Active Directory instance.",
 								MarkdownDescription: "The unique identifier of the Azure Active Directory instance.",
 								Required:            true,
 								Sensitive:           true,
 							},
 							"client_id": schema.StringAttribute{
+								Description:         "The unique identifier of an application created in the Azure Active Directory.",
 								MarkdownDescription: "The unique identifier of an application created in the Azure Active Directory.",
 								Required:            true,
 								Sensitive:           true,
 							},
 							"client_secret": schema.StringAttribute{
+								Description:         "A string value your app can use in place of a certificate to identity itself. Sometimes called an application password.",
 								MarkdownDescription: "A string value your app can use in place of a certificate to identity itself. Sometimes called an application password.",
 								Required:            true,
 								Sensitive:           true,
@@ -140,13 +144,12 @@ func (r *providerResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 						MarkdownDescription: "GCP cloud settings that will be used by this provider to create clusters.",
 						Attributes: map[string]schema.Attribute{
 							"credentials": schema.StringAttribute{
-								Computed:  true,
-								Optional:  true,
-								Sensitive: true,
-								Default:   defaults.Env("PLURAL_GCP_CREDENTIALS", ""),
-								// TODO: point to documentation with required list of permissions
-								Description:         "Base64 encoded GCP credentials.json file. It's recommended to use custom Service Account.",
-								MarkdownDescription: "Base64 encoded GCP credentials.json file. It's recommended to use custom Service Account.",
+								Computed:            true,
+								Optional:            true,
+								Sensitive:           true,
+								Default:             defaults.Env("PLURAL_GCP_CREDENTIALS", ""),
+								Description:         "Base64 encoded GCP credentials.json file. It's recommended to use custom service account.",
+								MarkdownDescription: "Base64 encoded GCP credentials.json file. It's recommended to use custom service account.",
 							},
 						},
 						Validators: []validator.Object{
