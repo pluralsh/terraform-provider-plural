@@ -32,9 +32,8 @@ func NewClusterResource() resource.Resource {
 
 // ClusterResource defines the cluster resource implementation.
 type clusterResource struct {
-	client          *client.Client
-	consoleUrl      string
-	operatorHandler *OperatorHandler
+	client     *client.Client
+	consoleUrl string
 }
 
 func (r *clusterResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -308,7 +307,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 
 	if common.IsCloud(data.Cloud.ValueString(), common.CloudBYOK) {
 		if result.CreateCluster.DeployToken == nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to fetch cluster deploy token"))
+			resp.Diagnostics.AddError("Client Error", "Unable to fetch cluster deploy token")
 			return
 		}
 
@@ -342,7 +341,7 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 	if result == nil || result.Cluster == nil {
-		resp.Diagnostics.AddError("Not Found", fmt.Sprintf("Unable to find cluster, it looks like it was deleted manually"))
+		resp.Diagnostics.AddError("Not Found", "Unable to find cluster, it looks like it was deleted manually")
 		return
 	}
 

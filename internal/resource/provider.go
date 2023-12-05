@@ -213,7 +213,7 @@ func (r *providerResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 	if result == nil || result.ClusterProvider == nil {
-		resp.Diagnostics.AddError("Not Found", fmt.Sprintf("Unable to find provider, it looks like it was deleted manually"))
+		resp.Diagnostics.AddError("Not Found", "Unable to find provider, it looks like it was deleted manually")
 		return
 	}
 

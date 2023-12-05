@@ -113,7 +113,7 @@ func (p *providerDataSource) Read(ctx context.Context, req datasource.ReadReques
 		return
 	}
 	if result == nil && result.ClusterProvider == nil {
-		resp.Diagnostics.AddError("Not Found", fmt.Sprintf("Unable to find provider"))
+		resp.Diagnostics.AddError("Not Found", "Unable to find provider")
 		return
 	}
 

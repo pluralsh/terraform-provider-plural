@@ -202,7 +202,7 @@ func (d *clusterDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	}
 
 	if cluster == nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read cluster, see warnings for more information"))
+		resp.Diagnostics.AddError("Client Error", "Unable to read cluster, see warnings for more information")
 		return
 	}
 

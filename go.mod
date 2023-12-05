@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/Yamashou/gqlgenc v0.14.0
-	github.com/golangci/golangci-lint v1.55.2
+	github.com/golangci/golangci-lint v1.55.1
 	github.com/hashicorp/terraform-plugin-docs v0.16.0
 	github.com/hashicorp/terraform-plugin-framework v1.4.2
 	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0

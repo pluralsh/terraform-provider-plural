@@ -167,7 +167,7 @@ func (r *GitRepositoryResource) Read(ctx context.Context, req resource.ReadReque
 	}
 
 	if response == nil || response.GitRepository == nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to find GitRepository"))
+		resp.Diagnostics.AddError("Client Error", "Unable to find GitRepository")
 		return
 	}
 
