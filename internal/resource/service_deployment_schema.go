@@ -112,6 +112,9 @@ func (r *ServiceDeploymentResource) schemaCluster() schema.SingleNestedAttribute
 		MarkdownDescription: "Unique cluster id/handle to deploy this ServiceDeployment",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
+				Optional:            true,
+				Description:         "ID of the cluster to use",
+				MarkdownDescription: "ID of the cluster to use",
 				Validators: []validator.String{
 					stringvalidator.ConflictsWith(path.MatchRoot("cluster").AtName("handle")),
 					stringvalidator.ExactlyOneOf(path.MatchRoot("cluster").AtName("handle")),
@@ -119,9 +122,11 @@ func (r *ServiceDeploymentResource) schemaCluster() schema.SingleNestedAttribute
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Optional: true,
 			},
 			"handle": schema.StringAttribute{
+				Optional:            true,
+				Description:         "A short, unique human readable name used to identify the cluster",
+				MarkdownDescription: "A short, unique human readable name used to identify the cluster",
 				Validators: []validator.String{
 					stringvalidator.ConflictsWith(path.MatchRoot("cluster").AtName("id")),
 					stringvalidator.ExactlyOneOf(path.MatchRoot("cluster").AtName("id")),
@@ -129,7 +134,6 @@ func (r *ServiceDeploymentResource) schemaCluster() schema.SingleNestedAttribute
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Optional: true,
 			},
 		},
 		PlanModifiers: []planmodifier.Object{
@@ -145,16 +149,19 @@ func (r *ServiceDeploymentResource) schemaRepository() schema.SingleNestedAttrib
 		MarkdownDescription: "Repository information used to pull ServiceDeployment.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Optional: true,
+				Optional:            true,
+				Description:         "ID of the repository to pull from.",
+				MarkdownDescription: "ID of the repository to pull from.",
 			},
 			"ref": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				Description:         "A general git ref, either a branch name or commit sha understandable by `git checkout <ref>.`",
+				MarkdownDescription: "A general git ref, either a branch name or commit sha understandable by `git checkout <ref>.`",
 			},
 			"folder": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				Description:         "The folder where manifests live.",
+				MarkdownDescription: "The folder where manifests live.",
 			},
 		},
 		Validators: []validator.Object{
@@ -206,9 +213,6 @@ func (r *ServiceDeploymentResource) schemaBindings() schema.SingleNestedAttribut
 				},
 			},
 		},
-		PlanModifiers: []planmodifier.Object{
-			objectplanmodifier.RequiresReplace(),
-		},
 	}
 }
 
@@ -231,9 +235,6 @@ func (r *ServiceDeploymentResource) schemaSyncConfig() schema.SingleNestedAttrib
 					},
 				},
 			},
-		},
-		PlanModifiers: []planmodifier.Object{
-			objectplanmodifier.RequiresReplace(),
 		},
 	}
 }

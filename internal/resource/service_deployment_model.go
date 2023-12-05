@@ -3,6 +3,8 @@ package resource
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+
 	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -56,7 +58,7 @@ func (this *ServiceDeployment) FromGet(response *gqlclient.ServiceDeploymentExte
 	this.Repository.From(response.Repository, response.Git)
 }
 
-func (this *ServiceDeployment) Attributes() gqlclient.ServiceDeploymentAttributes {
+func (this *ServiceDeployment) Attributes(d diag.Diagnostics) gqlclient.ServiceDeploymentAttributes {
 	if this == nil {
 		return gqlclient.ServiceDeploymentAttributes{}
 	}
@@ -66,7 +68,7 @@ func (this *ServiceDeployment) Attributes() gqlclient.ServiceDeploymentAttribute
 		Namespace:     this.Namespace.ValueString(),
 		Version:       this.VersionString(),
 		DocsPath:      this.DocsPath.ValueStringPointer(),
-		SyncConfig:    this.SyncConfig.Attributes(),
+		SyncConfig:    this.SyncConfig.Attributes(d),
 		Protect:       this.Protect.ValueBoolPointer(),
 		RepositoryID:  this.Repository.Id.ValueStringPointer(),
 		Git:           this.Repository.Attributes(),
@@ -241,13 +243,13 @@ type ServiceDeploymentSyncConfig struct {
 	NamespaceMetadata *ServiceDeploymentNamespaceMetadata `tfsdk:"namespace_metadata"`
 }
 
-func (this *ServiceDeploymentSyncConfig) Attributes() *gqlclient.SyncConfigAttributes {
+func (this *ServiceDeploymentSyncConfig) Attributes(d diag.Diagnostics) *gqlclient.SyncConfigAttributes {
 	if this == nil {
 		return nil
 	}
 
 	return &gqlclient.SyncConfigAttributes{
-		NamespaceMetadata: this.NamespaceMetadata.Attributes(),
+		NamespaceMetadata: this.NamespaceMetadata.Attributes(d),
 	}
 }
 
@@ -256,7 +258,7 @@ type ServiceDeploymentNamespaceMetadata struct {
 	Labels      types.Map `tfsdk:"labels"`
 }
 
-func (this *ServiceDeploymentNamespaceMetadata) Attributes() *gqlclient.MetadataAttributes {
+func (this *ServiceDeploymentNamespaceMetadata) Attributes(d diag.Diagnostics) *gqlclient.MetadataAttributes {
 	if this == nil {
 		return nil
 	}
@@ -268,8 +270,8 @@ func (this *ServiceDeploymentNamespaceMetadata) Attributes() *gqlclient.Metadata
 	this.Labels.ElementsAs(context.Background(), &labels, false)
 
 	return &gqlclient.MetadataAttributes{
-		Annotations: common.AttributesJson(annotations, nil),
-		Labels:      common.AttributesJson(labels, nil),
+		Annotations: common.AttributesJson(annotations, d),
+		Labels:      common.AttributesJson(labels, d),
 	}
 }
 

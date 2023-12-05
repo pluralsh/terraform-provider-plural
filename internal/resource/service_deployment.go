@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-log/tflog"
-
 	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -61,8 +59,7 @@ func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("sd: %+v", data.Attributes()))
-	sd, err := r.client.CreateServiceDeployment(ctx, data.Cluster.Id.ValueStringPointer(), data.Cluster.Handle.ValueStringPointer(), data.Attributes())
+	sd, err := r.client.CreateServiceDeployment(ctx, data.Cluster.Id.ValueStringPointer(), data.Cluster.Handle.ValueStringPointer(), data.Attributes(resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create ServiceDeployment, got error: %s", err))
 		return
