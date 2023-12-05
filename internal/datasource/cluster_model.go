@@ -3,11 +3,9 @@ package datasource
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/pluralsh/polly/algorithms"
-
 	"terraform-provider-plural/internal/common"
+
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -25,8 +23,7 @@ type cluster struct {
 	Cloud          types.String `tfsdk:"cloud"`
 	Protect        types.Bool   `tfsdk:"protect"`
 	Tags           types.Map    `tfsdk:"tags"`
-	//Bindings       *common.ClusterBindings   `tfsdk:"bindings"`
-	NodePools types.Set `tfsdk:"node_pools"`
+	NodePools      types.Map    `tfsdk:"node_pools"`
 }
 
 func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.Diagnostics) {
@@ -43,29 +40,8 @@ func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.
 }
 
 func (c *cluster) fromNodePools(nodePools []*console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) {
-	commonNodePools := algorithms.Map(common.ClusterNodePoolsFrom(nodePools, ctx, d), func(nodePool *common.ClusterNodePool) attr.Value {
-		return nodePool.Element()
-	})
-
-	c.NodePools = types.SetValueMust(basetypes.ObjectType{AttrTypes: map[string]attr.Type{
-		"name":          types.StringType,
-		"min_size":      types.Int64Type,
-		"max_size":      types.Int64Type,
-		"instance_type": types.StringType,
-		"labels":        types.MapType{ElemType: types.StringType},
-		"taints": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{
-			"key":    types.StringType,
-			"value":  types.StringType,
-			"effect": types.StringType,
-		}}},
-		"cloud_settings": types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"aws": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"launch_template_id": types.StringType,
-					},
-				},
-			},
-		},
-	}}, commonNodePools)
+	mapValue, diags := types.MapValue(basetypes.ObjectType{AttrTypes: common.ClusterNodePoolAttrTypes},
+		common.ClusterNodePoolsFrom(nodePools, ctx, d))
+	d.Append(diags...)
+	c.NodePools = mapValue
 }

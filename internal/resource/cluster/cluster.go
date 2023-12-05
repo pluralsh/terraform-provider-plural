@@ -126,9 +126,9 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				},
 				PlanModifiers: []planmodifier.Object{objectplanmodifier.RequiresReplace()},
 			},
-			"node_pools": schema.SetNestedAttribute{
-				Description:         "Experimental, not ready for production use. List of node pool specs managed by this cluster. Leave empty for bring your own cluster.",
-				MarkdownDescription: "**Experimental, not ready for production use.** List of node pool specs managed by this cluster. Leave empty for bring your own cluster.",
+			"node_pools": schema.MapNestedAttribute{
+				Description:         "Experimental, not ready for production use. Map of node pool specs managed by this cluster, where the key is name of the node pool and value contains the spec. Leave empty for bring your own cluster.",
+				MarkdownDescription: "**Experimental, not ready for production use.** Map of node pool specs managed by this cluster, where the key is name of the node pool and value contains the spec. Leave empty for bring your own cluster.",
 				Optional:            true,
 				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
@@ -183,19 +183,16 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 							Description:         "Cloud-specific settings for this node pool.",
 							MarkdownDescription: "Cloud-specific settings for this node pool.",
 							Optional:            true,
-							PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 							Attributes: map[string]schema.Attribute{
 								"aws": schema.SingleNestedAttribute{
 									Description:         "AWS node pool customizations.",
 									MarkdownDescription: "AWS node pool customizations.",
 									Optional:            true,
-									PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 									Attributes: map[string]schema.Attribute{
 										"launch_template_id": schema.StringAttribute{
 											Description:         "Custom launch template for your nodes. Useful for Golden AMI setups.",
 											MarkdownDescription: "Custom launch template for your nodes. Useful for Golden AMI setups.",
 											Optional:            true,
-											PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 										},
 									},
 								},

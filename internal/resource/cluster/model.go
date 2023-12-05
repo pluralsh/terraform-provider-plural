@@ -3,14 +3,11 @@ package cluster
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/pluralsh/polly/algorithms"
-
 	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	console "github.com/pluralsh/console-client-go"
 )
 
@@ -27,13 +24,13 @@ type cluster struct {
 	Protect        types.Bool              `tfsdk:"protect"`
 	Tags           types.Map               `tfsdk:"tags"`
 	Bindings       *common.ClusterBindings `tfsdk:"bindings"`
-	NodePools      types.Set               `tfsdk:"node_pools"`
+	NodePools      types.Map               `tfsdk:"node_pools"`
 	CloudSettings  *ClusterCloudSettings   `tfsdk:"cloud_settings"`
 }
 
 func (c *cluster) NodePoolsAttribute(ctx context.Context, d diag.Diagnostics) []*console.NodePoolAttributes {
 	result := make([]*console.NodePoolAttributes, 0, len(c.NodePools.Elements()))
-	nodePools := make([]common.ClusterNodePool, len(c.NodePools.Elements()))
+	nodePools := make(map[string]common.ClusterNodePool, len(c.NodePools.Elements()))
 	d.Append(c.NodePools.ElementsAs(ctx, &nodePools, false)...)
 
 	for _, nodePool := range nodePools {
@@ -117,11 +114,8 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, ctx context.Context, d d
 }
 
 func (c *cluster) NodePoolsFrom(nodePools []*console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) {
-	commonNodePools := algorithms.Map(common.ClusterNodePoolsFrom(nodePools, ctx, d), func(nodePool *common.ClusterNodePool) attr.Value {
-		return nodePool.Element()
-	})
-
-	setValue, diagnostics := types.SetValue(basetypes.ObjectType{AttrTypes: common.ClusterNodePoolAttrTypes}, commonNodePools)
-	d.Append(diagnostics...)
-	c.NodePools = setValue
+	mapValue, diags := types.MapValue(basetypes.ObjectType{AttrTypes: common.ClusterNodePoolAttrTypes},
+		common.ClusterNodePoolsFrom(nodePools, ctx, d))
+	d.Append(diags...)
+	c.NodePools = mapValue
 }

@@ -80,9 +80,9 @@ func (d *clusterDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 				Computed:            true,
 				ElementType:         types.StringType,
 			},
-			"node_pools": schema.SetNestedAttribute{
-				Description:         "List of node pool specs managed by this cluster.",
-				MarkdownDescription: "List of node pool specs managed by this cluster.",
+			"node_pools": schema.MapNestedAttribute{
+				Description:         "Map of node pool specs managed by this cluster, where the key is name of the node pool and value contains the spec.",
+				MarkdownDescription: "Map of node pool specs managed by this cluster, where the key is name of the node pool and value contains the spec.",
 				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{

@@ -38,15 +38,15 @@ resource "plural_cluster" "aws_cluster" {
       region = "us-east-1"
     }
   }
-  node_pools = [
-    {
-      name = "pool"
+  node_pools = {
+    pool1 = {
+      name = "pool1"
       min_size = 1
       max_size = 5
       instance_type = "t5.large"
     },
-    {
-      name = "pool-with-labels-and-taints"
+    pool2 = {
+      name = "pool2"
       min_size = 1
       max_size = 5
       instance_type = "t5.large"
@@ -62,8 +62,8 @@ resource "plural_cluster" "aws_cluster" {
         }
       ]
     },
-    {
-      name = "pool-with-cloud-settings"
+    pool3 = {
+      name = "pool3"
       min_size = 1
       max_size = 5
       instance_type = "t5.large"
@@ -72,8 +72,8 @@ resource "plural_cluster" "aws_cluster" {
           launch_template_id = "test"
         }
       }
-    },
-  ]
+    }
+  }
   tags = {
     "managed-by" = "terraform-provider-plural"
   }
