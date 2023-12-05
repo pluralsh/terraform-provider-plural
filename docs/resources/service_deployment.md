@@ -20,7 +20,6 @@ description: |-
 - `cluster` (Attributes) Unique cluster id/handle to deploy this ServiceDeployment (see [below for nested schema](#nestedatt--cluster))
 - `name` (String) Human-readable name of this ServiceDeployment.
 - `namespace` (String) Namespace to deploy this ServiceDeployment.
-- `repository` (Attributes) Repository information used to pull ServiceDeployment. (see [below for nested schema](#nestedatt--repository))
 
 ### Optional
 
@@ -30,6 +29,7 @@ description: |-
 - `helm` (Attributes) Settings defining how Helm charts should be applied. (see [below for nested schema](#nestedatt--helm))
 - `kustomize` (Attributes) Kustomize related service metadata. (see [below for nested schema](#nestedatt--kustomize))
 - `protect` (Boolean) If true, deletion of this service is not allowed.
+- `repository` (Attributes) Repository information used to pull ServiceDeployment. (see [below for nested schema](#nestedatt--repository))
 - `sync_config` (Attributes) Settings for advanced tuning of the sync process. (see [below for nested schema](#nestedatt--sync_config))
 - `version` (String) Semver version of this service ServiceDeployment.
 
@@ -42,21 +42,8 @@ description: |-
 
 Optional:
 
-- `handle` (String)
-- `id` (String)
-
-
-<a id="nestedatt--repository"></a>
-### Nested Schema for `repository`
-
-Required:
-
-- `id` (String)
-
-Optional:
-
-- `folder` (String)
-- `ref` (String)
+- `handle` (String) A short, unique human readable name used to identify the cluster
+- `id` (String) ID of the cluster to use
 
 
 <a id="nestedatt--bindings"></a>
@@ -124,6 +111,16 @@ Optional:
 Required:
 
 - `path` (String) Path to the kustomize file in the target git repository.
+
+
+<a id="nestedatt--repository"></a>
+### Nested Schema for `repository`
+
+Optional:
+
+- `folder` (String) The folder where manifests live.
+- `id` (String) ID of the repository to pull from.
+- `ref` (String) A general git ref, either a branch name or commit sha understandable by `git checkout <ref>.`
 
 
 <a id="nestedatt--sync_config"></a>

@@ -269,8 +269,8 @@ func (r *ServiceDeploymentResource) schemaHelm() schema.SingleNestedAttribute {
 			},
 			"values": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Helm values file to use with this service",
-				MarkdownDescription: "Helm values file to use with this service",
+				Description:         "Helm values file to use with this service.",
+				MarkdownDescription: "Helm values file to use with this service.",
 			},
 			"values_files": schema.SetAttribute{
 				ElementType:         types.StringType,

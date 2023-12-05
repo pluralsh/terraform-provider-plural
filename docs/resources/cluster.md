@@ -25,7 +25,7 @@ A representation of a cluster you can deploy to.
 
 - `bindings` (Attributes) Read and write policies of this cluster. (see [below for nested schema](#nestedatt--bindings))
 - `handle` (String) A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.
-- `node_pools` (Attributes Set) **Experimental, not ready for production use.** List of node pool specs managed by this cluster. Leave empty for bring your own cluster. (see [below for nested schema](#nestedatt--node_pools))
+- `node_pools` (Attributes Map) **Experimental, not ready for production use.** Map of node pool specs managed by this cluster, where the key is name of the node pool and value contains the spec. Leave empty for bring your own cluster. (see [below for nested schema](#nestedatt--node_pools))
 - `protect` (Boolean) If set to `true` then this cluster cannot be deleted.
 - `provider_id` (String) Provider used to create this cluster. Leave empty for bring your own cluster.
 - `tags` (Map of String) Key-value tags used to filter clusters.
@@ -33,7 +33,6 @@ A representation of a cluster you can deploy to.
 
 ### Read-Only
 
-- `current_version` (String) Current Kubernetes version for this cluster.
 - `desired_version` (String) Desired Kubernetes version for this cluster.
 - `id` (String) Internal identifier of this cluster.
 - `inserted_at` (String) Creation date of this cluster.

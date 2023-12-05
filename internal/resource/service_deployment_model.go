@@ -63,6 +63,11 @@ func (this *ServiceDeployment) Attributes(d diag.Diagnostics) gqlclient.ServiceD
 		return gqlclient.ServiceDeploymentAttributes{}
 	}
 
+	var repositoryId *string = nil
+	if this.Repository != nil && this.Repository.Id.ValueStringPointer() != nil {
+		repositoryId = this.Repository.Id.ValueStringPointer()
+	}
+
 	return gqlclient.ServiceDeploymentAttributes{
 		Name:          this.Name.ValueString(),
 		Namespace:     this.Namespace.ValueString(),
@@ -70,7 +75,7 @@ func (this *ServiceDeployment) Attributes(d diag.Diagnostics) gqlclient.ServiceD
 		DocsPath:      this.DocsPath.ValueStringPointer(),
 		SyncConfig:    this.SyncConfig.Attributes(d),
 		Protect:       this.Protect.ValueBoolPointer(),
-		RepositoryID:  this.Repository.Id.ValueStringPointer(),
+		RepositoryID:  repositoryId,
 		Git:           this.Repository.Attributes(),
 		Kustomize:     this.Kustomize.Attributes(),
 		Configuration: ToServiceDeploymentConfigAttributes(this.Configuration),
