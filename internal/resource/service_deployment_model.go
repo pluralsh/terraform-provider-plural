@@ -268,8 +268,8 @@ func (this *ServiceDeploymentNamespaceMetadata) Attributes() *gqlclient.Metadata
 	this.Labels.ElementsAs(context.Background(), &labels, false)
 
 	return &gqlclient.MetadataAttributes{
-		Annotations: common.ToAttributesMap(annotations),
-		Labels:      common.ToAttributesMap(labels),
+		Annotations: common.AttributesJson(annotations, nil),
+		Labels:      common.AttributesJson(labels, nil),
 	}
 }
 
