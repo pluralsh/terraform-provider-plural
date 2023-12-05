@@ -3,7 +3,7 @@ provider "plural" {
 }
 
 data "plural_cluster" "byok_workload_cluster" {
-  handle = "floreks-tf-workload-cluster"
+  handle = "gcp-workload-cluster"
 }
 
 resource "plural_service_deployment" "cd-test" {

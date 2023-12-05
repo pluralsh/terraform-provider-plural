@@ -3,7 +3,7 @@ provider "plural" {
 }
 
 data "plural_cluster" "byok_workload_cluster" {
-  handle = "floreks-tf-workload-cluster"
+  handle = "gcp-workload-cluster"
 }
 
 data "plural_git_repository" "cd-test" {
