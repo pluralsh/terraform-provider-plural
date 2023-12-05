@@ -17,7 +17,6 @@ type cluster struct {
 	Name           types.String            `tfsdk:"name"`
 	Handle         types.String            `tfsdk:"handle"`
 	Version        types.String            `tfsdk:"version"`
-	CurrentVersion types.String            `tfsdk:"current_version"`
 	DesiredVersion types.String            `tfsdk:"desired_version"`
 	ProviderId     types.String            `tfsdk:"provider_id"`
 	Cloud          types.String            `tfsdk:"cloud"`
@@ -93,7 +92,6 @@ func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.
 	c.Name = types.StringValue(cl.Name)
 	c.Handle = types.StringPointerValue(cl.Handle)
 	c.DesiredVersion = types.StringPointerValue(cl.Version)
-	c.CurrentVersion = types.StringPointerValue(cl.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cl.Protect)
 	c.Tags = common.ClusterTagsFrom(cl.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cl.Provider)
@@ -106,7 +104,6 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, ctx context.Context, d d
 	c.Name = types.StringValue(cc.CreateCluster.Name)
 	c.Handle = types.StringPointerValue(cc.CreateCluster.Handle)
 	c.DesiredVersion = types.StringPointerValue(cc.CreateCluster.Version)
-	c.CurrentVersion = types.StringPointerValue(cc.CreateCluster.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
 	c.Tags = common.ClusterTagsFrom(cc.CreateCluster.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cc.CreateCluster.Provider)

@@ -154,6 +154,10 @@ func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment, configNodePools
 }
 
 func clusterNodePoolTaintsFrom(nodePool *console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) types.Set {
+	if len(nodePool.Taints) == 0 {
+		return types.SetNull(basetypes.ObjectType{AttrTypes: NodePoolTaintAttrTypes})
+	}
+
 	taints := make([]attr.Value, len(nodePool.Taints))
 	for i, taint := range nodePool.Taints {
 		objValue, diags := types.ObjectValueFrom(ctx, NodePoolTaintAttrTypes, NodePoolTaint{

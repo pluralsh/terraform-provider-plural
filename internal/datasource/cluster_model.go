@@ -17,7 +17,6 @@ type cluster struct {
 	InsertedAt     types.String `tfsdk:"inserted_at"`
 	Name           types.String `tfsdk:"name"`
 	Handle         types.String `tfsdk:"handle"`
-	CurrentVersion types.String `tfsdk:"current_version"`
 	DesiredVersion types.String `tfsdk:"desired_version"`
 	ProviderId     types.String `tfsdk:"provider_id"`
 	Cloud          types.String `tfsdk:"cloud"`
@@ -32,7 +31,6 @@ func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.
 	c.Name = types.StringValue(cl.Name)
 	c.Handle = types.StringPointerValue(cl.Handle)
 	c.DesiredVersion = types.StringPointerValue(cl.Version)
-	c.CurrentVersion = types.StringPointerValue(cl.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cl.Protect)
 	c.fromNodePools(cl.NodePools, ctx, d)
 	c.Tags = common.ClusterTagsFrom(cl.Tags, d)

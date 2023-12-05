@@ -50,14 +50,13 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Description:         "Internal identifier of this cluster.",
 				MarkdownDescription: "Internal identifier of this cluster.",
 				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"inserted_at": schema.StringAttribute{
 				Description:         "Creation date of this cluster.",
 				MarkdownDescription: "Creation date of this cluster.",
 				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"name": schema.StringAttribute{
 				Description:         "Human-readable name of this cluster, that also translates to cloud resource name.",
@@ -70,6 +69,7 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				MarkdownDescription: "A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.",
 				Optional:            true,
 				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"version": schema.StringAttribute{
 				Description:         "Kubernetes version to use for this cluster. Leave empty for bring your own cluster. Supported version ranges can be found at https://github.com/pluralsh/console/tree/master/static/k8s-versions.",
@@ -84,11 +84,7 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Description:         "Desired Kubernetes version for this cluster.",
 				MarkdownDescription: "Desired Kubernetes version for this cluster.",
 				Computed:            true,
-			},
-			"current_version": schema.StringAttribute{
-				Description:         "Current Kubernetes version for this cluster.",
-				MarkdownDescription: "Current Kubernetes version for this cluster.",
-				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"provider_id": schema.StringAttribute{
 				Description:         "Provider used to create this cluster. Leave empty for bring your own cluster.",
@@ -158,13 +154,11 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 							MarkdownDescription: "Kubernetes labels to apply to the nodes in this pool. Useful for node selectors.",
 							ElementType:         types.StringType,
 							Optional:            true,
-							Computed:            true,
 						},
 						"taints": schema.SetNestedAttribute{
 							Description:         "Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances.",
 							MarkdownDescription: "Any taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances.",
 							Optional:            true,
-							Computed:            true,
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 									"key": schema.StringAttribute{

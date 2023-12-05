@@ -57,11 +57,6 @@ func (d *clusterDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 				MarkdownDescription: "Desired Kubernetes version for this cluster.",
 				Computed:            true,
 			},
-			"current_version": schema.StringAttribute{
-				Description:         "Current Kubernetes version for this cluster.",
-				MarkdownDescription: "Current Kubernetes version for this cluster.",
-				Computed:            true,
-			},
 			"provider_id": schema.StringAttribute{
 				Description:         "Provider used to create this cluster.",
 				MarkdownDescription: "Provider used to create this cluster.",
