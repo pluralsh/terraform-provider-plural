@@ -41,6 +41,10 @@ func (c *ClusterNodePool) LabelsAttribute(ctx context.Context, d diag.Diagnostic
 }
 
 func (c *ClusterNodePool) TaintsAttribute(ctx context.Context, d diag.Diagnostics) []*console.TaintAttributes {
+	if c.Taints.IsNull() {
+		return nil
+	}
+
 	result := make([]*console.TaintAttributes, 0, len(c.Taints.Elements()))
 	elements := make([]NodePoolTaint, len(c.Taints.Elements()))
 	d.Append(c.Taints.ElementsAs(ctx, &elements, false)...)
@@ -126,27 +130,34 @@ func (c *NodePoolCloudSettingsAWS) Attributes() *console.AwsNodeCloudAttributes 
 	}
 }
 
-func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) []*ClusterNodePool {
-	result := make([]*ClusterNodePool, len(nodePools))
-	for i, nodePool := range nodePools {
+func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment, configNodePools types.Map, ctx context.Context, d diag.Diagnostics) map[string]attr.Value {
+	configNodePoolsElements := make(map[string]ClusterNodePool, len(configNodePools.Elements()))
+	d.Append(configNodePools.ElementsAs(ctx, &configNodePoolsElements, false)...)
+
+	result := make(map[string]attr.Value)
+	for _, nodePool := range nodePools {
 		clusterNodePoolLabels, diags := types.MapValueFrom(ctx, types.StringType, nodePool.Labels)
 		d.Append(diags...)
 
-		result[i] = &ClusterNodePool{
+		result[nodePool.Name] = (&ClusterNodePool{
 			Name:          types.StringValue(nodePool.Name),
 			MinSize:       types.Int64Value(nodePool.MinSize),
 			MaxSize:       types.Int64Value(nodePool.MaxSize),
 			InstanceType:  types.StringValue(nodePool.InstanceType),
 			Labels:        clusterNodePoolLabels,
 			Taints:        clusterNodePoolTaintsFrom(nodePool, ctx, d),
-			CloudSettings: types.ObjectNull(NodePoolCloudSettingsAttrTypes),
-		}
+			CloudSettings: configNodePoolsElements[nodePool.Name].CloudSettings, // Rewriting config to state to avoid unknown values.
+		}).Element()
 	}
 
 	return result
 }
 
 func clusterNodePoolTaintsFrom(nodePool *console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) types.Set {
+	if len(nodePool.Taints) == 0 {
+		return types.SetNull(basetypes.ObjectType{AttrTypes: NodePoolTaintAttrTypes})
+	}
+
 	taints := make([]attr.Value, len(nodePool.Taints))
 	for i, taint := range nodePool.Taints {
 		objValue, diags := types.ObjectValueFrom(ctx, NodePoolTaintAttrTypes, NodePoolTaint{

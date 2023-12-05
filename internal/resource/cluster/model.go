@@ -3,14 +3,11 @@ package cluster
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/pluralsh/polly/algorithms"
-
 	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	console "github.com/pluralsh/console-client-go"
 )
 
@@ -20,20 +17,19 @@ type cluster struct {
 	Name           types.String            `tfsdk:"name"`
 	Handle         types.String            `tfsdk:"handle"`
 	Version        types.String            `tfsdk:"version"`
-	CurrentVersion types.String            `tfsdk:"current_version"`
 	DesiredVersion types.String            `tfsdk:"desired_version"`
 	ProviderId     types.String            `tfsdk:"provider_id"`
 	Cloud          types.String            `tfsdk:"cloud"`
 	Protect        types.Bool              `tfsdk:"protect"`
 	Tags           types.Map               `tfsdk:"tags"`
 	Bindings       *common.ClusterBindings `tfsdk:"bindings"`
-	NodePools      types.Set               `tfsdk:"node_pools"`
+	NodePools      types.Map               `tfsdk:"node_pools"`
 	CloudSettings  *ClusterCloudSettings   `tfsdk:"cloud_settings"`
 }
 
 func (c *cluster) NodePoolsAttribute(ctx context.Context, d diag.Diagnostics) []*console.NodePoolAttributes {
 	result := make([]*console.NodePoolAttributes, 0, len(c.NodePools.Elements()))
-	nodePools := make([]common.ClusterNodePool, len(c.NodePools.Elements()))
+	nodePools := make(map[string]common.ClusterNodePool, len(c.NodePools.Elements()))
 	d.Append(c.NodePools.ElementsAs(ctx, &nodePools, false)...)
 
 	for _, nodePool := range nodePools {
@@ -96,7 +92,6 @@ func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.
 	c.Name = types.StringValue(cl.Name)
 	c.Handle = types.StringPointerValue(cl.Handle)
 	c.DesiredVersion = types.StringPointerValue(cl.Version)
-	c.CurrentVersion = types.StringPointerValue(cl.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cl.Protect)
 	c.Tags = common.ClusterTagsFrom(cl.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cl.Provider)
@@ -109,7 +104,6 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, ctx context.Context, d d
 	c.Name = types.StringValue(cc.CreateCluster.Name)
 	c.Handle = types.StringPointerValue(cc.CreateCluster.Handle)
 	c.DesiredVersion = types.StringPointerValue(cc.CreateCluster.Version)
-	c.CurrentVersion = types.StringPointerValue(cc.CreateCluster.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
 	c.Tags = common.ClusterTagsFrom(cc.CreateCluster.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cc.CreateCluster.Provider)
@@ -117,11 +111,8 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, ctx context.Context, d d
 }
 
 func (c *cluster) NodePoolsFrom(nodePools []*console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) {
-	commonNodePools := algorithms.Map(common.ClusterNodePoolsFrom(nodePools, ctx, d), func(nodePool *common.ClusterNodePool) attr.Value {
-		return nodePool.Element()
-	})
-
-	setValue, diagnostics := types.SetValue(basetypes.ObjectType{AttrTypes: common.ClusterNodePoolAttrTypes}, commonNodePools)
-	d.Append(diagnostics...)
-	c.NodePools = setValue
+	mapValue, diags := types.MapValue(basetypes.ObjectType{AttrTypes: common.ClusterNodePoolAttrTypes},
+		common.ClusterNodePoolsFrom(nodePools, c.NodePools, ctx, d))
+	d.Append(diags...)
+	c.NodePools = mapValue
 }
