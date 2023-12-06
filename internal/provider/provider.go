@@ -11,7 +11,6 @@ import (
 	"terraform-provider-plural/internal/common"
 	ds "terraform-provider-plural/internal/datasource"
 	r "terraform-provider-plural/internal/resource"
-	"terraform-provider-plural/internal/resource/cluster"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -166,7 +165,7 @@ func (p *PluralProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		cluster.NewClusterResource,
+		r.NewClusterResource,
 		r.NewGitRepositoryResource,
 		r.NewProviderResource,
 		r.NewServiceDeploymentResource,

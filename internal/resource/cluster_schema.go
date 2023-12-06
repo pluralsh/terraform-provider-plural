@@ -1,17 +1,13 @@
-package cluster
+package resource
 
 import (
-	"context"
-	"fmt"
-	"time"
-
-	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
+	"terraform-provider-plural/internal/defaults"
 	internalvalidator "terraform-provider-plural/internal/validator"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
@@ -20,28 +16,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-var _ resource.Resource = &clusterResource{}
-var _ resource.ResourceWithImportState = &clusterResource{}
-
-func NewClusterResource() resource.Resource {
-	return &clusterResource{}
-}
-
-// ClusterResource defines the cluster resource implementation.
-type clusterResource struct {
-	client     *client.Client
-	consoleUrl string
-}
-
-func (r *clusterResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_cluster"
-}
-
-func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
+func (r *clusterResource) schema() schema.Schema {
+	return schema.Schema{
 		Description:         "A representation of a cluster you can deploy to.",
 		MarkdownDescription: "A representation of a cluster you can deploy to.",
 		Attributes: map[string]schema.Attribute{
@@ -114,10 +92,10 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				MarkdownDescription: "Cloud-specific settings for this cluster.",
 				Required:            true,
 				Attributes: map[string]schema.Attribute{
-					"aws":   AWSCloudSettingsSchema(),
-					"azure": AzureCloudSettingsSchema(),
-					"gcp":   GCPCloudSettingsSchema(),
-					"byok":  BYOKCloudSettingsSchema(),
+					"aws":   r.awsCloudSettingsSchema(),
+					"azure": r.azureCloudSettingsSchema(),
+					"gcp":   r.gcpCloudSettingsSchema(),
+					"byok":  r.byokCloudSettingsSchema(),
 				},
 				PlanModifiers: []planmodifier.Object{objectplanmodifier.RequiresReplace()},
 			},
@@ -274,124 +252,211 @@ func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 	}
 }
 
-func (r *clusterResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	if req.ProviderData == nil {
-		return
-	}
-
-	data, ok := req.ProviderData.(*common.ProviderData)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Cluster Resource Configure Type",
-			fmt.Sprintf("Expected *common.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-		return
-	}
-
-	r.client = data.Client
-	r.consoleUrl = data.ConsoleUrl
-}
-
-func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data cluster
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	result, err := r.client.CreateCluster(ctx, data.Attributes(ctx, resp.Diagnostics))
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create cluster, got error: %s", err))
-		return
-	}
-
-	if common.IsCloud(data.Cloud.ValueString(), common.CloudBYOK) {
-		if result.CreateCluster.DeployToken == nil {
-			resp.Diagnostics.AddError("Client Error", "Unable to fetch cluster deploy token")
-			return
-		}
-
-		handler, err := NewOperatorHandler(ctx, &data.CloudSettings.BYOK.Kubeconfig, r.consoleUrl)
-		if err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to init operator handler, got error: %s", err))
-			return
-		}
-
-		err = handler.InstallOrUpgrade(*result.CreateCluster.DeployToken)
-		if err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
-			return
-		}
-	}
-
-	data.FromCreate(result, ctx, resp.Diagnostics)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-}
-
-func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data cluster
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	result, err := r.client.GetCluster(ctx, data.Id.ValueStringPointer())
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read cluster, got error: %s", err))
-		return
-	}
-	if result == nil || result.Cluster == nil {
-		resp.Diagnostics.AddError("Not Found", "Unable to find cluster, it looks like it was deleted manually")
-		return
-	}
-
-	data.From(result.Cluster, ctx, resp.Diagnostics)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-}
-
-func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data cluster
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	_, err := r.client.UpdateCluster(ctx, data.Id.ValueString(), data.UpdateAttributes(ctx, resp.Diagnostics))
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update cluster, got error: %s", err))
-		return
-	}
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-}
-
-func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data cluster
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	_, err := r.client.DeleteCluster(ctx, data.Id.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete cluster, got error: %s", err))
-		return
-	}
-
-	err = wait.WaitForWithContext(ctx, client.Ticker(5*time.Second), func(ctx context.Context) (bool, error) {
-		response, err := r.client.GetCluster(ctx, data.Id.ValueStringPointer())
-		if client.IsNotFound(err) || response.Cluster == nil {
-			return true, nil
-		}
-
-		return false, err
-	})
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while watiting for cluster to be deleted, got error: %s", err))
-		return
+func (r *clusterResource) awsCloudSettingsSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Optional: true,
+		Attributes: map[string]schema.Attribute{
+			"region": schema.StringAttribute{
+				Description:         "AWS region to deploy the cluster to.",
+				MarkdownDescription: "AWS region to deploy the cluster to.",
+				Required:            true,
+			},
+		},
 	}
 }
 
-func (r *clusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+func (r *clusterResource) azureCloudSettingsSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Optional: true,
+		Attributes: map[string]schema.Attribute{
+			"resource_group": schema.StringAttribute{
+				Description:         "Name of the Azure resource group for this cluster.",
+				MarkdownDescription: "Name of the Azure resource group for this cluster.",
+				Required:            true,
+			},
+			"network": schema.StringAttribute{
+				Description:         "Name of the Azure virtual network for this cluster.",
+				MarkdownDescription: "Name of the Azure virtual network for this cluster.",
+				Required:            true,
+			},
+			"subscription_id": schema.StringAttribute{
+				Description:         "GUID of the Azure subscription to hold this cluster.",
+				MarkdownDescription: "GUID of the Azure subscription to hold this cluster.",
+				Required:            true,
+			},
+			"location": schema.StringAttribute{
+				Description:         "String matching one of the canonical Azure region names, i.e. eastus.",
+				MarkdownDescription: "String matching one of the canonical Azure region names, i.e. eastus.",
+				Required:            true,
+			},
+		},
+	}
+}
+
+func (r *clusterResource) gcpCloudSettingsSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Optional: true,
+		Attributes: map[string]schema.Attribute{
+			"project": schema.StringAttribute{
+				Required:            true,
+				Description:         "GCP project id to deploy cluster to.",
+				MarkdownDescription: "GCP project id to deploy cluster to.",
+			},
+			"network": schema.StringAttribute{
+				Required:            true,
+				Description:         "GCP network id to use when creating the cluster.",
+				MarkdownDescription: "GCP network id to use when creating the cluster.",
+			},
+			"region": schema.StringAttribute{
+				Required:            true,
+				Description:         "GCP region to deploy cluster to.",
+				MarkdownDescription: "GCP region to deploy cluster to.",
+			},
+		},
+	}
+}
+
+func (r *clusterResource) byokCloudSettingsSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Optional: true,
+		Attributes: map[string]schema.Attribute{
+			"kubeconfig": schema.SingleNestedAttribute{
+				Optional: true,
+				Attributes: map[string]schema.Attribute{
+					"host": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						Default:             defaults.Env("PLURAL_KUBE_HOST", ""),
+						Description:         "The complete address of the Kubernetes cluster, using scheme://hostname:port format. Can be sourced from PLURAL_KUBE_HOST.",
+						MarkdownDescription: "The complete address of the Kubernetes cluster, using scheme://hostname:port format. Can be sourced from `PLURAL_KUBE_HOST`.",
+					},
+					"username": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						Default:             defaults.Env("PLURAL_KUBE_USER", ""),
+						Description:         "The username for basic authentication to the Kubernetes cluster. Can be sourced from PLURAL_KUBE_USER.",
+						MarkdownDescription: "The username for basic authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_USER`.",
+					},
+					"password": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           true,
+						Default:             defaults.Env("PLURAL_KUBE_PASSWORD", ""),
+						Description:         "The password for basic authentication to the Kubernetes cluster. Can be sourced from PLURAL_KUBE_PASSWORD.",
+						MarkdownDescription: "The password for basic authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_PASSWORD`.",
+					},
+					"insecure": schema.BoolAttribute{
+						Optional:            true,
+						Computed:            true,
+						Default:             defaults.Env("PLURAL_KUBE_INSECURE", false),
+						Description:         "Skips the validity check for the server's certificate. This will make your HTTPS connections insecure. Can be sourced from PLURAL_KUBE_INSECURE.",
+						MarkdownDescription: "Skips the validity check for the server's certificate. This will make your HTTPS connections insecure. Can be sourced from `PLURAL_KUBE_INSECURE`.",
+					},
+					"tls_server_name": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						Default:             defaults.Env("PLURAL_KUBE_TLS_SERVER_NAME", ""),
+						Description:         "TLS server name is used to check server certificate. If it is empty, the hostname used to contact the server is used. Can be sourced from PLURAL_KUBE_TLS_SERVER_NAME.",
+						MarkdownDescription: "TLS server name is used to check server certificate. If it is empty, the hostname used to contact the server is used. Can be sourced from `PLURAL_KUBE_TLS_SERVER_NAME`.",
+					},
+					"client_certificate": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						Default:             defaults.Env("PLURAL_KUBE_CLIENT_CERT_DATA", ""),
+						Description:         "The path to a client cert file for TLS. Can be sourced from PLURAL_KUBE_CLIENT_CERT_DATA.",
+						MarkdownDescription: "The path to a client cert file for TLS. Can be sourced from `PLURAL_KUBE_CLIENT_CERT_DATA`.",
+					},
+					"client_key": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           true,
+						Default:             defaults.Env("PLURAL_KUBE_CLIENT_KEY_DATA", ""),
+						Description:         "The path to a client key file for TLS. Can be sourced from PLURAL_KUBE_CLIENT_KEY_DATA.",
+						MarkdownDescription: "The path to a client key file for TLS. Can be sourced from `PLURAL_KUBE_CLIENT_KEY_DATA`.",
+					},
+					"cluster_ca_certificate": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						Default:             defaults.Env("PLURAL_KUBE_CLUSTER_CA_CERT_DATA", ""),
+						Description:         "The path to a cert file for the certificate authority. Can be sourced from PLURAL_KUBE_CLUSTER_CA_CERT_DATA.",
+						MarkdownDescription: "The path to a cert file for the certificate authority. Can be sourced from `PLURAL_KUBE_CLUSTER_CA_CERT_DATA`.",
+					},
+					"config_path": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						Default:             defaults.Env("PLURAL_KUBE_CONFIG_PATH", ""),
+						Description:         "Path to the kubeconfig file. Can be sourced from PLURAL_KUBE_CONFIG_PATH.",
+						MarkdownDescription: "Path to the kubeconfig file. Can be sourced from `PLURAL_KUBE_CONFIG_PATH`.",
+					},
+					"config_context": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						Default:             defaults.Env("PLURAL_KUBE_CTX", ""),
+						Description:         "kubeconfig context to use. Can be sourced from PLURAL_KUBE_CTX.",
+						MarkdownDescription: "kubeconfig context to use. Can be sourced from `PLURAL_KUBE_CTX`.",
+					},
+					"config_context_auth_info": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						Default:             defaults.Env("PLURAL_KUBE_CTX_AUTH_INFO", ""),
+						Description:         "Can be sourced from PLURAL_KUBE_CTX_AUTH_INFO.",
+						MarkdownDescription: "Can be sourced from `PLURAL_KUBE_CTX_AUTH_INFO`.",
+					},
+					"config_context_cluster": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						Default:             defaults.Env("PLURAL_KUBE_CTX_CLUSTER", ""),
+						Description:         "Can be sourced from PLURAL_KUBE_CTX_CLUSTER.",
+						MarkdownDescription: "Can be sourced from `PLURAL_KUBE_CTX_CLUSTER`.",
+					},
+					"token": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           true,
+						Default:             defaults.Env("PLURAL_KUBE_TOKEN", ""),
+						Description:         "Token is the bearer token for authentication to the Kubernetes cluster. Can be sourced from PLURAL_KUBE_TOKEN.",
+						MarkdownDescription: "Token is the bearer token for authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_TOKEN`.",
+					},
+					"proxy_url": schema.StringAttribute{
+						Optional:            true,
+						Computed:            true,
+						Default:             defaults.Env("PLURAL_KUBE_PROXY_URL", ""),
+						Description:         "The URL to the proxy to be used for all requests made by this client. Can be sourced from PLURAL_KUBE_PROXY_URL.",
+						MarkdownDescription: "The URL to the proxy to be used for all requests made by this client. Can be sourced from `PLURAL_KUBE_PROXY_URL`.",
+					},
+					"exec": schema.ListNestedAttribute{
+						Optional:            true,
+						MarkdownDescription: "Specifies a command to provide client credentials",
+						Validators:          []validator.List{listvalidator.SizeAtMost(1)},
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"command": schema.StringAttribute{
+									Description:         "Command to execute.",
+									MarkdownDescription: "Command to execute.",
+									Required:            true,
+								},
+								"args": schema.ListAttribute{
+									Description:         "Arguments to pass to the command when executing it.",
+									MarkdownDescription: "Arguments to pass to the command when executing it.",
+									Optional:            true,
+									ElementType:         types.StringType,
+								},
+								"env": schema.MapAttribute{
+									Description:         "Defines  environment variables to expose to the process.",
+									MarkdownDescription: "Defines  environment variables to expose to the process.",
+									Optional:            true,
+									ElementType:         types.StringType,
+								},
+								"api_version": schema.StringAttribute{
+									Description:         "Preferred input version.",
+									MarkdownDescription: "Preferred input version.",
+									Required:            true,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
 }
