@@ -172,10 +172,11 @@ func newKubeconfig(ctx context.Context, kubeconfig *Kubeconfig, namespace *strin
 
 	client := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loader, overrides)
 	if client == nil {
-		tflog.Error(ctx, "failed to initialize kubernetes config")
-		return nil, nil
+		err := fmt.Errorf("failed to initialize kubernetes config")
+		tflog.Error(ctx, err.Error())
+		return nil, err
 	}
-	tflog.Trace(ctx, "successfully initialized kubernetes config")
 
+	tflog.Trace(ctx, "successfully initialized kubernetes config")
 	return &KubeConfig{ClientConfig: client}, nil
 }
