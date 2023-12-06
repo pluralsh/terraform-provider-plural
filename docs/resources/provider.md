@@ -42,21 +42,21 @@ Optional:
 <a id="nestedatt--cloud_settings--aws"></a>
 ### Nested Schema for `cloud_settings.aws`
 
-Required:
+Optional:
 
-- `access_key_id` (String, Sensitive) ID of an access key for an IAM user or the AWS account root user.
-- `secret_access_key` (String, Sensitive) Secret of an access key for an IAM user or the AWS account root user.
+- `access_key_id` (String, Sensitive) ID of an access key for an IAM user or the AWS account root user. Can be sourced from `PLURAL_AWS_ACCESS_KEY_ID`.
+- `secret_access_key` (String, Sensitive) Secret of an access key for an IAM user or the AWS account root user. Can be sourced from `PLURAL_AWS_SECRET_ACCESS_KEY`.
 
 
 <a id="nestedatt--cloud_settings--azure"></a>
 ### Nested Schema for `cloud_settings.azure`
 
-Required:
+Optional:
 
-- `client_id` (String, Sensitive) The unique identifier of an application created in the Azure Active Directory.
-- `client_secret` (String, Sensitive) A string value your app can use in place of a certificate to identity itself. Sometimes called an application password.
-- `subscription_id` (String, Sensitive) GUID of the Azure subscription
-- `tenant_id` (String, Sensitive) The unique identifier of the Azure Active Directory instance.
+- `client_id` (String, Sensitive) The unique identifier of an application created in the Azure Active Directory. Can be sourced from `PLURAL_AZURE_CLIENT_ID`.
+- `client_secret` (String, Sensitive) A string value your app can use in place of a certificate to identity itself. Sometimes called an application password. Can be sourced from `PLURAL_AZURE_CLIENT_SECRET`.
+- `subscription_id` (String, Sensitive) GUID of the Azure subscription. Can be sourced from `PLURAL_AZURE_SUBSCRIPTION_ID`.
+- `tenant_id` (String, Sensitive) The unique identifier of the Azure Active Directory instance. Can be sourced from `PLURAL_AZURE_TENANT_ID`.
 
 
 <a id="nestedatt--cloud_settings--gcp"></a>
@@ -64,4 +64,4 @@ Required:
 
 Optional:
 
-- `credentials` (String, Sensitive) Base64 encoded GCP credentials.json file. It's recommended to use custom service account.
+- `credentials` (String, Sensitive) Base64 encoded GCP credentials.json file. It's recommended to use custom service account. Can be sourced from `PLURAL_GCP_CREDENTIALS`.
