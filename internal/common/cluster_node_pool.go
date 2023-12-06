@@ -80,8 +80,8 @@ func (c *ClusterNodePool) TerraformAttributesLabels() attr.Value {
 	return types.MapValueMust(types.StringType, c.Labels.Elements())
 }
 
-func (c *ClusterNodePool) Element() attr.Value {
-	return types.ObjectValueMust(ClusterNodePoolAttrTypes, c.terraformAttributes())
+func (c *ClusterNodePool) Element() (attr.Value, diag.Diagnostics) {
+	return types.ObjectValue(ClusterNodePoolAttrTypes, c.terraformAttributes())
 }
 
 type NodePoolTaint struct {
@@ -136,7 +136,7 @@ func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment, configNodePools
 
 	result := make(map[string]attr.Value)
 	for _, nodePool := range nodePools {
-		result[nodePool.Name] = (&ClusterNodePool{
+		objValue, diags := (&ClusterNodePool{
 			Name:          types.StringValue(nodePool.Name),
 			MinSize:       types.Int64Value(nodePool.MinSize),
 			MaxSize:       types.Int64Value(nodePool.MaxSize),
@@ -145,6 +145,8 @@ func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment, configNodePools
 			Taints:        clusterNodePoolTaintsFrom(nodePool, ctx, d),
 			CloudSettings: configNodePoolsElements[nodePool.Name].CloudSettings, // Rewriting config to state to avoid unknown values.
 		}).Element()
+		d.Append(diags...)
+		result[nodePool.Name] = objValue
 	}
 
 	mapValue, diags := types.MapValue(basetypes.ObjectType{AttrTypes: ClusterNodePoolAttrTypes}, result)
