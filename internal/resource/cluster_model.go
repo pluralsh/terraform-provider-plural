@@ -201,7 +201,7 @@ type Kubeconfig struct {
 
 type KubeconfigExec struct {
 	Command    types.String `tfsdk:"command"`
-	Args       types.String `tfsdk:"args"`
-	Env        types.String `tfsdk:"env"`
+	Args       types.List   `tfsdk:"args"`
+	Env        types.Map    `tfsdk:"env"`
 	APIVersion types.String `tfsdk:"api_version"`
 }

@@ -3,9 +3,12 @@ package resource
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"k8s.io/client-go/discovery/cached/disk"
 
@@ -126,20 +129,38 @@ func newKubeconfig(ctx context.Context, kubeconfig *Kubeconfig, namespace *strin
 		overrides.ClusterDefaults.ProxyURL = kubeconfig.ProxyURL.ValueString()
 	}
 	if kubeconfig.Exec != nil {
-		exec := &clientcmdapi.ExecConfig{}
+		exec := &clientcmdapi.ExecConfig{
+			InteractiveMode: clientcmdapi.IfAvailableExecInteractiveMode,
+			APIVersion:      kubeconfig.Exec.APIVersion.ValueString(),
+			Command:         kubeconfig.Exec.Command.ValueString(),
+		}
 
-		//if spec, ok := v.([]interface{})[0].(map[string]interface{}); ok {
-		//	exec.InteractiveMode = clientcmdapi.IfAvailableExecInteractiveMode
-		//	exec.APIVersion = spec["api_version"].(string)
-		//	exec.Command = spec["command"].(string)
-		//	exec.Args = expandStringSlice(spec["args"].([]interface{}))
-		//	for kk, vv := range spec["env"].(map[string]interface{}) {
-		//		exec.Env = append(exec.Env, clientcmdapi.ExecEnvVar{Name: kk, Value: vv.(string)})
-		//	}
-		//} else {
-		//	log.Printf("[ERROR] Failed to parse exec")
-		//	return nil, fmt.Errorf("failed to parse exec")
-		//}
+		if !kubeconfig.Exec.Env.IsNull() {
+			envElements := make(map[string]types.String)
+			diags := kubeconfig.Exec.Env.ElementsAs(ctx, &envElements, false)
+			if diags.HasError() {
+				return nil, fmt.Errorf("error while parsing kubeconfig exec env, got diagnostics: %+v", diags)
+			}
+
+			env := make([]clientcmdapi.ExecEnvVar, 0)
+			for k, v := range envElements {
+				env = append(env, clientcmdapi.ExecEnvVar{
+					Name:  k,
+					Value: v.ValueString(),
+				})
+			}
+			exec.Env = env
+		}
+
+		if !kubeconfig.Exec.Args.IsNull() {
+			argsElements := make([]types.String, len(kubeconfig.Exec.Args.Elements()))
+			diags := kubeconfig.Exec.Args.ElementsAs(ctx, &argsElements, false)
+			if diags.HasError() {
+				return nil, fmt.Errorf("error while parsing kubeconfig exec args, got diagnostics: %+v", diags)
+			}
+
+			exec.Args = algorithms.Map(argsElements, func(v types.String) string { return v.ValueString() })
+		}
 
 		overrides.AuthInfo.Exec = exec
 	}
