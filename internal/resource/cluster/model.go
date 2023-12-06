@@ -95,7 +95,7 @@ func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.
 	c.Protect = types.BoolPointerValue(cl.Protect)
 	c.Tags = common.ClusterTagsFrom(cl.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cl.Provider)
-	c.NodePoolsFrom(cl.NodePools, ctx, d)
+	c.NodePools = common.ClusterNodePoolsFrom(cl.NodePools, c.NodePools, ctx, d)
 }
 
 func (c *cluster) FromCreate(cc *console.CreateCluster, ctx context.Context, d diag.Diagnostics) {
@@ -107,12 +107,5 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, ctx context.Context, d d
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
 	c.Tags = common.ClusterTagsFrom(cc.CreateCluster.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cc.CreateCluster.Provider)
-	c.NodePoolsFrom(cc.CreateCluster.NodePools, ctx, d)
-}
-
-func (c *cluster) NodePoolsFrom(nodePools []*console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) {
-	mapValue, diags := types.MapValue(basetypes.ObjectType{AttrTypes: common.ClusterNodePoolAttrTypes},
-		common.ClusterNodePoolsFrom(nodePools, c.NodePools, ctx, d))
-	d.Append(diags...)
-	c.NodePools = mapValue
+	c.NodePools = common.ClusterNodePoolsFrom(cc.CreateCluster.NodePools, c.NodePools, ctx, d)
 }

@@ -130,7 +130,7 @@ func (c *NodePoolCloudSettingsAWS) Attributes() *console.AwsNodeCloudAttributes 
 	}
 }
 
-func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment, configNodePools types.Map, ctx context.Context, d diag.Diagnostics) map[string]attr.Value {
+func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment, configNodePools types.Map, ctx context.Context, d diag.Diagnostics) types.Map {
 	configNodePoolsElements := make(map[string]ClusterNodePool, len(configNodePools.Elements()))
 	d.Append(configNodePools.ElementsAs(ctx, &configNodePoolsElements, false)...)
 
@@ -147,7 +147,9 @@ func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment, configNodePools
 		}).Element()
 	}
 
-	return result
+	mapValue, diags := types.MapValue(basetypes.ObjectType{AttrTypes: ClusterNodePoolAttrTypes}, result)
+	d.Append(diags...)
+	return mapValue
 }
 
 func clusterNodePoolLabelsFrom(nodePool *console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) types.Map {

@@ -5,8 +5,6 @@ import (
 
 	"terraform-provider-plural/internal/common"
 
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	console "github.com/pluralsh/console-client-go"
@@ -32,14 +30,7 @@ func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.
 	c.Handle = types.StringPointerValue(cl.Handle)
 	c.DesiredVersion = types.StringPointerValue(cl.Version)
 	c.Protect = types.BoolPointerValue(cl.Protect)
-	c.fromNodePools(cl.NodePools, ctx, d)
 	c.Tags = common.ClusterTagsFrom(cl.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cl.Provider)
-}
-
-func (c *cluster) fromNodePools(nodePools []*console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) {
-	mapValue, diags := types.MapValue(basetypes.ObjectType{AttrTypes: common.ClusterNodePoolAttrTypes},
-		common.ClusterNodePoolsFrom(nodePools, c.NodePools, ctx, d))
-	d.Append(diags...)
-	c.NodePools = mapValue
+	c.NodePools = common.ClusterNodePoolsFrom(cl.NodePools, c.NodePools, ctx, d)
 }
