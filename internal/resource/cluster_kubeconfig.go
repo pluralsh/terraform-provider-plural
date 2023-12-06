@@ -25,8 +25,7 @@ type KubeConfig struct {
 }
 
 func (k *KubeConfig) ToRESTConfig() (*rest.Config, error) {
-	config, err := k.ToRawKubeConfigLoader().ClientConfig()
-	return config, err
+	return k.ToRawKubeConfigLoader().ClientConfig()
 }
 
 func (k *KubeConfig) ToDiscoveryClient() (discovery.CachedDiscoveryInterface, error) {
@@ -39,14 +38,12 @@ func (k *KubeConfig) ToDiscoveryClient() (discovery.CachedDiscoveryInterface, er
 }
 
 func (k *KubeConfig) ToRESTMapper() (meta.RESTMapper, error) {
-	discoveryClient, err := k.ToDiscoveryClient()
+	client, err := k.ToDiscoveryClient()
 	if err != nil {
 		return nil, err
 	}
 
-	mapper := restmapper.NewDeferredDiscoveryRESTMapper(discoveryClient)
-	expander := restmapper.NewShortcutExpander(mapper, discoveryClient)
-	return expander, nil
+	return restmapper.NewShortcutExpander(restmapper.NewDeferredDiscoveryRESTMapper(client), client), nil
 }
 
 func (k *KubeConfig) ToRawKubeConfigLoader() clientcmd.ClientConfig {
