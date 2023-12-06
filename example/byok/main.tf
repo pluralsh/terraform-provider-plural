@@ -18,7 +18,9 @@ resource "plural_cluster" "byok_workload_cluster" {
   protect = "false"
   cloud_settings = {
     byok = {
-      # Provide before use
+      kubeconfig = {
+        # Required, can be sourced from environment variables
+      }
     }
   }
   tags = {

@@ -16,8 +16,8 @@ resource "plural_provider" "aws_provider" {
   cloud = "aws"
   cloud_settings = {
     aws = {
-      access_key_id = "" # Provide before use
-      secret_access_key = "" # Provide before use
+      # access_key_id = "" # Required, can be sourced from PLURAL_AWS_ACCESS_KEY_ID
+      # secret_access_key = "" # Required, can be sourced from PLURAL_AWS_SECRET_ACCESS_KEY
     }
   }
 }
