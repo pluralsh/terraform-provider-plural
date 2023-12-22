@@ -858,6 +858,12 @@ github.com/pkg/sftp v1.10.1/go.mod h1:lYOWFsE0bwd1+KfKJaKeuokY15vzFx25BLbzYYoAxZ
 github.com/pkg/sftp v1.13.1/go.mod h1:3HaPG6Dq1ILlpPZRO0HVMrsydcdLt6HRDccSgb87qRg=
 github.com/pluralsh/console-client-go v0.0.53 h1:Vawo9pP/nrXC8kSP7mUazMIo5YEigRNchDi/RZWnpVc=
 github.com/pluralsh/console-client-go v0.0.53/go.mod h1:u/RjzXE3wtl3L6wiWxwhQHSpxFX46+EYvpkss2mALN4=
+github.com/pluralsh/console-client-go v0.0.61 h1:0dM0HDRXziEgs8PUvYLGUoHe/VS2UPkKlanWccSqIxc=
+github.com/pluralsh/console-client-go v0.0.61/go.mod h1:u/RjzXE3wtl3L6wiWxwhQHSpxFX46+EYvpkss2mALN4=
+github.com/pluralsh/console-client-go v0.0.62 h1:Df0pAPKyYBUtrBj2vbbKQ1WPnwYSfZkf5ZaiiiV1Z2A=
+github.com/pluralsh/console-client-go v0.0.62/go.mod h1:u/RjzXE3wtl3L6wiWxwhQHSpxFX46+EYvpkss2mALN4=
+github.com/pluralsh/console-client-go v0.0.63 h1:gZn6qsdNE9BbEZfi3fT/CCt2voGNiJrfBTQ7Dp0qZNE=
+github.com/pluralsh/console-client-go v0.0.63/go.mod h1:u/RjzXE3wtl3L6wiWxwhQHSpxFX46+EYvpkss2mALN4=
 github.com/pluralsh/gqlclient v1.11.0 h1:FfXW7FiEJLHOfTAa7NxDb8jb3aMZNIpCAcG+bg8uHYA=
 github.com/pluralsh/gqlclient v1.11.0/go.mod h1:qSXKUlio1F2DRPy8el4oFYsmpKbkUYspgPB87T4it5I=
 github.com/pluralsh/plural-cli v0.8.3-0.20231204142546-98d50a1936d3 h1:zGbRWvgu4eQ1gygIbLiWfAQl+MR6Z11MJTIxN8H0hRo=
