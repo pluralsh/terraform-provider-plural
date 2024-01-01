@@ -59,13 +59,14 @@ func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	sd, err := r.client.CreateServiceDeployment(ctx, data.Cluster.Id.ValueStringPointer(), data.Cluster.Handle.ValueStringPointer(), data.Attributes(resp.Diagnostics))
+	attrs := data.Attributes(ctx, resp.Diagnostics)
+	sd, err := r.client.CreateServiceDeployment(ctx, data.Cluster.Id.ValueStringPointer(), data.Cluster.Handle.ValueStringPointer(), attrs)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create ServiceDeployment, got error: %s", err))
 		return
 	}
 
-	data.FromCreate(sd)
+	data.FromCreate(sd, resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
@@ -82,7 +83,7 @@ func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	data.FromGet(response.ServiceDeployment)
+	data.FromGet(response.ServiceDeployment, resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
@@ -93,7 +94,7 @@ func (r *ServiceDeploymentResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	_, err := r.client.UpdateServiceDeployment(ctx, data.Id.ValueString(), data.UpdateAttributes())
+	_, err := r.client.UpdateServiceDeployment(ctx, data.Id.ValueString(), data.UpdateAttributes(ctx, resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update ServiceDeployment, got error: %s", err))
 		return

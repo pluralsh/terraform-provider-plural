@@ -14,6 +14,7 @@ type gitRepository struct {
 	Password   types.String `tfsdk:"password"`
 	UrlFormat  types.String `tfsdk:"url_format"`
 	HttpsPath  types.String `tfsdk:"https_path"`
+	Decrypt    types.Bool   `tfsdk:"decrypt"`
 }
 
 func (g *gitRepository) From(response *gqlclient.GitRepositoryFragment) {
@@ -30,5 +31,6 @@ func (g *gitRepository) Attributes() gqlclient.GitAttributes {
 		Password:   g.Password.ValueStringPointer(),
 		HTTPSPath:  g.HttpsPath.ValueStringPointer(),
 		URLFormat:  g.UrlFormat.ValueStringPointer(),
+		Decrypt:    g.Decrypt.ValueBoolPointer(),
 	}
 }

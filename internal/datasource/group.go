@@ -76,9 +76,8 @@ func (d *groupDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		)
 	}
 
-	// First try to fetch cluster by ID if it was provided.
 	var group *console.GroupFragment
-	if !data.Id.IsNull() {
+	if !data.Name.IsNull() {
 		if c, err := d.client.GetGroup(ctx, data.Name.ValueString()); err != nil {
 			resp.Diagnostics.AddWarning("Client Error", fmt.Sprintf("Unable to read group by name, got error: %s", err))
 		} else {

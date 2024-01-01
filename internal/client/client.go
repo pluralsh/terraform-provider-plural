@@ -12,7 +12,7 @@ type Client struct {
 	*gqlclient.Client
 }
 
-func (c *Client) CreateServiceDeployment(ctx context.Context, id, handle *string, attrs gqlclient.ServiceDeploymentAttributes) (*gqlclient.ServiceDeploymentFragment, error) {
+func (c *Client) CreateServiceDeployment(ctx context.Context, id, handle *string, attrs gqlclient.ServiceDeploymentAttributes) (*gqlclient.ServiceDeploymentExtended, error) {
 	if len(lo.FromPtr(id)) == 0 && len(lo.FromPtr(handle)) == 0 {
 		return nil, fmt.Errorf("could not create service deployment: id or handle not provided")
 	}

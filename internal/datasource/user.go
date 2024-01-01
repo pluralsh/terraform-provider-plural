@@ -83,7 +83,7 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	// First try to fetch cluster by ID if it was provided.
 	var user *console.UserFragment
-	if !data.Id.IsNull() {
+	if !data.Email.IsNull() {
 		if c, err := d.client.GetUser(ctx, data.Email.ValueString()); err != nil {
 			resp.Diagnostics.AddWarning("Client Error", fmt.Sprintf("Unable to read user by email, got error: %s", err))
 		} else {

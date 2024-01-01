@@ -10,19 +10,16 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"gopkg.in/yaml.v2"
 )
 
 type config struct {
-	Email types.String `tfsdk:"email", yaml:"email"`
-	Token types.String `tfsdk:"token", yaml:"email"`
+	Email types.String `tfsdk:"email" yaml:"email"`
+	Token types.String `tfsdk:"token" yaml:"email"`
 }
 
 func NewConfigDataSource() datasource.DataSource {
@@ -45,7 +42,6 @@ func (d *configDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 				Optional:            true,
 				Computed:            true,
 				MarkdownDescription: "The email used to authenticate to plural.",
-				Validators:          []validator.String{stringvalidator.ExactlyOneOf(path.MatchRoot("email"))},
 			},
 			"token": schema.StringAttribute{
 				MarkdownDescription: "Access token used to authenticate to plural.",

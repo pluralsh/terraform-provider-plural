@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -61,7 +62,6 @@ func (r *GitRepositoryResource) Schema(_ context.Context, _ resource.SchemaReque
 					stringvalidator.ConflictsWith(
 						path.MatchRoot("username"), path.MatchRoot("password"),
 					),
-					stringvalidator.AlsoRequires(path.MatchRoot("passphrase")),
 				},
 			},
 			"passphrase": schema.StringAttribute{
@@ -98,6 +98,13 @@ func (r *GitRepositoryResource) Schema(_ context.Context, _ resource.SchemaReque
 					),
 					stringvalidator.AlsoRequires(path.MatchRoot("username")),
 				},
+			},
+			"decrypt": schema.BoolAttribute{
+				Description:         "If set to \"true\" then runs plural crypto unlock on the repo after clone.",
+				MarkdownDescription: "If set to `true` then runs `plural crypto unlock` on the repo after clone.",
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
 			},
 			"url_format": schema.StringAttribute{
 				Optional:            true,
