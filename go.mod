@@ -13,7 +13,7 @@ require (
 	github.com/pluralsh/console-client-go v0.0.70
 	github.com/pluralsh/plural-cli v0.8.3-0.20240103194947-ad93fa94908a
 	github.com/pluralsh/polly v0.1.4
-	github.com/samber/lo v1.38.1
+	github.com/samber/lo v1.39.0
 	github.com/sirupsen/logrus v1.9.3
 	gopkg.in/yaml.v2 v2.4.0
 	helm.sh/helm/v3 v3.11.2
