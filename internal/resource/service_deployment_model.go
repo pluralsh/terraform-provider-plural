@@ -3,29 +3,32 @@ package resource
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	gqlclient "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/polly/algorithms"
+	"github.com/samber/lo"
 )
 
 type ServiceDeployment struct {
-	Id            types.String                      `tfsdk:"id"`
-	Name          types.String                      `tfsdk:"name"`
-	Namespace     types.String                      `tfsdk:"namespace"`
-	Version       types.String                      `tfsdk:"version"`
-	DocsPath      types.String                      `tfsdk:"docs_path"`
-	Protect       types.Bool                        `tfsdk:"protect"`
-	Kustomize     *ServiceDeploymentKustomize       `tfsdk:"kustomize"`
-	Configuration []*ServiceDeploymentConfiguration `tfsdk:"configuration"`
-	Cluster       *ServiceDeploymentCluster         `tfsdk:"cluster"`
-	Repository    *ServiceDeploymentRepository      `tfsdk:"repository"`
-	Bindings      *ServiceDeploymentBindings        `tfsdk:"bindings"`
-	SyncConfig    *ServiceDeploymentSyncConfig      `tfsdk:"sync_config"`
-	Helm          *ServiceDeploymentHelm            `tfsdk:"helm"`
+	Id            types.String                 `tfsdk:"id"`
+	Name          types.String                 `tfsdk:"name"`
+	Namespace     types.String                 `tfsdk:"namespace"`
+	Version       types.String                 `tfsdk:"version"`
+	DocsPath      types.String                 `tfsdk:"docs_path"`
+	Protect       types.Bool                   `tfsdk:"protect"`
+	Kustomize     *ServiceDeploymentKustomize  `tfsdk:"kustomize"`
+	Configuration types.Map                    `tfsdk:"configuration"`
+	Cluster       *ServiceDeploymentCluster    `tfsdk:"cluster"`
+	Repository    *ServiceDeploymentRepository `tfsdk:"repository"`
+	Bindings      *ServiceDeploymentBindings   `tfsdk:"bindings"`
+	SyncConfig    *ServiceDeploymentSyncConfig `tfsdk:"sync_config"`
+	Helm          *ServiceDeploymentHelm       `tfsdk:"helm"`
 }
 
 func (this *ServiceDeployment) VersionString() *string {
@@ -37,28 +40,28 @@ func (this *ServiceDeployment) VersionString() *string {
 	return result
 }
 
-func (this *ServiceDeployment) FromCreate(response *gqlclient.ServiceDeploymentFragment) {
+func (this *ServiceDeployment) FromCreate(response *gqlclient.ServiceDeploymentExtended, d diag.Diagnostics) {
 	this.Id = types.StringValue(response.ID)
 	this.Name = types.StringValue(response.Name)
 	this.Namespace = types.StringValue(response.Namespace)
 	this.Protect = types.BoolPointerValue(response.Protect)
 	this.Version = types.StringValue(response.Version)
 	this.Kustomize.From(response.Kustomize)
-	this.Configuration = ToServiceDeploymentConfiguration(response.Configuration)
+	this.Configuration = ToServiceDeploymentConfiguration(response.Configuration, d)
 	this.Repository.From(response.Repository, response.Git)
 }
 
-func (this *ServiceDeployment) FromGet(response *gqlclient.ServiceDeploymentExtended) {
+func (this *ServiceDeployment) FromGet(response *gqlclient.ServiceDeploymentExtended, d diag.Diagnostics) {
 	this.Id = types.StringValue(response.ID)
 	this.Name = types.StringValue(response.Name)
 	this.Namespace = types.StringValue(response.Namespace)
 	this.Protect = types.BoolPointerValue(response.Protect)
 	this.Kustomize.From(response.Kustomize)
-	this.Configuration = ToServiceDeploymentConfiguration(response.Configuration)
+	this.Configuration = ToServiceDeploymentConfiguration(response.Configuration, d)
 	this.Repository.From(response.Repository, response.Git)
 }
 
-func (this *ServiceDeployment) Attributes(d diag.Diagnostics) gqlclient.ServiceDeploymentAttributes {
+func (this *ServiceDeployment) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.ServiceDeploymentAttributes {
 	if this == nil {
 		return gqlclient.ServiceDeploymentAttributes{}
 	}
@@ -78,14 +81,14 @@ func (this *ServiceDeployment) Attributes(d diag.Diagnostics) gqlclient.ServiceD
 		RepositoryID:  repositoryId,
 		Git:           this.Repository.Attributes(),
 		Kustomize:     this.Kustomize.Attributes(),
-		Configuration: ToServiceDeploymentConfigAttributes(this.Configuration),
+		Configuration: this.ToServiceDeploymentConfigAttributes(ctx, d),
 		ReadBindings:  this.Bindings.ReadAttributes(),
 		WriteBindings: this.Bindings.WriteAttributes(),
 		Helm:          this.Helm.Attributes(),
 	}
 }
 
-func (this *ServiceDeployment) UpdateAttributes() gqlclient.ServiceUpdateAttributes {
+func (this *ServiceDeployment) UpdateAttributes(ctx context.Context, d diag.Diagnostics) gqlclient.ServiceUpdateAttributes {
 	if this == nil {
 		return gqlclient.ServiceUpdateAttributes{}
 	}
@@ -94,7 +97,7 @@ func (this *ServiceDeployment) UpdateAttributes() gqlclient.ServiceUpdateAttribu
 		Version:       this.Version.ValueStringPointer(),
 		Protect:       this.Protect.ValueBoolPointer(),
 		Git:           this.Repository.Attributes(),
-		Configuration: ToServiceDeploymentConfigAttributes(this.Configuration),
+		Configuration: this.ToServiceDeploymentConfigAttributes(ctx, d),
 		Kustomize:     this.Kustomize.Attributes(),
 		Helm:          this.Helm.Attributes(),
 	}
@@ -108,25 +111,25 @@ type ServiceDeploymentConfiguration struct {
 func ToServiceDeploymentConfiguration(configuration []*struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
-}) []*ServiceDeploymentConfiguration {
-	result := make([]*ServiceDeploymentConfiguration, len(configuration))
-	for i, c := range configuration {
-		result[i] = &ServiceDeploymentConfiguration{
-			Name:  types.StringValue(c.Name),
-			Value: types.StringValue(c.Value),
-		}
+}, d diag.Diagnostics) basetypes.MapValue {
+	resultMap := make(map[string]attr.Value, len(configuration))
+	for _, c := range configuration {
+		resultMap[c.Name] = types.StringValue(c.Value)
 	}
+
+	result, tagsDiagnostics := types.MapValue(types.StringType, resultMap)
+	d.Append(tagsDiagnostics...)
 
 	return result
 }
 
-func ToServiceDeploymentConfigAttributes(configuration []*ServiceDeploymentConfiguration) []*gqlclient.ConfigAttributes {
-	result := make([]*gqlclient.ConfigAttributes, len(configuration))
-	for i, c := range configuration {
-		result[i] = &gqlclient.ConfigAttributes{
-			Name:  c.Name.ValueString(),
-			Value: c.Value.ValueStringPointer(),
-		}
+func (this *ServiceDeployment) ToServiceDeploymentConfigAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.ConfigAttributes {
+	result := make([]*gqlclient.ConfigAttributes, 0)
+	elements := make(map[string]types.String, len(this.Configuration.Elements()))
+	d.Append(this.Configuration.ElementsAs(ctx, &elements, false)...)
+
+	for k, v := range elements {
+		result = append(result, &gqlclient.ConfigAttributes{Name: k, Value: lo.ToPtr(v.ValueString())})
 	}
 
 	return result
