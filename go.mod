@@ -3,7 +3,7 @@ module terraform-provider-plural
 go 1.21
 
 require (
-	github.com/Yamashou/gqlgenc v0.14.0
+	github.com/Yamashou/gqlgenc v0.16.1
 	github.com/golangci/golangci-lint v1.55.1
 	github.com/hashicorp/terraform-plugin-docs v0.16.0
 	github.com/hashicorp/terraform-plugin-framework v1.4.2
@@ -499,7 +499,7 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fastjson v1.6.4 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
-	github.com/vektah/gqlparser/v2 v2.5.1 // indirect
+	github.com/vektah/gqlparser/v2 v2.5.10 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect
