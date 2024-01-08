@@ -25,6 +25,7 @@ type cluster struct {
 	Bindings       *common.ClusterBindings `tfsdk:"bindings"`
 	NodePools      types.Map               `tfsdk:"node_pools"`
 	CloudSettings  *ClusterCloudSettings   `tfsdk:"cloud_settings"`
+	Kubeconfig     *Kubeconfig             `tfsdk:"kubeconfig"`
 }
 
 func (c *cluster) NodePoolsAttribute(ctx context.Context, d diag.Diagnostics) []*console.NodePoolAttributes {
@@ -110,6 +111,22 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, ctx context.Context, d d
 	c.NodePools = common.ClusterNodePoolsFrom(cc.CreateCluster.NodePools, c.NodePools, ctx, d)
 }
 
+func (c *cluster) HasKubeconfig() bool {
+	return c.Kubeconfig != nil || (c.CloudSettings != nil && c.CloudSettings.BYOK != nil && c.CloudSettings.BYOK.Kubeconfig != nil)
+}
+
+func (c *cluster) GetKubeconfig() *Kubeconfig {
+	if !c.HasKubeconfig() {
+		return nil
+	}
+
+	if c.Kubeconfig != nil {
+		return c.Kubeconfig
+	}
+
+	return c.CloudSettings.BYOK.Kubeconfig
+}
+
 type ClusterCloudSettings struct {
 	AWS   *ClusterCloudSettingsAWS   `tfsdk:"aws"`
 	Azure *ClusterCloudSettingsAzure `tfsdk:"azure"`
@@ -178,7 +195,7 @@ func (c *ClusterCloudSettingsGCP) Attributes() *console.GcpCloudAttributes {
 }
 
 type ClusterCloudSettingsBYOK struct {
-	Kubeconfig Kubeconfig `tfsdk:"kubeconfig"`
+	Kubeconfig *Kubeconfig `tfsdk:"kubeconfig"`
 }
 
 type Kubeconfig struct {

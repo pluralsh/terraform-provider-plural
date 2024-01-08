@@ -65,13 +65,13 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	if common.IsCloud(data.Cloud.ValueString(), common.CloudBYOK) {
+	if common.IsCloud(data.Cloud.ValueString(), common.CloudBYOK) && data.HasKubeconfig() {
 		if result.CreateCluster.DeployToken == nil {
 			resp.Diagnostics.AddError("Client Error", "Unable to fetch cluster deploy token")
 			return
 		}
 
-		handler, err := NewOperatorHandler(ctx, &data.CloudSettings.BYOK.Kubeconfig, r.consoleUrl)
+		handler, err := NewOperatorHandler(ctx, data.GetKubeconfig(), r.consoleUrl)
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to init operator handler, got error: %s", err))
 			return
