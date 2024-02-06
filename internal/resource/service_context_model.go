@@ -17,9 +17,9 @@ type serviceContext struct {
 	Secrets       types.Map    `tfsdk:"secrets"`
 }
 
-func (sc *serviceContext) From(cp *console.ServiceContextFragment, ctx context.Context, d diag.Diagnostics) {
-	sc.Id = types.StringValue(cp.ID)
-	sc.Configuration = serviceContextConfigurationFrom(cp.Configuration, ctx, d)
+func (sc *serviceContext) From(scf *console.ServiceContextFragment, ctx context.Context, d diag.Diagnostics) {
+	sc.Id = types.StringValue(scf.ID)
+	sc.Configuration = serviceContextConfigurationFrom(scf.Configuration, ctx, d)
 }
 
 func serviceContextConfigurationFrom(configuration map[string]any, ctx context.Context, d diag.Diagnostics) types.Map {

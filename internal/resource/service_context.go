@@ -92,8 +92,7 @@ func (r *ServiceContextResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	attrs := data.Attributes(ctx, resp.Diagnostics)
-	sc, err := r.client.SaveServiceContext(ctx, data.Name.String(), attrs)
+	sc, err := r.client.SaveServiceContext(ctx, data.Name.ValueString(), data.Attributes(ctx, resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create service context, got error: %s", err))
 		return
