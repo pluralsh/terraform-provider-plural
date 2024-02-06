@@ -3,9 +3,10 @@ package resource
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"terraform-provider-plural/internal/common"
+
+	"terraform-provider-plural/internal/client"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -13,9 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"k8s.io/apimachinery/pkg/util/wait"
-
-	"terraform-provider-plural/internal/client"
 )
 
 var _ resource.Resource = &ServiceContextResource{}
@@ -145,19 +143,6 @@ func (r *ServiceContextResource) Delete(ctx context.Context, req resource.Delete
 	_, err := r.client.DeleteServiceContext(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete service context, got error: %s", err))
-		return
-	}
-
-	err = wait.WaitForWithContext(ctx, client.Ticker(5*time.Second), func(ctx context.Context) (bool, error) {
-		_, err := r.client.GetServiceContext(ctx, data.Name.ValueString())
-		if client.IsNotFound(err) {
-			return true, nil
-		}
-
-		return false, err
-	})
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error during watiting for service context to be deleted, got error: %s", err))
 		return
 	}
 }
