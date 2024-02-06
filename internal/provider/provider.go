@@ -169,6 +169,7 @@ func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource
 		r.NewGitRepositoryResource,
 		r.NewProviderResource,
 		r.NewServiceDeploymentResource,
+		r.NewServiceContextResource,
 	}
 }
 

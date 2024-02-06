@@ -21,6 +21,7 @@ GitRepository resource
 
 ### Optional
 
+- `decrypt` (Boolean) If set to `true` then runs `plural crypto unlock` on the repo after clone.
 - `https_path` (String) Manually supplied https path for non standard git setups. This is auto-inferred in many cases.
 - `passphrase` (String, Sensitive) Passphrase to decrypt the given private key.
 - `password` (String, Sensitive) HTTP password for http authenticated repos.

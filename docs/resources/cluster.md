@@ -17,14 +17,15 @@ A representation of a cluster you can deploy to.
 
 ### Required
 
-- `cloud` (String) The cloud provider used to create this cluster.
-- `cloud_settings` (Attributes) Cloud-specific settings for this cluster. (see [below for nested schema](#nestedatt--cloud_settings))
 - `name` (String) Human-readable name of this cluster, that also translates to cloud resource name.
 
 ### Optional
 
 - `bindings` (Attributes) Read and write policies of this cluster. (see [below for nested schema](#nestedatt--bindings))
+- `cloud` (String) The cloud provider used to create this cluster.
+- `cloud_settings` (Attributes) Cloud-specific settings for this cluster. (see [below for nested schema](#nestedatt--cloud_settings))
 - `handle` (String) A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.
+- `kubeconfig` (Attributes) (see [below for nested schema](#nestedatt--kubeconfig))
 - `node_pools` (Attributes Map) **Experimental, not ready for production use.** Map of node pool specs managed by this cluster, where the key is name of the node pool and value contains the spec. Leave empty for bring your own cluster. (see [below for nested schema](#nestedatt--node_pools))
 - `protect` (Boolean) If set to `true` then this cluster cannot be deleted.
 - `provider_id` (String) Provider used to create this cluster. Leave empty for bring your own cluster.
@@ -36,6 +37,35 @@ A representation of a cluster you can deploy to.
 - `desired_version` (String) Desired Kubernetes version for this cluster.
 - `id` (String) Internal identifier of this cluster.
 - `inserted_at` (String) Creation date of this cluster.
+
+<a id="nestedatt--bindings"></a>
+### Nested Schema for `bindings`
+
+Optional:
+
+- `read` (Attributes Set) Read policies of this cluster. (see [below for nested schema](#nestedatt--bindings--read))
+- `write` (Attributes Set) Write policies of this cluster. (see [below for nested schema](#nestedatt--bindings--write))
+
+<a id="nestedatt--bindings--read"></a>
+### Nested Schema for `bindings.read`
+
+Optional:
+
+- `group_id` (String)
+- `id` (String)
+- `user_id` (String)
+
+
+<a id="nestedatt--bindings--write"></a>
+### Nested Schema for `bindings.write`
+
+Optional:
+
+- `group_id` (String)
+- `id` (String)
+- `user_id` (String)
+
+
 
 <a id="nestedatt--cloud_settings"></a>
 ### Nested Schema for `cloud_settings`
@@ -71,7 +101,7 @@ Required:
 
 Optional:
 
-- `kubeconfig` (Attributes) (see [below for nested schema](#nestedatt--cloud_settings--byok--kubeconfig))
+- `kubeconfig` (Attributes, Deprecated) (see [below for nested schema](#nestedatt--cloud_settings--byok--kubeconfig))
 
 <a id="nestedatt--cloud_settings--byok--kubeconfig"></a>
 ### Nested Schema for `cloud_settings.byok.kubeconfig`
@@ -121,32 +151,39 @@ Required:
 
 
 
-<a id="nestedatt--bindings"></a>
-### Nested Schema for `bindings`
+<a id="nestedatt--kubeconfig"></a>
+### Nested Schema for `kubeconfig`
 
 Optional:
 
-- `read` (Attributes Set) Read policies of this cluster. (see [below for nested schema](#nestedatt--bindings--read))
-- `write` (Attributes Set) Write policies of this cluster. (see [below for nested schema](#nestedatt--bindings--write))
+- `client_certificate` (String) The path to a client cert file for TLS. Can be sourced from `PLURAL_KUBE_CLIENT_CERT_DATA`.
+- `client_key` (String, Sensitive) The path to a client key file for TLS. Can be sourced from `PLURAL_KUBE_CLIENT_KEY_DATA`.
+- `cluster_ca_certificate` (String) The path to a cert file for the certificate authority. Can be sourced from `PLURAL_KUBE_CLUSTER_CA_CERT_DATA`.
+- `config_context` (String) kubeconfig context to use. Can be sourced from `PLURAL_KUBE_CTX`.
+- `config_context_auth_info` (String) Can be sourced from `PLURAL_KUBE_CTX_AUTH_INFO`.
+- `config_context_cluster` (String) Can be sourced from `PLURAL_KUBE_CTX_CLUSTER`.
+- `config_path` (String) Path to the kubeconfig file. Can be sourced from `PLURAL_KUBE_CONFIG_PATH`.
+- `exec` (Attributes List) Specifies a command to provide client credentials (see [below for nested schema](#nestedatt--kubeconfig--exec))
+- `host` (String) The complete address of the Kubernetes cluster, using scheme://hostname:port format. Can be sourced from `PLURAL_KUBE_HOST`.
+- `insecure` (Boolean) Skips the validity check for the server's certificate. This will make your HTTPS connections insecure. Can be sourced from `PLURAL_KUBE_INSECURE`.
+- `password` (String, Sensitive) The password for basic authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_PASSWORD`.
+- `proxy_url` (String) The URL to the proxy to be used for all requests made by this client. Can be sourced from `PLURAL_KUBE_PROXY_URL`.
+- `tls_server_name` (String) TLS server name is used to check server certificate. If it is empty, the hostname used to contact the server is used. Can be sourced from `PLURAL_KUBE_TLS_SERVER_NAME`.
+- `token` (String, Sensitive) Token is the bearer token for authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_TOKEN`.
+- `username` (String) The username for basic authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_USER`.
 
-<a id="nestedatt--bindings--read"></a>
-### Nested Schema for `bindings.read`
+<a id="nestedatt--kubeconfig--exec"></a>
+### Nested Schema for `kubeconfig.exec`
+
+Required:
+
+- `api_version` (String) Preferred input version.
+- `command` (String) Command to execute.
 
 Optional:
 
-- `group_id` (String)
-- `id` (String)
-- `user_id` (String)
-
-
-<a id="nestedatt--bindings--write"></a>
-### Nested Schema for `bindings.write`
-
-Optional:
-
-- `group_id` (String)
-- `id` (String)
-- `user_id` (String)
+- `args` (List of String) Arguments to pass to the command when executing it.
+- `env` (Map of String) Defines  environment variables to expose to the process.
 
 
 
