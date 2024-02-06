@@ -24,7 +24,7 @@ description: |-
 ### Optional
 
 - `bindings` (Attributes) Read and write policies of this ServiceDeployment. (see [below for nested schema](#nestedatt--bindings))
-- `configuration` (Attributes Set) List of [name, value] secrets used to alter this ServiceDeployment configuration. (see [below for nested schema](#nestedatt--configuration))
+- `configuration` (Map of String) Key-value configuration used to parameterize this service (stored securely by default).
 - `docs_path` (String) Path to the documentation in the target git repository.
 - `helm` (Attributes) Settings defining how Helm charts should be applied. (see [below for nested schema](#nestedatt--helm))
 - `kustomize` (Attributes) Kustomize related service metadata. (see [below for nested schema](#nestedatt--kustomize))
@@ -73,15 +73,6 @@ Optional:
 - `id` (String)
 - `user_id` (String)
 
-
-
-<a id="nestedatt--configuration"></a>
-### Nested Schema for `configuration`
-
-Required:
-
-- `name` (String)
-- `value` (String, Sensitive)
 
 
 <a id="nestedatt--helm"></a>
