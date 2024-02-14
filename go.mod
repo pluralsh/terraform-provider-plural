@@ -16,7 +16,7 @@ require (
 	github.com/samber/lo v1.38.1
 	github.com/sirupsen/logrus v1.9.3
 	gopkg.in/yaml.v2 v2.4.0
-	helm.sh/helm/v3 v3.11.2
+	helm.sh/helm/v3 v3.14.1
 	k8s.io/apimachinery v0.26.4
 	k8s.io/client-go v0.26.4
 )
