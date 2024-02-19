@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -57,6 +58,13 @@ func (r *ServiceDeploymentResource) schema() schema.Schema {
 				Optional:            true,
 				Description:         "If true, deletion of this service is not allowed.",
 				MarkdownDescription: "If true, deletion of this service is not allowed.",
+			},
+			"templated": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(true),
+				Description:         "If true, apply Liquid templating to raw YAML files.",
+				MarkdownDescription: "If true, apply Liquid templating to raw YAML files.",
 			},
 			"kustomize": r.schemaKustomize(),
 			"configuration": schema.MapAttribute{
