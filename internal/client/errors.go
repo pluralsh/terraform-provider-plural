@@ -3,7 +3,7 @@ package client
 import (
 	"errors"
 
-	"github.com/Yamashou/gqlgenc/client"
+	client "github.com/Yamashou/gqlgenc/clientv2"
 )
 
 type KnownError string

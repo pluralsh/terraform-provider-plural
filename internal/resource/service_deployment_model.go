@@ -22,6 +22,7 @@ type ServiceDeployment struct {
 	Version       types.String                 `tfsdk:"version"`
 	DocsPath      types.String                 `tfsdk:"docs_path"`
 	Protect       types.Bool                   `tfsdk:"protect"`
+	Templated     types.Bool                   `tfsdk:"templated"`
 	Kustomize     *ServiceDeploymentKustomize  `tfsdk:"kustomize"`
 	Configuration types.Map                    `tfsdk:"configuration"`
 	Cluster       *ServiceDeploymentCluster    `tfsdk:"cluster"`
@@ -49,6 +50,7 @@ func (this *ServiceDeployment) FromCreate(response *gqlclient.ServiceDeploymentE
 	this.Kustomize.From(response.Kustomize)
 	this.Configuration = ToServiceDeploymentConfiguration(response.Configuration, d)
 	this.Repository.From(response.Repository, response.Git)
+	this.Templated = types.BoolPointerValue(response.Templated)
 }
 
 func (this *ServiceDeployment) FromGet(response *gqlclient.ServiceDeploymentExtended, d diag.Diagnostics) {
@@ -59,6 +61,7 @@ func (this *ServiceDeployment) FromGet(response *gqlclient.ServiceDeploymentExte
 	this.Kustomize.From(response.Kustomize)
 	this.Configuration = ToServiceDeploymentConfiguration(response.Configuration, d)
 	this.Repository.From(response.Repository, response.Git)
+	this.Templated = types.BoolPointerValue(response.Templated)
 }
 
 func (this *ServiceDeployment) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.ServiceDeploymentAttributes {
@@ -85,6 +88,7 @@ func (this *ServiceDeployment) Attributes(ctx context.Context, d diag.Diagnostic
 		ReadBindings:  this.Bindings.ReadAttributes(),
 		WriteBindings: this.Bindings.WriteAttributes(),
 		Helm:          this.Helm.Attributes(),
+		Templated:     this.Templated.ValueBoolPointer(),
 	}
 }
 
@@ -100,6 +104,7 @@ func (this *ServiceDeployment) UpdateAttributes(ctx context.Context, d diag.Diag
 		Configuration: this.ToServiceDeploymentConfigAttributes(ctx, d),
 		Kustomize:     this.Kustomize.Attributes(),
 		Helm:          this.Helm.Attributes(),
+		Templated:     this.Templated.ValueBoolPointer(),
 	}
 }
 
@@ -108,10 +113,7 @@ type ServiceDeploymentConfiguration struct {
 	Value types.String `tfsdk:"value"`
 }
 
-func ToServiceDeploymentConfiguration(configuration []*struct {
-	Name  string "json:\"name\" graphql:\"name\""
-	Value string "json:\"value\" graphql:\"value\""
-}, d diag.Diagnostics) basetypes.MapValue {
+func ToServiceDeploymentConfiguration(configuration []*gqlclient.ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration, d diag.Diagnostics) basetypes.MapValue {
 	resultMap := make(map[string]attr.Value, len(configuration))
 	for _, c := range configuration {
 		resultMap[c.Name] = types.StringValue(c.Value)

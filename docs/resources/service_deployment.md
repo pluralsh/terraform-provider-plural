@@ -31,6 +31,7 @@ description: |-
 - `protect` (Boolean) If true, deletion of this service is not allowed.
 - `repository` (Attributes) Repository information used to pull ServiceDeployment. (see [below for nested schema](#nestedatt--repository))
 - `sync_config` (Attributes) Settings for advanced tuning of the sync process. (see [below for nested schema](#nestedatt--sync_config))
+- `templated` (Boolean) If true, apply Liquid templating to raw YAML files.
 - `version` (String) Semver version of this service ServiceDeployment.
 
 ### Read-Only

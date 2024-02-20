@@ -1,9 +1,19 @@
+terraform {
+  required_providers {
+    plural = {
+      source = "pluralsh/plural"
+      version = "0.0.1"
+    }
+  }
+}
+
+
 provider "plural" {
   use_cli = true
 }
 
 data "plural_cluster" "byok_workload_cluster" {
-  handle = "gcp-workload-cluster"
+  handle = "cd-demo"
 }
 
 data "plural_git_repository" "cd-test" {
@@ -29,17 +39,12 @@ resource "plural_service_deployment" "cd-test" {
   version = "0.0.2"
   docs_path = "doc"
   protect   = false
+  templated = true
 
-  configuration = [
-    {
-      name : "host"
-      value : "tf-cd-test.gcp.plural.sh"
-    },
-    {
-      name : "tag"
-      value : "sha-4d01e86"
-    }
-  ]
+  configuration = {
+   "host" = "tf-cd-test.gcp.plural.sh"
+    "tag" = "sha-4d01e86"
+  }
 
   sync_config = {
     namespace_metadata = {

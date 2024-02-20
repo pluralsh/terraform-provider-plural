@@ -9,7 +9,7 @@ import (
 )
 
 type Client struct {
-	*gqlclient.Client
+	gqlclient.ConsoleClient
 }
 
 func (c *Client) CreateServiceDeployment(ctx context.Context, id, handle *string, attrs gqlclient.ServiceDeploymentAttributes) (*gqlclient.ServiceDeploymentExtended, error) {
@@ -18,7 +18,7 @@ func (c *Client) CreateServiceDeployment(ctx context.Context, id, handle *string
 	}
 
 	if len(lo.FromPtr(id)) > 0 {
-		res, err := c.Client.CreateServiceDeployment(ctx, *id, attrs)
+		res, err := c.ConsoleClient.CreateServiceDeployment(ctx, *id, attrs)
 		if err != nil {
 			return nil, err
 		}
@@ -26,7 +26,7 @@ func (c *Client) CreateServiceDeployment(ctx context.Context, id, handle *string
 		return res.CreateServiceDeployment, err
 	}
 
-	res, err := c.Client.CreateServiceDeploymentWithHandle(ctx, *handle, attrs)
+	res, err := c.ConsoleClient.CreateServiceDeploymentWithHandle(ctx, *handle, attrs)
 	if err != nil {
 		return nil, err
 	}
@@ -34,8 +34,8 @@ func (c *Client) CreateServiceDeployment(ctx context.Context, id, handle *string
 	return res.CreateServiceDeployment, err
 }
 
-func NewClient(client *gqlclient.Client) *Client {
+func NewClient(client gqlclient.ConsoleClient) *Client {
 	return &Client{
-		Client: client,
+		ConsoleClient: client,
 	}
 }

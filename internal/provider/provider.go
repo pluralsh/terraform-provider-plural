@@ -39,6 +39,16 @@ type pluralProviderModel struct {
 	UseCli      types.Bool   `tfsdk:"use_cli"`
 }
 
+type authedTransport struct {
+	token   string
+	wrapped http.RoundTripper
+}
+
+func (t *authedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Set("Authorization", "Token "+t.token)
+	return t.wrapped.RoundTrip(req)
+}
+
 func (p *PluralProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = "plural"
 	resp.Version = p.version
@@ -153,10 +163,14 @@ func (p *PluralProvider) Configure(ctx context.Context, req provider.ConfigureRe
 		return
 	}
 
-	consoleClient := client.NewClient(http.DefaultClient, fmt.Sprintf("%s/gql", consoleUrl), func(req *http.Request) {
-		req.Header.Set("Authorization", fmt.Sprintf("Token %s", accessToken))
-	})
+	httpClient := http.Client{
+		Transport: &authedTransport{
+			token:   accessToken,
+			wrapped: http.DefaultTransport,
+		},
+	}
 
+	consoleClient := client.NewClient(&httpClient, fmt.Sprintf("%s/gql", consoleUrl), nil)
 	internalClient := internalclient.NewClient(consoleClient)
 
 	resp.ResourceData = common.NewProviderData(internalClient, consoleUrl)
