@@ -864,6 +864,8 @@ github.com/pluralsh/plural-cli v0.8.5-0.20240216094552-efc34ee6de37 h1:DBnaKvKmb
 github.com/pluralsh/plural-cli v0.8.5-0.20240216094552-efc34ee6de37/go.mod h1:ZjvgOn9wE5vQXkImmoQknKKP0/68Ph6Hj19fUE1WdDU=
 github.com/pluralsh/polly v0.1.4 h1:Kz90peCgvsfF3ERt8cujr5TR9z4wUlqQE60Eg09ZItY=
 github.com/pluralsh/polly v0.1.4/go.mod h1:Yo1/jcW+4xwhWG+ZJikZy4J4HJkMNPZ7sq5auL2c/tY=
+github.com/pluralsh/polly v0.1.7 h1:MUuTb6rCUV1doisaFGC+iz+33ZPU4FZHOb/kFwSDkjw=
+github.com/pluralsh/polly v0.1.7/go.mod h1:Yo1/jcW+4xwhWG+ZJikZy4J4HJkMNPZ7sq5auL2c/tY=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/polyfloyd/go-errorlint v1.4.5 h1:70YWmMy4FgRHehGNOUask3HtSFSOLKgmDn7ryNe7LqI=

@@ -7,8 +7,10 @@ import (
 
 	"github.com/pluralsh/plural-cli/pkg/console"
 	"github.com/pluralsh/plural-cli/pkg/helm"
+	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
@@ -22,6 +24,9 @@ type OperatorHandler struct {
 	kubeconfig *Kubeconfig
 	// url is an url to the Console API, i.e. https://console.mycluster.onplural.sh
 	url string
+
+	// additional values used on install
+	vals map[string]interface{}
 
 	// Preconfigured helm actions and chart
 	chart         *chart.Chart
@@ -129,12 +134,13 @@ func (oh *OperatorHandler) listReleases(state action.ListStates) ([]*release.Rel
 }
 
 func (oh *OperatorHandler) values(token string) map[string]interface{} {
-	return map[string]interface{}{
+	vals := map[string]interface{}{
 		"secrets": map[string]string{
 			"deployToken": token,
 		},
 		"consoleUrl": fmt.Sprintf("%s/ext/gql", oh.url),
 	}
+	return algorithms.Merge(vals, oh.vals)
 }
 
 func (oh *OperatorHandler) InstallOrUpgrade(token string) error {
@@ -165,11 +171,19 @@ func (oh *OperatorHandler) Uninstall() error {
 	return err
 }
 
-func NewOperatorHandler(ctx context.Context, kubeconfig *Kubeconfig, consoleUrl string) (*OperatorHandler, error) {
+func NewOperatorHandler(ctx context.Context, kubeconfig *Kubeconfig, values *string, consoleUrl string) (*OperatorHandler, error) {
+	vals := map[string]interface{}{}
+	if values != nil {
+		if err := yaml.Unmarshal([]byte(*values), &vals); err != nil {
+			return nil, err
+		}
+	}
+
 	handler := &OperatorHandler{
 		ctx:        ctx,
 		kubeconfig: kubeconfig,
 		url:        consoleUrl,
+		vals:       vals,
 	}
 
 	err := handler.init()
