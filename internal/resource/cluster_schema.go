@@ -108,6 +108,11 @@ func (r *clusterResource) schema() schema.Schema {
 				},
 				PlanModifiers: []planmodifier.Object{objectplanmodifier.RequiresReplace()},
 			},
+			"helm_values": schema.StringAttribute{
+				Description:         "Additional helm values you'd like to use in deployment agent helm installs.  This is useful for BYOK clusters that need to use custom images or other constructs.",
+				MarkdownDescription: "Additional helm values you'd like to use in deployment agent helm installs.  This is useful for BYOK clusters that need to use custom images or other constructs.",
+				Optional:            true,
+			},
 			"kubeconfig": r.kubeconfigSchema(false),
 			"node_pools": schema.MapNestedAttribute{
 				Description:         "Experimental, not ready for production use. Map of node pool specs managed by this cluster, where the key is name of the node pool and value contains the spec. Leave empty for bring your own cluster.",
