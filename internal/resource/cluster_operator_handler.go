@@ -10,12 +10,12 @@ import (
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/release"
+	"sigs.k8s.io/yaml"
 )
 
 type OperatorHandler struct {
