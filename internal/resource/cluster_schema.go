@@ -78,7 +78,7 @@ func (r *clusterResource) schema() schema.Schema {
 			"metadata": schema.StringAttribute{
 				Description:         "Arbitrary JSON metadata to store user-specific state of this cluster (e.g. IAM roles for add-ons).",
 				MarkdownDescription: "Arbitrary JSON metadata to store user-specific state of this cluster (e.g. IAM roles for add-ons).",
-				Required:            true,
+				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"cloud": schema.StringAttribute{
@@ -125,6 +125,7 @@ func (r *clusterResource) schema() schema.Schema {
 				MarkdownDescription: "**Experimental, not ready for production use.** Map of node pool specs managed by this cluster, where the key is name of the node pool and value contains the spec. Leave empty for bring your own cluster.",
 				Optional:            true,
 				Computed:            true,
+				PlanModifiers:       []planmodifier.Map{mapplanmodifier.UseStateForUnknown()},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{

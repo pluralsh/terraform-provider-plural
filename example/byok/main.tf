@@ -11,9 +11,8 @@ provider "plural" {
   use_cli = true
 }
 
-resource "plural_cluster" "byok_workload_cluster" {
-  name           = "workload-cluster-tf"
-  handle         = "wctf"
+resource "plural_cluster" "byok" {
+  name           = "byok-tf"
   protect        = "false"
   kubeconfig = {
     # Required, can be sourced from environment variables
@@ -26,14 +25,6 @@ resource "plural_cluster" "byok_workload_cluster" {
       abc = false
     })
   })
-  # Alternative method
-  #  metadata = <<EOF
-  #{
-  #  "test1": "string",
-  #  "test2": false,
-  #  "test3": {"abc": false},
-  #}
-  #EOF
   tags = {
     "managed-by" = "terraform-provider-plural"
   }
