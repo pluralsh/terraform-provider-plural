@@ -75,6 +75,10 @@ func (d *clusterDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 				Computed:            true,
 				ElementType:         types.StringType,
 			},
+			"metadata": schema.StringAttribute{
+				MarkdownDescription: "Arbitrary JSON metadata to store user-specific state of this cluster (e.g. IAM roles for add-ons).",
+				Computed:            true,
+			},
 			"node_pools": schema.MapNestedAttribute{
 				Description:         "Map of node pool specs managed by this cluster, where the key is name of the node pool and value contains the spec.",
 				MarkdownDescription: "Map of node pool specs managed by this cluster, where the key is name of the node pool and value contains the spec.",

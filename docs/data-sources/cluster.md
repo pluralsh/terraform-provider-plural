@@ -25,6 +25,7 @@ A representation of a cluster you can deploy to.
 - `cloud` (String) The cloud provider used to create this cluster.
 - `desired_version` (String) Desired Kubernetes version for this cluster.
 - `inserted_at` (String) Creation date of this cluster.
+- `metadata` (String) Arbitrary JSON metadata to store user-specific state of this cluster (e.g. IAM roles for add-ons).
 - `name` (String) Human-readable name of this cluster, that also translates to cloud resource name.
 - `node_pools` (Attributes Map) Map of node pool specs managed by this cluster, where the key is name of the node pool and value contains the spec. (see [below for nested schema](#nestedatt--node_pools))
 - `protect` (Boolean) If set to `true` then this cluster cannot be deleted.

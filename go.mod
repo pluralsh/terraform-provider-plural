@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/pluralsh/console-client-go v0.0.96
+	github.com/pluralsh/console-client-go v0.1.16
 	github.com/pluralsh/plural-cli v0.8.5-0.20240216094552-efc34ee6de37
 	github.com/pluralsh/polly v0.1.7
 	github.com/samber/lo v1.38.1
@@ -21,6 +21,7 @@ require (
 	helm.sh/helm/v3 v3.11.2
 	k8s.io/apimachinery v0.26.4
 	k8s.io/client-go v0.26.4
+	sigs.k8s.io/yaml v1.3.0
 )
 
 require (
@@ -353,7 +354,6 @@ require (
 	sigs.k8s.io/kustomize/api v0.13.2 // indirect
 	sigs.k8s.io/kustomize/kyaml v0.14.3 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
-	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
 replace (

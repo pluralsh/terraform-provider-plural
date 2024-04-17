@@ -11,21 +11,21 @@ provider "plural" {
   use_cli = true
 }
 
-resource "plural_provider" "azure_provider" {
-  name = "azure"
-  cloud = "azure"
-  cloud_settings = {
-    azure = {
-      # subscription_id = "" # Required, can be sourced from PLURAL_AZURE_SUBSCRIPTION_ID
-      # tenant_id = "" # Required, can be sourced from PLURAL_AZURE_TENANT_ID
-      # client_id = "" # Required, can be sourced from PLURAL_AZURE_CLIENT_ID
-      # client_secret = "" # Required, can be sourced from PLURAL_AZURE_CLIENT_SECRET
-    }
-  }
-}
+#resource "plural_provider" "azure_provider" {
+#  name = "azure"
+#  cloud = "azure"
+#  cloud_settings = {
+#    azure = {
+#      # subscription_id = "" # Required, can be sourced from PLURAL_AZURE_SUBSCRIPTION_ID
+#      # tenant_id = "" # Required, can be sourced from PLURAL_AZURE_TENANT_ID
+#      # client_id = "" # Required, can be sourced from PLURAL_AZURE_CLIENT_ID
+#      # client_secret = "" # Required, can be sourced from PLURAL_AZURE_CLIENT_SECRET
+#    }
+#  }
+#}
 
 data "plural_provider" "azure_provider" {
-  cloud = "aws"
+  cloud = "azure"
 }
 
 resource "plural_cluster" "azure_cluster" {
@@ -43,6 +43,13 @@ resource "plural_cluster" "azure_cluster" {
       location = "eastus"
     }
   }
+  metadata = jsonencode({
+    test1 = "test"
+    test2 = false
+    test3 = jsonencode({
+      abc = false
+    })
+  })
   tags = {
     "managed-by" = "terraform-provider-plural"
   }

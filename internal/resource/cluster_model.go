@@ -2,6 +2,8 @@ package resource
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"terraform-provider-plural/internal/common"
 
@@ -22,9 +24,11 @@ type cluster struct {
 	Cloud          types.String            `tfsdk:"cloud"`
 	Protect        types.Bool              `tfsdk:"protect"`
 	Tags           types.Map               `tfsdk:"tags"`
+	Metadata       types.String            `tfsdk:"metadata"`
 	Bindings       *common.ClusterBindings `tfsdk:"bindings"`
 	NodePools      types.Map               `tfsdk:"node_pools"`
 	CloudSettings  *ClusterCloudSettings   `tfsdk:"cloud_settings"`
+	HelmRepoUrl    types.String            `tfsdk:"helm_repo_url"`
 	HelmValues     types.String            `tfsdk:"helm_values"`
 	Kubeconfig     *Kubeconfig             `tfsdk:"kubeconfig"`
 }
@@ -76,6 +80,7 @@ func (c *cluster) Attributes(ctx context.Context, d diag.Diagnostics) console.Cl
 		WriteBindings: c.Bindings.WriteAttributes(),
 		Tags:          c.TagsAttribute(ctx, d),
 		NodePools:     c.NodePoolsAttribute(ctx, d),
+		Metadata:      c.Metadata.ValueStringPointer(),
 	}
 }
 
@@ -89,15 +94,22 @@ func (c *cluster) UpdateAttributes(ctx context.Context, d diag.Diagnostics) cons
 }
 
 func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.Diagnostics) {
+	metadata, err := json.Marshal(cl.Metadata)
+	if err != nil {
+		d.AddError("Provider Error", fmt.Sprintf("Cannot marshall metadata, got error: %s", err))
+		return
+	}
+
 	c.Id = types.StringValue(cl.ID)
 	c.InsertedAt = types.StringPointerValue(cl.InsertedAt)
 	c.Name = types.StringValue(cl.Name)
 	c.Handle = types.StringPointerValue(cl.Handle)
-	c.DesiredVersion = types.StringPointerValue(cl.Version)
+	c.DesiredVersion = c.ClusterVersionFrom(cl.Version, cl.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cl.Protect)
 	c.Tags = common.ClusterTagsFrom(cl.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cl.Provider)
 	c.NodePools = common.ClusterNodePoolsFrom(cl.NodePools, c.NodePools, ctx, d)
+	c.Metadata = types.StringValue(string(metadata))
 }
 
 func (c *cluster) FromCreate(cc *console.CreateCluster, ctx context.Context, d diag.Diagnostics) {
@@ -105,11 +117,23 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, ctx context.Context, d d
 	c.InsertedAt = types.StringPointerValue(cc.CreateCluster.InsertedAt)
 	c.Name = types.StringValue(cc.CreateCluster.Name)
 	c.Handle = types.StringPointerValue(cc.CreateCluster.Handle)
-	c.DesiredVersion = types.StringPointerValue(cc.CreateCluster.Version)
+	c.DesiredVersion = c.ClusterVersionFrom(cc.CreateCluster.Version, cc.CreateCluster.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
 	c.Tags = common.ClusterTagsFrom(cc.CreateCluster.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cc.CreateCluster.Provider)
 	c.NodePools = common.ClusterNodePoolsFrom(cc.CreateCluster.NodePools, c.NodePools, ctx, d)
+}
+
+func (c *cluster) ClusterVersionFrom(version, currentVersion *string) types.String {
+	if version != nil && len(*version) > 0 {
+		return types.StringPointerValue(version)
+	}
+
+	if currentVersion != nil && len(*currentVersion) > 0 {
+		return types.StringPointerValue(currentVersion)
+	}
+
+	return types.StringValue("unknown")
 }
 
 func (c *cluster) HasKubeconfig() bool {

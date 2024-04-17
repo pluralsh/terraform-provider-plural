@@ -2,6 +2,8 @@ package datasource
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"terraform-provider-plural/internal/common"
 
@@ -20,10 +22,17 @@ type cluster struct {
 	Cloud          types.String `tfsdk:"cloud"`
 	Protect        types.Bool   `tfsdk:"protect"`
 	Tags           types.Map    `tfsdk:"tags"`
+	Metadata       types.String `tfsdk:"metadata"`
 	NodePools      types.Map    `tfsdk:"node_pools"`
 }
 
 func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.Diagnostics) {
+	metadata, err := json.Marshal(cl.Metadata)
+	if err != nil {
+		d.AddError("Provider Error", fmt.Sprintf("Cannot marshall metadata, got error: %s", err))
+		return
+	}
+
 	c.Id = types.StringValue(cl.ID)
 	c.InsertedAt = types.StringPointerValue(cl.InsertedAt)
 	c.Name = types.StringValue(cl.Name)
@@ -31,6 +40,7 @@ func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.
 	c.DesiredVersion = types.StringPointerValue(cl.Version)
 	c.Protect = types.BoolPointerValue(cl.Protect)
 	c.Tags = common.ClusterTagsFrom(cl.Tags, d)
+	c.Metadata = types.StringValue(string(metadata))
 	c.ProviderId = common.ClusterProviderIdFrom(cl.Provider)
 	c.NodePools = common.ClusterNodePoolsFrom(cl.NodePools, c.NodePools, ctx, d)
 }

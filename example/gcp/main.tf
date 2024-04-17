@@ -28,6 +28,5 @@ resource "plural_cluster" "gcp_workload_cluster" {
   tags = {
     "managed-by" = "terraform-provider-plural"
   }
-
   depends_on = [plural_provider.gcp_provider]
 }

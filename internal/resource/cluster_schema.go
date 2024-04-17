@@ -2,6 +2,7 @@ package resource
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/pluralsh/plural-cli/pkg/console"
 
 	"terraform-provider-plural/internal/common"
 	"terraform-provider-plural/internal/defaults"
@@ -75,6 +76,12 @@ func (r *clusterResource) schema() schema.Schema {
 						path.MatchRoot("cloud")),
 				},
 			},
+			"metadata": schema.StringAttribute{
+				Description:         "Arbitrary JSON metadata to store user-specific state of this cluster (e.g. IAM roles for add-ons).",
+				MarkdownDescription: "Arbitrary JSON metadata to store user-specific state of this cluster (e.g. IAM roles for add-ons).",
+				Optional:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			},
 			"cloud": schema.StringAttribute{
 				Description:         "The cloud provider used to create this cluster.",
 				MarkdownDescription: "The cloud provider used to create this cluster.",
@@ -108,9 +115,17 @@ func (r *clusterResource) schema() schema.Schema {
 				},
 				PlanModifiers: []planmodifier.Object{objectplanmodifier.RequiresReplace()},
 			},
+			"helm_repo_url": schema.StringAttribute{
+				Description:         "Helm repository URL you'd like to use in deployment agent Helm install.",
+				MarkdownDescription: "Helm repository URL you'd like to use in deployment agent Helm install.",
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(console.RepoUrl),
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+			},
 			"helm_values": schema.StringAttribute{
-				Description:         "Additional helm values you'd like to use in deployment agent helm installs.  This is useful for BYOK clusters that need to use custom images or other constructs.",
-				MarkdownDescription: "Additional helm values you'd like to use in deployment agent helm installs.  This is useful for BYOK clusters that need to use custom images or other constructs.",
+				Description:         "Additional Helm values you'd like to use in deployment agent Helm installs. This is useful for BYOK clusters that need to use custom images or other constructs.",
+				MarkdownDescription: "Additional Helm values you'd like to use in deployment agent Helm installs. This is useful for BYOK clusters that need to use custom images or other constructs.",
 				Optional:            true,
 			},
 			"kubeconfig": r.kubeconfigSchema(false),
@@ -119,6 +134,7 @@ func (r *clusterResource) schema() schema.Schema {
 				MarkdownDescription: "**Experimental, not ready for production use.** Map of node pool specs managed by this cluster, where the key is name of the node pool and value contains the spec. Leave empty for bring your own cluster.",
 				Optional:            true,
 				Computed:            true,
+				PlanModifiers:       []planmodifier.Map{mapplanmodifier.UseStateForUnknown()},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
