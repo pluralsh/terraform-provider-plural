@@ -17,6 +17,7 @@ A representation of a cluster you can deploy to.
 
 ### Required
 
+- `metadata` (String) Arbitrary JSON metadata to store user-specific state of this cluster (e.g. IAM roles for add-ons).
 - `name` (String) Human-readable name of this cluster, that also translates to cloud resource name.
 
 ### Optional

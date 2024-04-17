@@ -75,6 +75,12 @@ func (r *clusterResource) schema() schema.Schema {
 						path.MatchRoot("cloud")),
 				},
 			},
+			"metadata": schema.StringAttribute{
+				Description:         "Arbitrary JSON metadata to store user-specific state of this cluster (e.g. IAM roles for add-ons).",
+				MarkdownDescription: "Arbitrary JSON metadata to store user-specific state of this cluster (e.g. IAM roles for add-ons).",
+				Required:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			},
 			"cloud": schema.StringAttribute{
 				Description:         "The cloud provider used to create this cluster.",
 				MarkdownDescription: "The cloud provider used to create this cluster.",

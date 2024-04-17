@@ -2,6 +2,8 @@ package resource
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"terraform-provider-plural/internal/common"
 
@@ -22,6 +24,7 @@ type cluster struct {
 	Cloud          types.String            `tfsdk:"cloud"`
 	Protect        types.Bool              `tfsdk:"protect"`
 	Tags           types.Map               `tfsdk:"tags"`
+	Metadata       types.String            `tfsdk:"name"`
 	Bindings       *common.ClusterBindings `tfsdk:"bindings"`
 	NodePools      types.Map               `tfsdk:"node_pools"`
 	CloudSettings  *ClusterCloudSettings   `tfsdk:"cloud_settings"`
@@ -76,6 +79,7 @@ func (c *cluster) Attributes(ctx context.Context, d diag.Diagnostics) console.Cl
 		WriteBindings: c.Bindings.WriteAttributes(),
 		Tags:          c.TagsAttribute(ctx, d),
 		NodePools:     c.NodePoolsAttribute(ctx, d),
+		Metadata:      c.Metadata.ValueStringPointer(),
 	}
 }
 
@@ -89,6 +93,12 @@ func (c *cluster) UpdateAttributes(ctx context.Context, d diag.Diagnostics) cons
 }
 
 func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.Diagnostics) {
+	metadata, err := json.Marshal(cl.Metadata)
+	if err != nil {
+		d.AddError("Provider Error", fmt.Sprintf("Cannot marshall metadata, got error: %s", err))
+		return
+	}
+
 	c.Id = types.StringValue(cl.ID)
 	c.InsertedAt = types.StringPointerValue(cl.InsertedAt)
 	c.Name = types.StringValue(cl.Name)
@@ -98,6 +108,7 @@ func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.
 	c.Tags = common.ClusterTagsFrom(cl.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cl.Provider)
 	c.NodePools = common.ClusterNodePoolsFrom(cl.NodePools, c.NodePools, ctx, d)
+	c.Metadata = types.StringValue(string(metadata))
 }
 
 func (c *cluster) FromCreate(cc *console.CreateCluster, ctx context.Context, d diag.Diagnostics) {

@@ -28,6 +28,20 @@ resource "plural_cluster" "gcp_workload_cluster" {
   tags = {
     "managed-by" = "terraform-provider-plural"
   }
-
+  metadata = jsonencode({
+    test1 = "string"
+    test2 = false
+    test3 = jsonencode({
+      abc = false
+    })
+  })
+# Alternative method:
+#  metadata = <<EOF
+#{
+#  "test1": "string",
+#  "test2": false,
+#  "test3": {"abc": false},
+#}
+#EOF
   depends_on = [plural_provider.gcp_provider]
 }
