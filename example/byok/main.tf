@@ -12,14 +12,14 @@ provider "plural" {
 }
 
 resource "plural_cluster" "byok" {
-  name           = "byok-tf"
+  name           = "byok"
   protect        = "false"
   kubeconfig = {
     # Required, can be sourced from environment variables
     # export PLURAL_KUBE_CONFIG_PATH to read from local file
   }
   metadata = jsonencode({
-    test1 = "string"
+    test1 = "test"
     test2 = false
     test3 = jsonencode({
       abc = false

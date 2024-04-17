@@ -103,7 +103,7 @@ func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.
 	c.InsertedAt = types.StringPointerValue(cl.InsertedAt)
 	c.Name = types.StringValue(cl.Name)
 	c.Handle = types.StringPointerValue(cl.Handle)
-	c.DesiredVersion = types.StringPointerValue(cl.Version)
+	c.DesiredVersion = c.ClusterVersionFrom(cl.Version, cl.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cl.Protect)
 	c.Tags = common.ClusterTagsFrom(cl.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cl.Provider)
@@ -116,11 +116,23 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, ctx context.Context, d d
 	c.InsertedAt = types.StringPointerValue(cc.CreateCluster.InsertedAt)
 	c.Name = types.StringValue(cc.CreateCluster.Name)
 	c.Handle = types.StringPointerValue(cc.CreateCluster.Handle)
-	c.DesiredVersion = types.StringPointerValue(cc.CreateCluster.Version)
+	c.DesiredVersion = c.ClusterVersionFrom(cc.CreateCluster.Version, cc.CreateCluster.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
 	c.Tags = common.ClusterTagsFrom(cc.CreateCluster.Tags, d)
 	c.ProviderId = common.ClusterProviderIdFrom(cc.CreateCluster.Provider)
 	c.NodePools = common.ClusterNodePoolsFrom(cc.CreateCluster.NodePools, c.NodePools, ctx, d)
+}
+
+func (c *cluster) ClusterVersionFrom(version, currentVersion *string) types.String {
+	if version != nil && len(*version) > 0 {
+		return types.StringPointerValue(version)
+	}
+
+	if currentVersion != nil && len(*currentVersion) > 0 {
+		return types.StringPointerValue(currentVersion)
+	}
+
+	return types.StringValue("unknown")
 }
 
 func (c *cluster) HasKubeconfig() bool {
