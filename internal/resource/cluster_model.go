@@ -24,7 +24,7 @@ type cluster struct {
 	Cloud          types.String            `tfsdk:"cloud"`
 	Protect        types.Bool              `tfsdk:"protect"`
 	Tags           types.Map               `tfsdk:"tags"`
-	Metadata       types.String            `tfsdk:"name"`
+	Metadata       types.String            `tfsdk:"metadata"`
 	Bindings       *common.ClusterBindings `tfsdk:"bindings"`
 	NodePools      types.Map               `tfsdk:"node_pools"`
 	CloudSettings  *ClusterCloudSettings   `tfsdk:"cloud_settings"`
