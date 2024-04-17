@@ -17,7 +17,6 @@ A representation of a cluster you can deploy to.
 
 ### Required
 
-- `metadata` (String) Arbitrary JSON metadata to store user-specific state of this cluster (e.g. IAM roles for add-ons).
 - `name` (String) Human-readable name of this cluster, that also translates to cloud resource name.
 
 ### Optional
@@ -28,6 +27,7 @@ A representation of a cluster you can deploy to.
 - `handle` (String) A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.
 - `helm_values` (String) Additional helm values you'd like to use in deployment agent helm installs.  This is useful for BYOK clusters that need to use custom images or other constructs.
 - `kubeconfig` (Attributes) (see [below for nested schema](#nestedatt--kubeconfig))
+- `metadata` (String) Arbitrary JSON metadata to store user-specific state of this cluster (e.g. IAM roles for add-ons).
 - `node_pools` (Attributes Map) **Experimental, not ready for production use.** Map of node pool specs managed by this cluster, where the key is name of the node pool and value contains the spec. Leave empty for bring your own cluster. (see [below for nested schema](#nestedatt--node_pools))
 - `protect` (Boolean) If set to `true` then this cluster cannot be deleted.
 - `provider_id` (String) Provider used to create this cluster. Leave empty for bring your own cluster.
