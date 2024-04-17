@@ -71,7 +71,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 			return
 		}
 
-		handler, err := NewOperatorHandler(ctx, data.GetKubeconfig(), data.HelmValues.ValueStringPointer(), r.consoleUrl)
+		handler, err := NewOperatorHandler(ctx, data.GetKubeconfig(), data.HelmRepoUrl.String(), data.HelmValues.ValueStringPointer(), r.consoleUrl)
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to init operator handler, got error: %s", err))
 			return

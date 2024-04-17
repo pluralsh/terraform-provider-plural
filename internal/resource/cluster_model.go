@@ -28,6 +28,7 @@ type cluster struct {
 	Bindings       *common.ClusterBindings `tfsdk:"bindings"`
 	NodePools      types.Map               `tfsdk:"node_pools"`
 	CloudSettings  *ClusterCloudSettings   `tfsdk:"cloud_settings"`
+	HelmRepoUrl    types.String            `tfsdk:"helm_repo_url"`
 	HelmValues     types.String            `tfsdk:"helm_values"`
 	Kubeconfig     *Kubeconfig             `tfsdk:"kubeconfig"`
 }

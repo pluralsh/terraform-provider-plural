@@ -20,10 +20,15 @@ import (
 
 type OperatorHandler struct {
 	ctx context.Context
+
 	// kubeconfig is a model.Kubeconfig data model read from terraform
 	kubeconfig *Kubeconfig
+
 	// url is an url to the Console API, i.e. https://console.mycluster.onplural.sh
 	url string
+
+	// repoUrl is an URL of the deployment agent chart.
+	repoUrl string
 
 	// additional values used on install
 	vals map[string]interface{}
@@ -67,7 +72,7 @@ func (oh *OperatorHandler) init() error {
 }
 
 func (oh *OperatorHandler) initRepo() error {
-	return helm.AddRepo(console.ReleaseName, console.RepoUrl)
+	return helm.AddRepo(console.ReleaseName, oh.repoUrl)
 }
 
 func (oh *OperatorHandler) initChart() error {
@@ -171,7 +176,7 @@ func (oh *OperatorHandler) Uninstall() error {
 	return err
 }
 
-func NewOperatorHandler(ctx context.Context, kubeconfig *Kubeconfig, values *string, consoleUrl string) (*OperatorHandler, error) {
+func NewOperatorHandler(ctx context.Context, kubeconfig *Kubeconfig, repoUrl string, values *string, consoleUrl string) (*OperatorHandler, error) {
 	vals := map[string]interface{}{}
 	if values != nil {
 		if err := yaml.Unmarshal([]byte(*values), &vals); err != nil {
@@ -182,6 +187,7 @@ func NewOperatorHandler(ctx context.Context, kubeconfig *Kubeconfig, values *str
 	handler := &OperatorHandler{
 		ctx:        ctx,
 		kubeconfig: kubeconfig,
+		repoUrl:    repoUrl,
 		url:        consoleUrl,
 		vals:       vals,
 	}

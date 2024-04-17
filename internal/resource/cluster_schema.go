@@ -2,6 +2,7 @@ package resource
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/pluralsh/plural-cli/pkg/console"
 
 	"terraform-provider-plural/internal/common"
 	"terraform-provider-plural/internal/defaults"
@@ -114,9 +115,16 @@ func (r *clusterResource) schema() schema.Schema {
 				},
 				PlanModifiers: []planmodifier.Object{objectplanmodifier.RequiresReplace()},
 			},
+			"helm_repo_url": schema.StringAttribute{
+				Description:         "Helm repository URL you'd like to use in deployment agent Helm install.",
+				MarkdownDescription: "Helm repository URL you'd like to use in deployment agent Helm install.",
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(console.RepoUrl),
+			},
 			"helm_values": schema.StringAttribute{
-				Description:         "Additional helm values you'd like to use in deployment agent helm installs.  This is useful for BYOK clusters that need to use custom images or other constructs.",
-				MarkdownDescription: "Additional helm values you'd like to use in deployment agent helm installs.  This is useful for BYOK clusters that need to use custom images or other constructs.",
+				Description:         "Additional Helm values you'd like to use in deployment agent Helm installs. This is useful for BYOK clusters that need to use custom images or other constructs.",
+				MarkdownDescription: "Additional Helm values you'd like to use in deployment agent Helm installs. This is useful for BYOK clusters that need to use custom images or other constructs.",
 				Optional:            true,
 			},
 			"kubeconfig": r.kubeconfigSchema(false),
