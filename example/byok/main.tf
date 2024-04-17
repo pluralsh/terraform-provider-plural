@@ -25,6 +25,7 @@ resource "plural_cluster" "byok" {
       abc = false
     })
   })
+  helm_repo_url = "https://pluralsh.github.io/deployment-operator"
   tags = {
     "managed-by" = "terraform-provider-plural"
   }

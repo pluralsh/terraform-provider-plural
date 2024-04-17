@@ -121,6 +121,7 @@ func (r *clusterResource) schema() schema.Schema {
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString(console.RepoUrl),
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"helm_values": schema.StringAttribute{
 				Description:         "Additional Helm values you'd like to use in deployment agent Helm installs. This is useful for BYOK clusters that need to use custom images or other constructs.",
