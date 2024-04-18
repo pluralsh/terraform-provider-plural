@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"terraform-provider-plural/internal/client"
+
 	"github.com/pluralsh/plural-cli/pkg/console"
 	"github.com/pluralsh/plural-cli/pkg/helm"
 	"github.com/pluralsh/polly/algorithms"
@@ -15,10 +17,17 @@ import (
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/release"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/yaml"
 )
 
 type OperatorHandler struct {
+	client *client.Client
+
+	kube *kubernetes.Clientset
+
 	ctx context.Context
 
 	// kubeconfig is a model.Kubeconfig data model read from terraform
@@ -48,6 +57,11 @@ func (oh *OperatorHandler) init() error {
 	if err != nil {
 		return err
 	}
+	kube, err := kubeconfig.ToClientSet()
+	if err != nil {
+		return err
+	}
+	oh.kube = kube
 
 	err = oh.configuration.Init(kubeconfig, console.OperatorNamespace, "", logrus.Debugf)
 	if err != nil {
@@ -138,17 +152,50 @@ func (oh *OperatorHandler) listReleases(state action.ListStates) ([]*release.Rel
 	return client.Run()
 }
 
-func (oh *OperatorHandler) values(token string) map[string]interface{} {
+func (oh *OperatorHandler) values(token string) (map[string]interface{}, error) {
+	globalVals := map[string]interface{}{}
 	vals := map[string]interface{}{
 		"secrets": map[string]string{
 			"deployToken": token,
 		},
 		"consoleUrl": fmt.Sprintf("%s/ext/gql", oh.url),
 	}
-	return algorithms.Merge(vals, oh.vals)
+
+	setting, err := oh.client.GetDeploymentSettings(oh.ctx)
+	if err != nil {
+		return nil, err
+	}
+	if setting != nil && setting.DeploymentSettings != nil && setting.DeploymentSettings.AgentHelmValues != nil {
+		if err := yaml.Unmarshal([]byte(*setting.DeploymentSettings.AgentHelmValues), &globalVals); err != nil {
+			return nil, err
+		}
+	}
+	return algorithms.Merge(vals, oh.vals, globalVals), nil
+}
+
+func (oh *OperatorHandler) UpsertNamespace() error {
+	_, err := oh.kube.CoreV1().Namespaces().Get(oh.ctx, console.OperatorNamespace, metav1.GetOptions{})
+	if err == nil {
+		return nil
+	}
+
+	_, err = oh.kube.CoreV1().Namespaces().Create(oh.ctx, &v1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: console.OperatorNamespace,
+			Labels: map[string]string{
+				"app.kubernetes.io/managed-by": "plural",
+				"app.plural.sh/name":           console.OperatorNamespace,
+			},
+		},
+	}, metav1.CreateOptions{})
+
+	return err
 }
 
 func (oh *OperatorHandler) InstallOrUpgrade(token string) error {
+	if err := oh.UpsertNamespace(); err != nil {
+		return err
+	}
 	exists, err := oh.chartExists()
 	if err != nil {
 		return err
@@ -162,12 +209,20 @@ func (oh *OperatorHandler) InstallOrUpgrade(token string) error {
 }
 
 func (oh *OperatorHandler) Install(token string) error {
-	_, err := oh.install.Run(oh.chart, oh.values(token))
+	values, err := oh.values(token)
+	if err != nil {
+		return err
+	}
+	_, err = oh.install.Run(oh.chart, values)
 	return err
 }
 
 func (oh *OperatorHandler) Upgrade(token string) error {
-	_, err := oh.upgrade.Run(console.ReleaseName, oh.chart, oh.values(token))
+	values, err := oh.values(token)
+	if err != nil {
+		return err
+	}
+	_, err = oh.upgrade.Run(console.ReleaseName, oh.chart, values)
 	return err
 }
 
@@ -176,7 +231,7 @@ func (oh *OperatorHandler) Uninstall() error {
 	return err
 }
 
-func NewOperatorHandler(ctx context.Context, kubeconfig *Kubeconfig, repoUrl string, values *string, consoleUrl string) (*OperatorHandler, error) {
+func NewOperatorHandler(ctx context.Context, client *client.Client, kubeconfig *Kubeconfig, repoUrl string, values *string, consoleUrl string) (*OperatorHandler, error) {
 	vals := map[string]interface{}{}
 	if values != nil {
 		if err := yaml.Unmarshal([]byte(*values), &vals); err != nil {
@@ -185,6 +240,7 @@ func NewOperatorHandler(ctx context.Context, kubeconfig *Kubeconfig, repoUrl str
 	}
 
 	handler := &OperatorHandler{
+		client:     client,
 		ctx:        ctx,
 		kubeconfig: kubeconfig,
 		repoUrl:    repoUrl,

@@ -8,15 +8,15 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/pluralsh/polly/algorithms"
-	"github.com/samber/lo"
-	"k8s.io/client-go/discovery/cached/disk"
-
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/go-homedir"
+	"github.com/pluralsh/polly/algorithms"
+	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/meta"
 	apimachineryschema "k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
+	"k8s.io/client-go/discovery/cached/disk"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/tools/clientcmd"
@@ -25,6 +25,14 @@ import (
 
 type KubeConfig struct {
 	ClientConfig clientcmd.ClientConfig
+}
+
+func (k *KubeConfig) ToClientSet() (*kubernetes.Clientset, error) {
+	config, err := k.ToRawKubeConfigLoader().ClientConfig()
+	if err != nil {
+		return nil, err
+	}
+	return kubernetes.NewForConfig(config)
 }
 
 func (k *KubeConfig) ToRESTConfig() (*rest.Config, error) {
