@@ -1,8 +1,10 @@
 package resource
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	gqlclient "github.com/pluralsh/console-client-go"
 )
 
@@ -10,14 +12,38 @@ type InfrastructureStack struct {
 	Id            types.String                      `tfsdk:"id"`
 	Name          types.String                      `tfsdk:"name"`
 	Type          types.String                      `tfsdk:"type"`
+	Approval      types.Bool                        `tfsdk:"protect"`
 	ClusterId     types.String                      `tfsdk:"cluster_id"`
 	Repository    *InfrastructureStackRepository    `tfsdk:"repository"`
-	Approval      types.Bool                        `tfsdk:"protect"`
 	Configuration *InfrastructureStackConfiguration `tfsdk:"configuration"`
-	Files         []*InfrastructureStackFile        `tfsdk:"environment"`
-	Environemnt   []*InfrastructureStackEnvironment `tfsdk:"files"`
+	Files         types.Map                         `tfsdk:"files"`
+	Environemnt   []*InfrastructureStackEnvironment `tfsdk:"environment"`
 	Bindings      *InfrastructureStackBindings      `tfsdk:"bindings"`
 	JobSpec       *InfrastructureStackJobSpec       `tfsdk:"job_spec"`
+}
+
+func (is *InfrastructureStack) FromCreate(stack *gqlclient.InfrastructureStack, d diag.Diagnostics) {
+	is.Id = types.StringPointerValue(stack.ID)
+	is.Name = types.StringValue(stack.Name)
+	is.Type = types.StringValue(string(stack.Type))
+	is.Approval = types.BoolPointerValue(stack.Approval)
+	is.ClusterId = types.StringValue(stack.Cluster.ID)
+	is.Repository.From(stack.Repository, stack.Git)
+	is.Configuration.From(stack.Configuration)
+	is.Files = toInfrastructureStackFiles(stack.Files, d)
+	// TODO ...
+}
+
+func toInfrastructureStackFiles(files []*gqlclient.StackFile, d diag.Diagnostics) basetypes.MapValue {
+	resultMap := make(map[string]attr.Value, len(files))
+	for _, file := range files {
+		resultMap[file.Path] = types.StringValue(file.Content)
+	}
+
+	result, tagsDiagnostics := types.MapValue(types.StringType, resultMap)
+	d.Append(tagsDiagnostics...)
+
+	return result
 }
 
 type InfrastructureStackRepository struct {
@@ -56,11 +82,6 @@ type InfrastructureStackEnvironment struct {
 	Secret types.Bool   `tfsdk:"secret"`
 }
 
-type InfrastructureStackFile struct {
-	Path    types.String `tfsdk:"path"`
-	Content types.String `tfsdk:"content"`
-}
-
 type InfrastructureStackBindings struct {
 	Read  []*InfrastructureStackPolicyBinding `tfsdk:"read"`
 	Write []*InfrastructureStackPolicyBinding `tfsdk:"write"`
@@ -91,15 +112,4 @@ type InfrastructureStackContainerSpec struct {
 type InfrastructureStackContainerEnvFrom struct {
 	Secret    types.String `tfsdk:"secret"`
 	ConfigMap types.String `tfsdk:"configMap"`
-}
-
-func (is *InfrastructureStack) FromCreate(stack *gqlclient.InfrastructureStack, d diag.Diagnostics) {
-	is.Id = types.StringPointerValue(stack.ID)
-	is.Name = types.StringValue(stack.Name)
-	is.Type = types.StringValue(string(stack.Type))
-	is.ClusterId = types.StringValue(stack.Cluster.ID)
-	is.Repository.From(stack.Repository, stack.Git)
-	is.Approval = types.BoolPointerValue(stack.Approval)
-	is.Configuration.From(stack.Configuration)
-	// TODO ...
 }
