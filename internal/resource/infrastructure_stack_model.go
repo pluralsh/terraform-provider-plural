@@ -43,7 +43,7 @@ func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostic
 	}
 }
 
-func (is *infrastructureStack) From(stack *gqlclient.InfrastructureStack, ctx context.Context, d diag.Diagnostics) {
+func (is *infrastructureStack) From(stack *gqlclient.InfrastructureStackFragment, ctx context.Context, d diag.Diagnostics) {
 	is.Id = types.StringPointerValue(stack.ID)
 	is.Name = types.StringValue(stack.Name)
 	is.Type = types.StringValue(string(stack.Type))
@@ -57,7 +57,7 @@ func (is *infrastructureStack) From(stack *gqlclient.InfrastructureStack, ctx co
 	is.JobSpec.From(stack.JobSpec)
 }
 
-func infrastructureStackFilesFrom(files []*gqlclient.StackFile, d diag.Diagnostics) basetypes.MapValue {
+func infrastructureStackFilesFrom(files []*gqlclient.StackFileFragment, d diag.Diagnostics) basetypes.MapValue {
 	resultMap := make(map[string]attr.Value, len(files))
 	for _, file := range files {
 		resultMap[file.Path] = types.StringValue(file.Content)
@@ -75,7 +75,7 @@ type InfrastructureStackRepository struct {
 	Folder types.String `tfsdk:"folder"`
 }
 
-func (isr *InfrastructureStackRepository) From(repository *gqlclient.GitRepository, ref gqlclient.GitRef) {
+func (isr *InfrastructureStackRepository) From(repository *gqlclient.GitRepositoryFragment, ref gqlclient.GitRefFragment) {
 	if isr == nil {
 		return
 	}
@@ -90,7 +90,7 @@ type InfrastructureStackConfiguration struct {
 	Version types.String `tfsdk:"version"`
 }
 
-func (isc *InfrastructureStackConfiguration) From(configuration gqlclient.StackConfiguration) {
+func (isc *InfrastructureStackConfiguration) From(configuration gqlclient.StackConfigurationFragment) {
 	if isc == nil {
 		return
 	}
@@ -152,7 +152,7 @@ type InfrastructureStackJobSpec struct {
 	ServiceAccount types.String                        `tfsdk:"serviceAccount"`
 }
 
-func (isjs *InfrastructureStackJobSpec) From(spec *gqlclient.JobGateSpec) {
+func (isjs *InfrastructureStackJobSpec) From(spec *gqlclient.JobGateSpecFragment) {
 	if isjs == nil {
 		return
 	}
