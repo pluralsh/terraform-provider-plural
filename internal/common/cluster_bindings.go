@@ -26,6 +26,15 @@ func (cb *ClusterBindings) WriteAttributes() []*console.PolicyBindingAttributes 
 	return clusterPolicyBindingAttributes(cb.Write)
 }
 
+func (cb *ClusterBindings) From(readBindings []*console.PolicyBinding, writeBindings []*console.PolicyBinding) {
+	if cb == nil {
+		return
+	}
+
+	// TODO: WriteBindings
+	// TODO: ReadBindings
+}
+
 type ClusterPolicyBinding struct {
 	GroupID types.String `tfsdk:"group_id"`
 	ID      types.String `tfsdk:"id"`

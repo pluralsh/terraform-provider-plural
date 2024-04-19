@@ -1,6 +1,10 @@
 package resource
 
 import (
+	"context"
+
+	"terraform-provider-plural/internal/common"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -8,7 +12,7 @@ import (
 	gqlclient "github.com/pluralsh/console-client-go"
 )
 
-type InfrastructureStack struct {
+type infrastructureStack struct {
 	Id            types.String                      `tfsdk:"id"`
 	Name          types.String                      `tfsdk:"name"`
 	Type          types.String                      `tfsdk:"type"`
@@ -17,12 +21,29 @@ type InfrastructureStack struct {
 	Repository    *InfrastructureStackRepository    `tfsdk:"repository"`
 	Configuration *InfrastructureStackConfiguration `tfsdk:"configuration"`
 	Files         types.Map                         `tfsdk:"files"`
-	Environemnt   []*InfrastructureStackEnvironment `tfsdk:"environment"`
-	Bindings      *InfrastructureStackBindings      `tfsdk:"bindings"`
+	Environment   types.Set                         `tfsdk:"environment"`
 	JobSpec       *InfrastructureStackJobSpec       `tfsdk:"job_spec"`
+	Bindings      *common.ClusterBindings           `tfsdk:"bindings"`
 }
 
-func (is *InfrastructureStack) FromCreate(stack *gqlclient.InfrastructureStack, d diag.Diagnostics) {
+func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.StackAttributes {
+	return gqlclient.StackAttributes{
+		Name:          is.Name.ValueString(),
+		Type:          gqlclient.StackType(is.Type.ValueString()),
+		RepositoryID:  is.Repository.Id.ValueString(),
+		ClusterID:     is.ClusterId.ValueString(),
+		Git:           gqlclient.GitRefAttributes{},
+		JobSpec:       nil,
+		Configuration: gqlclient.StackConfigurationAttributes{},
+		Approval:      is.Approval.ValueBoolPointer(),
+		ReadBindings:  is.Bindings.ReadAttributes(),
+		WriteBindings: is.Bindings.WriteAttributes(),
+		Files:         nil,
+		Environemnt:   nil,
+	}
+}
+
+func (is *infrastructureStack) From(stack *gqlclient.InfrastructureStack, ctx context.Context, d diag.Diagnostics) {
 	is.Id = types.StringPointerValue(stack.ID)
 	is.Name = types.StringValue(stack.Name)
 	is.Type = types.StringValue(string(stack.Type))
@@ -30,11 +51,13 @@ func (is *InfrastructureStack) FromCreate(stack *gqlclient.InfrastructureStack, 
 	is.ClusterId = types.StringValue(stack.Cluster.ID)
 	is.Repository.From(stack.Repository, stack.Git)
 	is.Configuration.From(stack.Configuration)
-	is.Files = toInfrastructureStackFiles(stack.Files, d)
-	// TODO ...
+	is.Files = infrastructureStackFilesFrom(stack.Files, d)
+	is.Environment = infrastructureStackEnvironmentsFrom(stack.Environment, ctx, d)
+	is.Bindings.From(stack.ReadBindings, stack.WriteBindings)
+	is.JobSpec.From(stack.JobSpec)
 }
 
-func toInfrastructureStackFiles(files []*gqlclient.StackFile, d diag.Diagnostics) basetypes.MapValue {
+func infrastructureStackFilesFrom(files []*gqlclient.StackFile, d diag.Diagnostics) basetypes.MapValue {
 	resultMap := make(map[string]attr.Value, len(files))
 	for _, file := range files {
 		resultMap[file.Path] = types.StringValue(file.Content)
@@ -82,6 +105,33 @@ type InfrastructureStackEnvironment struct {
 	Secret types.Bool   `tfsdk:"secret"`
 }
 
+var InfrastructureStackEnvironmentAttrTypes = map[string]attr.Type{
+	"name":   types.StringType,
+	"value":  types.StringType,
+	"secret": types.BoolType,
+}
+
+func infrastructureStackEnvironmentsFrom(envs []*gqlclient.StackEnvironment, ctx context.Context, d diag.Diagnostics) types.Set {
+	if len(envs) == 0 {
+		return types.SetNull(basetypes.ObjectType{AttrTypes: InfrastructureStackEnvironmentAttrTypes})
+	}
+
+	values := make([]attr.Value, len(envs))
+	for i, file := range envs {
+		objValue, diags := types.ObjectValueFrom(ctx, InfrastructureStackEnvironmentAttrTypes, InfrastructureStackEnvironment{
+			Name:   types.StringValue(file.Name),
+			Value:  types.StringValue(file.Value),
+			Secret: types.BoolPointerValue(file.Secret),
+		})
+		values[i] = objValue
+		d.Append(diags...)
+	}
+
+	setValue, diags := types.SetValue(basetypes.ObjectType{AttrTypes: InfrastructureStackEnvironmentAttrTypes}, values)
+	d.Append(diags...)
+	return setValue
+}
+
 type InfrastructureStackBindings struct {
 	Read  []*InfrastructureStackPolicyBinding `tfsdk:"read"`
 	Write []*InfrastructureStackPolicyBinding `tfsdk:"write"`
@@ -97,9 +147,22 @@ type InfrastructureStackJobSpec struct {
 	Namespace      types.String                        `tfsdk:"namespace"`
 	Raw            types.String                        `tfsdk:"raw"`
 	Containers     []*InfrastructureStackContainerSpec `tfsdk:"containers"`
-	Labels         types.String                        `tfsdk:"labels"`
-	Annotations    types.String                        `tfsdk:"annotations"`
+	Labels         types.Map                           `tfsdk:"labels"`
+	Annotations    types.Map                           `tfsdk:"annotations"`
 	ServiceAccount types.String                        `tfsdk:"serviceAccount"`
+}
+
+func (isjs *InfrastructureStackJobSpec) From(spec *gqlclient.JobGateSpec) {
+	if isjs == nil {
+		return
+	}
+
+	isjs.Namespace = types.StringValue(spec.Namespace)
+	isjs.Raw = types.StringPointerValue(spec.Raw)
+	// TODO: Containers
+	// TODO: Labels
+	// TODO: Annotations
+	isjs.ServiceAccount = types.StringPointerValue(spec.ServiceAccount)
 }
 
 type InfrastructureStackContainerSpec struct {
