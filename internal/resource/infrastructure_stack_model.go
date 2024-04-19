@@ -36,8 +36,8 @@ func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostic
 		JobSpec:       nil,
 		Configuration: gqlclient.StackConfigurationAttributes{},
 		Approval:      is.Approval.ValueBoolPointer(),
-		ReadBindings:  is.Bindings.ReadAttributes(),
-		WriteBindings: is.Bindings.WriteAttributes(),
+		ReadBindings:  is.Bindings.ReadAttributes(ctx, d),
+		WriteBindings: is.Bindings.WriteAttributes(ctx, d),
 		Files:         nil,
 		Environemnt:   nil,
 	}
@@ -53,7 +53,7 @@ func (is *infrastructureStack) From(stack *gqlclient.InfrastructureStack, ctx co
 	is.Configuration.From(stack.Configuration)
 	is.Files = infrastructureStackFilesFrom(stack.Files, d)
 	is.Environment = infrastructureStackEnvironmentsFrom(stack.Environment, ctx, d)
-	is.Bindings.From(stack.ReadBindings, stack.WriteBindings)
+	is.Bindings.From(stack.ReadBindings, stack.WriteBindings, ctx, d)
 	is.JobSpec.From(stack.JobSpec)
 }
 
