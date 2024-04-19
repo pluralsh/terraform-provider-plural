@@ -17,7 +17,7 @@ type InfrastructureStack struct {
 	Files         []*InfrastructureStackFile        `tfsdk:"environment"`
 	Environemnt   []*InfrastructureStackEnvironment `tfsdk:"files"`
 	Bindings      *InfrastructureStackBindings      `tfsdk:"bindings"`
-	// TODO: JobSpec *GateJobAttributes `json:"jobSpec,omitempty"`
+	JobSpec       *InfrastructureStackJobSpec       `tfsdk:"job_spec"`
 }
 
 type InfrastructureStackRepository struct {
@@ -39,6 +39,15 @@ func (isr *InfrastructureStackRepository) From(repository *gqlclient.GitReposito
 type InfrastructureStackConfiguration struct {
 	Image   types.String `tfsdk:"image"`
 	Version types.String `tfsdk:"version"`
+}
+
+func (isc *InfrastructureStackConfiguration) From(configuration gqlclient.StackConfiguration) {
+	if isc == nil {
+		return
+	}
+
+	isc.Image = types.StringPointerValue(configuration.Image)
+	isc.Version = types.StringValue(configuration.Version)
 }
 
 type InfrastructureStackEnvironment struct {
@@ -63,6 +72,27 @@ type InfrastructureStackPolicyBinding struct {
 	UserID  types.String `tfsdk:"user_id"`
 }
 
+type InfrastructureStackJobSpec struct {
+	Namespace      types.String                        `tfsdk:"namespace"`
+	Raw            types.String                        `tfsdk:"raw"`
+	Containers     []*InfrastructureStackContainerSpec `tfsdk:"containers"`
+	Labels         types.String                        `tfsdk:"labels"`
+	Annotations    types.String                        `tfsdk:"annotations"`
+	ServiceAccount types.String                        `tfsdk:"serviceAccount"`
+}
+
+type InfrastructureStackContainerSpec struct {
+	Image   types.String                           `tfsdk:"image"`
+	Args    types.List                             `tfsdk:"args"`
+	Env     types.Map                              `tfsdk:"env"`
+	EnvFrom []*InfrastructureStackContainerEnvFrom `tfsdk:"envFrom"`
+}
+
+type InfrastructureStackContainerEnvFrom struct {
+	Secret    types.String `tfsdk:"secret"`
+	ConfigMap types.String `tfsdk:"configMap"`
+}
+
 func (is *InfrastructureStack) FromCreate(stack *gqlclient.InfrastructureStack, d diag.Diagnostics) {
 	is.Id = types.StringPointerValue(stack.ID)
 	is.Name = types.StringValue(stack.Name)
@@ -70,5 +100,6 @@ func (is *InfrastructureStack) FromCreate(stack *gqlclient.InfrastructureStack, 
 	is.ClusterId = types.StringValue(stack.Cluster.ID)
 	is.Repository.From(stack.Repository, stack.Git)
 	is.Approval = types.BoolPointerValue(stack.Approval)
+	is.Configuration.From(stack.Configuration)
 	// TODO ...
 }
