@@ -33,7 +33,7 @@ func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostic
 		RepositoryID:  is.Repository.Id.ValueString(),
 		ClusterID:     is.ClusterId.ValueString(),
 		Git:           is.Repository.Attributes(),
-		JobSpec:       nil,
+		JobSpec:       is.JobSpec.Attributes(),
 		Configuration: is.Configuration.Attributes(),
 		Approval:      is.Approval.ValueBoolPointer(),
 		ReadBindings:  is.Bindings.ReadAttributes(ctx, d),
@@ -177,6 +177,14 @@ type InfrastructureStackJobSpec struct {
 	Labels         types.Map    `tfsdk:"labels"`
 	Annotations    types.Map    `tfsdk:"annotations"`
 	ServiceAccount types.String `tfsdk:"service_account"`
+}
+
+func (isjs *InfrastructureStackJobSpec) Attributes() *gqlclient.GateJobAttributes {
+	if isjs == nil {
+		return nil
+	}
+
+	return &gqlclient.GateJobAttributes{} // TODO
 }
 
 func (isjs *InfrastructureStackJobSpec) From(spec *gqlclient.JobGateSpecFragment) {
