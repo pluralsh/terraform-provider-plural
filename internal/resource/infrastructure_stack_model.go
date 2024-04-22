@@ -27,6 +27,7 @@ type infrastructureStack struct {
 }
 
 func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.StackAttributes {
+
 	return gqlclient.StackAttributes{
 		Name:          is.Name.ValueString(),
 		Type:          gqlclient.StackType(is.Type.ValueString()),
@@ -39,8 +40,28 @@ func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostic
 		ReadBindings:  is.Bindings.ReadAttributes(ctx, d),
 		WriteBindings: is.Bindings.WriteAttributes(ctx, d),
 		Files:         nil,
-		Environemnt:   nil,
+		Environemnt:   environmentAttributes(is.Environment, ctx, d),
 	}
+}
+
+func environmentAttributes(environment types.Set, ctx context.Context, d diag.Diagnostics) []*gqlclient.StackEnvironmentAttributes {
+	if environment.IsNull() {
+		return nil
+	}
+
+	result := make([]*gqlclient.StackEnvironmentAttributes, 0, len(environment.Elements()))
+	elements := make([]InfrastructureStackEnvironment, len(environment.Elements()))
+	d.Append(environment.ElementsAs(ctx, &elements, false)...)
+
+	for _, env := range elements {
+		result = append(result, &gqlclient.StackEnvironmentAttributes{
+			Name:   env.Name.ValueString(),
+			Value:  env.Value.ValueString(),
+			Secret: env.Secret.ValueBoolPointer(),
+		})
+	}
+
+	return result
 }
 
 func (is *infrastructureStack) From(stack *gqlclient.InfrastructureStackFragment, ctx context.Context, d diag.Diagnostics) {
