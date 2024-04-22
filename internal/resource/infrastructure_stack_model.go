@@ -259,6 +259,38 @@ func (isjs *InfrastructureStackJobSpec) From(spec *gqlclient.JobGateSpecFragment
 	isjs.ServiceAccount = types.StringPointerValue(spec.ServiceAccount)
 }
 
+func infrastructureStackJobSpecContainersFrom(containers []*gqlclient.ContainerSpecFragment, ctx context.Context, d diag.Diagnostics) types.Set {
+	if len(containers) == 0 {
+		return types.SetNull(basetypes.ObjectType{AttrTypes: InfrastructureStackContainerSpecAttrTypes})
+	}
+
+	values := make([]attr.Value, len(containers))
+	for i, container := range containers {
+		objValue, diags := types.ObjectValueFrom(ctx, InfrastructureStackContainerSpecAttrTypes, InfrastructureStackContainerSpec{
+			Image:   types.StringValue(container.Image),
+			Args:    infrastructureStackContainerSpecArgsFrom(container.Args, ctx, d),
+			Env:     types.Map{},
+			EnvFrom: types.Set{},
+		})
+		values[i] = objValue
+		d.Append(diags...)
+	}
+
+	setValue, diags := types.SetValue(basetypes.ObjectType{AttrTypes: InfrastructureStackContainerSpecAttrTypes}, values)
+	d.Append(diags...)
+	return setValue
+}
+
+func infrastructureStackContainerSpecArgsFrom(values []*string, ctx context.Context, d diag.Diagnostics) types.Set {
+	if len(values) == 0 {
+		return types.SetNull(types.StringType)
+	}
+
+	setValue, diags := types.SetValueFrom(ctx, types.StringType, values)
+	d.Append(diags...)
+	return setValue
+}
+
 type InfrastructureStackContainerSpec struct {
 	Image   types.String `tfsdk:"image"`
 	Args    types.Set    `tfsdk:"args"`
@@ -271,28 +303,6 @@ var InfrastructureStackContainerSpecAttrTypes = map[string]attr.Type{
 	"args":     types.SetType{ElemType: types.StringType},
 	"env":      types.MapType{ElemType: types.StringType},
 	"env_from": types.SetType{ElemType: types.ObjectType{AttrTypes: InfrastructureStackContainerEnvFromAttrTypes}},
-}
-
-func infrastructureStackJobSpecContainersFrom(containers []*gqlclient.ContainerSpecFragment, ctx context.Context, d diag.Diagnostics) types.Set {
-	if len(containers) == 0 {
-		return types.SetNull(basetypes.ObjectType{AttrTypes: InfrastructureStackContainerSpecAttrTypes})
-	}
-
-	values := make([]attr.Value, len(containers))
-	for i, container := range containers {
-		objValue, diags := types.ObjectValueFrom(ctx, InfrastructureStackContainerSpecAttrTypes, InfrastructureStackContainerSpec{
-			Image:   types.StringValue(container.Image),
-			Args:    types.Set{},
-			Env:     types.Map{},
-			EnvFrom: types.Set{},
-		})
-		values[i] = objValue
-		d.Append(diags...)
-	}
-
-	setValue, diags := types.SetValue(basetypes.ObjectType{AttrTypes: InfrastructureStackContainerSpecAttrTypes}, values)
-	d.Append(diags...)
-	return setValue
 }
 
 type InfrastructureStackContainerEnvFrom struct {
