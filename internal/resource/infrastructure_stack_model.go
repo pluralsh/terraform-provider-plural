@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	gqlclient "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/polly/algorithms"
 )
 
 type infrastructureStack struct {
@@ -328,10 +329,20 @@ func (iscs *InfrastructureStackContainerSpec) Attributes(ctx context.Context, d 
 
 	return &gqlclient.ContainerAttributes{
 		Image:   iscs.Image.ValueString(),
-		Args:    nil, // TODO
+		Args:    iscs.ArgsAttributes(ctx, d),
 		Env:     nil, // TODO
 		EnvFrom: nil, // TODO
 	}
+}
+
+func (isjs *InfrastructureStackContainerSpec) ArgsAttributes(ctx context.Context, d diag.Diagnostics) []*string {
+	if isjs.Args.IsNull() {
+		return nil
+	}
+
+	elements := make([]types.String, len(isjs.Args.Elements()))
+	d.Append(isjs.Args.ElementsAs(ctx, &elements, false)...)
+	return algorithms.Map(elements, func(v types.String) *string { return v.ValueStringPointer() })
 }
 
 type InfrastructureStackContainerEnvFrom struct {
