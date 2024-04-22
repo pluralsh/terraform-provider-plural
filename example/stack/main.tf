@@ -20,7 +20,7 @@ data "plural_git_repository" "repository" {
 }
 
 resource "plural_infrastructure_stack" "stack" {
-  name = "tf-stack"
+  name = "tf-stack-2"
   type = "TERRAFORM"
   # approval = false
   cluster_id = data.plural_cluster.cluster.id
@@ -47,7 +47,7 @@ resource "plural_infrastructure_stack" "stack" {
   ]
   job_spec = {
     namespace = "default"
-    # raw = ""
+    raw = ""
     # ...
   }
   bindings = {

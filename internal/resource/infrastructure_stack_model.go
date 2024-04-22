@@ -17,7 +17,7 @@ type infrastructureStack struct {
 	Id            types.String                      `tfsdk:"id"`
 	Name          types.String                      `tfsdk:"name"`
 	Type          types.String                      `tfsdk:"type"`
-	Approval      types.Bool                        `tfsdk:"protect"`
+	Approval      types.Bool                        `tfsdk:"approval"`
 	ClusterId     types.String                      `tfsdk:"cluster_id"`
 	Repository    *InfrastructureStackRepository    `tfsdk:"repository"`
 	Configuration *InfrastructureStackConfiguration `tfsdk:"configuration"`
@@ -45,6 +45,10 @@ func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostic
 }
 
 func (is *infrastructureStack) FilesAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.StackFileAttributes {
+	if is.Files.IsNull() {
+		return nil
+	}
+
 	result := make([]*gqlclient.StackFileAttributes, 0)
 	elements := make(map[string]types.String, len(is.Files.Elements()))
 	d.Append(is.Files.ElementsAs(ctx, &elements, false)...)
