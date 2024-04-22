@@ -219,7 +219,7 @@ func (isjs *InfrastructureStackJobSpec) Attributes(ctx context.Context, d diag.D
 	return &gqlclient.GateJobAttributes{
 		Namespace:      isjs.Namespace.ValueString(),
 		Raw:            isjs.Raw.ValueStringPointer(),
-		Containers:     nil, // TODO
+		Containers:     isjs.ContainersAttributes(ctx, d),
 		Labels:         isjs.LabelsAttributes(ctx, d),
 		Annotations:    isjs.AnnotationsAttributes(ctx, d),
 		ServiceAccount: isjs.ServiceAccount.ValueStringPointer(),
@@ -246,6 +246,22 @@ func (isjs *InfrastructureStackJobSpec) AnnotationsAttributes(ctx context.Contex
 	return common.AttributesJson(elements, d)
 }
 
+func (isjs *InfrastructureStackJobSpec) ContainersAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.ContainerAttributes {
+	if isjs.Containers.IsNull() {
+		return nil
+	}
+
+	result := make([]*gqlclient.ContainerAttributes, 0, len(isjs.Containers.Elements()))
+	elements := make([]InfrastructureStackContainerSpec, len(isjs.Containers.Elements()))
+	d.Append(isjs.Containers.ElementsAs(ctx, &elements, false)...)
+
+	for _, container := range elements {
+		result = append(result, container.Attributes(ctx, d))
+	}
+
+	return result
+}
+
 func (isjs *InfrastructureStackJobSpec) From(spec *gqlclient.JobGateSpecFragment, ctx context.Context, d diag.Diagnostics) {
 	if isjs == nil {
 		return
@@ -269,8 +285,8 @@ func infrastructureStackJobSpecContainersFrom(containers []*gqlclient.ContainerS
 		objValue, diags := types.ObjectValueFrom(ctx, InfrastructureStackContainerSpecAttrTypes, InfrastructureStackContainerSpec{
 			Image:   types.StringValue(container.Image),
 			Args:    infrastructureStackContainerSpecArgsFrom(container.Args, ctx, d),
-			Env:     types.Map{},
-			EnvFrom: types.Set{},
+			Env:     types.Map{}, // TODO
+			EnvFrom: types.Set{}, // TODO
 		})
 		values[i] = objValue
 		d.Append(diags...)
@@ -303,6 +319,19 @@ var InfrastructureStackContainerSpecAttrTypes = map[string]attr.Type{
 	"args":     types.SetType{ElemType: types.StringType},
 	"env":      types.MapType{ElemType: types.StringType},
 	"env_from": types.SetType{ElemType: types.ObjectType{AttrTypes: InfrastructureStackContainerEnvFromAttrTypes}},
+}
+
+func (iscs *InfrastructureStackContainerSpec) Attributes(ctx context.Context, d diag.Diagnostics) *gqlclient.ContainerAttributes {
+	if iscs == nil {
+		return nil
+	}
+
+	return &gqlclient.ContainerAttributes{
+		Image:   iscs.Image.ValueString(),
+		Args:    nil, // TODO
+		Env:     nil, // TODO
+		EnvFrom: nil, // TODO
+	}
 }
 
 type InfrastructureStackContainerEnvFrom struct {
