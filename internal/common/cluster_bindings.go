@@ -51,7 +51,7 @@ func clusterPolicyBindingAttributes(bindings types.Set, ctx context.Context, d d
 	return result
 }
 
-func (cb *ClusterBindings) From(readBindings []*console.PolicyBinding, writeBindings []*console.PolicyBinding, ctx context.Context, d diag.Diagnostics) {
+func (cb *ClusterBindings) From(readBindings []*console.PolicyBindingFragment, writeBindings []*console.PolicyBindingFragment, ctx context.Context, d diag.Diagnostics) {
 	if cb == nil {
 		return
 	}
@@ -60,7 +60,7 @@ func (cb *ClusterBindings) From(readBindings []*console.PolicyBinding, writeBind
 	cb.Write = clusterBindingsFrom(writeBindings, ctx, d)
 }
 
-func clusterBindingsFrom(bindings []*console.PolicyBinding, ctx context.Context, d diag.Diagnostics) types.Set {
+func clusterBindingsFrom(bindings []*console.PolicyBindingFragment, ctx context.Context, d diag.Diagnostics) types.Set {
 	if len(bindings) == 0 {
 		return types.SetNull(basetypes.ObjectType{AttrTypes: ClusterPolicyBindingAttrTypes})
 	}
