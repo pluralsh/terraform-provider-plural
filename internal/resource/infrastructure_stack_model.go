@@ -27,7 +27,6 @@ type infrastructureStack struct {
 }
 
 func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.StackAttributes {
-
 	return gqlclient.StackAttributes{
 		Name:          is.Name.ValueString(),
 		Type:          gqlclient.StackType(is.Type.ValueString()),
@@ -39,19 +38,31 @@ func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostic
 		Approval:      is.Approval.ValueBoolPointer(),
 		ReadBindings:  is.Bindings.ReadAttributes(ctx, d),
 		WriteBindings: is.Bindings.WriteAttributes(ctx, d),
-		Files:         nil,
-		Environemnt:   environmentAttributes(is.Environment, ctx, d),
+		Files:         is.FilesAttributes(ctx, d),
+		Environemnt:   is.EnvironmentAttributes(ctx, d),
 	}
 }
 
-func environmentAttributes(environment types.Set, ctx context.Context, d diag.Diagnostics) []*gqlclient.StackEnvironmentAttributes {
-	if environment.IsNull() {
+func (is *infrastructureStack) FilesAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.StackFileAttributes {
+	result := make([]*gqlclient.StackFileAttributes, 0)
+	elements := make(map[string]types.String, len(is.Files.Elements()))
+	d.Append(is.Files.ElementsAs(ctx, &elements, false)...)
+
+	for k, v := range elements {
+		result = append(result, &gqlclient.StackFileAttributes{Path: k, Content: v.ValueString()})
+	}
+
+	return result
+}
+
+func (is *infrastructureStack) EnvironmentAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.StackEnvironmentAttributes {
+	if is.Environment.IsNull() {
 		return nil
 	}
 
-	result := make([]*gqlclient.StackEnvironmentAttributes, 0, len(environment.Elements()))
-	elements := make([]InfrastructureStackEnvironment, len(environment.Elements()))
-	d.Append(environment.ElementsAs(ctx, &elements, false)...)
+	result := make([]*gqlclient.StackEnvironmentAttributes, 0, len(is.Environment.Elements()))
+	elements := make([]InfrastructureStackEnvironment, len(is.Environment.Elements()))
+	d.Append(is.Environment.ElementsAs(ctx, &elements, false)...)
 
 	for _, env := range elements {
 		result = append(result, &gqlclient.StackEnvironmentAttributes{
