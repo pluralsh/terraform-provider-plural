@@ -1,7 +1,10 @@
 package resource
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -110,6 +113,130 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 							MarkdownDescription: "Indicates if environment variable is secret.",
 							Optional:            true,
 							Default:             booldefault.StaticBool(false),
+						},
+					},
+				},
+			},
+			"job_spec": schema.SingleNestedAttribute{
+				Description:         "Repository information used to pull stack.",
+				MarkdownDescription: "Repository information used to pull stack.",
+				Optional:            true,
+				Attributes: map[string]schema.Attribute{
+					"namespace": schema.StringAttribute{
+						Description:         "Namespace where job will be deployed.",
+						MarkdownDescription: "Namespace where job will be deployed.",
+						Required:            true,
+					},
+					"raw": schema.StringAttribute{
+						Description:         "If you'd rather define the job spec via straight Kubernetes YAML.",
+						MarkdownDescription: "If you'd rather define the job spec via straight Kubernetes YAML.",
+						Optional:            true,
+						Validators: []validator.String{
+							stringvalidator.ExactlyOneOf(
+								path.MatchRelative().AtParent().AtName("labels"),
+								path.MatchRelative().AtParent().AtName("annotations"),
+								path.MatchRelative().AtParent().AtName("service_account"),
+								path.MatchRelative().AtParent().AtName("containers"),
+							),
+						},
+					},
+					"labels": schema.MapAttribute{
+						Description:         "Kubernetes labels applied to the job.",
+						MarkdownDescription: "Kubernetes labels applied to the job.",
+						ElementType:         types.StringType,
+						Optional:            true,
+						Validators:          []validator.Map{mapvalidator.ExactlyOneOf(path.MatchRelative().AtParent().AtName("raw"))},
+					},
+					"annotations": schema.MapAttribute{
+						Description:         "Kubernetes annotations applied to the job.",
+						MarkdownDescription: "Kubernetes annotations applied to the job.",
+						ElementType:         types.StringType,
+						Optional:            true,
+						Validators:          []validator.Map{mapvalidator.ExactlyOneOf(path.MatchRelative().AtParent().AtName("raw"))},
+					},
+					"service_account": schema.StringAttribute{
+						Description:         "Kubernetes service account for this job.",
+						MarkdownDescription: "Kubernetes service account for this job.",
+						Optional:            true,
+						Validators:          []validator.String{stringvalidator.ExactlyOneOf(path.MatchRelative().AtParent().AtName("raw"))},
+					},
+					"containers": schema.SetNestedAttribute{
+						Optional: true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"image": schema.StringAttribute{
+									Required: true,
+								},
+								"args": schema.SetAttribute{
+									Description:         "Arguments to pass to the command when executing it.",
+									MarkdownDescription: "Arguments to pass to the command when executing it.",
+									Optional:            true,
+									ElementType:         types.StringType,
+								},
+								"env": schema.MapAttribute{
+									Description:         "Defines environment variables to expose to the process.",
+									MarkdownDescription: "Defines environment variables to expose to the process.",
+									Optional:            true,
+									ElementType:         types.StringType,
+								},
+								"env_from": schema.SetNestedAttribute{
+									Optional: true,
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
+											"secret": schema.StringAttribute{
+												Required: true,
+											},
+											"config_map": schema.StringAttribute{
+												Required: true,
+											},
+										},
+									},
+								},
+							},
+						},
+						Validators: []validator.Set{setvalidator.ExactlyOneOf(path.MatchRelative().AtParent().AtName("raw"))},
+					},
+				},
+			},
+			"bindings": schema.SingleNestedAttribute{
+				Description:         "Read and write policies of this stack.",
+				MarkdownDescription: "Read and write policies of this stack.",
+				Optional:            true,
+				Attributes: map[string]schema.Attribute{
+					"read": schema.SetNestedAttribute{
+						Description:         "Read policies of this stack.",
+						MarkdownDescription: "Read policies of this stack.",
+						Optional:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"group_id": schema.StringAttribute{
+									Optional: true,
+								},
+								"id": schema.StringAttribute{
+									Optional: true,
+								},
+								"user_id": schema.StringAttribute{
+									Optional: true,
+								},
+							},
+						},
+					},
+					"write": schema.SetNestedAttribute{
+						Description:         "Write policies of this stack.",
+						MarkdownDescription: "Write policies of this stack.",
+						Optional:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"group_id": schema.StringAttribute{
+									Optional: true,
+								},
+								"id": schema.StringAttribute{
+									Optional: true,
+								},
+								"user_id": schema.StringAttribute{
+									Optional: true,
+								},
+							},
 						},
 					},
 				},

@@ -144,12 +144,12 @@ type InfrastructureStackPolicyBinding struct {
 }
 
 type InfrastructureStackJobSpec struct {
-	Namespace      types.String                        `tfsdk:"namespace"`
-	Raw            types.String                        `tfsdk:"raw"`
-	Containers     []*InfrastructureStackContainerSpec `tfsdk:"containers"`
-	Labels         types.Map                           `tfsdk:"labels"`
-	Annotations    types.Map                           `tfsdk:"annotations"`
-	ServiceAccount types.String                        `tfsdk:"serviceAccount"`
+	Namespace      types.String `tfsdk:"namespace"`
+	Raw            types.String `tfsdk:"raw"`
+	Containers     types.Set    `tfsdk:"containers"`
+	Labels         types.Map    `tfsdk:"labels"`
+	Annotations    types.Map    `tfsdk:"annotations"`
+	ServiceAccount types.String `tfsdk:"service_account"`
 }
 
 func (isjs *InfrastructureStackJobSpec) From(spec *gqlclient.JobGateSpecFragment) {
@@ -166,13 +166,13 @@ func (isjs *InfrastructureStackJobSpec) From(spec *gqlclient.JobGateSpecFragment
 }
 
 type InfrastructureStackContainerSpec struct {
-	Image   types.String                           `tfsdk:"image"`
-	Args    types.List                             `tfsdk:"args"`
-	Env     types.Map                              `tfsdk:"env"`
-	EnvFrom []*InfrastructureStackContainerEnvFrom `tfsdk:"envFrom"`
+	Image   types.String `tfsdk:"image"`
+	Args    types.Set    `tfsdk:"args"`
+	Env     types.Map    `tfsdk:"env"`
+	EnvFrom types.Set    `tfsdk:"env_from"`
 }
 
 type InfrastructureStackContainerEnvFrom struct {
 	Secret    types.String `tfsdk:"secret"`
-	ConfigMap types.String `tfsdk:"configMap"`
+	ConfigMap types.String `tfsdk:"config_map"`
 }
