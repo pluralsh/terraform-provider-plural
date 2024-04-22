@@ -33,7 +33,7 @@ func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostic
 		RepositoryID:  is.Repository.Id.ValueString(),
 		ClusterID:     is.ClusterId.ValueString(),
 		Git:           is.Repository.Attributes(),
-		JobSpec:       is.JobSpec.Attributes(),
+		JobSpec:       is.JobSpec.Attributes(ctx, d),
 		Configuration: is.Configuration.Attributes(),
 		Approval:      is.Approval.ValueBoolPointer(),
 		ReadBindings:  is.Bindings.ReadAttributes(ctx, d),
@@ -211,12 +211,39 @@ type InfrastructureStackJobSpec struct {
 	ServiceAccount types.String `tfsdk:"service_account"`
 }
 
-func (isjs *InfrastructureStackJobSpec) Attributes() *gqlclient.GateJobAttributes {
+func (isjs *InfrastructureStackJobSpec) Attributes(ctx context.Context, d diag.Diagnostics) *gqlclient.GateJobAttributes {
 	if isjs == nil {
 		return nil
 	}
 
-	return &gqlclient.GateJobAttributes{} // TODO
+	return &gqlclient.GateJobAttributes{
+		Namespace:      isjs.Namespace.ValueString(),
+		Raw:            isjs.Raw.ValueStringPointer(),
+		Containers:     nil, // TODO
+		Labels:         isjs.LabelsAttributes(ctx, d),
+		Annotations:    isjs.AnnotationsAttributes(ctx, d),
+		ServiceAccount: isjs.ServiceAccount.ValueStringPointer(),
+	}
+}
+
+func (isjs *InfrastructureStackJobSpec) LabelsAttributes(ctx context.Context, d diag.Diagnostics) *string {
+	if isjs.Labels.IsNull() {
+		return nil
+	}
+
+	elements := make(map[string]types.String, len(isjs.Labels.Elements()))
+	d.Append(isjs.Labels.ElementsAs(ctx, &elements, false)...)
+	return common.AttributesJson(elements, d)
+}
+
+func (isjs *InfrastructureStackJobSpec) AnnotationsAttributes(ctx context.Context, d diag.Diagnostics) *string {
+	if isjs.Annotations.IsNull() {
+		return nil
+	}
+
+	elements := make(map[string]types.String, len(isjs.Annotations.Elements()))
+	d.Append(isjs.Annotations.ElementsAs(ctx, &elements, false)...)
+	return common.AttributesJson(elements, d)
 }
 
 func (isjs *InfrastructureStackJobSpec) From(spec *gqlclient.JobGateSpecFragment) {
