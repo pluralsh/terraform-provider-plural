@@ -20,9 +20,9 @@ data "plural_git_repository" "repository" {
 }
 
 resource "plural_infrastructure_stack" "stack" {
-  name = "tf-stack-2"
+  name = "tf-stack-4"
   type = "TERRAFORM"
-  # approval = false
+  approval = true
   cluster_id = data.plural_cluster.cluster.id
   repository = {
     id = data.plural_git_repository.repository.id

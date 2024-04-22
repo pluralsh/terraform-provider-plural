@@ -95,6 +95,10 @@ func (is *infrastructureStack) From(stack *gqlclient.InfrastructureStackFragment
 }
 
 func infrastructureStackFilesFrom(files []*gqlclient.StackFileFragment, d diag.Diagnostics) basetypes.MapValue {
+	if len(files) == 0 {
+		return types.MapNull(types.StringType)
+	}
+
 	resultMap := make(map[string]attr.Value, len(files))
 	for _, file := range files {
 		resultMap[file.Path] = types.StringValue(file.Content)
