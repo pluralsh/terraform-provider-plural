@@ -1,6 +1,8 @@
 package resource
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -30,8 +32,8 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"type": schema.StringAttribute{
-				Description:         "A type for the stack, specifies the tool to use to apply it.",
-				MarkdownDescription: "A type for the stack, specifies the tool to use to apply it.",
+				Description:         fmt.Sprintf("A type for the stack, specifies the tool to use to apply it. Allowed values include \"%s\" and \"%s\".", gqlclient.StackTypeAnsible, gqlclient.StackTypeTerraform),
+				MarkdownDescription: fmt.Sprintf("A type for the stack, specifies the tool to use to apply it. Allowed values include `%s` and `%s`.", gqlclient.StackTypeAnsible, gqlclient.StackTypeTerraform),
 				Required:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				Validators:          []validator.String{stringvalidator.OneOf(string(gqlclient.StackTypeAnsible), string(gqlclient.StackTypeTerraform))},
