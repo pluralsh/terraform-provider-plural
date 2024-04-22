@@ -286,7 +286,7 @@ func infrastructureStackJobSpecContainersFrom(containers []*gqlclient.ContainerS
 		objValue, diags := types.ObjectValueFrom(ctx, InfrastructureStackContainerSpecAttrTypes, InfrastructureStackContainerSpec{
 			Image:   types.StringValue(container.Image),
 			Args:    infrastructureStackContainerSpecArgsFrom(container.Args, ctx, d),
-			Env:     types.Map{}, // TODO
+			Env:     infrastructureStackContainerSpecEnvFrom(container.Env, ctx, d),
 			EnvFrom: types.Set{}, // TODO
 		})
 		values[i] = objValue
@@ -306,6 +306,18 @@ func infrastructureStackContainerSpecArgsFrom(values []*string, ctx context.Cont
 	setValue, diags := types.SetValueFrom(ctx, types.StringType, values)
 	d.Append(diags...)
 	return setValue
+}
+
+func infrastructureStackContainerSpecEnvFrom(env []*gqlclient.ContainerSpecFragment_Env, ctx context.Context, d diag.Diagnostics) basetypes.MapValue {
+	resultMap := map[string]attr.Value{}
+	for _, v := range env {
+		resultMap[v.Name] = types.StringValue(v.Value)
+	}
+
+	result, tagsDiagnostics := types.MapValue(types.StringType, resultMap)
+	d.Append(tagsDiagnostics...)
+
+	return result
 }
 
 type InfrastructureStackContainerSpec struct {
