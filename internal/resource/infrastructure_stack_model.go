@@ -330,7 +330,7 @@ func (iscs *InfrastructureStackContainerSpec) Attributes(ctx context.Context, d 
 	return &gqlclient.ContainerAttributes{
 		Image:   iscs.Image.ValueString(),
 		Args:    iscs.ArgsAttributes(ctx, d),
-		Env:     nil, // TODO
+		Env:     iscs.EnvAttributes(ctx, d),
 		EnvFrom: iscs.EnvFromAttributes(ctx, d),
 	}
 }
@@ -343,6 +343,22 @@ func (isjs *InfrastructureStackContainerSpec) ArgsAttributes(ctx context.Context
 	elements := make([]types.String, len(isjs.Args.Elements()))
 	d.Append(isjs.Args.ElementsAs(ctx, &elements, false)...)
 	return algorithms.Map(elements, func(v types.String) *string { return v.ValueStringPointer() })
+}
+
+func (isjs *InfrastructureStackContainerSpec) EnvAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.EnvAttributes {
+	if isjs.Env.IsNull() {
+		return nil
+	}
+
+	result := make([]*gqlclient.EnvAttributes, 0)
+	elements := make(map[string]types.String, len(isjs.Env.Elements()))
+	d.Append(isjs.Env.ElementsAs(ctx, &elements, false)...)
+
+	for k, v := range elements {
+		result = append(result, &gqlclient.EnvAttributes{Name: k, Value: v.ValueString()})
+	}
+
+	return result
 }
 
 func (isjs *InfrastructureStackContainerSpec) EnvFromAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.EnvFromAttributes {
