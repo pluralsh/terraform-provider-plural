@@ -286,8 +286,8 @@ func infrastructureStackJobSpecContainersFrom(containers []*gqlclient.ContainerS
 		objValue, diags := types.ObjectValueFrom(ctx, InfrastructureStackContainerSpecAttrTypes, InfrastructureStackContainerSpec{
 			Image:   types.StringValue(container.Image),
 			Args:    infrastructureStackContainerSpecArgsFrom(container.Args, ctx, d),
-			Env:     infrastructureStackContainerSpecEnvFrom(container.Env, ctx, d),
-			EnvFrom: types.Set{}, // TODO
+			Env:     infrastructureStackContainerSpecEnvFrom(container.Env, d),
+			EnvFrom: infrastructureStackContainerSpecEnvFromFrom(container.EnvFrom, ctx, d),
 		})
 		values[i] = objValue
 		d.Append(diags...)
@@ -308,7 +308,7 @@ func infrastructureStackContainerSpecArgsFrom(values []*string, ctx context.Cont
 	return setValue
 }
 
-func infrastructureStackContainerSpecEnvFrom(env []*gqlclient.ContainerSpecFragment_Env, ctx context.Context, d diag.Diagnostics) basetypes.MapValue {
+func infrastructureStackContainerSpecEnvFrom(env []*gqlclient.ContainerSpecFragment_Env, d diag.Diagnostics) types.Map {
 	resultMap := map[string]attr.Value{}
 	for _, v := range env {
 		resultMap[v.Name] = types.StringValue(v.Value)
@@ -318,6 +318,26 @@ func infrastructureStackContainerSpecEnvFrom(env []*gqlclient.ContainerSpecFragm
 	d.Append(tagsDiagnostics...)
 
 	return result
+}
+
+func infrastructureStackContainerSpecEnvFromFrom(envFroms []*gqlclient.ContainerSpecFragment_EnvFrom, ctx context.Context, d diag.Diagnostics) types.Set {
+	if len(envFroms) == 0 {
+		return types.SetNull(basetypes.ObjectType{AttrTypes: InfrastructureStackContainerEnvFromAttrTypes})
+	}
+
+	values := make([]attr.Value, len(envFroms))
+	for i, envFrom := range envFroms {
+		objValue, diags := types.ObjectValueFrom(ctx, InfrastructureStackContainerEnvFromAttrTypes, InfrastructureStackContainerEnvFrom{
+			ConfigMap: types.StringValue(envFrom.ConfigMap),
+			Secret:    types.StringValue(envFrom.Secret),
+		})
+		values[i] = objValue
+		d.Append(diags...)
+	}
+
+	setValue, diags := types.SetValue(basetypes.ObjectType{AttrTypes: InfrastructureStackContainerEnvFromAttrTypes}, values)
+	d.Append(diags...)
+	return setValue
 }
 
 type InfrastructureStackContainerSpec struct {
