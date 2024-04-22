@@ -20,7 +20,7 @@ data "plural_git_repository" "repository" {
 }
 
 resource "plural_infrastructure_stack" "stack" {
-  name = "tf-stack-4"
+  name = "tf-stack-13"
   type = "TERRAFORM"
   approval = true
   cluster_id = data.plural_cluster.cluster.id
@@ -30,10 +30,12 @@ resource "plural_infrastructure_stack" "stack" {
     folder = "terraform"
   }
   configuration = {
-    # image = ""
-    version = "1.5.7"
+    image = "hashicorp/terraform:1.8.1"
+    version = "1.8.1"
   }
-  # files = {}
+  files = {
+    # "test.yml": "value: 123"
+  }
   environment = [
     {
       name = "USERNAME"
@@ -47,11 +49,18 @@ resource "plural_infrastructure_stack" "stack" {
   ]
   job_spec = {
     namespace = "default"
-    raw = ""
+    raw = jsonencode({
+      containers = jsonencode([{
+        name  = "pi"
+        image = "perl:5.34.0"
+        command = jsonencode(["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"])
+      }])
+      restartPolicy = "Never"
+    })
     # ...
   }
   bindings = {
-    read = []
-    write = []
+     read = []
+     write = []
   }
 }

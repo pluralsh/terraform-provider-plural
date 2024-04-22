@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -130,6 +131,7 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 						Description:         "If you'd rather define the job spec via straight Kubernetes YAML.",
 						MarkdownDescription: "If you'd rather define the job spec via straight Kubernetes YAML.",
 						Optional:            true,
+						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 						Validators: []validator.String{
 							stringvalidator.ExactlyOneOf(path.MatchRelative().AtParent().AtName("containers")),
 							stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("containers")),
@@ -238,6 +240,7 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 						},
 					},
 				},
+				PlanModifiers: []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 			},
 		},
 	}

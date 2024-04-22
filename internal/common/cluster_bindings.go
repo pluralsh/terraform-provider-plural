@@ -17,7 +17,7 @@ type ClusterBindings struct {
 
 func (cb *ClusterBindings) ReadAttributes(ctx context.Context, d diag.Diagnostics) []*console.PolicyBindingAttributes {
 	if cb == nil {
-		return []*console.PolicyBindingAttributes{}
+		return nil
 	}
 
 	return clusterPolicyBindingAttributes(cb.Read, ctx, d)
@@ -25,7 +25,7 @@ func (cb *ClusterBindings) ReadAttributes(ctx context.Context, d diag.Diagnostic
 
 func (cb *ClusterBindings) WriteAttributes(ctx context.Context, d diag.Diagnostics) []*console.PolicyBindingAttributes {
 	if cb == nil {
-		return []*console.PolicyBindingAttributes{}
+		return nil
 	}
 
 	return clusterPolicyBindingAttributes(cb.Write, ctx, d)
