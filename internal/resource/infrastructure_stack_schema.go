@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -42,7 +41,6 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 				Description:         "Determines whether to require approval.",
 				MarkdownDescription: "Determines whether to require approval.",
 				Optional:            true,
-				Default:             booldefault.StaticBool(false),
 			},
 			"cluster_id": schema.StringAttribute{
 				Description:         "The cluster on which the stack will be applied.",
@@ -114,7 +112,6 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 							Description:         "Indicates if environment variable is secret.",
 							MarkdownDescription: "Indicates if environment variable is secret.",
 							Optional:            true,
-							Default:             booldefault.StaticBool(false),
 						},
 					},
 				},
