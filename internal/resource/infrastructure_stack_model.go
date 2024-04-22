@@ -75,12 +75,17 @@ type InfrastructureStackRepository struct {
 	Folder types.String `tfsdk:"folder"`
 }
 
-func (isr *InfrastructureStackRepository) From(repository *gqlclient.GitRepositoryFragment, ref gqlclient.GitRefFragment) {
+func (isr *InfrastructureStackRepository) From(repository *gqlclient.GitRepositoryFragment, ref *gqlclient.GitRefFragment) {
 	if isr == nil {
 		return
 	}
 
 	isr.Id = types.StringValue(repository.ID)
+
+	if ref == nil {
+		return
+	}
+
 	isr.Ref = types.StringValue(ref.Ref)
 	isr.Folder = types.StringValue(ref.Folder)
 }
@@ -90,8 +95,8 @@ type InfrastructureStackConfiguration struct {
 	Version types.String `tfsdk:"version"`
 }
 
-func (isc *InfrastructureStackConfiguration) From(configuration gqlclient.StackConfigurationFragment) {
-	if isc == nil {
+func (isc *InfrastructureStackConfiguration) From(configuration *gqlclient.StackConfigurationFragment) {
+	if isc == nil || configuration == nil {
 		return
 	}
 
@@ -111,7 +116,7 @@ var InfrastructureStackEnvironmentAttrTypes = map[string]attr.Type{
 	"secret": types.BoolType,
 }
 
-func infrastructureStackEnvironmentsFrom(envs []*gqlclient.StackEnvironment, ctx context.Context, d diag.Diagnostics) types.Set {
+func infrastructureStackEnvironmentsFrom(envs []*gqlclient.StackEnvironmentFragment, ctx context.Context, d diag.Diagnostics) types.Set {
 	if len(envs) == 0 {
 		return types.SetNull(basetypes.ObjectType{AttrTypes: InfrastructureStackEnvironmentAttrTypes})
 	}
