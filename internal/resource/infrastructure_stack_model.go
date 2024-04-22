@@ -32,9 +32,9 @@ func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostic
 		Type:          gqlclient.StackType(is.Type.ValueString()),
 		RepositoryID:  is.Repository.Id.ValueString(),
 		ClusterID:     is.ClusterId.ValueString(),
-		Git:           gqlclient.GitRefAttributes{},
+		Git:           is.Repository.Attributes(),
 		JobSpec:       nil,
-		Configuration: gqlclient.StackConfigurationAttributes{},
+		Configuration: is.Configuration.Attributes(),
 		Approval:      is.Approval.ValueBoolPointer(),
 		ReadBindings:  is.Bindings.ReadAttributes(ctx, d),
 		WriteBindings: is.Bindings.WriteAttributes(ctx, d),
@@ -75,6 +75,17 @@ type InfrastructureStackRepository struct {
 	Folder types.String `tfsdk:"folder"`
 }
 
+func (isr *InfrastructureStackRepository) Attributes() gqlclient.GitRefAttributes {
+	if isr == nil {
+		return gqlclient.GitRefAttributes{}
+	}
+
+	return gqlclient.GitRefAttributes{
+		Ref:    isr.Ref.ValueString(),
+		Folder: isr.Folder.ValueString(),
+	}
+}
+
 func (isr *InfrastructureStackRepository) From(repository *gqlclient.GitRepositoryFragment, ref *gqlclient.GitRefFragment) {
 	if isr == nil {
 		return
@@ -93,6 +104,17 @@ func (isr *InfrastructureStackRepository) From(repository *gqlclient.GitReposito
 type InfrastructureStackConfiguration struct {
 	Image   types.String `tfsdk:"image"`
 	Version types.String `tfsdk:"version"`
+}
+
+func (isc *InfrastructureStackConfiguration) Attributes() gqlclient.StackConfigurationAttributes {
+	if isc == nil {
+		return gqlclient.StackConfigurationAttributes{}
+	}
+
+	return gqlclient.StackConfigurationAttributes{
+		Image:   isc.Image.ValueStringPointer(),
+		Version: isc.Version.ValueString(),
+	}
 }
 
 func (isc *InfrastructureStackConfiguration) From(configuration *gqlclient.StackConfigurationFragment) {
