@@ -131,12 +131,8 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 						MarkdownDescription: "If you'd rather define the job spec via straight Kubernetes YAML.",
 						Optional:            true,
 						Validators: []validator.String{
-							stringvalidator.ExactlyOneOf(
-								path.MatchRelative().AtParent().AtName("labels"),
-								path.MatchRelative().AtParent().AtName("annotations"),
-								path.MatchRelative().AtParent().AtName("service_account"),
-								path.MatchRelative().AtParent().AtName("containers"),
-							),
+							stringvalidator.ExactlyOneOf(path.MatchRelative().AtParent().AtName("containers")),
+							stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("containers")),
 						},
 					},
 					"labels": schema.MapAttribute{
@@ -144,20 +140,20 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 						MarkdownDescription: "Kubernetes labels applied to the job.",
 						ElementType:         types.StringType,
 						Optional:            true,
-						Validators:          []validator.Map{mapvalidator.ExactlyOneOf(path.MatchRelative().AtParent().AtName("raw"))},
+						Validators:          []validator.Map{mapvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("raw"))},
 					},
 					"annotations": schema.MapAttribute{
 						Description:         "Kubernetes annotations applied to the job.",
 						MarkdownDescription: "Kubernetes annotations applied to the job.",
 						ElementType:         types.StringType,
 						Optional:            true,
-						Validators:          []validator.Map{mapvalidator.ExactlyOneOf(path.MatchRelative().AtParent().AtName("raw"))},
+						Validators:          []validator.Map{mapvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("raw"))},
 					},
 					"service_account": schema.StringAttribute{
 						Description:         "Kubernetes service account for this job.",
 						MarkdownDescription: "Kubernetes service account for this job.",
 						Optional:            true,
-						Validators:          []validator.String{stringvalidator.ExactlyOneOf(path.MatchRelative().AtParent().AtName("raw"))},
+						Validators:          []validator.String{stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("raw"))},
 					},
 					"containers": schema.SetNestedAttribute{
 						Optional: true,
@@ -193,7 +189,10 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 								},
 							},
 						},
-						Validators: []validator.Set{setvalidator.ExactlyOneOf(path.MatchRelative().AtParent().AtName("raw"))},
+						Validators: []validator.Set{
+							setvalidator.ExactlyOneOf(path.MatchRelative().AtParent().AtName("raw")),
+							setvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("raw")),
+						},
 					},
 				},
 			},
