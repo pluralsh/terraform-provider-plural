@@ -25,6 +25,7 @@ resource "random_string" "random" {
   special = false
 }
 
+# TODO: Test deletion.
 resource "plural_infrastructure_stack" "stack" {
   name = "stack-tf-${random_string.random.result}"
   type = "TERRAFORM"
@@ -40,30 +41,42 @@ resource "plural_infrastructure_stack" "stack" {
     version = "1.8.1"
   }
   files = {
+    # TODO: Test it.
     # "test.yml": "value: 123"
   }
   environment = [
-    {
-      name = "USERNAME"
-      value = "joe"
-    },
-    {
-      name = "PASSWORD"
-      value = "test"
-      secret = true
-    }
+    # TODO: Test it.
+    # {
+    #   name = "USERNAME"
+    #   value = "joe"
+    # },
+    # {
+    #   name = "PASSWORD"
+    #   value = "test"
+    #   secret = true
+    # }
   ]
   job_spec = {
     namespace = "default"
-    raw = jsonencode({
-      containers = jsonencode([{
-        name  = "pi"
-        image = "perl:5.34.0"
-        command = jsonencode(["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"])
-      }])
-      restartPolicy = "Never"
-    })
-    # ...
+    labels = {
+      test = "123"
+    }
+    service_account = "default"
+    containers = [{
+      image = "perl:5.34.0"
+      args = ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      # TODO: Test without env and env_from.
+      env = {}
+      env_from = []
+    }]
+    # raw = jsonencode({
+    #   containers = jsonencode([{
+    #     name  = "pi"
+    #     image = "perl:5.34.0"
+    #     command = jsonencode(["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"])
+    #   }])
+    #   restartPolicy = "Never"
+    # })
   }
   bindings = {
      read = []

@@ -164,7 +164,7 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 								"image": schema.StringAttribute{
 									Required: true,
 								},
-								"args": schema.SetAttribute{
+								"args": schema.ListAttribute{
 									Description:         "Arguments to pass to the command when executing it.",
 									MarkdownDescription: "Arguments to pass to the command when executing it.",
 									Optional:            true,

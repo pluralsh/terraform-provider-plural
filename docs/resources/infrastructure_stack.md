@@ -123,7 +123,7 @@ Required:
 
 Optional:
 
-- `args` (Set of String) Arguments to pass to the command when executing it.
+- `args` (List of String) Arguments to pass to the command when executing it.
 - `env` (Map of String) Defines environment variables to expose to the process.
 - `env_from` (Attributes Set) (see [below for nested schema](#nestedatt--job_spec--containers--env_from))
 

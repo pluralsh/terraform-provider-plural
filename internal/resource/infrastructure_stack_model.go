@@ -285,7 +285,7 @@ func (isjs *InfrastructureStackJobSpec) From(spec *gqlclient.JobGateSpecFragment
 }
 
 func infrastructureStackJobSpecContainersFrom(containers []*gqlclient.ContainerSpecFragment, ctx context.Context, d diag.Diagnostics) types.Set {
-	if len(containers) == 0 {
+	if containers == nil {
 		return types.SetNull(basetypes.ObjectType{AttrTypes: InfrastructureStackContainerSpecAttrTypes})
 	}
 
@@ -306,17 +306,21 @@ func infrastructureStackJobSpecContainersFrom(containers []*gqlclient.ContainerS
 	return setValue
 }
 
-func infrastructureStackContainerSpecArgsFrom(values []*string, ctx context.Context, d diag.Diagnostics) types.Set {
-	if len(values) == 0 {
-		return types.SetNull(types.StringType)
+func infrastructureStackContainerSpecArgsFrom(values []*string, ctx context.Context, d diag.Diagnostics) types.List {
+	if values == nil {
+		return types.ListNull(types.StringType)
 	}
 
-	setValue, diags := types.SetValueFrom(ctx, types.StringType, values)
+	listValue, diags := types.ListValueFrom(ctx, types.StringType, values)
 	d.Append(diags...)
-	return setValue
+	return listValue
 }
 
 func infrastructureStackContainerSpecEnvFrom(env []*gqlclient.ContainerSpecFragment_Env, d diag.Diagnostics) types.Map {
+	if env == nil {
+		return types.MapNull(types.StringType)
+	}
+
 	resultMap := map[string]attr.Value{}
 	for _, v := range env {
 		resultMap[v.Name] = types.StringValue(v.Value)
@@ -329,7 +333,7 @@ func infrastructureStackContainerSpecEnvFrom(env []*gqlclient.ContainerSpecFragm
 }
 
 func infrastructureStackContainerSpecEnvFromFrom(envFroms []*gqlclient.ContainerSpecFragment_EnvFrom, ctx context.Context, d diag.Diagnostics) types.Set {
-	if len(envFroms) == 0 {
+	if envFroms == nil {
 		return types.SetNull(basetypes.ObjectType{AttrTypes: InfrastructureStackContainerEnvFromAttrTypes})
 	}
 
@@ -350,14 +354,14 @@ func infrastructureStackContainerSpecEnvFromFrom(envFroms []*gqlclient.Container
 
 type InfrastructureStackContainerSpec struct {
 	Image   types.String `tfsdk:"image"`
-	Args    types.Set    `tfsdk:"args"`
+	Args    types.List   `tfsdk:"args"`
 	Env     types.Map    `tfsdk:"env"`
 	EnvFrom types.Set    `tfsdk:"env_from"`
 }
 
 var InfrastructureStackContainerSpecAttrTypes = map[string]attr.Type{
 	"image":    types.StringType,
-	"args":     types.SetType{ElemType: types.StringType},
+	"args":     types.ListType{ElemType: types.StringType},
 	"env":      types.MapType{ElemType: types.StringType},
 	"env_from": types.SetType{ElemType: types.ObjectType{AttrTypes: InfrastructureStackContainerEnvFromAttrTypes}},
 }
