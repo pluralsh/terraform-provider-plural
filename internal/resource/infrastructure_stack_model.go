@@ -327,8 +327,8 @@ func infrastructureStackContainerSpecEnvFrom(env []*gqlclient.ContainerSpecFragm
 		resultMap[v.Name] = types.StringValue(v.Value)
 	}
 
-	result, tagsDiagnostics := types.MapValue(types.StringType, resultMap)
-	d.Append(tagsDiagnostics...)
+	result, diags := types.MapValue(types.StringType, resultMap)
+	d.Append(diags...)
 
 	return result
 }
