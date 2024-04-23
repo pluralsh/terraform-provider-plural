@@ -106,7 +106,7 @@ resource "plural_infrastructure_stack" "stack-raw" {
   ]
   job_spec = {
     namespace = "default"
-    raw       = jsonencode({
+    raw       = yamlencode({
       containers = [
         {
           name    = "pi"
@@ -141,9 +141,7 @@ resource "plural_infrastructure_stack" "stack-empty" {
   environment = []
   job_spec = {
     namespace  = "default"
-    labels = {}
-    annotations = {}
-    containers = []
+    raw = yamlencode({})
   }
   bindings = {}
 }
