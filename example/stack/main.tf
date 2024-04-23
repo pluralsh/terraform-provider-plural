@@ -41,7 +41,7 @@ resource "plural_infrastructure_stack" "stack-full" {
     version = "1.8.1"
   }
   files = {
-    "test.yml" : "value: 123"
+    "test.yml" = "value: 123"
   }
   environment = [
     {
@@ -91,7 +91,7 @@ resource "plural_infrastructure_stack" "stack-raw" {
     version = "1.8.1"
   }
   files = {
-    "test.yml" : "value: 123"
+    "test.yml" = "value: 123"
   }
   environment = [
     {
@@ -140,8 +140,8 @@ resource "plural_infrastructure_stack" "stack-empty" {
   files = {}
   environment = []
   job_spec = {
-    namespace  = "default"
-    raw = yamlencode({})
+    namespace = "default"
+    raw       = yamlencode({ test = true })
   }
   bindings = {}
 }
