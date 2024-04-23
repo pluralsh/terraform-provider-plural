@@ -61,7 +61,7 @@ func (cb *ClusterBindings) From(readBindings []*console.PolicyBindingFragment, w
 }
 
 func clusterBindingsFrom(bindings []*console.PolicyBindingFragment, ctx context.Context, d diag.Diagnostics) types.Set {
-	if len(bindings) == 0 {
+	if bindings == nil {
 		return types.SetNull(basetypes.ObjectType{AttrTypes: ClusterPolicyBindingAttrTypes})
 	}
 
