@@ -38,7 +38,7 @@ func (d envDefaultValue[_]) MarkdownDescription(_ context.Context) string {
 }
 
 func (d envDefaultValue[T]) DefaultString(_ context.Context, _ defaults.StringRequest, resp *defaults.StringResponse) {
-	value := interface{}(d.defaultValue)
+	value := any(d.defaultValue)
 	if v := os.Getenv(d.envVar); len(v) > 0 {
 		value = v
 	}
@@ -48,7 +48,7 @@ func (d envDefaultValue[T]) DefaultString(_ context.Context, _ defaults.StringRe
 }
 
 func (d envDefaultValue[T]) DefaultBool(_ context.Context, _ defaults.BoolRequest, resp *defaults.BoolResponse) {
-	value := interface{}(d.defaultValue)
+	value := any(d.defaultValue)
 	if v := os.Getenv(d.envVar); len(v) > 0 {
 		value = v == "true"
 	}

@@ -66,7 +66,7 @@ func newKubeconfig(ctx context.Context, kubeconfig *Kubeconfig, namespace *strin
 	loader := &clientcmd.ClientConfigLoadingRules{}
 
 	if !lo.IsEmpty(kubeconfig.ConfigPath.ValueString()) {
-		tflog.Info(ctx, "using kubeconfig", map[string]interface{}{
+		tflog.Info(ctx, "using kubeconfig", map[string]any{
 			"kubeconfig": kubeconfig.ConfigPath.ValueString(),
 		})
 
@@ -79,7 +79,7 @@ func newKubeconfig(ctx context.Context, kubeconfig *Kubeconfig, namespace *strin
 		if !lo.IsEmpty(kubeconfig.ConfigContext.ValueString()) || !lo.IsEmpty(kubeconfig.ConfigContextAuthInfo.ValueString()) || !lo.IsEmpty(kubeconfig.ConfigContextCluster.ValueString()) {
 			if !lo.IsEmpty(kubeconfig.ConfigContext.ValueString()) {
 				overrides.CurrentContext = kubeconfig.ConfigContext.ValueString()
-				tflog.Info(ctx, "using custom current context", map[string]interface{}{
+				tflog.Info(ctx, "using custom current context", map[string]any{
 					"context": overrides.CurrentContext,
 				})
 			}
@@ -91,7 +91,7 @@ func newKubeconfig(ctx context.Context, kubeconfig *Kubeconfig, namespace *strin
 			if !lo.IsEmpty(kubeconfig.ConfigContextCluster.ValueString()) {
 				overrides.Context.Cluster = kubeconfig.ConfigContextCluster.ValueString()
 			}
-			tflog.Info(ctx, "using overridden context", map[string]interface{}{
+			tflog.Info(ctx, "using overridden context", map[string]any{
 				"context": overrides.Context,
 			})
 		}
