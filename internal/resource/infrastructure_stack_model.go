@@ -95,7 +95,7 @@ func (is *infrastructureStack) From(stack *gqlclient.InfrastructureStackFragment
 }
 
 func infrastructureStackFilesFrom(files []*gqlclient.StackFileFragment, d diag.Diagnostics) basetypes.MapValue {
-	if len(files) == 0 {
+	if files == nil {
 		return types.MapNull(types.StringType)
 	}
 
@@ -180,7 +180,7 @@ var InfrastructureStackEnvironmentAttrTypes = map[string]attr.Type{
 }
 
 func infrastructureStackEnvironmentsFrom(envs []*gqlclient.StackEnvironmentFragment, ctx context.Context, d diag.Diagnostics) types.Set {
-	if len(envs) == 0 {
+	if envs == nil {
 		return types.SetNull(basetypes.ObjectType{AttrTypes: InfrastructureStackEnvironmentAttrTypes})
 	}
 
