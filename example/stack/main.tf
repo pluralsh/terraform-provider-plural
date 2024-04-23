@@ -25,11 +25,11 @@ resource "random_string" "random" {
   special = false
 }
 
-# TODO: Test deletion.
 resource "plural_infrastructure_stack" "stack-full" {
   name       = "stack-tf-full-${random_string.random.result}"
   type       = "TERRAFORM"
   approval   = true
+  detach     = true
   cluster_id = data.plural_cluster.cluster.id
   repository = {
     id     = data.plural_git_repository.repository.id
@@ -79,6 +79,7 @@ resource "plural_infrastructure_stack" "stack-raw" {
   name       = "stack-tf-raw-${random_string.random.result}"
   type       = "TERRAFORM"
   approval   = true
+  detach     = true
   cluster_id = data.plural_cluster.cluster.id
   repository = {
     id     = data.plural_git_repository.repository.id
@@ -126,6 +127,7 @@ resource "plural_infrastructure_stack" "stack-empty" {
   name       = "stack-tf-empty-${random_string.random.result}"
   type       = "TERRAFORM"
   approval   = true
+  detach     = true
   cluster_id = data.plural_cluster.cluster.id
   repository = {
     id     = data.plural_git_repository.repository.id
@@ -138,7 +140,7 @@ resource "plural_infrastructure_stack" "stack-empty" {
   files = {}
   environment = []
   job_spec = {
-    namespace = "default"
+    namespace  = "default"
     labels = {}
     annotations = {}
     containers = []
@@ -149,6 +151,7 @@ resource "plural_infrastructure_stack" "stack-empty" {
 resource "plural_infrastructure_stack" "stack-minimal" {
   name       = "stack-tf-minimal-${random_string.random.result}"
   type       = "TERRAFORM"
+  detach     = true
   cluster_id = data.plural_cluster.cluster.id
   repository = {
     id     = data.plural_git_repository.repository.id
