@@ -19,8 +19,14 @@ data "plural_git_repository" "repository" {
   url = "https://github.com/zreigz/tf-hello.git"
 }
 
+resource "random_string" "random" {
+  length = 5
+  upper = false
+  special = false
+}
+
 resource "plural_infrastructure_stack" "stack" {
-  name = "tf-stack-13"
+  name = "stack-tf-${random_string.random.result}"
   type = "TERRAFORM"
   approval = true
   cluster_id = data.plural_cluster.cluster.id
