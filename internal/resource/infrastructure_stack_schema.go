@@ -205,6 +205,7 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 							},
 						},
 						Validators: []validator.Set{
+							setvalidator.SizeAtLeast(1),
 							setvalidator.ExactlyOneOf(path.MatchRelative().AtParent().AtName("raw")),
 							setvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("raw")),
 						},
