@@ -106,6 +106,7 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 				Description:         "Defines environment variables for the stack.",
 				MarkdownDescription: "Defines environment variables for the stack.",
 				Optional:            true,
+				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{

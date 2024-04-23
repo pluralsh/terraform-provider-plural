@@ -27,6 +27,7 @@ description: |-
 
 - `approval` (Boolean) Determines whether to require approval.
 - `bindings` (Attributes) Read and write policies of this stack. (see [below for nested schema](#nestedatt--bindings))
+- `detach` (Boolean) Determines behavior during resource destruction, if true it will detach resource instead of deleting it.
 - `environment` (Attributes Set) Defines environment variables for the stack. (see [below for nested schema](#nestedatt--environment))
 - `files` (Map of String) File path-content map.
 - `job_spec` (Attributes) Repository information used to pull stack. (see [below for nested schema](#nestedatt--job_spec))
