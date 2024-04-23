@@ -69,14 +69,14 @@ resource "plural_infrastructure_stack" "stack" {
       env = {}
       env_from = []
     }]
-    # raw = jsonencode({
-    #   containers = jsonencode([{
-    #     name  = "pi"
-    #     image = "perl:5.34.0"
-    #     command = jsonencode(["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"])
-    #   }])
-    #   restartPolicy = "Never"
-    # })
+#     raw = jsonencode({
+#       containers = [{
+#         name  = "pi"
+#         image = "perl:5.34.0"
+#         command = ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+#       }]
+#       restartPolicy = "Never"
+#     })
   }
   bindings = {
      read = []

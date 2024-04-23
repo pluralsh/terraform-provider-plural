@@ -21,9 +21,9 @@ resource "plural_cluster" "byok" {
   metadata = jsonencode({
     test1 = "test"
     test2 = false
-    test3 = jsonencode({
+    test3 = {
       abc = false
-    })
+    }
   })
   helm_repo_url = "https://pluralsh.github.io/deployment-operator"
   tags = {
