@@ -48,6 +48,7 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 				Description:         "Determines behavior during resource destruction, if true it will detach resource instead of deleting it.",
 				MarkdownDescription: "Determines behavior during resource destruction, if true it will detach resource instead of deleting it.",
 				Optional:            true,
+				Computed:            true,
 				Default:             booldefault.StaticBool(false),
 			},
 			"cluster_id": schema.StringAttribute{
