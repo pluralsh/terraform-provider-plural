@@ -18,6 +18,7 @@ type infrastructureStack struct {
 	Name          types.String                      `tfsdk:"name"`
 	Type          types.String                      `tfsdk:"type"`
 	Approval      types.Bool                        `tfsdk:"approval"`
+	Detach        types.Bool                        `tfsdk:"detach"`
 	ClusterId     types.String                      `tfsdk:"cluster_id"`
 	Repository    *InfrastructureStackRepository    `tfsdk:"repository"`
 	Configuration *InfrastructureStackConfiguration `tfsdk:"configuration"`
@@ -40,7 +41,7 @@ func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostic
 		ReadBindings:  is.Bindings.ReadAttributes(ctx, d),
 		WriteBindings: is.Bindings.WriteAttributes(ctx, d),
 		Files:         is.FilesAttributes(ctx, d),
-		Environemnt:   is.EnvironmentAttributes(ctx, d),
+		Environment:   is.EnvironmentAttributes(ctx, d),
 	}
 }
 

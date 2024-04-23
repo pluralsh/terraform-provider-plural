@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -42,6 +43,12 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 				Description:         "Determines whether to require approval.",
 				MarkdownDescription: "Determines whether to require approval.",
 				Optional:            true,
+			},
+			"detach": schema.BoolAttribute{
+				Description:         "Determines behavior during resource destruction, if true it will detach resource instead of deleting it.",
+				MarkdownDescription: "Determines behavior during resource destruction, if true it will detach resource instead of deleting it.",
+				Optional:            true,
+				Default:             booldefault.StaticBool(false),
 			},
 			"cluster_id": schema.StringAttribute{
 				Description:         "The cluster on which the stack will be applied.",

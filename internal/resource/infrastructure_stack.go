@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"k8s.io/apimachinery/pkg/util/wait"
-
-	"terraform-provider-plural/internal/client"
 )
 
 var _ resource.Resource = &InfrastructureStackResource{}
@@ -109,23 +108,31 @@ func (r *InfrastructureStackResource) Delete(ctx context.Context, req resource.D
 		return
 	}
 
-	_, err := r.client.DeleteStack(ctx, data.Id.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete infrastructure stack, got error: %s", err))
-		return
-	}
-
-	err = wait.WaitForWithContext(ctx, client.Ticker(5*time.Second), func(ctx context.Context) (bool, error) {
-		_, err := r.client.GetInfrastructureStack(ctx, data.Id.ValueString())
-		if client.IsNotFound(err) {
-			return true, nil
+	if data.Detach.ValueBool() {
+		_, err := r.client.DetachStack(ctx, data.Id.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to detach infrastructure stack, got error: %s", err))
+			return
+		}
+	} else {
+		_, err := r.client.DeleteStack(ctx, data.Id.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete infrastructure stack, got error: %s", err))
+			return
 		}
 
-		return false, err
-	})
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error during watiting for infrastructure stack to be deleted, got error: %s", err))
-		return
+		err = wait.WaitForWithContext(ctx, client.Ticker(5*time.Second), func(ctx context.Context) (bool, error) {
+			_, err := r.client.GetInfrastructureStack(ctx, data.Id.ValueString())
+			if client.IsNotFound(err) {
+				return true, nil
+			}
+
+			return false, err
+		})
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error during watiting for infrastructure stack to be deleted, got error: %s", err))
+			return
+		}
 	}
 }
 
