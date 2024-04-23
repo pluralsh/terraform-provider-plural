@@ -99,6 +99,7 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 			"files": schema.MapAttribute{
 				MarkdownDescription: "File path-content map.",
 				Optional:            true,
+				Computed:            true,
 				ElementType:         types.StringType,
 			},
 			"environment": schema.SetNestedAttribute{
@@ -215,6 +216,7 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 						Description:         "Read policies of this stack.",
 						MarkdownDescription: "Read policies of this stack.",
 						Optional:            true,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"group_id": schema.StringAttribute{
@@ -233,6 +235,7 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 						Description:         "Write policies of this stack.",
 						MarkdownDescription: "Write policies of this stack.",
 						Optional:            true,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"group_id": schema.StringAttribute{
