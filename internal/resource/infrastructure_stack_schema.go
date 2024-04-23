@@ -143,6 +143,7 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 						Optional:            true,
 						PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 						Validators: []validator.String{
+							stringvalidator.LengthAtLeast(1),
 							stringvalidator.ExactlyOneOf(path.MatchRelative().AtParent().AtName("containers")),
 							stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("containers")),
 						},
