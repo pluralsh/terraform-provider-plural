@@ -6,11 +6,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -108,7 +106,6 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 				Description:         "Defines environment variables for the stack.",
 				MarkdownDescription: "Defines environment variables for the stack.",
 				Optional:            true,
-				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
@@ -155,8 +152,6 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 						MarkdownDescription: "Kubernetes labels applied to the job.",
 						ElementType:         types.StringType,
 						Optional:            true,
-						Computed:            true,
-						Default:             mapdefault.StaticValue(types.MapValueMust(types.StringType, map[string]attr.Value{})),
 						Validators:          []validator.Map{mapvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("raw"))},
 					},
 					"annotations": schema.MapAttribute{
@@ -164,8 +159,6 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 						MarkdownDescription: "Kubernetes annotations applied to the job.",
 						ElementType:         types.StringType,
 						Optional:            true,
-						Computed:            true,
-						Default:             mapdefault.StaticValue(types.MapValueMust(types.StringType, map[string]attr.Value{})),
 						Validators:          []validator.Map{mapvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("raw"))},
 					},
 					"service_account": schema.StringAttribute{
@@ -176,7 +169,6 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 					},
 					"containers": schema.SetNestedAttribute{
 						Optional: true,
-						Computed: true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"image": schema.StringAttribute{
@@ -226,7 +218,6 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 						Description:         "Read policies of this stack.",
 						MarkdownDescription: "Read policies of this stack.",
 						Optional:            true,
-						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"group_id": schema.StringAttribute{
@@ -245,7 +236,6 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 						Description:         "Write policies of this stack.",
 						MarkdownDescription: "Write policies of this stack.",
 						Optional:            true,
-						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"group_id": schema.StringAttribute{

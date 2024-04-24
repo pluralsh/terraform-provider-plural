@@ -89,15 +89,17 @@ func (is *infrastructureStack) From(stack *gqlclient.InfrastructureStackFragment
 	is.ClusterId = types.StringValue(stack.Cluster.ID)
 	is.Repository.From(stack.Repository, stack.Git)
 	is.Configuration.From(stack.Configuration)
-	is.Files = infrastructureStackFilesFrom(stack.Files, d)
-	is.Environment = infrastructureStackEnvironmentsFrom(stack.Environment, ctx, d)
+	is.Files = infrastructureStackFilesFrom(stack.Files, is.Files, d)
+	is.Environment = infrastructureStackEnvironmentsFrom(stack.Environment, is.Environment, ctx, d)
 	is.Bindings.From(stack.ReadBindings, stack.WriteBindings, ctx, d)
 	is.JobSpec.From(stack.JobSpec, ctx, d)
 }
 
-func infrastructureStackFilesFrom(files []*gqlclient.StackFileFragment, d diag.Diagnostics) basetypes.MapValue {
-	if files == nil {
-		return types.MapNull(types.StringType)
+func infrastructureStackFilesFrom(files []*gqlclient.StackFileFragment, config types.Map, d diag.Diagnostics) types.Map {
+	if len(files) == 0 {
+		// Rewriting config to state to avoid inconsistent result errors.
+		// This could happen, for example, when sending "nil" to API and "[]" is returned as a result.
+		return config
 	}
 
 	resultMap := make(map[string]attr.Value, len(files))
@@ -109,6 +111,29 @@ func infrastructureStackFilesFrom(files []*gqlclient.StackFileFragment, d diag.D
 	d.Append(tagsDiagnostics...)
 
 	return result
+}
+
+func infrastructureStackEnvironmentsFrom(envs []*gqlclient.StackEnvironmentFragment, config types.Set, ctx context.Context, d diag.Diagnostics) types.Set {
+	if len(envs) == 0 {
+		// Rewriting config to state to avoid inconsistent result errors.
+		// This could happen, for example, when sending "nil" to API and "[]" is returned as a result.
+		return config
+	}
+
+	values := make([]attr.Value, len(envs))
+	for i, file := range envs {
+		objValue, diags := types.ObjectValueFrom(ctx, InfrastructureStackEnvironmentAttrTypes, InfrastructureStackEnvironment{
+			Name:   types.StringValue(file.Name),
+			Value:  types.StringValue(file.Value),
+			Secret: types.BoolPointerValue(file.Secret),
+		})
+		values[i] = objValue
+		d.Append(diags...)
+	}
+
+	setValue, diags := types.SetValue(basetypes.ObjectType{AttrTypes: InfrastructureStackEnvironmentAttrTypes}, values)
+	d.Append(diags...)
+	return setValue
 }
 
 type InfrastructureStackRepository struct {
@@ -178,27 +203,6 @@ var InfrastructureStackEnvironmentAttrTypes = map[string]attr.Type{
 	"name":   types.StringType,
 	"value":  types.StringType,
 	"secret": types.BoolType,
-}
-
-func infrastructureStackEnvironmentsFrom(envs []*gqlclient.StackEnvironmentFragment, ctx context.Context, d diag.Diagnostics) types.Set {
-	if envs == nil {
-		return types.SetNull(basetypes.ObjectType{AttrTypes: InfrastructureStackEnvironmentAttrTypes})
-	}
-
-	values := make([]attr.Value, len(envs))
-	for i, file := range envs {
-		objValue, diags := types.ObjectValueFrom(ctx, InfrastructureStackEnvironmentAttrTypes, InfrastructureStackEnvironment{
-			Name:   types.StringValue(file.Name),
-			Value:  types.StringValue(file.Value),
-			Secret: types.BoolPointerValue(file.Secret),
-		})
-		values[i] = objValue
-		d.Append(diags...)
-	}
-
-	setValue, diags := types.SetValue(basetypes.ObjectType{AttrTypes: InfrastructureStackEnvironmentAttrTypes}, values)
-	d.Append(diags...)
-	return setValue
 }
 
 type InfrastructureStackBindings struct {
@@ -279,15 +283,17 @@ func (isjs *InfrastructureStackJobSpec) From(spec *gqlclient.JobGateSpecFragment
 
 	isjs.Namespace = types.StringValue(spec.Namespace)
 	isjs.Raw = types.StringPointerValue(spec.Raw)
-	isjs.Containers = infrastructureStackJobSpecContainersFrom(spec.Containers, ctx, d)
-	isjs.Labels = common.MapFrom(spec.Labels, ctx, d)
-	isjs.Annotations = common.MapFrom(spec.Annotations, ctx, d)
+	isjs.Containers = infrastructureStackJobSpecContainersFrom(spec.Containers, isjs.Containers, ctx, d)
+	isjs.Labels = common.MapFromWithConfig(spec.Labels, isjs.Labels, ctx, d)
+	isjs.Annotations = common.MapFromWithConfig(spec.Annotations, isjs.Annotations, ctx, d)
 	isjs.ServiceAccount = types.StringPointerValue(spec.ServiceAccount)
 }
 
-func infrastructureStackJobSpecContainersFrom(containers []*gqlclient.ContainerSpecFragment, ctx context.Context, d diag.Diagnostics) types.Set {
-	if containers == nil {
-		return types.SetNull(basetypes.ObjectType{AttrTypes: InfrastructureStackContainerSpecAttrTypes})
+func infrastructureStackJobSpecContainersFrom(containers []*gqlclient.ContainerSpecFragment, config types.Set, ctx context.Context, d diag.Diagnostics) types.Set {
+	if len(containers) == 0 {
+		// Rewriting config to state to avoid inconsistent result errors.
+		// This could happen, for example, when sending "nil" to API and "[]" is returned as a result.
+		return config
 	}
 
 	values := make([]attr.Value, len(containers))

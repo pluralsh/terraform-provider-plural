@@ -56,13 +56,15 @@ func (cb *ClusterBindings) From(readBindings []*console.PolicyBindingFragment, w
 		return
 	}
 
-	cb.Read = clusterBindingsFrom(readBindings, ctx, d)
-	cb.Write = clusterBindingsFrom(writeBindings, ctx, d)
+	cb.Read = clusterBindingsFrom(readBindings, cb.Read, ctx, d)
+	cb.Write = clusterBindingsFrom(writeBindings, cb.Write, ctx, d)
 }
 
-func clusterBindingsFrom(bindings []*console.PolicyBindingFragment, ctx context.Context, d diag.Diagnostics) types.Set {
-	if bindings == nil {
-		return types.SetNull(basetypes.ObjectType{AttrTypes: ClusterPolicyBindingAttrTypes})
+func clusterBindingsFrom(bindings []*console.PolicyBindingFragment, config types.Set, ctx context.Context, d diag.Diagnostics) types.Set {
+	if len(bindings) == 0 {
+		// Rewriting config to state to avoid inconsistent result errors.
+		// This could happen, for example, when sending "nil" to API and "[]" is returned as a result.
+		return config
 	}
 
 	values := make([]attr.Value, len(bindings))
