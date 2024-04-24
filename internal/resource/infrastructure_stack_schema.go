@@ -102,7 +102,6 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 				Description:         "File path-content map.",
 				MarkdownDescription: "File path-content map.",
 				Optional:            true,
-				Computed:            true,
 				ElementType:         types.StringType,
 			},
 			"environment": schema.SetNestedAttribute{
