@@ -138,7 +138,7 @@ Required:
 Optional:
 
 - `args` (List of String) Arguments to pass to the command when executing it.
-- `env` (Map of String) Defines  environment variables to expose to the process.
+- `env` (Map of String) Defines environment variables to expose to the process.
 
 
 
@@ -186,7 +186,7 @@ Required:
 Optional:
 
 - `args` (List of String) Arguments to pass to the command when executing it.
-- `env` (Map of String) Defines  environment variables to expose to the process.
+- `env` (Map of String) Defines environment variables to expose to the process.
 
 
 

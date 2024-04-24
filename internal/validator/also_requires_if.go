@@ -117,7 +117,6 @@ func (a alsoRequiresIfValidator) ValidateString(ctx context.Context, req validat
 	resp.Diagnostics.Append(validateResp.Diagnostics...)
 }
 
-// AlsoRequiresIf todo.
 func AlsoRequiresIf(f RequiresIf, expressions ...path.Expression) validator.String {
 	return &alsoRequiresIfValidator{
 		PathExpressions: expressions,

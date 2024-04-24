@@ -40,7 +40,7 @@ type OperatorHandler struct {
 	repoUrl string
 
 	// additional values used on install
-	vals map[string]interface{}
+	vals map[string]any
 
 	// Preconfigured helm actions and chart
 	chart         *chart.Chart
@@ -152,9 +152,9 @@ func (oh *OperatorHandler) listReleases(state action.ListStates) ([]*release.Rel
 	return client.Run()
 }
 
-func (oh *OperatorHandler) values(token string) (map[string]interface{}, error) {
-	globalVals := map[string]interface{}{}
-	vals := map[string]interface{}{
+func (oh *OperatorHandler) values(token string) (map[string]any, error) {
+	globalVals := map[string]any{}
+	vals := map[string]any{
 		"secrets": map[string]string{
 			"deployToken": token,
 		},
@@ -232,7 +232,7 @@ func (oh *OperatorHandler) Uninstall() error {
 }
 
 func NewOperatorHandler(ctx context.Context, client *client.Client, kubeconfig *Kubeconfig, repoUrl string, values *string, consoleUrl string) (*OperatorHandler, error) {
-	vals := map[string]interface{}{}
+	vals := map[string]any{}
 	if values != nil {
 		if err := yaml.Unmarshal([]byte(*values), &vals); err != nil {
 			return nil, err

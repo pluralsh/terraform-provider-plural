@@ -19,17 +19,7 @@ type serviceContext struct {
 
 func (sc *serviceContext) From(scf *console.ServiceContextFragment, ctx context.Context, d diag.Diagnostics) {
 	sc.Id = types.StringValue(scf.ID)
-	sc.Configuration = serviceContextConfigurationFrom(scf.Configuration, ctx, d)
-}
-
-func serviceContextConfigurationFrom(configuration map[string]any, ctx context.Context, d diag.Diagnostics) types.Map {
-	if len(configuration) == 0 {
-		return types.MapNull(types.StringType)
-	}
-
-	mapValue, diags := types.MapValueFrom(ctx, types.StringType, configuration)
-	d.Append(diags...)
-	return mapValue
+	sc.Configuration = common.MapFrom(scf.Configuration, ctx, d)
 }
 
 func (sc *serviceContext) Attributes(ctx context.Context, d diag.Diagnostics) console.ServiceContextAttributes {

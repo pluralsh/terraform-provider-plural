@@ -235,19 +235,13 @@ func (r *clusterResource) schema() schema.Schema {
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"group_id": schema.StringAttribute{
-									Description:         "",
-									MarkdownDescription: "",
-									Optional:            true,
+									Optional: true,
 								},
 								"id": schema.StringAttribute{
-									Description:         "",
-									MarkdownDescription: "",
-									Optional:            true,
+									Optional: true,
 								},
 								"user_id": schema.StringAttribute{
-									Description:         "",
-									MarkdownDescription: "",
-									Optional:            true,
+									Optional: true,
 								},
 							},
 						},
@@ -259,19 +253,13 @@ func (r *clusterResource) schema() schema.Schema {
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"group_id": schema.StringAttribute{
-									Description:         "",
-									MarkdownDescription: "",
-									Optional:            true,
+									Optional: true,
 								},
 								"id": schema.StringAttribute{
-									Description:         "",
-									MarkdownDescription: "",
-									Optional:            true,
+									Optional: true,
 								},
 								"user_id": schema.StringAttribute{
-									Description:         "",
-									MarkdownDescription: "",
-									Optional:            true,
+									Optional: true,
 								},
 							},
 						},
@@ -477,8 +465,8 @@ func (r *clusterResource) kubeconfigSchema(deprecated bool) schema.SingleNestedA
 							ElementType:         types.StringType,
 						},
 						"env": schema.MapAttribute{
-							Description:         "Defines  environment variables to expose to the process.",
-							MarkdownDescription: "Defines  environment variables to expose to the process.",
+							Description:         "Defines environment variables to expose to the process.",
+							MarkdownDescription: "Defines environment variables to expose to the process.",
 							Optional:            true,
 							ElementType:         types.StringType,
 						},
