@@ -8,7 +8,7 @@ import (
 )
 
 func MapFrom(values map[string]any, ctx context.Context, d diag.Diagnostics) types.Map {
-	if len(values) == 0 {
+	if values == nil {
 		return types.MapNull(types.StringType)
 	}
 
