@@ -3,10 +3,12 @@ package resource
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"terraform-provider-plural/internal/client"
 
+	gqlclient "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/plural-cli/pkg/console"
 	"github.com/pluralsh/plural-cli/pkg/helm"
 	"github.com/pluralsh/polly/algorithms"
@@ -32,6 +34,8 @@ type OperatorHandler struct {
 
 	// kubeconfig is a model.Kubeconfig data model read from terraform
 	kubeconfig *Kubeconfig
+
+	settings *gqlclient.DeploymentSettingsFragment
 
 	// url is an url to the Console API, i.e. https://console.mycluster.onplural.sh
 	url string
@@ -68,6 +72,8 @@ func (oh *OperatorHandler) init() error {
 		return err
 	}
 
+	oh.initSettings()
+
 	err = oh.initRepo()
 	if err != nil {
 		return err
@@ -85,12 +91,26 @@ func (oh *OperatorHandler) init() error {
 	return nil
 }
 
+func (oh *OperatorHandler) initSettings() {
+	settings, err := oh.client.GetDeploymentSettings(oh.ctx)
+	if err != nil {
+		return
+	}
+	oh.settings = settings.DeploymentSettings
+}
+
 func (oh *OperatorHandler) initRepo() error {
 	return helm.AddRepo(console.ReleaseName, oh.repoUrl)
 }
 
 func (oh *OperatorHandler) initChart() error {
+	vsn := ""
+	if oh.settings != nil {
+		vsn = oh.settings.AgentVsn
+	}
+
 	client := action.NewInstall(oh.configuration)
+	client.ChartPathOptions.Version = strings.TrimPrefix(vsn, "v")
 	locateName := fmt.Sprintf("%s/%s", console.ReleaseName, console.ChartName)
 	path, err := client.ChartPathOptions.LocateChart(locateName, cli.New())
 	if err != nil {
@@ -161,12 +181,8 @@ func (oh *OperatorHandler) values(token string) (map[string]any, error) {
 		"consoleUrl": fmt.Sprintf("%s/ext/gql", oh.url),
 	}
 
-	setting, err := oh.client.GetDeploymentSettings(oh.ctx)
-	if err != nil {
-		return nil, err
-	}
-	if setting != nil && setting.DeploymentSettings != nil && setting.DeploymentSettings.AgentHelmValues != nil {
-		if err := yaml.Unmarshal([]byte(*setting.DeploymentSettings.AgentHelmValues), &globalVals); err != nil {
+	if oh.settings != nil && oh.settings.AgentHelmValues != nil {
+		if err := yaml.Unmarshal([]byte(*oh.settings.AgentHelmValues), &globalVals); err != nil {
 			return nil, err
 		}
 	}
