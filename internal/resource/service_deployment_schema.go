@@ -97,24 +97,24 @@ func (r *ServiceDeploymentResource) schemaKustomize() schema.SingleNestedAttribu
 	}
 }
 
-func (r *ServiceDeploymentResource) schemaConfiguration() schema.SetNestedAttribute {
-	return schema.SetNestedAttribute{
-		Optional:            true,
-		Description:         "List of [name, value] secrets used to alter this ServiceDeployment configuration.",
-		MarkdownDescription: "List of [name, value] secrets used to alter this ServiceDeployment configuration.",
-		NestedObject: schema.NestedAttributeObject{
-			Attributes: map[string]schema.Attribute{
-				"name": schema.StringAttribute{
-					Required: true,
-				},
-				"value": schema.StringAttribute{
-					Required:  true,
-					Sensitive: true,
-				},
-			},
-		},
-	}
-}
+// func (r *ServiceDeploymentResource) schemaConfiguration() schema.SetNestedAttribute {
+// 	return schema.SetNestedAttribute{
+// 		Optional:            true,
+// 		Description:         "List of [name, value] secrets used to alter this ServiceDeployment configuration.",
+// 		MarkdownDescription: "List of [name, value] secrets used to alter this ServiceDeployment configuration.",
+// 		NestedObject: schema.NestedAttributeObject{
+// 			Attributes: map[string]schema.Attribute{
+// 				"name": schema.StringAttribute{
+// 					Required: true,
+// 				},
+// 				"value": schema.StringAttribute{
+// 					Required:  true,
+// 					Sensitive: true,
+// 				},
+// 			},
+// 		},
+// 	}
+// }
 
 func (r *ServiceDeploymentResource) schemaCluster() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{

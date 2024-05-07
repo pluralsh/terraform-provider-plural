@@ -276,7 +276,7 @@ func (isjs *InfrastructureStackJobSpec) ContainersAttributes(ctx context.Context
 	return result
 }
 
-func (isjs *InfrastructureStackJobSpec) From(spec *gqlclient.JobGateSpecFragment, ctx context.Context, d diag.Diagnostics) {
+func (isjs *InfrastructureStackJobSpec) From(spec *gqlclient.JobSpecFragment, ctx context.Context, d diag.Diagnostics) {
 	if isjs == nil {
 		return
 	}

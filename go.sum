@@ -858,6 +858,8 @@ github.com/pkg/sftp v1.10.1/go.mod h1:lYOWFsE0bwd1+KfKJaKeuokY15vzFx25BLbzYYoAxZ
 github.com/pkg/sftp v1.13.1/go.mod h1:3HaPG6Dq1ILlpPZRO0HVMrsydcdLt6HRDccSgb87qRg=
 github.com/pluralsh/console-client-go v0.4.0 h1:lgKaVGi8jB7S8wFF6L3P6H/4Xc88e4FozhyW58O1w3Q=
 github.com/pluralsh/console-client-go v0.4.0/go.mod h1:eyCiLA44YbXiYyJh8303jk5JdPkt9McgCo5kBjk4lKo=
+github.com/pluralsh/console-client-go v0.5.3 h1:RB4XtKlvh8+BM5o1o0h+W6zHculBGbL6q5lI/yRnqJE=
+github.com/pluralsh/console-client-go v0.5.3/go.mod h1:eyCiLA44YbXiYyJh8303jk5JdPkt9McgCo5kBjk4lKo=
 github.com/pluralsh/gqlclient v1.11.0 h1:FfXW7FiEJLHOfTAa7NxDb8jb3aMZNIpCAcG+bg8uHYA=
 github.com/pluralsh/gqlclient v1.11.0/go.mod h1:qSXKUlio1F2DRPy8el4oFYsmpKbkUYspgPB87T4it5I=
 github.com/pluralsh/plural-cli v0.8.5-0.20240216094552-efc34ee6de37 h1:DBnaKvKmbTbKwbkrh/2gJBwyHYfaXdxeT3UGh+94K4g=

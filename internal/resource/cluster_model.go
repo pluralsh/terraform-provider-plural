@@ -90,6 +90,8 @@ func (c *cluster) UpdateAttributes(ctx context.Context, d diag.Diagnostics) cons
 		Handle:    c.Handle.ValueStringPointer(),
 		Protect:   c.Protect.ValueBoolPointer(),
 		NodePools: c.NodePoolsAttribute(ctx, d),
+		Metadata:  c.Metadata.ValueStringPointer(),
+		Tags:      c.TagsAttribute(ctx, d),
 	}
 }
 
