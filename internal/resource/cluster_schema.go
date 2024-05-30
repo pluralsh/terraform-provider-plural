@@ -221,7 +221,7 @@ func (r *clusterResource) schema() schema.Schema {
 				MarkdownDescription: "Key-value tags used to filter clusters.",
 				Optional:            true,
 				ElementType:         types.StringType,
-				PlanModifiers:       []planmodifier.Map{mapplanmodifier.RequiresReplace()},
+				PlanModifiers:       []planmodifier.Map{mapplanmodifier.UseStateForUnknown()},
 			},
 			"bindings": schema.SingleNestedAttribute{
 				Description:         "Read and write policies of this cluster.",
@@ -265,7 +265,7 @@ func (r *clusterResource) schema() schema.Schema {
 						},
 					},
 				},
-				PlanModifiers: []planmodifier.Object{objectplanmodifier.RequiresReplace()},
+				PlanModifiers: []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 			},
 		},
 	}
