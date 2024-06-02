@@ -65,7 +65,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	if common.IsCloud(data.Cloud.ValueString(), common.CloudBYOK) && data.HasKubeconfig() {
+	if data.HasKubeconfig() {
 		if result.CreateCluster.DeployToken == nil {
 			resp.Diagnostics.AddError("Client Error", "Unable to fetch cluster deploy token")
 			return
