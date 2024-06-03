@@ -51,7 +51,6 @@ type OperatorHandler struct {
 	configuration *action.Configuration
 	install       *action.Install
 	upgrade       *action.Upgrade
-	uninstall     *action.Uninstall
 }
 
 func (oh *OperatorHandler) init() error {
@@ -86,7 +85,6 @@ func (oh *OperatorHandler) init() error {
 
 	oh.initInstallAction()
 	oh.initUpgradeAction()
-	oh.initUninstallAction()
 
 	return nil
 }
@@ -127,7 +125,7 @@ func (oh *OperatorHandler) initInstallAction() {
 	oh.install.Namespace = console.OperatorNamespace
 	oh.install.ReleaseName = console.ReleaseName
 	oh.install.Timeout = 5 * time.Minute
-	oh.install.Wait = true
+	oh.install.Wait = false
 	oh.install.CreateNamespace = true
 }
 
@@ -136,14 +134,7 @@ func (oh *OperatorHandler) initUpgradeAction() {
 
 	oh.upgrade.Namespace = console.OperatorNamespace
 	oh.upgrade.Timeout = 5 * time.Minute
-	oh.upgrade.Wait = true
-}
-
-func (oh *OperatorHandler) initUninstallAction() {
-	oh.uninstall = action.NewUninstall(oh.configuration)
-
-	oh.uninstall.Timeout = 5 * time.Minute
-	oh.uninstall.Wait = true
+	oh.upgrade.Wait = false
 }
 
 // chartExists checks whether a chart is already installed
@@ -239,11 +230,6 @@ func (oh *OperatorHandler) Upgrade(token string) error {
 		return err
 	}
 	_, err = oh.upgrade.Run(console.ReleaseName, oh.chart, values)
-	return err
-}
-
-func (oh *OperatorHandler) Uninstall() error {
-	_, err := oh.uninstall.Run(console.ReleaseName)
 	return err
 }
 
