@@ -3,6 +3,7 @@ package resource
 import (
 	"context"
 
+	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -17,6 +18,7 @@ type infrastructureStack struct {
 	Id            types.String                      `tfsdk:"id"`
 	Name          types.String                      `tfsdk:"name"`
 	Type          types.String                      `tfsdk:"type"`
+	Actor         types.String                      `tfsdk:"actor"`
 	Approval      types.Bool                        `tfsdk:"approval"`
 	Detach        types.Bool                        `tfsdk:"detach"`
 	ClusterId     types.String                      `tfsdk:"cluster_id"`
@@ -28,21 +30,30 @@ type infrastructureStack struct {
 	Bindings      *common.ClusterBindings           `tfsdk:"bindings"`
 }
 
-func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.StackAttributes {
-	return gqlclient.StackAttributes{
+func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostics, client *client.Client) (*gqlclient.StackAttributes, error) {
+	attr := &gqlclient.StackAttributes{
 		Name:          is.Name.ValueString(),
 		Type:          gqlclient.StackType(is.Type.ValueString()),
 		RepositoryID:  is.Repository.Id.ValueString(),
 		ClusterID:     is.ClusterId.ValueString(),
 		Git:           is.Repository.Attributes(),
 		JobSpec:       is.JobSpec.Attributes(ctx, d),
-		Configuration: is.Configuration.Attributes(),
+		Configuration: is.Configuration.Attributes(ctx, d),
 		Approval:      is.Approval.ValueBoolPointer(),
 		ReadBindings:  is.Bindings.ReadAttributes(ctx, d),
 		WriteBindings: is.Bindings.WriteAttributes(ctx, d),
 		Files:         is.FilesAttributes(ctx, d),
 		Environment:   is.EnvironmentAttributes(ctx, d),
 	}
+	if !is.Actor.IsNull() {
+		user, err := client.GetUser(ctx, is.Actor.ValueString())
+		if err != nil {
+			return nil, err
+		}
+		attr.ActorID = &user.User.ID
+	}
+
+	return attr, nil
 }
 
 func (is *infrastructureStack) FilesAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.StackFileAttributes {
@@ -88,7 +99,7 @@ func (is *infrastructureStack) From(stack *gqlclient.InfrastructureStackFragment
 	is.Approval = types.BoolPointerValue(stack.Approval)
 	is.ClusterId = types.StringValue(stack.Cluster.ID)
 	is.Repository.From(stack.Repository, stack.Git)
-	is.Configuration.From(stack.Configuration)
+	is.Configuration.From(ctx, stack.Configuration, d)
 	is.Files = infrastructureStackFilesFrom(stack.Files, is.Files, d)
 	is.Environment = infrastructureStackEnvironmentsFrom(stack.Environment, is.Environment, ctx, d)
 	is.Bindings.From(stack.ReadBindings, stack.WriteBindings, ctx, d)
@@ -168,29 +179,102 @@ func (isr *InfrastructureStackRepository) From(repository *gqlclient.GitReposito
 	isr.Folder = types.StringValue(ref.Folder)
 }
 
+type InfrastructureStackHookSpec struct {
+	// the command this hook will execute
+	Cmd types.String `tfsdk:"cmd"`
+
+	// optional arguments to pass to the command
+	Args types.List `tfsdk:"args"`
+
+	AfterStage types.String `tfsdk:"after_stage"`
+}
+
+var InfrastructureStackHookTypes = map[string]attr.Type{
+	"cmd":         types.StringType,
+	"args":        types.ListType{ElemType: types.StringType},
+	"after_stage": types.StringType,
+}
+
+func infrastructureStackHooksFrom(ctx context.Context, hooks []*gqlclient.StackHookFragment, configHooks types.Set, d diag.Diagnostics) types.Set {
+	if len(hooks) == 0 {
+		return configHooks
+	}
+
+	values := make([]attr.Value, len(hooks))
+
+	for i, h := range hooks {
+		objValue, diags := types.ObjectValueFrom(ctx, InfrastructureStackHookTypes, InfrastructureStackHookSpec{
+			Cmd:        types.StringValue(h.Cmd),
+			Args:       infrastructureStackContainerSpecArgsFrom(h.Args, ctx, d),
+			AfterStage: types.StringValue(h.AfterStage.String()),
+		})
+		values[i] = objValue
+		d.Append(diags...)
+	}
+
+	setValue, diags := types.SetValue(basetypes.ObjectType{AttrTypes: InfrastructureStackHookTypes}, values)
+	d.Append(diags...)
+	return setValue
+}
+
+func (sh *InfrastructureStackHookSpec) Attributes(ctx context.Context, d diag.Diagnostics) *gqlclient.StackHookAttributes {
+	if sh == nil {
+		return &gqlclient.StackHookAttributes{}
+	}
+
+	args := make([]types.String, len(sh.Args.Elements()))
+	d.Append(sh.Args.ElementsAs(ctx, &args, false)...)
+	return &gqlclient.StackHookAttributes{
+		Cmd: sh.Cmd.ValueString(),
+		Args: algorithms.Map(args, func(v types.String) *string {
+			return v.ValueStringPointer()
+		}),
+		AfterStage: gqlclient.StepStage(sh.AfterStage.ValueString()),
+	}
+}
+
 type InfrastructureStackConfiguration struct {
 	Image   types.String `tfsdk:"image"`
 	Version types.String `tfsdk:"version"`
+	Hooks   types.Set    `tfsdk:"hooks"`
 }
 
-func (isc *InfrastructureStackConfiguration) Attributes() gqlclient.StackConfigurationAttributes {
+func (isc *InfrastructureStackConfiguration) HooksAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.StackHookAttributes {
+	if isc.Hooks.IsNull() {
+		return nil
+	}
+
+	result := make([]*gqlclient.StackHookAttributes, 0, len(isc.Hooks.Elements()))
+	elements := make([]InfrastructureStackHookSpec, len(isc.Hooks.Elements()))
+	d.Append(isc.Hooks.ElementsAs(ctx, &elements, false)...)
+
+	for _, hook := range elements {
+		result = append(result, hook.Attributes(ctx, d))
+	}
+
+	return result
+}
+
+func (isc *InfrastructureStackConfiguration) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.StackConfigurationAttributes {
 	if isc == nil {
 		return gqlclient.StackConfigurationAttributes{}
 	}
 
 	return gqlclient.StackConfigurationAttributes{
 		Image:   isc.Image.ValueStringPointer(),
-		Version: isc.Version.ValueString(),
+		Version: isc.Version.ValueStringPointer(),
+		Hooks:   isc.HooksAttributes(ctx, d),
 	}
 }
 
-func (isc *InfrastructureStackConfiguration) From(configuration *gqlclient.StackConfigurationFragment) {
+func (isc *InfrastructureStackConfiguration) From(ctx context.Context, configuration *gqlclient.StackConfigurationFragment, d diag.Diagnostics) {
 	if isc == nil || configuration == nil {
 		return
 	}
 
 	isc.Image = types.StringPointerValue(configuration.Image)
 	isc.Version = types.StringValue(configuration.Version)
+	isc.Hooks = infrastructureStackHooksFrom(ctx, configuration.Hooks, isc.Hooks, d)
 }
 
 type InfrastructureStackEnvironment struct {
