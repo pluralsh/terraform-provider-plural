@@ -56,6 +56,10 @@ type cluster struct {
 // }
 
 func (c *cluster) TagsAttribute(ctx context.Context, d diag.Diagnostics) []*console.TagAttributes {
+	if c.Tags.IsNull() {
+		return nil
+	}
+
 	result := make([]*console.TagAttributes, 0)
 	elements := make(map[string]types.String, len(c.Tags.Elements()))
 	d.Append(c.Tags.ElementsAs(ctx, &elements, false)...)
@@ -107,7 +111,7 @@ func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.
 	c.Handle = types.StringPointerValue(cl.Handle)
 	// c.DesiredVersion = c.ClusterVersionFrom(cl.Provider, cl.Version, cl.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cl.Protect)
-	c.Tags = common.ClusterTagsFrom(cl.Tags, d)
+	c.Tags = common.TagsFrom(cl.Tags, c.Tags, d)
 	// c.ProviderId = common.ClusterProviderIdFrom(cl.Provider)
 	// c.NodePools = common.ClusterNodePoolsFrom(cl.NodePools, c.NodePools, ctx, d)
 	c.Metadata = types.StringValue(string(metadata))
@@ -120,7 +124,7 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, ctx context.Context, d d
 	c.Handle = types.StringPointerValue(cc.CreateCluster.Handle)
 	// c.DesiredVersion = c.ClusterVersionFrom(cc.CreateCluster.Provider, cc.CreateCluster.Version, cc.CreateCluster.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
-	c.Tags = common.ClusterTagsFrom(cc.CreateCluster.Tags, d)
+	c.Tags = common.TagsFrom(cc.CreateCluster.Tags, c.Tags, d)
 	// c.ProviderId = common.ClusterProviderIdFrom(cc.CreateCluster.Provider)
 	// c.NodePools = common.ClusterNodePoolsFrom(cc.CreateCluster.NodePools, c.NodePools, ctx, d)
 }

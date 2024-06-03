@@ -39,7 +39,7 @@ func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.
 	c.Handle = types.StringPointerValue(cl.Handle)
 	c.DesiredVersion = types.StringPointerValue(cl.Version)
 	c.Protect = types.BoolPointerValue(cl.Protect)
-	c.Tags = common.ClusterTagsFrom(cl.Tags, d)
+	c.Tags = common.TagsFrom(cl.Tags, c.Tags, d)
 	c.Metadata = types.StringValue(string(metadata))
 	c.ProviderId = common.ClusterProviderIdFrom(cl.Provider)
 	c.NodePools = common.ClusterNodePoolsFrom(cl.NodePools, c.NodePools, ctx, d)

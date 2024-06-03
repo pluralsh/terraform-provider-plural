@@ -3,6 +3,7 @@ package resource
 import (
 	"context"
 	"strings"
+
 	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -30,7 +31,8 @@ func (g *globalService) From(response *gqlclient.GlobalServiceFragment, d diag.D
 	if response.Provider != nil {
 		g.ProviderId = types.StringValue(response.Provider.ID)
 	}
-	g.Tags = common.ClusterTagsFrom(response.Tags, d)
+	g.Tags = common.TagsFrom(response.Tags, g.Tags, d)
+
 }
 
 func (g *globalService) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.GlobalServiceAttributes {
@@ -47,6 +49,10 @@ func (g *globalService) Attributes(ctx context.Context, d diag.Diagnostics) gqlc
 }
 
 func (g *globalService) TagsAttribute(ctx context.Context, d diag.Diagnostics) []*gqlclient.TagAttributes {
+	if g.Tags.IsNull() {
+		return nil
+	}
+
 	result := make([]*gqlclient.TagAttributes, 0)
 	elements := make(map[string]types.String, len(g.Tags.Elements()))
 	d.Append(g.Tags.ElementsAs(ctx, &elements, false)...)

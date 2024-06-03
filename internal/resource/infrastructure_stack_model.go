@@ -109,7 +109,7 @@ func (is *infrastructureStack) From(stack *gqlclient.InfrastructureStackFragment
 func infrastructureStackFilesFrom(files []*gqlclient.StackFileFragment, config types.Map, d diag.Diagnostics) types.Map {
 	if len(files) == 0 {
 		// Rewriting config to state to avoid inconsistent result errors.
-		// This could happen, for example, when sending "nil" to API and "[]" is returned as a result.
+		// This could happen, for example, when sending "nil" to API and "{}" is returned as a result.
 		return config
 	}
 
