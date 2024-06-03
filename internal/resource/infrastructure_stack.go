@@ -58,7 +58,12 @@ func (r *InfrastructureStackResource) Create(ctx context.Context, req resource.C
 		return
 	}
 
-	sd, err := r.client.CreateStack(ctx, data.Attributes(ctx, resp.Diagnostics))
+	attr, err := data.Attributes(ctx, resp.Diagnostics, r.client)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get attributes, got error: %s", err))
+		return
+	}
+	sd, err := r.client.CreateStack(ctx, *attr)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create infrastructure stack, got error: %s", err))
 		return
@@ -92,7 +97,12 @@ func (r *InfrastructureStackResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
-	_, err := r.client.UpdateStack(ctx, data.Id.ValueString(), data.Attributes(ctx, resp.Diagnostics))
+	attr, err := data.Attributes(ctx, resp.Diagnostics, r.client)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get attributes, got error: %s", err))
+		return
+	}
+	_, err = r.client.UpdateStack(ctx, data.Id.ValueString(), *attr)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update infrastructure stack, got error: %s", err))
 		return

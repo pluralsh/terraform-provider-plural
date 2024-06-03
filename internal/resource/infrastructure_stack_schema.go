@@ -51,6 +51,11 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
 			},
+			"actor": schema.StringAttribute{
+				Description:         "The User email to use for default Plural authentication in this stack.",
+				MarkdownDescription: "The User email to use for default Plural authentication in this stack.",
+				Optional:            true,
+			},
 			"cluster_id": schema.StringAttribute{
 				Description:         "The cluster on which the stack will be applied.",
 				MarkdownDescription: "The cluster on which the stack will be applied.",
@@ -93,6 +98,27 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 						Description:         "The semver of the tool you wish to use.",
 						MarkdownDescription: "The semver of the tool you wish to use.",
 						Required:            true,
+					},
+					"hooks": schema.SetNestedAttribute{
+						Description:         "The hooks to customize execution for this stack.",
+						MarkdownDescription: "The hooks to customize execution for this stack.",
+						Optional:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"cmd": schema.StringAttribute{
+									Required: true,
+								},
+								"args": schema.ListAttribute{
+									Description:         "Arguments to pass to the command when executing it.",
+									MarkdownDescription: "Arguments to pass to the command when executing it.",
+									Optional:            true,
+									ElementType:         types.StringType,
+								},
+								"after_stage": schema.StringAttribute{
+									Required: true,
+								},
+							},
+						},
 					},
 				},
 			},
