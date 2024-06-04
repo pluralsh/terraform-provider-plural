@@ -39,6 +39,7 @@ func (csr *customStackRun) From(customStackRun *gqlclient.CustomStackRunFragment
 	csr.Documentation = types.StringPointerValue(customStackRun.Documentation)
 	csr.StackId = types.StringPointerValue(customStackRun.Stack.ID)
 	csr.Commands = customStackRunCommandsFrom(customStackRun.Commands, csr.Commands, ctx, d)
+	csr.Configuration = customStackRunConfigurationFrom(customStackRun.Configuration, csr.Configuration, ctx, d)
 	// TODO Configuration
 }
 
@@ -85,4 +86,66 @@ func customStackRunCommandArgsFrom(values []*string, ctx context.Context, d diag
 	setValue, diags := types.SetValueFrom(ctx, types.StringType, values)
 	d.Append(diags...)
 	return setValue
+}
+
+type CustomStackRunConfiguration struct {
+	Type          types.String                          `tfsdk:"type"`
+	Name          types.String                          `tfsdk:"name"`
+	Default       types.String                          `tfsdk:"default"`
+	Documentation types.String                          `tfsdk:"documentation"`
+	Longform      types.String                          `tfsdk:"longform"`
+	Placeholder   types.String                          `tfsdk:"placeholder"`
+	Optional      types.Bool                            `tfsdk:"optional"`
+	Condition     *CustomStackRunConfigurationCondition `tfsdk:"condition"`
+}
+
+var CustomStackRunConfigurationAttrTypes = map[string]attr.Type{
+	"type":          types.StringType,
+	"name":          types.StringType,
+	"default":       types.StringType,
+	"documentation": types.StringType,
+	"longform":      types.StringType,
+	"placeholder":   types.StringType,
+	"optional":      types.BoolType,
+	"condition":     types.ObjectType{AttrTypes: CustomStackRunCommandConditionAttrTypes},
+}
+
+func customStackRunConfigurationFrom(configs []*gqlclient.PrConfigurationFragment, config types.Set, ctx context.Context, d diag.Diagnostics) types.Set {
+	if len(configs) == 0 {
+		// Rewriting config to state to avoid inconsistent result errors.
+		// This could happen, for example, when sending "nil" to API and "[]" is returned as a result.
+		return config
+	}
+
+	values := make([]attr.Value, len(configs))
+	for i, config := range configs {
+		objValue, diags := types.ObjectValueFrom(ctx, CustomStackRunConfigurationAttrTypes, CustomStackRunConfiguration{
+			Type:          types.StringValue(string(config.Type)),
+			Name:          types.StringValue(config.Name),
+			Default:       types.StringPointerValue(config.Default),
+			Documentation: types.StringPointerValue(config.Documentation),
+			Longform:      types.StringPointerValue(config.Longform),
+			Placeholder:   types.StringPointerValue(config.Placeholder),
+			Optional:      types.BoolPointerValue(config.Optional),
+			Condition:     nil, // TODO
+		})
+		values[i] = objValue
+		d.Append(diags...)
+	}
+
+	setValue, diags := types.SetValue(basetypes.ObjectType{AttrTypes: CustomStackRunConfigurationAttrTypes}, values)
+	d.Append(diags...)
+	return setValue
+}
+
+type CustomStackRunConfigurationCondition struct {
+	Operation types.String `tfsdk:"operation"`
+	Field     types.String `tfsdk:"field"`
+	Value     types.String `tfsdk:"value"`
+}
+
+var CustomStackRunCommandConditionAttrTypes = map[string]attr.Type{
+	"operation": types.StringType,
+	"field":     types.StringType,
+	"value":     types.StringType,
 }
