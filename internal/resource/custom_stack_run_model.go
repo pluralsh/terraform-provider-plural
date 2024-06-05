@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	gqlclient "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/polly/algorithms"
 )
 
 type customStackRun struct {
@@ -26,11 +27,34 @@ func (csr *customStackRun) Attributes(ctx context.Context, d diag.Diagnostics, c
 		Name:          csr.Name.ValueString(),
 		Documentation: csr.Documentation.ValueStringPointer(),
 		StackID:       csr.StackId.ValueStringPointer(),
-		Commands:      nil, // TODO
+		Commands:      csr.commandsAttribute(ctx, d),
 		Configuration: nil, // TODO
 	}
 
 	return attr, nil
+}
+
+func (csr *customStackRun) commandsAttribute(ctx context.Context, d diag.Diagnostics) []*gqlclient.CommandAttributes {
+	if csr.Commands.IsNull() {
+		return nil
+	}
+
+	result := make([]*gqlclient.CommandAttributes, 0, len(csr.Commands.Elements()))
+	elements := make([]CustomStackRunCommand, len(csr.Commands.Elements()))
+	d.Append(csr.Commands.ElementsAs(ctx, &elements, false)...)
+
+	for _, cmd := range elements {
+		args := make([]types.String, len(cmd.Args.Elements()))
+		d.Append(cmd.Args.ElementsAs(ctx, &args, false)...)
+
+		result = append(result, &gqlclient.CommandAttributes{
+			Cmd:  cmd.Cmd.ValueString(),
+			Args: algorithms.Map(args, func(v types.String) *string { return v.ValueStringPointer() }),
+			Dir:  cmd.Dir.ValueStringPointer(),
+		})
+	}
+
+	return result
 }
 
 func (csr *customStackRun) From(customStackRun *gqlclient.CustomStackRunFragment, ctx context.Context, d diag.Diagnostics) {
