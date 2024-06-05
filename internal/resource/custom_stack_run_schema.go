@@ -31,7 +31,7 @@ func (r *CustomStackRunResource) schema() schema.Schema {
 			"stack_id": schema.StringAttribute{
 				Description:         "The ID of the stack to attach it to.",
 				MarkdownDescription: "The ID of the stack to attach it to.",
-				Required:            true,
+				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"commands": schema.SetNestedAttribute{
