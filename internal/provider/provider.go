@@ -185,6 +185,7 @@ func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource
 		r.NewServiceDeploymentResource,
 		r.NewServiceContextResource,
 		r.NewInfrastructureStackResource,
+		r.NewCustomStackRunResource,
 	}
 }
 
