@@ -23,15 +23,13 @@ type customStackRun struct {
 }
 
 func (csr *customStackRun) Attributes(ctx context.Context, d diag.Diagnostics, client *client.Client) (*gqlclient.CustomStackRunAttributes, error) {
-	attr := &gqlclient.CustomStackRunAttributes{
+	return &gqlclient.CustomStackRunAttributes{
 		Name:          csr.Name.ValueString(),
 		Documentation: csr.Documentation.ValueStringPointer(),
 		StackID:       csr.StackId.ValueStringPointer(),
 		Commands:      csr.commandsAttribute(ctx, d),
-		Configuration: nil, // TODO
-	}
-
-	return attr, nil
+		Configuration: csr.configurationAttribute(ctx, d),
+	}, nil
 }
 
 func (csr *customStackRun) commandsAttribute(ctx context.Context, d diag.Diagnostics) []*gqlclient.CommandAttributes {
@@ -51,6 +49,31 @@ func (csr *customStackRun) commandsAttribute(ctx context.Context, d diag.Diagnos
 			Cmd:  cmd.Cmd.ValueString(),
 			Args: algorithms.Map(args, func(v types.String) *string { return v.ValueStringPointer() }),
 			Dir:  cmd.Dir.ValueStringPointer(),
+		})
+	}
+
+	return result
+}
+
+func (csr *customStackRun) configurationAttribute(ctx context.Context, d diag.Diagnostics) []*gqlclient.PrConfigurationAttributes {
+	if csr.Configuration.IsNull() {
+		return nil
+	}
+
+	result := make([]*gqlclient.PrConfigurationAttributes, 0, len(csr.Commands.Elements()))
+	elements := make([]CustomStackRunConfiguration, len(csr.Commands.Elements()))
+	d.Append(csr.Commands.ElementsAs(ctx, &elements, false)...)
+
+	for _, cfg := range elements {
+		result = append(result, &gqlclient.PrConfigurationAttributes{
+			Type:          gqlclient.ConfigurationType(cfg.Type.ValueString()),
+			Name:          cfg.Name.ValueString(),
+			Default:       cfg.Default.ValueStringPointer(),
+			Documentation: cfg.Documentation.ValueStringPointer(),
+			Longform:      cfg.Longform.ValueStringPointer(),
+			Placeholder:   cfg.Placeholder.ValueStringPointer(),
+			Optional:      cfg.Optional.ValueBoolPointer(),
+			Condition:     cfg.Condition.Attributes(),
 		})
 	}
 
@@ -180,4 +203,16 @@ var CustomStackRunCommandConditionAttrTypes = map[string]attr.Type{
 	"operation": types.StringType,
 	"field":     types.StringType,
 	"value":     types.StringType,
+}
+
+func (csrcc *CustomStackRunConfigurationCondition) Attributes() *gqlclient.ConditionAttributes {
+	if csrcc == nil {
+		return nil
+	}
+
+	return &gqlclient.ConditionAttributes{
+		Operation: gqlclient.Operation(csrcc.Operation.ValueString()),
+		Field:     csrcc.Field.ValueString(),
+		Value:     csrcc.Value.ValueStringPointer(),
+	}
 }
