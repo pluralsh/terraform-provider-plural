@@ -25,6 +25,7 @@ description: |-
 
 ### Optional
 
+- `actor` (String) The User email to use for default Plural authentication in this stack.
 - `approval` (Boolean) Determines whether to require approval.
 - `bindings` (Attributes) Read and write policies of this stack. (see [below for nested schema](#nestedatt--bindings))
 - `detach` (Boolean) Determines behavior during resource destruction, if true it will detach resource instead of deleting it.
@@ -45,7 +46,21 @@ Required:
 
 Optional:
 
+- `hooks` (Attributes Set) The hooks to customize execution for this stack. (see [below for nested schema](#nestedatt--configuration--hooks))
 - `image` (String) Optional custom image you might want to use.
+
+<a id="nestedatt--configuration--hooks"></a>
+### Nested Schema for `configuration.hooks`
+
+Required:
+
+- `after_stage` (String)
+- `cmd` (String)
+
+Optional:
+
+- `args` (List of String) Arguments to pass to the command when executing it.
+
 
 
 <a id="nestedatt--repository"></a>
