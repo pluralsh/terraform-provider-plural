@@ -40,7 +40,6 @@ func (csr *customStackRun) From(customStackRun *gqlclient.CustomStackRunFragment
 	csr.StackId = types.StringPointerValue(customStackRun.Stack.ID)
 	csr.Commands = customStackRunCommandsFrom(customStackRun.Commands, csr.Commands, ctx, d)
 	csr.Configuration = customStackRunConfigurationFrom(customStackRun.Configuration, csr.Configuration, ctx, d)
-	// TODO Configuration
 }
 
 type CustomStackRunCommand struct {
@@ -118,17 +117,26 @@ func customStackRunConfigurationFrom(configs []*gqlclient.PrConfigurationFragmen
 	}
 
 	values := make([]attr.Value, len(configs))
-	for i, config := range configs {
-		objValue, diags := types.ObjectValueFrom(ctx, CustomStackRunConfigurationAttrTypes, CustomStackRunConfiguration{
-			Type:          types.StringValue(string(config.Type)),
-			Name:          types.StringValue(config.Name),
-			Default:       types.StringPointerValue(config.Default),
-			Documentation: types.StringPointerValue(config.Documentation),
-			Longform:      types.StringPointerValue(config.Longform),
-			Placeholder:   types.StringPointerValue(config.Placeholder),
-			Optional:      types.BoolPointerValue(config.Optional),
-			Condition:     nil, // TODO
-		})
+	for i, cfg := range configs {
+		value := CustomStackRunConfiguration{
+			Type:          types.StringValue(string(cfg.Type)),
+			Name:          types.StringValue(cfg.Name),
+			Default:       types.StringPointerValue(cfg.Default),
+			Documentation: types.StringPointerValue(cfg.Documentation),
+			Longform:      types.StringPointerValue(cfg.Longform),
+			Placeholder:   types.StringPointerValue(cfg.Placeholder),
+			Optional:      types.BoolPointerValue(cfg.Optional),
+		}
+
+		if cfg.Condition != nil {
+			value.Condition = &CustomStackRunConfigurationCondition{
+				Operation: types.StringValue(string(cfg.Condition.Operation)),
+				Field:     types.StringValue(cfg.Condition.Field),
+				Value:     types.StringPointerValue(cfg.Condition.Value),
+			}
+		}
+
+		objValue, diags := types.ObjectValueFrom(ctx, CustomStackRunConfigurationAttrTypes, value)
 		values[i] = objValue
 		d.Append(diags...)
 	}
