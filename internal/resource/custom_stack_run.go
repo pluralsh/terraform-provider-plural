@@ -3,14 +3,12 @@ package resource
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 var _ resource.Resource = &CustomStackRunResource{}
@@ -73,21 +71,8 @@ func (r *CustomStackRunResource) Create(ctx context.Context, req resource.Create
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
-func (r *CustomStackRunResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	data := new(customStackRun)
-	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	response, err := r.client.GetStackRun(ctx, data.Id.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read custom stack run, got error: %s", err))
-		return
-	}
-
-	data.From(response.StackRun, ctx, resp.Diagnostics)
-	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
+func (r *CustomStackRunResource) Read(_ context.Context, _ resource.ReadRequest, _ *resource.ReadResponse) {
+	// Ignore.
 }
 
 func (r *CustomStackRunResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -123,21 +108,6 @@ func (r *CustomStackRunResource) Delete(ctx context.Context, req resource.Delete
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete custom stack run, got error: %s", err))
 		return
 	}
-
-	// TODO: Is it needed?
-	err = wait.WaitForWithContext(ctx, client.Ticker(5*time.Second), func(ctx context.Context) (bool, error) {
-		_, err := r.client.DeleteCustomStackRun(ctx, data.Id.ValueString())
-		if client.IsNotFound(err) {
-			return true, nil
-		}
-
-		return false, err
-	})
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error during watiting for custom stack run to be deleted, got error: %s", err))
-		return
-	}
-
 }
 
 func (r *CustomStackRunResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
