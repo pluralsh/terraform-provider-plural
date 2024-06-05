@@ -1,10 +1,13 @@
 package resource
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	gqlclient "github.com/pluralsh/console-client-go"
 )
 
 func (r *CustomStackRunResource) schema() schema.Schema {
@@ -65,6 +68,16 @@ func (r *CustomStackRunResource) schema() schema.Schema {
 					Attributes: map[string]schema.Attribute{
 						"type": schema.StringAttribute{
 							Required: true,
+							Validators: []validator.String{stringvalidator.OneOf(
+								string(gqlclient.ConfigurationTypeString),
+								string(gqlclient.ConfigurationTypeInt),
+								string(gqlclient.ConfigurationTypeBool),
+								string(gqlclient.ConfigurationTypeDomain),
+								string(gqlclient.ConfigurationTypeBucket),
+								string(gqlclient.ConfigurationTypeFile),
+								string(gqlclient.ConfigurationTypeFunction),
+								string(gqlclient.ConfigurationTypePassword),
+							)},
 						},
 						"name": schema.StringAttribute{
 							Required: true,
@@ -89,6 +102,16 @@ func (r *CustomStackRunResource) schema() schema.Schema {
 							Attributes: map[string]schema.Attribute{
 								"operation": schema.StringAttribute{
 									Required: true,
+									Validators: []validator.String{stringvalidator.OneOf(
+										string(gqlclient.OperationNot),
+										string(gqlclient.OperationGt),
+										string(gqlclient.OperationLt),
+										string(gqlclient.OperationEq),
+										string(gqlclient.OperationGte),
+										string(gqlclient.OperationLte),
+										string(gqlclient.OperationPrefix),
+										string(gqlclient.OperationSuffix),
+									)},
 								},
 								"field": schema.StringAttribute{
 									Required: true,

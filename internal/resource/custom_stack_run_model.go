@@ -85,8 +85,8 @@ func (csr *customStackRun) From(customStackRun *gqlclient.CustomStackRunFragment
 	csr.Name = types.StringValue(customStackRun.Name)
 	csr.Documentation = types.StringPointerValue(customStackRun.Documentation)
 	csr.StackId = types.StringPointerValue(customStackRun.Stack.ID)
-	csr.Commands = customStackRunCommandsFrom(customStackRun.Commands, csr.Commands, ctx, d)
-	csr.Configuration = customStackRunConfigurationFrom(customStackRun.Configuration, csr.Configuration, ctx, d)
+	csr.Commands = commandsFrom(customStackRun.Commands, csr.Commands, ctx, d)
+	csr.Configuration = configurationFrom(customStackRun.Configuration, csr.Configuration, ctx, d)
 }
 
 type CustomStackRunCommand struct {
@@ -101,7 +101,7 @@ var CustomStackRunCommandAttrTypes = map[string]attr.Type{
 	"dir":  types.StringType,
 }
 
-func customStackRunCommandsFrom(commands []*gqlclient.StackCommandFragment, config types.Set, ctx context.Context, d diag.Diagnostics) types.Set {
+func commandsFrom(commands []*gqlclient.StackCommandFragment, config types.Set, ctx context.Context, d diag.Diagnostics) types.Set {
 	if len(commands) == 0 {
 		// Rewriting config to state to avoid inconsistent result errors.
 		// This could happen, for example, when sending "nil" to API and "[]" is returned as a result.
@@ -112,7 +112,7 @@ func customStackRunCommandsFrom(commands []*gqlclient.StackCommandFragment, conf
 	for i, command := range commands {
 		objValue, diags := types.ObjectValueFrom(ctx, CustomStackRunCommandAttrTypes, CustomStackRunCommand{
 			Cmd:  types.StringValue(command.Cmd),
-			Args: customStackRunCommandArgsFrom(command.Args, ctx, d),
+			Args: commandArgsFrom(command.Args, ctx, d),
 			Dir:  types.StringPointerValue(command.Dir),
 		})
 		values[i] = objValue
@@ -124,7 +124,7 @@ func customStackRunCommandsFrom(commands []*gqlclient.StackCommandFragment, conf
 	return setValue
 }
 
-func customStackRunCommandArgsFrom(values []*string, ctx context.Context, d diag.Diagnostics) types.Set {
+func commandArgsFrom(values []*string, ctx context.Context, d diag.Diagnostics) types.Set {
 	if values == nil {
 		return types.SetNull(types.StringType)
 	}
@@ -156,7 +156,7 @@ var CustomStackRunConfigurationAttrTypes = map[string]attr.Type{
 	"condition":     types.ObjectType{AttrTypes: CustomStackRunCommandConditionAttrTypes},
 }
 
-func customStackRunConfigurationFrom(configs []*gqlclient.PrConfigurationFragment, config types.Set, ctx context.Context, d diag.Diagnostics) types.Set {
+func configurationFrom(configs []*gqlclient.PrConfigurationFragment, config types.Set, ctx context.Context, d diag.Diagnostics) types.Set {
 	if len(configs) == 0 {
 		// Rewriting config to state to avoid inconsistent result errors.
 		// This could happen, for example, when sending "nil" to API and "[]" is returned as a result.
