@@ -60,9 +60,9 @@ func (csr *customStackRun) configurationAttribute(ctx context.Context, d diag.Di
 		return nil
 	}
 
-	result := make([]*gqlclient.PrConfigurationAttributes, 0, len(csr.Commands.Elements()))
-	elements := make([]CustomStackRunConfiguration, len(csr.Commands.Elements()))
-	d.Append(csr.Commands.ElementsAs(ctx, &elements, false)...)
+	result := make([]*gqlclient.PrConfigurationAttributes, 0, len(csr.Configuration.Elements()))
+	elements := make([]CustomStackRunConfiguration, len(csr.Configuration.Elements()))
+	d.Append(csr.Configuration.ElementsAs(ctx, &elements, false)...)
 
 	for _, cfg := range elements {
 		result = append(result, &gqlclient.PrConfigurationAttributes{
