@@ -61,18 +61,31 @@ func (r *CustomStackRunResource) Create(ctx context.Context, req resource.Create
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get attributes, got error: %s", err))
 		return
 	}
-	sd, err := r.client.UpsertCustomStackRun(ctx, *attr)
+	sd, err := r.client.CreateCustomStackRun(ctx, *attr)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create custom stack run, got error: %s", err))
 		return
 	}
 
-	data.From(sd.UpsertCustomStackRun, ctx, resp.Diagnostics)
+	data.From(sd.CreateCustomStackRun, ctx, resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
-func (r *CustomStackRunResource) Read(_ context.Context, _ resource.ReadRequest, _ *resource.ReadResponse) {
-	// Ignore.
+func (r *CustomStackRunResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	data := new(customStackRun)
+	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	response, err := r.client.GetCustomStackRun(ctx, data.Id.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read custom stack run, got error: %s", err))
+		return
+	}
+
+	data.From(response.CustomStackRun, ctx, resp.Diagnostics)
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
 func (r *CustomStackRunResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -87,7 +100,7 @@ func (r *CustomStackRunResource) Update(ctx context.Context, req resource.Update
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get attributes, got error: %s", err))
 		return
 	}
-	_, err = r.client.UpsertCustomStackRun(ctx, *attr)
+	_, err = r.client.UpdateCustomStackRun(ctx, data.Id.ValueString(), *attr)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update custom stack run, got error: %s", err))
 		return
