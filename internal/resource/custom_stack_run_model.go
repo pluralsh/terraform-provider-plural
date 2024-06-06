@@ -84,7 +84,11 @@ func (csr *customStackRun) From(customStackRun *gqlclient.CustomStackRunFragment
 	csr.Id = types.StringValue(customStackRun.ID)
 	csr.Name = types.StringValue(customStackRun.Name)
 	csr.Documentation = types.StringPointerValue(customStackRun.Documentation)
-	csr.StackId = types.StringPointerValue(customStackRun.Stack.ID)
+
+	if customStackRun.Stack != nil {
+		csr.StackId = types.StringPointerValue(customStackRun.Stack.ID)
+	}
+
 	csr.Commands = commandsFrom(customStackRun.Commands, csr.Commands, ctx, d)
 	csr.Configuration = configurationFrom(customStackRun.Configuration, csr.Configuration, ctx, d)
 }
