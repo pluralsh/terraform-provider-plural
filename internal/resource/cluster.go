@@ -145,17 +145,21 @@ func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 			return
 		}
 
-		err = wait.PollWithContext(ctx, 10*time.Second, 10*time.Minute, func(ctx context.Context) (bool, error) {
+		if err = wait.PollWithContext(ctx, 10*time.Second, 10*time.Minute, func(ctx context.Context) (bool, error) {
 			response, err := r.client.GetCluster(ctx, data.Id.ValueStringPointer())
 			if client.IsNotFound(err) || response.Cluster == nil {
 				return true, nil
 			}
 
 			return false, err
-		})
-		if err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while watiting for cluster to be deleted, got error: %s", err))
-			return
+		}); err != nil {
+			resp.Diagnostics.AddWarning("Client Error", fmt.Sprintf("Error while watiting for cluster to be deleted, got error: %s", err))
+
+			_, err = r.client.DetachCluster(ctx, data.Id.ValueString())
+			if err != nil {
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to detach cluster, got error: %s", err))
+				return
+			}
 		}
 	}
 }
