@@ -11,9 +11,9 @@ import (
 )
 
 type rbac struct {
-	ClusterId types.String            `tfsdk:"cluster_id"`
-	ServiceId types.String            `tfsdk:"service_id"`
-	Bindings  *common.ClusterBindings `tfsdk:"rbac"`
+	ClusterId types.String     `tfsdk:"cluster_id"`
+	ServiceId types.String     `tfsdk:"service_id"`
+	Bindings  *common.Bindings `tfsdk:"rbac"`
 }
 
 func (g *rbac) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.RbacAttributes {

@@ -21,10 +21,10 @@ type cluster struct {
 	// DesiredVersion types.String            `tfsdk:"desired_version"`
 	// ProviderId types.String            `tfsdk:"provider_id"`
 	// Cloud    types.String            `tfsdk:"cloud"`
-	Protect  types.Bool              `tfsdk:"protect"`
-	Tags     types.Map               `tfsdk:"tags"`
-	Metadata types.String            `tfsdk:"metadata"`
-	Bindings *common.ClusterBindings `tfsdk:"bindings"`
+	Protect  types.Bool       `tfsdk:"protect"`
+	Tags     types.Map        `tfsdk:"tags"`
+	Metadata types.String     `tfsdk:"metadata"`
+	Bindings *common.Bindings `tfsdk:"bindings"`
 	// NodePools      types.Map               `tfsdk:"node_pools"`
 	// CloudSettings *ClusterCloudSettings `tfsdk:"cloud_settings"`
 	HelmRepoUrl types.String `tfsdk:"helm_repo_url"`

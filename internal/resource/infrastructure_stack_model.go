@@ -27,7 +27,7 @@ type infrastructureStack struct {
 	Files         types.Map                         `tfsdk:"files"`
 	Environment   types.Set                         `tfsdk:"environment"`
 	JobSpec       *InfrastructureStackJobSpec       `tfsdk:"job_spec"`
-	Bindings      *common.ClusterBindings           `tfsdk:"bindings"`
+	Bindings      *common.Bindings                  `tfsdk:"bindings"`
 }
 
 func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostics, client *client.Client) (*gqlclient.StackAttributes, error) {
