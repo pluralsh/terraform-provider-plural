@@ -179,6 +179,7 @@ func (p *PluralProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		r.NewProjectResource,
 		r.NewClusterResource,
 		r.NewGitRepositoryResource,
 		r.NewProviderResource,

@@ -3,7 +3,6 @@ package resource
 import (
 	"context"
 
-	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -14,12 +13,12 @@ import (
 type project struct {
 	Id          types.String     `tfsdk:"id"`
 	Name        types.String     `tfsdk:"name"`
-	Default     types.Bool       `tfsdk:"default"`
 	Description types.String     `tfsdk:"description"`
+	Default     types.Bool       `tfsdk:"default"`
 	Bindings    *common.Bindings `tfsdk:"bindings"`
 }
 
-func (p *project) Attributes(ctx context.Context, d diag.Diagnostics, client *client.Client) (*gqlclient.ProjectAttributes, error) {
+func (p *project) Attributes(ctx context.Context, d diag.Diagnostics) (*gqlclient.ProjectAttributes, error) {
 	return &gqlclient.ProjectAttributes{
 		Name:          p.Name.ValueString(),
 		Description:   p.Description.ValueStringPointer(),
@@ -31,7 +30,7 @@ func (p *project) Attributes(ctx context.Context, d diag.Diagnostics, client *cl
 func (p *project) From(project *gqlclient.ProjectFragment, ctx context.Context, d diag.Diagnostics) {
 	p.Id = types.StringValue(project.ID)
 	p.Name = types.StringValue(project.Name)
-	p.Default = types.BoolPointerValue(project.Default)
 	p.Description = types.StringPointerValue(project.Description)
+	p.Default = types.BoolPointerValue(project.Default)
 	p.Bindings.From(project.ReadBindings, project.WriteBindings, ctx, d)
 }
