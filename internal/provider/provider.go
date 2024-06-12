@@ -192,6 +192,7 @@ func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource
 
 func (p *PluralProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		ds.NewProjectDataSource,
 		ds.NewClusterDataSource,
 		ds.NewGitRepositoryDataSource,
 		ds.NewProviderDataSource,
