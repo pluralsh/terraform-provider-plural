@@ -132,23 +132,31 @@ func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	_, err := r.client.DeleteCluster(ctx, data.Id.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete cluster, got error: %s", err))
-		return
-	}
-
-	err = wait.WaitForWithContext(ctx, client.Ticker(5*time.Second), func(ctx context.Context) (bool, error) {
-		response, err := r.client.GetCluster(ctx, data.Id.ValueStringPointer())
-		if client.IsNotFound(err) || response.Cluster == nil {
-			return true, nil
+	if data.Detach.ValueBool() {
+		_, err := r.client.DetachCluster(ctx, data.Id.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to detach cluster, got error: %s", err))
+			return
+		}
+	} else {
+		_, err := r.client.DeleteCluster(ctx, data.Id.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete cluster, got error: %s", err))
+			return
 		}
 
-		return false, err
-	})
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while watiting for cluster to be deleted, got error: %s", err))
-		return
+		err = wait.WaitForWithContext(ctx, client.Ticker(5*time.Second), func(ctx context.Context) (bool, error) {
+			response, err := r.client.GetCluster(ctx, data.Id.ValueStringPointer())
+			if client.IsNotFound(err) || response.Cluster == nil {
+				return true, nil
+			}
+
+			return false, err
+		})
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while watiting for cluster to be deleted, got error: %s", err))
+			return
+		}
 	}
 }
 
