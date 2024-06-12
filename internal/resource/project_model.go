@@ -10,7 +10,7 @@ import (
 	gqlclient "github.com/pluralsh/console-client-go"
 )
 
-type project struct {
+type Project struct {
 	Id          types.String     `tfsdk:"id"`
 	Name        types.String     `tfsdk:"name"`
 	Description types.String     `tfsdk:"description"`
@@ -18,7 +18,7 @@ type project struct {
 	Bindings    *common.Bindings `tfsdk:"bindings"`
 }
 
-func (p *project) Attributes(ctx context.Context, d diag.Diagnostics) (*gqlclient.ProjectAttributes, error) {
+func (p *Project) Attributes(ctx context.Context, d diag.Diagnostics) (*gqlclient.ProjectAttributes, error) {
 	return &gqlclient.ProjectAttributes{
 		Name:          p.Name.ValueString(),
 		Description:   p.Description.ValueStringPointer(),
@@ -27,7 +27,7 @@ func (p *project) Attributes(ctx context.Context, d diag.Diagnostics) (*gqlclien
 	}, nil
 }
 
-func (p *project) From(project *gqlclient.ProjectFragment, ctx context.Context, d diag.Diagnostics) {
+func (p *Project) From(project *gqlclient.ProjectFragment, ctx context.Context, d diag.Diagnostics) {
 	p.Id = types.StringValue(project.ID)
 	p.Name = types.StringValue(project.Name)
 	p.Description = types.StringPointerValue(project.Description)
