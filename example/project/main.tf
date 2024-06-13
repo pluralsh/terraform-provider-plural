@@ -12,13 +12,9 @@ provider "plural" {
 }
 
 data "plural_project" "default" {
-  name       = "default"
-  # id should work as well
+  name = "default"
 }
 
 data "plural_cluster" "cluster" {
   handle = "mgmt"
 }
-
-
-

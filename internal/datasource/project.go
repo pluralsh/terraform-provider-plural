@@ -8,8 +8,11 @@ import (
 	"terraform-provider-plural/internal/common"
 	"terraform-provider-plural/internal/resource"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 func NewProjectDataSource() datasource.DataSource {
@@ -30,19 +33,23 @@ func (d *projectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 			"id": schema.StringAttribute{
 				Description:         "Internal identifier of this project.",
 				MarkdownDescription: "Internal identifier of this project.",
+				Optional:            true,
 				Computed:            true,
+				Validators:          []validator.String{stringvalidator.ExactlyOneOf(path.MatchRoot("name"))},
 			},
 			"name": schema.StringAttribute{
 				Description:         "Human-readable name of this project.",
 				MarkdownDescription: "Human-readable name of this project.",
-				Required:            true,
+				Optional:            true,
+				Computed:            true,
+				Validators:          []validator.String{stringvalidator.ExactlyOneOf(path.MatchRoot("id"))},
 			},
 			"description": schema.StringAttribute{
 				Description:         "Description of this project.",
 				MarkdownDescription: "Description of this project.",
 				Optional:            true,
 			},
-			"default": schema.StringAttribute{
+			"default": schema.BoolAttribute{
 				Computed: true,
 			},
 			"bindings": schema.SingleNestedAttribute{
