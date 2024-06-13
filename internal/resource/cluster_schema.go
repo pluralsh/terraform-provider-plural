@@ -46,6 +46,13 @@ func (r *clusterResource) schema() schema.Schema {
 				Computed:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
+			"project_id": schema.StringAttribute{
+				Description:         "ID of the project that this cluster belongs to.",
+				MarkdownDescription: "ID of the project that this cluster belongs to.",
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+			},
 			// "version": schema.StringAttribute{
 			// 	Description:         "Kubernetes version to use for this cluster. Leave empty for bring your own cluster. Supported version ranges can be found at https://github.com/pluralsh/console/tree/master/static/k8s-versions.",
 			// 	MarkdownDescription: "Kubernetes version to use for this cluster. Leave empty for bring your own cluster. Supported version ranges can be found at https://github.com/pluralsh/console/tree/master/static/k8s-versions.",

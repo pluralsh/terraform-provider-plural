@@ -17,6 +17,7 @@ type cluster struct {
 	InsertedAt types.String `tfsdk:"inserted_at"`
 	Name       types.String `tfsdk:"name"`
 	Handle     types.String `tfsdk:"handle"`
+	ProjectId  types.String `tfsdk:"project_id"`
 	// Version    types.String `tfsdk:"version"`
 	// DesiredVersion types.String            `tfsdk:"desired_version"`
 	// ProviderId types.String            `tfsdk:"provider_id"`
@@ -73,8 +74,9 @@ func (c *cluster) TagsAttribute(ctx context.Context, d diag.Diagnostics) []*cons
 
 func (c *cluster) Attributes(ctx context.Context, d diag.Diagnostics) console.ClusterAttributes {
 	return console.ClusterAttributes{
-		Name:   c.Name.ValueString(),
-		Handle: c.Handle.ValueStringPointer(),
+		Name:      c.Name.ValueString(),
+		Handle:    c.Handle.ValueStringPointer(),
+		ProjectID: c.ProjectId.ValueStringPointer(),
 		// ProviderID:    c.ProviderId.ValueStringPointer(),
 		// Version:       c.Version.ValueStringPointer(),
 		Protect: c.Protect.ValueBoolPointer(),
@@ -109,6 +111,7 @@ func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.
 	c.InsertedAt = types.StringPointerValue(cl.InsertedAt)
 	c.Name = types.StringValue(cl.Name)
 	c.Handle = types.StringPointerValue(cl.Handle)
+	c.ProjectId = common.ProjectFrom(cl.Project)
 	// c.DesiredVersion = c.ClusterVersionFrom(cl.Provider, cl.Version, cl.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cl.Protect)
 	c.Tags = common.TagsFrom(cl.Tags, c.Tags, d)
@@ -122,6 +125,7 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, ctx context.Context, d d
 	c.InsertedAt = types.StringPointerValue(cc.CreateCluster.InsertedAt)
 	c.Name = types.StringValue(cc.CreateCluster.Name)
 	c.Handle = types.StringPointerValue(cc.CreateCluster.Handle)
+	c.ProjectId = common.ProjectFrom(cc.CreateCluster.Project)
 	// c.DesiredVersion = c.ClusterVersionFrom(cc.CreateCluster.Provider, cc.CreateCluster.Version, cc.CreateCluster.CurrentVersion)
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
 	c.Tags = common.TagsFrom(cc.CreateCluster.Tags, c.Tags, d)
