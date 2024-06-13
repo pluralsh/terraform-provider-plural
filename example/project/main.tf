@@ -25,19 +25,24 @@ resource "random_string" "random" {
   special = false
 }
 
-resource "plural_cluster" "byok" {
-  name       = "byok-${random_string.random.result}"
-  project_id = data.plural_project.default.id
-  kubeconfig = {
-    # Required, can be sourced from environment variables
-    # export PLURAL_KUBE_CONFIG_PATH to read from local file
-  }
+resource "plural_project" "test" {
+  name       = "test-${random_string.random.result}"
+  description = "test project created by terraform provider"
 }
 
+# resource "plural_cluster" "byok" {
+#   name       = "byok-${random_string.random.result}"
+#   project_id = data.plural_project.default.id
+#   kubeconfig = {
+#     # Required, can be sourced from environment variables
+#     # export PLURAL_KUBE_CONFIG_PATH to read from local file
+#   }
+# }
+#
 # data "plural_git_repository" "tf-hello" {
 #   url = "https://github.com/zreigz/tf-hello.git"
 # }
-
+#
 # resource "plural_infrastructure_stack" "tf-hello" {
 #   name       = "tf-hello-${random_string.random.result}"
 #   type       = "TERRAFORM"

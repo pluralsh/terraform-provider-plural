@@ -52,7 +52,7 @@ func (r *ProjectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
-			"default": schema.StringAttribute{
+			"default": schema.BoolAttribute{
 				Computed: true,
 			},
 			"bindings": schema.SingleNestedAttribute{
