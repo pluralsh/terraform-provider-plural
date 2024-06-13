@@ -56,6 +56,12 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 				MarkdownDescription: "The User email to use for default Plural authentication in this stack.",
 				Optional:            true,
 			},
+			"project_id": schema.StringAttribute{
+				Description:         "ID of the project that this stack belongs to.",
+				MarkdownDescription: "ID of the project that this stack belongs to.",
+				Computed:            true,
+				Optional:            true,
+			},
 			"cluster_id": schema.StringAttribute{
 				Description:         "The cluster on which the stack will be applied.",
 				MarkdownDescription: "The cluster on which the stack will be applied.",
