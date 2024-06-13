@@ -201,8 +201,6 @@ func (p *PluralProvider) DataSources(_ context.Context) []func() datasource.Data
 
 func New(version string) func() provider.Provider {
 	return func() provider.Provider {
-		return &PluralProvider{
-			version: version,
-		}
+		return &PluralProvider{version: version}
 	}
 }
