@@ -31,6 +31,14 @@ func (p *Project) From(project *gqlclient.ProjectFragment, ctx context.Context, 
 	p.Id = types.StringValue(project.ID)
 	p.Name = types.StringValue(project.Name)
 	p.Description = types.StringPointerValue(project.Description)
-	p.Default = types.BoolPointerValue(project.Default)
+	p.Default = defaultFrom(project.Default)
 	p.Bindings.From(project.ReadBindings, project.WriteBindings, ctx, d)
+}
+
+func defaultFrom(def *bool) types.Bool {
+	if def == nil {
+		return types.BoolValue(false)
+	}
+
+	return types.BoolValue(*def)
 }

@@ -27,7 +27,7 @@ resource "random_string" "random" {
 
 resource "plural_project" "test" {
   name       = "test-${random_string.random.result}"
-  description = "test project created by terraform provider"
+  description = "test project created by terraform"
 }
 
 # resource "plural_cluster" "byok" {
