@@ -2,7 +2,7 @@ terraform {
   required_providers {
     plural = {
       source  = "pluralsh/plural"
-      version = "0.0.1"
+      version = "0.2.1"
     }
   }
 }
@@ -12,8 +12,9 @@ provider "plural" {
 }
 
 resource "plural_cluster" "byok" {
-  name           = "byok"
-  protect        = "false"
+  name    = "byok"
+  protect = "false"
+  detach  = true
   kubeconfig = {
     # Required, can be sourced from environment variables
     # export PLURAL_KUBE_CONFIG_PATH to read from local file

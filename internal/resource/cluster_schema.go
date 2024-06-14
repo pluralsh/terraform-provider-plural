@@ -53,6 +53,13 @@ func (r *clusterResource) schema() schema.Schema {
 				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
+			"detach": schema.BoolAttribute{
+				Description:         "Determines behavior during resource destruction, if true it will detach resource instead of deleting it.",
+				MarkdownDescription: "Determines behavior during resource destruction, if true it will detach resource instead of deleting it.",
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
+			},
 			// "version": schema.StringAttribute{
 			// 	Description:         "Kubernetes version to use for this cluster. Leave empty for bring your own cluster. Supported version ranges can be found at https://github.com/pluralsh/console/tree/master/static/k8s-versions.",
 			// 	MarkdownDescription: "Kubernetes version to use for this cluster. Leave empty for bring your own cluster. Supported version ranges can be found at https://github.com/pluralsh/console/tree/master/static/k8s-versions.",

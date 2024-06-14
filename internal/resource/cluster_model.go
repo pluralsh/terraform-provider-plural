@@ -18,6 +18,7 @@ type cluster struct {
 	Name       types.String `tfsdk:"name"`
 	Handle     types.String `tfsdk:"handle"`
 	ProjectId  types.String `tfsdk:"project_id"`
+	Detach     types.Bool   `tfsdk:"detach"`
 	// Version    types.String `tfsdk:"version"`
 	// DesiredVersion types.String            `tfsdk:"desired_version"`
 	// ProviderId types.String            `tfsdk:"provider_id"`

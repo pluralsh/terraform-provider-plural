@@ -22,6 +22,7 @@ A representation of a cluster you can deploy to.
 ### Optional
 
 - `bindings` (Attributes) Read and write policies of this cluster. (see [below for nested schema](#nestedatt--bindings))
+- `detach` (Boolean) Determines behavior during resource destruction, if true it will detach resource instead of deleting it.
 - `handle` (String) A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.
 - `helm_repo_url` (String) Helm repository URL you'd like to use in deployment agent Helm install.
 - `helm_values` (String) Additional Helm values you'd like to use in deployment agent Helm installs. This is useful for BYOK clusters that need to use custom images or other constructs.
