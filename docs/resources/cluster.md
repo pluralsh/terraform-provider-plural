@@ -28,6 +28,7 @@ A representation of a cluster you can deploy to.
 - `helm_values` (String) Additional Helm values you'd like to use in deployment agent Helm installs. This is useful for BYOK clusters that need to use custom images or other constructs.
 - `kubeconfig` (Attributes) (see [below for nested schema](#nestedatt--kubeconfig))
 - `metadata` (String) Arbitrary JSON metadata to store user-specific state of this cluster (e.g. IAM roles for add-ons).
+- `project_id` (String) ID of the project that this cluster belongs to.
 - `protect` (Boolean) If set to `true` then this cluster cannot be deleted.
 - `tags` (Map of String) Key-value tags used to filter clusters.
 

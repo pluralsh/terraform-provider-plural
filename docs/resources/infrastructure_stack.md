@@ -32,6 +32,7 @@ description: |-
 - `environment` (Attributes Set) Defines environment variables for the stack. (see [below for nested schema](#nestedatt--environment))
 - `files` (Map of String) File path-content map.
 - `job_spec` (Attributes) Repository information used to pull stack. (see [below for nested schema](#nestedatt--job_spec))
+- `project_id` (String) ID of the project that this stack belongs to.
 
 ### Read-Only
 
