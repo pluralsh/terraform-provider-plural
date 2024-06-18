@@ -21,13 +21,14 @@ type infrastructureStack struct {
 	Actor         types.String                      `tfsdk:"actor"`
 	Approval      types.Bool                        `tfsdk:"approval"`
 	Detach        types.Bool                        `tfsdk:"detach"`
+	ProjectId     types.String                      `tfsdk:"project_id"`
 	ClusterId     types.String                      `tfsdk:"cluster_id"`
 	Repository    *InfrastructureStackRepository    `tfsdk:"repository"`
 	Configuration *InfrastructureStackConfiguration `tfsdk:"configuration"`
 	Files         types.Map                         `tfsdk:"files"`
 	Environment   types.Set                         `tfsdk:"environment"`
 	JobSpec       *InfrastructureStackJobSpec       `tfsdk:"job_spec"`
-	Bindings      *common.ClusterBindings           `tfsdk:"bindings"`
+	Bindings      *common.Bindings                  `tfsdk:"bindings"`
 }
 
 func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostics, client *client.Client) (*gqlclient.StackAttributes, error) {
@@ -35,6 +36,7 @@ func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostic
 		Name:          is.Name.ValueString(),
 		Type:          gqlclient.StackType(is.Type.ValueString()),
 		RepositoryID:  is.Repository.Id.ValueString(),
+		ProjectID:     is.ProjectId.ValueStringPointer(),
 		ClusterID:     is.ClusterId.ValueString(),
 		Git:           is.Repository.Attributes(),
 		JobSpec:       is.JobSpec.Attributes(ctx, d),
@@ -97,6 +99,7 @@ func (is *infrastructureStack) From(stack *gqlclient.InfrastructureStackFragment
 	is.Name = types.StringValue(stack.Name)
 	is.Type = types.StringValue(string(stack.Type))
 	is.Approval = types.BoolPointerValue(stack.Approval)
+	is.ProjectId = common.ProjectFrom(stack.Project)
 	is.ClusterId = types.StringValue(stack.Cluster.ID)
 	is.Repository.From(stack.Repository, stack.Git)
 	is.Configuration.From(ctx, stack.Configuration, d)

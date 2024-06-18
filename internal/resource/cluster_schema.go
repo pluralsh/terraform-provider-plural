@@ -46,6 +46,13 @@ func (r *clusterResource) schema() schema.Schema {
 				Computed:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
+			"project_id": schema.StringAttribute{
+				Description:         "ID of the project that this cluster belongs to.",
+				MarkdownDescription: "ID of the project that this cluster belongs to.",
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+			},
 			"detach": schema.BoolAttribute{
 				Description:         "Determines behavior during resource destruction, if true it will detach resource instead of deleting it.",
 				MarkdownDescription: "Determines behavior during resource destruction, if true it will detach resource instead of deleting it.",

@@ -46,6 +46,11 @@ func (d *clusterDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 				MarkdownDescription: "Human-readable name of this cluster, that also translates to cloud resource name.",
 				Computed:            true,
 			},
+			"project_id": schema.StringAttribute{
+				Description:         "ID of the project that this cluster belongs to.",
+				MarkdownDescription: "ID of the project that this cluster belongs to.",
+				Computed:            true,
+			},
 			"handle": schema.StringAttribute{
 				MarkdownDescription: "A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.",
 				Optional:            true,

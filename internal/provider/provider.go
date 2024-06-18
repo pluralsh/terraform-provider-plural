@@ -179,6 +179,7 @@ func (p *PluralProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		r.NewProjectResource,
 		r.NewClusterResource,
 		r.NewGitRepositoryResource,
 		r.NewProviderResource,
@@ -191,6 +192,7 @@ func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource
 
 func (p *PluralProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		ds.NewProjectDataSource,
 		ds.NewClusterDataSource,
 		ds.NewGitRepositoryDataSource,
 		ds.NewProviderDataSource,
@@ -199,8 +201,6 @@ func (p *PluralProvider) DataSources(_ context.Context) []func() datasource.Data
 
 func New(version string) func() provider.Provider {
 	return func() provider.Provider {
-		return &PluralProvider{
-			version: version,
-		}
+		return &PluralProvider{version: version}
 	}
 }
