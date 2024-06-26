@@ -110,9 +110,15 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 }
 
 func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data cluster
+	var data, state cluster
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !data.ProjectId.Equal(state.ProjectId) {
+		resp.Diagnostics.AddError("Invalid Configuration", fmt.Sprintf("Unable to update cluster, project ID must not be modified"))
 		return
 	}
 
