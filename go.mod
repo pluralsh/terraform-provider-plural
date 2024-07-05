@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.22.0
 
 require (
-	github.com/Yamashou/gqlgenc v0.18.1
+	github.com/Yamashou/gqlgenc v0.23.2
 	github.com/golangci/golangci-lint v1.55.1
 	github.com/hashicorp/terraform-plugin-docs v0.16.0
 	github.com/hashicorp/terraform-plugin-framework v1.4.2
