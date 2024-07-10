@@ -118,7 +118,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	if !data.ProjectId.Equal(state.ProjectId) {
-		resp.Diagnostics.AddError("Invalid Configuration", fmt.Sprintf("Unable to update cluster, project ID must not be modified"))
+		resp.Diagnostics.AddError("Invalid Configuration", "Unable to update cluster, project ID must not be modified")
 		return
 	}
 

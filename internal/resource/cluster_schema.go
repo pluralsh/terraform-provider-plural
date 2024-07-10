@@ -277,69 +277,69 @@ func (r *clusterResource) schema() schema.Schema {
 	}
 }
 
-func (r *clusterResource) awsCloudSettingsSchema() schema.SingleNestedAttribute {
-	return schema.SingleNestedAttribute{
-		Optional: true,
-		Attributes: map[string]schema.Attribute{
-			"region": schema.StringAttribute{
-				Description:         "AWS region to deploy the cluster to.",
-				MarkdownDescription: "AWS region to deploy the cluster to.",
-				Required:            true,
-			},
-		},
-	}
-}
+//func (r *clusterResource) awsCloudSettingsSchema() schema.SingleNestedAttribute {
+//	return schema.SingleNestedAttribute{
+//		Optional: true,
+//		Attributes: map[string]schema.Attribute{
+//			"region": schema.StringAttribute{
+//				Description:         "AWS region to deploy the cluster to.",
+//				MarkdownDescription: "AWS region to deploy the cluster to.",
+//				Required:            true,
+//			},
+//		},
+//	}
+//}
 
-func (r *clusterResource) azureCloudSettingsSchema() schema.SingleNestedAttribute {
-	return schema.SingleNestedAttribute{
-		Optional: true,
-		Attributes: map[string]schema.Attribute{
-			"resource_group": schema.StringAttribute{
-				Description:         "Name of the Azure resource group for this cluster.",
-				MarkdownDescription: "Name of the Azure resource group for this cluster.",
-				Required:            true,
-			},
-			"network": schema.StringAttribute{
-				Description:         "Name of the Azure virtual network for this cluster.",
-				MarkdownDescription: "Name of the Azure virtual network for this cluster.",
-				Required:            true,
-			},
-			"subscription_id": schema.StringAttribute{
-				Description:         "GUID of the Azure subscription to hold this cluster.",
-				MarkdownDescription: "GUID of the Azure subscription to hold this cluster.",
-				Required:            true,
-			},
-			"location": schema.StringAttribute{
-				Description:         "String matching one of the canonical Azure region names, i.e. eastus.",
-				MarkdownDescription: "String matching one of the canonical Azure region names, i.e. eastus.",
-				Required:            true,
-			},
-		},
-	}
-}
+//func (r *clusterResource) azureCloudSettingsSchema() schema.SingleNestedAttribute {
+//	return schema.SingleNestedAttribute{
+//		Optional: true,
+//		Attributes: map[string]schema.Attribute{
+//			"resource_group": schema.StringAttribute{
+//				Description:         "Name of the Azure resource group for this cluster.",
+//				MarkdownDescription: "Name of the Azure resource group for this cluster.",
+//				Required:            true,
+//			},
+//			"network": schema.StringAttribute{
+//				Description:         "Name of the Azure virtual network for this cluster.",
+//				MarkdownDescription: "Name of the Azure virtual network for this cluster.",
+//				Required:            true,
+//			},
+//			"subscription_id": schema.StringAttribute{
+//				Description:         "GUID of the Azure subscription to hold this cluster.",
+//				MarkdownDescription: "GUID of the Azure subscription to hold this cluster.",
+//				Required:            true,
+//			},
+//			"location": schema.StringAttribute{
+//				Description:         "String matching one of the canonical Azure region names, i.e. eastus.",
+//				MarkdownDescription: "String matching one of the canonical Azure region names, i.e. eastus.",
+//				Required:            true,
+//			},
+//		},
+//	}
+//}
 
-func (r *clusterResource) gcpCloudSettingsSchema() schema.SingleNestedAttribute {
-	return schema.SingleNestedAttribute{
-		Optional: true,
-		Attributes: map[string]schema.Attribute{
-			"project": schema.StringAttribute{
-				Required:            true,
-				Description:         "GCP project id to deploy cluster to.",
-				MarkdownDescription: "GCP project id to deploy cluster to.",
-			},
-			"network": schema.StringAttribute{
-				Required:            true,
-				Description:         "GCP network id to use when creating the cluster.",
-				MarkdownDescription: "GCP network id to use when creating the cluster.",
-			},
-			"region": schema.StringAttribute{
-				Required:            true,
-				Description:         "GCP region to deploy cluster to.",
-				MarkdownDescription: "GCP region to deploy cluster to.",
-			},
-		},
-	}
-}
+//func (r *clusterResource) gcpCloudSettingsSchema() schema.SingleNestedAttribute {
+//	return schema.SingleNestedAttribute{
+//		Optional: true,
+//		Attributes: map[string]schema.Attribute{
+//			"project": schema.StringAttribute{
+//				Required:            true,
+//				Description:         "GCP project id to deploy cluster to.",
+//				MarkdownDescription: "GCP project id to deploy cluster to.",
+//			},
+//			"network": schema.StringAttribute{
+//				Required:            true,
+//				Description:         "GCP network id to use when creating the cluster.",
+//				MarkdownDescription: "GCP network id to use when creating the cluster.",
+//			},
+//			"region": schema.StringAttribute{
+//				Required:            true,
+//				Description:         "GCP region to deploy cluster to.",
+//				MarkdownDescription: "GCP region to deploy cluster to.",
+//			},
+//		},
+//	}
+//}
 
 func (r *clusterResource) kubeconfigSchema(deprecated bool) schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
@@ -488,11 +488,11 @@ func (r *clusterResource) kubeconfigSchema(deprecated bool) schema.SingleNestedA
 	}
 }
 
-func (r *clusterResource) byokCloudSettingsSchema() schema.SingleNestedAttribute {
-	return schema.SingleNestedAttribute{
-		Optional: true,
-		Attributes: map[string]schema.Attribute{
-			"kubeconfig": r.kubeconfigSchema(true),
-		},
-	}
-}
+//func (r *clusterResource) byokCloudSettingsSchema() schema.SingleNestedAttribute {
+//	return schema.SingleNestedAttribute{
+//		Optional: true,
+//		Attributes: map[string]schema.Attribute{
+//			"kubeconfig": r.kubeconfigSchema(true),
+//		},
+//	}
+//}
