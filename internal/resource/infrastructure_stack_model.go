@@ -167,19 +167,15 @@ func (isr *InfrastructureStackRepository) Attributes() gqlclient.GitRefAttribute
 	}
 }
 
-func (isr *InfrastructureStackRepository) From(repository *gqlclient.GitRepositoryFragment, ref *gqlclient.GitRefFragment) {
+func (isr *InfrastructureStackRepository) From(repository *gqlclient.GitRepositoryFragment, ref gqlclient.GitRefFragment) {
+	isr.Ref = types.StringValue(ref.Ref)
+	isr.Folder = types.StringValue(ref.Folder)
+
 	if isr == nil {
 		return
 	}
 
 	isr.Id = types.StringValue(repository.ID)
-
-	if ref == nil {
-		return
-	}
-
-	isr.Ref = types.StringValue(ref.Ref)
-	isr.Folder = types.StringValue(ref.Folder)
 }
 
 type InfrastructureStackHookSpec struct {
@@ -270,8 +266,8 @@ func (isc *InfrastructureStackConfiguration) Attributes(ctx context.Context, d d
 	}
 }
 
-func (isc *InfrastructureStackConfiguration) From(ctx context.Context, configuration *gqlclient.StackConfigurationFragment, d diag.Diagnostics) {
-	if isc == nil || configuration == nil {
+func (isc *InfrastructureStackConfiguration) From(ctx context.Context, configuration gqlclient.StackConfigurationFragment, d diag.Diagnostics) {
+	if isc == nil {
 		return
 	}
 
