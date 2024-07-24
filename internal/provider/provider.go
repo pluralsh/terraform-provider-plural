@@ -187,6 +187,8 @@ func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource
 		r.NewServiceContextResource,
 		r.NewInfrastructureStackResource,
 		r.NewCustomStackRunResource,
+		r.NewRbacResource,
+		r.NewGlobalServiceResource,
 		r.NewGroupMemberResource,
 	}
 }
@@ -197,6 +199,9 @@ func (p *PluralProvider) DataSources(_ context.Context) []func() datasource.Data
 		ds.NewClusterDataSource,
 		ds.NewGitRepositoryDataSource,
 		ds.NewProviderDataSource,
+		ds.NewGroupDataSource,
+		ds.NewUserDataSource,
+		ds.NewConfigDataSource,
 	}
 }
 
