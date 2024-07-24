@@ -168,14 +168,13 @@ func (isr *InfrastructureStackRepository) Attributes() gqlclient.GitRefAttribute
 }
 
 func (isr *InfrastructureStackRepository) From(repository *gqlclient.GitRepositoryFragment, ref gqlclient.GitRefFragment) {
-	isr.Ref = types.StringValue(ref.Ref)
-	isr.Folder = types.StringValue(ref.Folder)
-
 	if isr == nil {
 		return
 	}
 
 	isr.Id = types.StringValue(repository.ID)
+	isr.Ref = types.StringValue(ref.Ref)
+	isr.Folder = types.StringValue(ref.Folder)
 }
 
 type InfrastructureStackHookSpec struct {
