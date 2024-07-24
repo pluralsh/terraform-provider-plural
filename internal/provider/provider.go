@@ -190,6 +190,7 @@ func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource
 		r.NewRbacResource,
 		r.NewGlobalServiceResource,
 		r.NewGroupMemberResource,
+		r.NewGroupResource,
 	}
 }
 
