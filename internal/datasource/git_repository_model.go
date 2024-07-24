@@ -2,7 +2,7 @@ package datasource
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	gqlclient "github.com/pluralsh/console-client-go"
+	gqlclient "github.com/pluralsh/console/go/client"
 )
 
 type gitRepository struct {

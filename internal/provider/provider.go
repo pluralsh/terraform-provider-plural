@@ -21,7 +21,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	client "github.com/pluralsh/console-client-go"
+	client "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/plural-cli/pkg/console"
 )
 

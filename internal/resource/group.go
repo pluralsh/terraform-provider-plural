@@ -89,13 +89,13 @@ func (r *GroupResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	response, err := r.client.CreateGroup(ctx, data.Attributes())
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create group, got error: %s", err))
-		return
-	}
-
-	data.From(response.CreateGroup)
+	//response, err := r.client.CreateGroup(ctx, data.Attributes())
+	//if err != nil {
+	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create group, got error: %s", err))
+	//	return
+	//}
+	//
+	//data.From(response.CreateGroup)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
@@ -128,11 +128,11 @@ func (r *GroupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		return
 	}
 
-	_, err := r.client.UpdateGroup(ctx, data.Id.ValueString(), data.Attributes())
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update group, got error: %s", err))
-		return
-	}
+	// _, err := r.client.UpdateGroup(ctx, data.Id.ValueString(), data.Attributes())
+	//if err != nil {
+	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update group, got error: %s", err))
+	//	return
+	//}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
@@ -144,11 +144,11 @@ func (r *GroupResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 		return
 	}
 
-	_, err := r.client.DeleteGroup(ctx, data.Id.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete group, got error: %s", err))
-		return
-	}
+	//_, err := r.client.DeleteGroup(ctx, data.Id.ValueString())
+	//if err != nil {
+	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete group, got error: %s", err))
+	//	return
+	//}
 }
 
 func (r *GroupResource) ImportState(
