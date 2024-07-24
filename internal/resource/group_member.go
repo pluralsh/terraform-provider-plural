@@ -99,11 +99,11 @@ func (r *GroupMemberResource) Create(ctx context.Context, req resource.CreateReq
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
-func (r *GroupMemberResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *GroupMemberResource) Read(_ context.Context, _ resource.ReadRequest, _ *resource.ReadResponse) {
 	// ignore
 }
 
-func (r *GroupMemberResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *GroupMemberResource) Update(_ context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddError("Client Error", "cannot update a group member")
 }
 
