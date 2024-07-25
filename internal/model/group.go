@@ -14,7 +14,7 @@ type Group struct {
 func (g *Group) From(response *gqlclient.GroupFragment) {
 	g.Id = types.StringValue(response.ID)
 	g.Name = types.StringValue(response.Name)
-	g.Name = types.StringPointerValue(response.Description)
+	g.Description = types.StringPointerValue(response.Description)
 }
 
 func (g *Group) Attributes() gqlclient.GroupAttributes {
