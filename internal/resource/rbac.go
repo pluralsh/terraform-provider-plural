@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"terraform-provider-plural/internal/model"
+
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
@@ -120,7 +122,7 @@ func (r *rbacResource) Configure(_ context.Context, req resource.ConfigureReques
 }
 
 func (r *rbacResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data rbac
+	var data model.RBAC
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -140,7 +142,7 @@ func (r *rbacResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 }
 
 func (r *rbacResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data rbac
+	var data model.RBAC
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return

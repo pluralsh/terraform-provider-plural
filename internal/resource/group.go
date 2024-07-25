@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"terraform-provider-plural/internal/common"
+	"terraform-provider-plural/internal/model"
 
 	"terraform-provider-plural/internal/client"
 
@@ -83,7 +84,7 @@ func (r *GroupResource) Configure(
 }
 
 func (r *GroupResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	data := new(group)
+	data := new(model.Group)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -100,7 +101,7 @@ func (r *GroupResource) Create(ctx context.Context, req resource.CreateRequest, 
 }
 
 func (r *GroupResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	data := new(group)
+	data := new(model.Group)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -122,7 +123,7 @@ func (r *GroupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 }
 
 func (r *GroupResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	data := new(group)
+	data := new(model.Group)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -138,7 +139,7 @@ func (r *GroupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 }
 
 func (r *GroupResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	data := new(group)
+	data := new(model.Group)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return

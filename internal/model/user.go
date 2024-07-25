@@ -1,18 +1,18 @@
-package datasource
+package model
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	console "github.com/pluralsh/console/go/client"
 )
 
-type user struct {
+type User struct {
 	Id    types.String `tfsdk:"id"`
 	Name  types.String `tfsdk:"name"`
 	Email types.String `tfsdk:"email"`
 }
 
-func (c *user) From(cl *console.UserFragment) {
-	c.Id = types.StringValue(cl.ID)
-	c.Name = types.StringValue(cl.Name)
-	c.Email = types.StringValue(cl.Email)
+func (u *User) From(response *console.UserFragment) {
+	u.Id = types.StringValue(response.ID)
+	u.Name = types.StringValue(response.Name)
+	u.Email = types.StringValue(response.Email)
 }

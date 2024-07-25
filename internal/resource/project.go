@@ -6,6 +6,7 @@ import (
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
+	"terraform-provider-plural/internal/model"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -124,7 +125,7 @@ func (r *ProjectResource) Configure(_ context.Context, req resource.ConfigureReq
 }
 
 func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	data := new(Project)
+	data := new(model.Project)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -146,7 +147,7 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 }
 
 func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	data := new(Project)
+	data := new(model.Project)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -163,7 +164,7 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 }
 
 func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	data := new(Project)
+	data := new(model.Project)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return

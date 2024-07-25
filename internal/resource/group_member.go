@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"terraform-provider-plural/internal/common"
+	"terraform-provider-plural/internal/model"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -83,7 +84,7 @@ func (r *GroupMemberResource) Configure(
 }
 
 func (r *GroupMemberResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	data := new(groupMember)
+	data := new(model.GroupMember)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -108,7 +109,7 @@ func (r *GroupMemberResource) Update(_ context.Context, _ resource.UpdateRequest
 }
 
 func (r *GroupMemberResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	data := new(groupMember)
+	data := new(model.GroupMember)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return

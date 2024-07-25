@@ -1,4 +1,4 @@
-package resource
+package model
 
 import (
 	"context"
@@ -10,15 +10,15 @@ import (
 	gqlclient "github.com/pluralsh/console/go/client"
 )
 
-type rbac struct {
+type RBAC struct {
 	ClusterId types.String     `tfsdk:"cluster_id"`
 	ServiceId types.String     `tfsdk:"service_id"`
 	Bindings  *common.Bindings `tfsdk:"rbac"`
 }
 
-func (g *rbac) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.RbacAttributes {
+func (rbac *RBAC) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.RbacAttributes {
 	return gqlclient.RbacAttributes{
-		ReadBindings:  g.Bindings.ReadAttributes(ctx, d),
-		WriteBindings: g.Bindings.WriteAttributes(ctx, d),
+		ReadBindings:  rbac.Bindings.ReadAttributes(ctx, d),
+		WriteBindings: rbac.Bindings.WriteAttributes(ctx, d),
 	}
 }
