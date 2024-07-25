@@ -6,6 +6,7 @@ import (
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
+	"terraform-provider-plural/internal/model"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -70,7 +71,7 @@ func (r *GitRepositoryDataSource) Configure(_ context.Context, req datasource.Co
 }
 
 func (r *GitRepositoryDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	data := new(gitRepository)
+	data := new(model.GitRepository)
 	resp.Diagnostics.Append(req.Config.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return

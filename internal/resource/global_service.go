@@ -63,7 +63,6 @@ func (r *GlobalServiceResource) Schema(_ context.Context, _ resource.SchemaReque
 				MarkdownDescription: "Id of a CAPI provider that this global service targets.",
 			},
 			"service_id": schema.StringAttribute{
-				Optional:            true,
 				Required:            true,
 				Description:         "The id of the service that will be replicated by this global service.",
 				MarkdownDescription: "The id of the service that will be replicated by this global service.",
