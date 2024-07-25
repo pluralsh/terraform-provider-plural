@@ -108,7 +108,7 @@ func (r *GlobalServiceResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	response, err := r.client.CreateGlobalService(ctx, data.Attributes(ctx, resp.Diagnostics))
+	response, err := r.client.CreateGlobalServiceDeployment(ctx, data.ServiceId.ValueString(), data.Attributes(ctx, resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create GlobalService, got error: %s", err))
 		return
