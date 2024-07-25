@@ -52,7 +52,7 @@ func (r *GroupResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 				MarkdownDescription: "Name of this group.",
 			},
 			"description": schema.StringAttribute{
-				Required:            true,
+				Optional:            true,
 				Description:         "Description of this group.",
 				MarkdownDescription: "Description of this group.",
 			},

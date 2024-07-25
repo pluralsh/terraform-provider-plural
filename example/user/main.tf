@@ -20,3 +20,12 @@ data "plural_user" "user" {
 data "plural_group" "group" {
   name = "team"
 }
+
+# resource "plural_group" "test" {
+#   name = "test"
+#   description = "test group"
+# }
+#
+# resource "plural_group" "empty" {
+#   name = "empty"
+# }
