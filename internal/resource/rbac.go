@@ -8,6 +8,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
@@ -56,19 +58,13 @@ func (r *rbacResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"group_id": schema.StringAttribute{
-									Description:         "",
-									MarkdownDescription: "",
-									Optional:            true,
+									Optional: true,
 								},
 								"id": schema.StringAttribute{
-									Description:         "",
-									MarkdownDescription: "",
-									Optional:            true,
+									Optional: true,
 								},
 								"user_id": schema.StringAttribute{
-									Description:         "",
-									MarkdownDescription: "",
-									Optional:            true,
+									Optional: true,
 								},
 							},
 						},
@@ -80,24 +76,19 @@ func (r *rbacResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"group_id": schema.StringAttribute{
-									Description:         "",
-									MarkdownDescription: "",
-									Optional:            true,
+									Optional: true,
 								},
 								"id": schema.StringAttribute{
-									Description:         "",
-									MarkdownDescription: "",
-									Optional:            true,
+									Optional: true,
 								},
 								"user_id": schema.StringAttribute{
-									Description:         "",
-									MarkdownDescription: "",
-									Optional:            true,
+									Optional: true,
 								},
 							},
 						},
 					},
 				},
+				PlanModifiers: []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 			},
 		},
 	}
@@ -122,7 +113,7 @@ func (r *rbacResource) Configure(_ context.Context, req resource.ConfigureReques
 }
 
 func (r *rbacResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data model.RBAC
+	data := new(model.RBAC)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -130,19 +121,19 @@ func (r *rbacResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 	_, err := r.client.UpdateRbac(ctx, data.Attributes(ctx, resp.Diagnostics), data.ServiceId.ValueStringPointer(), data.ClusterId.ValueStringPointer(), nil)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update rbac, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update RBAC, got error: %s", err))
 		return
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *rbacResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *rbacResource) Read(_ context.Context, _ resource.ReadRequest, _ *resource.ReadResponse) {
 	// ignore
 }
 
 func (r *rbacResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data model.RBAC
+	data := new(model.RBAC)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -150,17 +141,16 @@ func (r *rbacResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	_, err := r.client.UpdateRbac(ctx, data.Attributes(ctx, resp.Diagnostics), data.ServiceId.ValueStringPointer(), data.ClusterId.ValueStringPointer(), nil)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update rbac, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update RBAC, got error: %s", err))
 		return
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *rbacResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *rbacResource) Delete(_ context.Context, _ resource.DeleteRequest, _ *resource.DeleteResponse) {
 	// ignore
 }
 
-func (r *rbacResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	// ignore
+func (r *rbacResource) ImportState(_ context.Context, _ resource.ImportStateRequest, _ *resource.ImportStateResponse) {
 }

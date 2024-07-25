@@ -26,11 +26,14 @@ resource "plural_group" "test" {
   description = "test group"
 }
 
-resource "plural_group" "empty" {
-  name = "empty"
-}
-
-resource "plural_group_member" "test" {
-  user_id = data.plural_user.user.id
-  group_id = plural_group.test.id
+resource "plural_rbac" "rbac" {
+  service_id = "624bff88-05e3-45f6-bc3b-44708594e28e"
+  bindings = {
+    read  = [{
+      user_id = data.plural_user.user.id
+    }]
+    write = [{
+      user_id = data.plural_user.user.id
+    }]
+  }
 }
