@@ -11,6 +11,8 @@ provider "plural" {
   use_cli = true
 }
 
+data "plural_config" "config" {}
+
 data "plural_user" "user" {
   email = "marcin@plural.sh"
 }
