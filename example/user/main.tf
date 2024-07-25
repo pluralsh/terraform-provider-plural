@@ -21,11 +21,16 @@ data "plural_group" "group" {
   name = "team"
 }
 
-# resource "plural_group" "test" {
-#   name = "test"
-#   description = "test group"
-# }
-#
-# resource "plural_group" "empty" {
-#   name = "empty"
-# }
+resource "plural_group" "test" {
+  name = "test"
+  description = "test group"
+}
+
+resource "plural_group" "empty" {
+  name = "empty"
+}
+
+resource "plural_group_member" "test" {
+  user_id = data.plural_user.user.id
+  group_id = plural_group.test.id
+}
