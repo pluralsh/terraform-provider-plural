@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	console "github.com/pluralsh/console/go/client"
 )
 
 func NewUserDataSource() datasource.DataSource {
@@ -43,7 +42,7 @@ func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 			},
 			"email": schema.StringAttribute{
 				MarkdownDescription: "Email address of this user.",
-				Computed:            true,
+				Required:            true,
 				Validators:          []validator.String{stringvalidator.ExactlyOneOf(path.MatchRoot("id"))},
 			},
 		},
@@ -74,28 +73,16 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	if data.Email.IsNull() {
-		resp.Diagnostics.AddError(
-			"Missing user email",
-			"The provider could not read user data. Email must be specified.",
-		)
+	response, err := d.client.GetUser(ctx, data.Email.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read user by email, got error: %s", err))
 	}
 
-	// First try to fetch cluster by ID if it was provided.
-	var user *console.UserFragment
-	if !data.Email.IsNull() {
-		if c, err := d.client.GetUser(ctx, data.Email.ValueString()); err != nil {
-			resp.Diagnostics.AddWarning("Client Error", fmt.Sprintf("Unable to read user by email, got error: %s", err))
-		} else {
-			user = c.User
-		}
-	}
-
-	if user == nil {
-		resp.Diagnostics.AddError("Client Error", "Unable to read user, see warnings for more information")
+	if response == nil || response.User == nil {
+		resp.Diagnostics.AddError("Client Error", "Unable to find user, got no error")
 		return
 	}
 
-	data.From(user, ctx, resp.Diagnostics)
+	data.From(response.User)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

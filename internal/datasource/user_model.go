@@ -1,9 +1,6 @@
 package datasource
 
 import (
-	"context"
-
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	console "github.com/pluralsh/console/go/client"
 )
@@ -14,7 +11,7 @@ type user struct {
 	Email types.String `tfsdk:"email"`
 }
 
-func (c *user) From(cl *console.UserFragment, ctx context.Context, d diag.Diagnostics) {
+func (c *user) From(cl *console.UserFragment) {
 	c.Id = types.StringValue(cl.ID)
 	c.Name = types.StringValue(cl.Name)
 	c.Email = types.StringValue(cl.Email)
