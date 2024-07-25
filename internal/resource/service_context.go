@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"terraform-provider-plural/internal/common"
+	"terraform-provider-plural/internal/model"
 
 	"terraform-provider-plural/internal/client"
 
@@ -84,7 +85,7 @@ func (r *ServiceContextResource) Configure(_ context.Context, req resource.Confi
 }
 
 func (r *ServiceContextResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	data := new(serviceContext)
+	data := new(model.ServiceContext)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -101,7 +102,7 @@ func (r *ServiceContextResource) Create(ctx context.Context, req resource.Create
 }
 
 func (r *ServiceContextResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	data := new(serviceContext)
+	data := new(model.ServiceContext)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -118,7 +119,7 @@ func (r *ServiceContextResource) Read(ctx context.Context, req resource.ReadRequ
 }
 
 func (r *ServiceContextResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	data := new(serviceContext)
+	data := new(model.ServiceContext)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -134,7 +135,7 @@ func (r *ServiceContextResource) Update(ctx context.Context, req resource.Update
 }
 
 func (r *ServiceContextResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	data := new(serviceContext)
+	data := new(model.ServiceContext)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return

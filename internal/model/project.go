@@ -1,4 +1,4 @@
-package resource
+package model
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	gqlclient "github.com/pluralsh/console-client-go"
+	gqlclient "github.com/pluralsh/console/go/client"
 )
 
 type Project struct {
@@ -27,12 +27,12 @@ func (p *Project) Attributes(ctx context.Context, d diag.Diagnostics) (*gqlclien
 	}, nil
 }
 
-func (p *Project) From(project *gqlclient.ProjectFragment, ctx context.Context, d diag.Diagnostics) {
-	p.Id = types.StringValue(project.ID)
-	p.Name = types.StringValue(project.Name)
-	p.Description = types.StringPointerValue(project.Description)
-	p.Default = defaultFrom(project.Default)
-	p.Bindings.From(project.ReadBindings, project.WriteBindings, ctx, d)
+func (p *Project) From(response *gqlclient.ProjectFragment, ctx context.Context, d diag.Diagnostics) {
+	p.Id = types.StringValue(response.ID)
+	p.Name = types.StringValue(response.Name)
+	p.Description = types.StringPointerValue(response.Description)
+	p.Default = defaultFrom(response.Default)
+	p.Bindings.From(response.ReadBindings, response.WriteBindings, ctx, d)
 }
 
 func defaultFrom(def *bool) types.Bool {

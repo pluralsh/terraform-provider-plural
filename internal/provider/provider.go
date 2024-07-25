@@ -21,7 +21,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	client "github.com/pluralsh/console-client-go"
+	client "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/plural-cli/pkg/console"
 )
 
@@ -187,6 +187,10 @@ func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource
 		r.NewServiceContextResource,
 		r.NewInfrastructureStackResource,
 		r.NewCustomStackRunResource,
+		r.NewRbacResource,
+		r.NewGlobalServiceResource,
+		r.NewGroupMemberResource,
+		r.NewGroupResource,
 	}
 }
 
@@ -196,6 +200,9 @@ func (p *PluralProvider) DataSources(_ context.Context) []func() datasource.Data
 		ds.NewClusterDataSource,
 		ds.NewGitRepositoryDataSource,
 		ds.NewProviderDataSource,
+		ds.NewGroupDataSource,
+		ds.NewUserDataSource,
+		ds.NewConfigDataSource,
 	}
 }
 

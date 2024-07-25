@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"terraform-provider-plural/internal/common"
+	"terraform-provider-plural/internal/model"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -144,7 +145,7 @@ func (r *GitRepositoryResource) Configure(
 }
 
 func (r *GitRepositoryResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	data := new(gitRepository)
+	data := new(model.GitRepositoryExtended)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -161,7 +162,7 @@ func (r *GitRepositoryResource) Create(ctx context.Context, req resource.CreateR
 }
 
 func (r *GitRepositoryResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	data := new(gitRepository)
+	data := new(model.GitRepositoryExtended)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -183,7 +184,7 @@ func (r *GitRepositoryResource) Read(ctx context.Context, req resource.ReadReque
 }
 
 func (r *GitRepositoryResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	data := new(gitRepository)
+	data := new(model.GitRepositoryExtended)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -199,7 +200,7 @@ func (r *GitRepositoryResource) Update(ctx context.Context, req resource.UpdateR
 }
 
 func (r *GitRepositoryResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	data := new(gitRepository)
+	data := new(model.GitRepositoryExtended)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return

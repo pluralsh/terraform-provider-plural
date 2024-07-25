@@ -8,7 +8,7 @@ import (
 
 	"terraform-provider-plural/internal/client"
 
-	gqlclient "github.com/pluralsh/console-client-go"
+	gqlclient "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/plural-cli/pkg/console"
 	"github.com/pluralsh/plural-cli/pkg/helm"
 	"github.com/pluralsh/polly/algorithms"

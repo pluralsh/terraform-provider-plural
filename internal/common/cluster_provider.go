@@ -3,7 +3,7 @@ package common
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	console "github.com/pluralsh/console-client-go"
+	console "github.com/pluralsh/console/go/client"
 )
 
 func ClusterProviderIdFrom(provider *console.ClusterProviderFragment) basetypes.StringValue {

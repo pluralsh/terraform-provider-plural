@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	gqlclient "github.com/pluralsh/console-client-go"
+	gqlclient "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/polly/algorithms"
 )
 
@@ -167,17 +167,12 @@ func (isr *InfrastructureStackRepository) Attributes() gqlclient.GitRefAttribute
 	}
 }
 
-func (isr *InfrastructureStackRepository) From(repository *gqlclient.GitRepositoryFragment, ref *gqlclient.GitRefFragment) {
+func (isr *InfrastructureStackRepository) From(repository *gqlclient.GitRepositoryFragment, ref gqlclient.GitRefFragment) {
 	if isr == nil {
 		return
 	}
 
 	isr.Id = types.StringValue(repository.ID)
-
-	if ref == nil {
-		return
-	}
-
 	isr.Ref = types.StringValue(ref.Ref)
 	isr.Folder = types.StringValue(ref.Folder)
 }
@@ -270,8 +265,8 @@ func (isc *InfrastructureStackConfiguration) Attributes(ctx context.Context, d d
 	}
 }
 
-func (isc *InfrastructureStackConfiguration) From(ctx context.Context, configuration *gqlclient.StackConfigurationFragment, d diag.Diagnostics) {
-	if isc == nil || configuration == nil {
+func (isc *InfrastructureStackConfiguration) From(ctx context.Context, configuration gqlclient.StackConfigurationFragment, d diag.Diagnostics) {
+	if isc == nil {
 		return
 	}
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"terraform-provider-plural/internal/common"
+	"terraform-provider-plural/internal/model"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -62,7 +63,6 @@ func (r *GlobalServiceResource) Schema(_ context.Context, _ resource.SchemaReque
 				MarkdownDescription: "Id of a CAPI provider that this global service targets.",
 			},
 			"service_id": schema.StringAttribute{
-				Optional:            true,
 				Required:            true,
 				Description:         "The id of the service that will be replicated by this global service.",
 				MarkdownDescription: "The id of the service that will be replicated by this global service.",
@@ -102,13 +102,13 @@ func (r *GlobalServiceResource) Configure(
 }
 
 func (r *GlobalServiceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	data := new(globalService)
+	data := new(model.GlobalService)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	response, err := r.client.CreateGlobalService(ctx, data.Attributes(ctx, resp.Diagnostics))
+	response, err := r.client.CreateGlobalServiceDeployment(ctx, data.ServiceId.ValueString(), data.Attributes(ctx, resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create GlobalService, got error: %s", err))
 		return
@@ -119,7 +119,7 @@ func (r *GlobalServiceResource) Create(ctx context.Context, req resource.CreateR
 }
 
 func (r *GlobalServiceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	data := new(globalService)
+	data := new(model.GlobalService)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -129,7 +129,7 @@ func (r *GlobalServiceResource) Read(ctx context.Context, req resource.ReadReque
 }
 
 func (r *GlobalServiceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	data := new(globalService)
+	data := new(model.GlobalService)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -145,7 +145,7 @@ func (r *GlobalServiceResource) Update(ctx context.Context, req resource.UpdateR
 }
 
 func (r *GlobalServiceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	data := new(globalService)
+	data := new(model.GlobalService)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return

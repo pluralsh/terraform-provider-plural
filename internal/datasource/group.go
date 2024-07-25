@@ -6,13 +6,10 @@ import (
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
+	"terraform-provider-plural/internal/model"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	console "github.com/pluralsh/console-client-go"
 )
 
 func NewGroupDataSource() datasource.DataSource {
@@ -32,13 +29,18 @@ func (d *groupDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 		MarkdownDescription: "A representation of a group to organize authorization in your plural console.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
+				Description:         "Internal identifier of this group.",
 				MarkdownDescription: "Internal identifier of this group.",
-				Validators:          []validator.String{stringvalidator.ExactlyOneOf(path.MatchRoot("id"))},
+				Computed:            true,
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "Name of the group.",
+				Description:         "Name of this group.",
+				MarkdownDescription: "Name of this group.",
+				Required:            true,
+			},
+			"description": schema.StringAttribute{
+				Description:         "Description of this group.",
+				MarkdownDescription: "Description of this group.",
 				Computed:            true,
 			},
 		},
@@ -63,33 +65,22 @@ func (d *groupDataSource) Configure(_ context.Context, req datasource.ConfigureR
 }
 
 func (d *groupDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data group
+	var data model.Group
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if data.Name.IsNull() {
-		resp.Diagnostics.AddError(
-			"Missing group name",
-			"The provider could not read group data. Name must be specified.",
-		)
+	response, err := d.client.GetGroup(ctx, data.Name.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read group by name, got error: %s", err))
 	}
 
-	var group *console.GroupFragment
-	if !data.Name.IsNull() {
-		if c, err := d.client.GetGroup(ctx, data.Name.ValueString()); err != nil {
-			resp.Diagnostics.AddWarning("Client Error", fmt.Sprintf("Unable to read group by name, got error: %s", err))
-		} else {
-			group = c.Group
-		}
-	}
-
-	if group == nil {
-		resp.Diagnostics.AddError("Client Error", "Unable to read group, see warnings for more information")
+	if response == nil || response.Group == nil {
+		resp.Diagnostics.AddError("Client Error", "Unable to find group, got no error")
 		return
 	}
 
-	data.From(group, ctx, resp.Diagnostics)
+	data.From(response.Group)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
