@@ -1,5 +1,6 @@
 # Visit https://golangci-lint.run/ for usage documentation
 # and information on other useful linters
+args: --timeout=10m
 issues:
   max-same-issues: 0
 linters:
