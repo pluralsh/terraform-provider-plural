@@ -1,4 +1,4 @@
-package resource
+package model
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"github.com/pluralsh/polly/algorithms"
 )
 
-type customStackRun struct {
+type CustomStackRun struct {
 	Id            types.String `tfsdk:"id"`
 	Name          types.String `tfsdk:"name"`
 	Documentation types.String `tfsdk:"documentation"`
@@ -22,7 +22,7 @@ type customStackRun struct {
 	Configuration types.Set    `tfsdk:"configuration"`
 }
 
-func (csr *customStackRun) Attributes(ctx context.Context, d diag.Diagnostics, client *client.Client) (*gqlclient.CustomStackRunAttributes, error) {
+func (csr *CustomStackRun) Attributes(ctx context.Context, d diag.Diagnostics, client *client.Client) (*gqlclient.CustomStackRunAttributes, error) {
 	return &gqlclient.CustomStackRunAttributes{
 		Name:          csr.Name.ValueString(),
 		Documentation: csr.Documentation.ValueStringPointer(),
@@ -32,7 +32,7 @@ func (csr *customStackRun) Attributes(ctx context.Context, d diag.Diagnostics, c
 	}, nil
 }
 
-func (csr *customStackRun) commandsAttribute(ctx context.Context, d diag.Diagnostics) []*gqlclient.CommandAttributes {
+func (csr *CustomStackRun) commandsAttribute(ctx context.Context, d diag.Diagnostics) []*gqlclient.CommandAttributes {
 	if csr.Commands.IsNull() {
 		return nil
 	}
@@ -55,7 +55,7 @@ func (csr *customStackRun) commandsAttribute(ctx context.Context, d diag.Diagnos
 	return result
 }
 
-func (csr *customStackRun) configurationAttribute(ctx context.Context, d diag.Diagnostics) []*gqlclient.PrConfigurationAttributes {
+func (csr *CustomStackRun) configurationAttribute(ctx context.Context, d diag.Diagnostics) []*gqlclient.PrConfigurationAttributes {
 	if csr.Configuration.IsNull() {
 		return nil
 	}
@@ -80,7 +80,7 @@ func (csr *customStackRun) configurationAttribute(ctx context.Context, d diag.Di
 	return result
 }
 
-func (csr *customStackRun) From(customStackRun *gqlclient.CustomStackRunFragment, ctx context.Context, d diag.Diagnostics) {
+func (csr *CustomStackRun) From(customStackRun *gqlclient.CustomStackRunFragment, ctx context.Context, d diag.Diagnostics) {
 	csr.Id = types.StringValue(customStackRun.ID)
 	csr.Name = types.StringValue(customStackRun.Name)
 	csr.Documentation = types.StringPointerValue(customStackRun.Documentation)

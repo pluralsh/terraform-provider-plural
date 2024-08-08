@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"terraform-provider-plural/internal/common"
+	"terraform-provider-plural/internal/model"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -53,7 +54,7 @@ func (r *ServiceDeploymentResource) Configure(_ context.Context, req resource.Co
 }
 
 func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	data := new(ServiceDeployment)
+	data := new(model.ServiceDeployment)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -71,7 +72,7 @@ func (r *ServiceDeploymentResource) Create(ctx context.Context, req resource.Cre
 }
 
 func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	data := new(ServiceDeployment)
+	data := new(model.ServiceDeployment)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -88,7 +89,7 @@ func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadR
 }
 
 func (r *ServiceDeploymentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	data := new(ServiceDeployment)
+	data := new(model.ServiceDeployment)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -104,7 +105,7 @@ func (r *ServiceDeploymentResource) Update(ctx context.Context, req resource.Upd
 }
 
 func (r *ServiceDeploymentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	data := new(ServiceDeployment)
+	data := new(model.ServiceDeployment)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -116,7 +117,7 @@ func (r *ServiceDeploymentResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	err = wait.WaitForWithContext(ctx, client.Ticker(5*time.Second), func(ctx context.Context) (bool, error) {
+	err = wait.PollUntilContextCancel(ctx, 5*time.Second, true, func(ctx context.Context) (bool, error) {
 		_, err := r.client.GetServiceDeployment(ctx, data.Id.ValueString())
 		if client.IsNotFound(err) {
 			return true, nil

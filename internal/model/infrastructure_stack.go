@@ -1,4 +1,4 @@
-package resource
+package model
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	"github.com/pluralsh/polly/algorithms"
 )
 
-type infrastructureStack struct {
+type InfrastructureStack struct {
 	Id            types.String                      `tfsdk:"id"`
 	Name          types.String                      `tfsdk:"name"`
 	Type          types.String                      `tfsdk:"type"`
@@ -31,7 +31,7 @@ type infrastructureStack struct {
 	Bindings      *common.Bindings                  `tfsdk:"bindings"`
 }
 
-func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostics, client *client.Client) (*gqlclient.StackAttributes, error) {
+func (is *InfrastructureStack) Attributes(ctx context.Context, d diag.Diagnostics, client *client.Client) (*gqlclient.StackAttributes, error) {
 	attr := &gqlclient.StackAttributes{
 		Name:          is.Name.ValueString(),
 		Type:          gqlclient.StackType(is.Type.ValueString()),
@@ -58,7 +58,7 @@ func (is *infrastructureStack) Attributes(ctx context.Context, d diag.Diagnostic
 	return attr, nil
 }
 
-func (is *infrastructureStack) FilesAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.StackFileAttributes {
+func (is *InfrastructureStack) FilesAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.StackFileAttributes {
 	if is.Files.IsNull() {
 		return nil
 	}
@@ -74,7 +74,7 @@ func (is *infrastructureStack) FilesAttributes(ctx context.Context, d diag.Diagn
 	return result
 }
 
-func (is *infrastructureStack) EnvironmentAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.StackEnvironmentAttributes {
+func (is *InfrastructureStack) EnvironmentAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.StackEnvironmentAttributes {
 	if is.Environment.IsNull() {
 		return nil
 	}
@@ -94,7 +94,7 @@ func (is *infrastructureStack) EnvironmentAttributes(ctx context.Context, d diag
 	return result
 }
 
-func (is *infrastructureStack) From(stack *gqlclient.InfrastructureStackFragment, ctx context.Context, d diag.Diagnostics) {
+func (is *InfrastructureStack) From(stack *gqlclient.InfrastructureStackFragment, ctx context.Context, d diag.Diagnostics) {
 	is.Id = types.StringPointerValue(stack.ID)
 	is.Name = types.StringValue(stack.Name)
 	is.Type = types.StringValue(string(stack.Type))
@@ -253,12 +253,12 @@ func (isc *InfrastructureStackConfiguration) HooksAttributes(ctx context.Context
 	return result
 }
 
-func (isc *InfrastructureStackConfiguration) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.StackConfigurationAttributes {
+func (isc *InfrastructureStackConfiguration) Attributes(ctx context.Context, d diag.Diagnostics) *gqlclient.StackConfigurationAttributes {
 	if isc == nil {
-		return gqlclient.StackConfigurationAttributes{}
+		return nil
 	}
 
-	return gqlclient.StackConfigurationAttributes{
+	return &gqlclient.StackConfigurationAttributes{
 		Image:   isc.Image.ValueStringPointer(),
 		Version: isc.Version.ValueStringPointer(),
 		Hooks:   isc.HooksAttributes(ctx, d),
