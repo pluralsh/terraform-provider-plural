@@ -116,7 +116,7 @@ func (r *ServiceDeploymentResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	err = wait.WaitForWithContext(ctx, client.Ticker(5*time.Second), func(ctx context.Context) (bool, error) {
+	err = wait.PollUntilContextCancel(ctx, 5*time.Second, true, func(ctx context.Context) (bool, error) {
 		_, err := r.client.GetServiceDeployment(ctx, data.Id.ValueString())
 		if client.IsNotFound(err) {
 			return true, nil
