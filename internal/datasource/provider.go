@@ -6,6 +6,7 @@ import (
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
+	"terraform-provider-plural/internal/model"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -81,7 +82,7 @@ func (p *providerDataSource) Configure(_ context.Context, req datasource.Configu
 }
 
 func (p *providerDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data provider
+	var data model.Provider
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return

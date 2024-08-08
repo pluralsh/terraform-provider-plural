@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"terraform-provider-plural/internal/model"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -196,7 +198,7 @@ func (r *providerResource) Configure(_ context.Context, req resource.ConfigureRe
 }
 
 func (r *providerResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data provider
+	var data model.ProviderExtended
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -213,7 +215,7 @@ func (r *providerResource) Create(ctx context.Context, req resource.CreateReques
 }
 
 func (r *providerResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data provider
+	var data model.ProviderExtended
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -234,7 +236,7 @@ func (r *providerResource) Read(ctx context.Context, req resource.ReadRequest, r
 }
 
 func (r *providerResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data provider
+	var data model.ProviderExtended
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -250,7 +252,7 @@ func (r *providerResource) Update(ctx context.Context, req resource.UpdateReques
 }
 
 func (r *providerResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data provider
+	var data model.ProviderExtended
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
