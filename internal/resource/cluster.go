@@ -65,8 +65,10 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
+	data.FromCreate(result, ctx, resp.Diagnostics)
+
 	if data.HasKubeconfig() {
-		if result.CreateCluster.DeployToken == nil {
+		if data.DeployToken.IsNull() {
 			resp.Diagnostics.AddError("Client Error", "Unable to fetch cluster deploy token")
 			return
 		}
@@ -77,14 +79,13 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 			return
 		}
 
-		err = handler.InstallOrUpgrade(*result.CreateCluster.DeployToken)
+		err = handler.InstallOrUpgrade(data.DeployToken.ValueString())
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
 			return
 		}
 	}
 
-	data.FromCreate(result, ctx, resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -126,6 +127,25 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update cluster, got error: %s", err))
 		return
+	}
+
+	if !data.HelmRepoUrl.Equal(state.HelmRepoUrl) && data.HasKubeconfig() {
+		if data.DeployToken.IsNull() {
+			resp.Diagnostics.AddError("Client Error", "Unable to fetch cluster deploy token")
+			return
+		}
+
+		handler, err := NewOperatorHandler(ctx, r.client, data.GetKubeconfig(), data.HelmRepoUrl.ValueString(), data.HelmValues.ValueStringPointer(), r.consoleUrl)
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to init operator handler, got error: %s", err))
+			return
+		}
+
+		err = handler.InstallOrUpgrade(data.DeployToken.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
+			return
+		}
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

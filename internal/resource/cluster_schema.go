@@ -27,6 +27,12 @@ func (r *clusterResource) schema() schema.Schema {
 				Computed:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
+			"deploy_token": schema.StringAttribute{
+				Description:         "A auth token to be used by the deploy operator.",
+				MarkdownDescription: "A auth token to be used by the deploy operator.",
+				Computed:            true,
+				Sensitive:           true,
+			},
 			"inserted_at": schema.StringAttribute{
 				Description:         "Creation date of this cluster.",
 				MarkdownDescription: "Creation date of this cluster.",
