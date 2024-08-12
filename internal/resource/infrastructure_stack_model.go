@@ -253,12 +253,12 @@ func (isc *InfrastructureStackConfiguration) HooksAttributes(ctx context.Context
 	return result
 }
 
-func (isc *InfrastructureStackConfiguration) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.StackConfigurationAttributes {
+func (isc *InfrastructureStackConfiguration) Attributes(ctx context.Context, d diag.Diagnostics) *gqlclient.StackConfigurationAttributes {
 	if isc == nil {
-		return gqlclient.StackConfigurationAttributes{}
+		return nil
 	}
 
-	return gqlclient.StackConfigurationAttributes{
+	return &gqlclient.StackConfigurationAttributes{
 		Image:   isc.Image.ValueStringPointer(),
 		Version: isc.Version.ValueStringPointer(),
 		Hooks:   isc.HooksAttributes(ctx, d),
