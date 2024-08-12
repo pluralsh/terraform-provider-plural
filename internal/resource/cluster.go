@@ -151,7 +151,7 @@ func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 			return
 		}
 
-		if err = wait.PollWithContext(ctx, 10*time.Second, 10*time.Minute, func(ctx context.Context) (bool, error) {
+		if err = wait.PollUntilContextTimeout(ctx, 10*time.Second, 10*time.Minute, true, func(ctx context.Context) (bool, error) {
 			response, err := r.client.GetCluster(ctx, data.Id.ValueStringPointer())
 			if client.IsNotFound(err) || response == nil || response.Cluster == nil {
 				return true, nil
