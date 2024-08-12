@@ -1,20 +1,19 @@
-package resource
+package model
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	console "github.com/pluralsh/console/go/client"
 )
 
-type provider struct {
-	Id            types.String          `tfsdk:"id"`
-	Name          types.String          `tfsdk:"name"`
-	Namespace     types.String          `tfsdk:"namespace"`
-	Editable      types.Bool            `tfsdk:"editable"`
-	Cloud         types.String          `tfsdk:"cloud"`
-	CloudSettings ProviderCloudSettings `tfsdk:"cloud_settings"`
+type Provider struct {
+	Id        types.String `tfsdk:"id"`
+	Name      types.String `tfsdk:"name"`
+	Namespace types.String `tfsdk:"namespace"`
+	Editable  types.Bool   `tfsdk:"editable"`
+	Cloud     types.String `tfsdk:"cloud"`
 }
 
-func (p *provider) From(cp *console.ClusterProviderFragment) {
+func (p *Provider) From(cp *console.ClusterProviderFragment) {
 	p.Id = types.StringValue(cp.ID)
 	p.Name = types.StringValue(cp.Name)
 	p.Namespace = types.StringValue(cp.Namespace)
@@ -22,18 +21,23 @@ func (p *provider) From(cp *console.ClusterProviderFragment) {
 	p.Cloud = types.StringValue(cp.Cloud)
 }
 
-func (p *provider) Attributes() console.ClusterProviderAttributes {
+type ProviderExtended struct {
+	Provider
+	CloudSettings ProviderCloudSettings `tfsdk:"cloud_settings"`
+}
+
+func (pe *ProviderExtended) Attributes() console.ClusterProviderAttributes {
 	return console.ClusterProviderAttributes{
-		Name:          p.Name.ValueString(),
-		Namespace:     p.Namespace.ValueStringPointer(),
-		Cloud:         p.Cloud.ValueStringPointer(),
-		CloudSettings: p.CloudSettings.Attributes(),
+		Name:          pe.Name.ValueString(),
+		Namespace:     pe.Namespace.ValueStringPointer(),
+		Cloud:         pe.Cloud.ValueStringPointer(),
+		CloudSettings: pe.CloudSettings.Attributes(),
 	}
 }
 
-func (p *provider) UpdateAttributes() console.ClusterProviderUpdateAttributes {
+func (pe *ProviderExtended) UpdateAttributes() console.ClusterProviderUpdateAttributes {
 	return console.ClusterProviderUpdateAttributes{
-		CloudSettings: p.CloudSettings.Attributes(),
+		CloudSettings: pe.CloudSettings.Attributes(),
 	}
 }
 
