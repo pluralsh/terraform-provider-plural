@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/samber/lo"
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
@@ -41,14 +40,22 @@ func (in *prAutomationTriggerResource) Schema(_ context.Context, _ resource.Sche
 					stringvalidator.LengthAtLeast(1),
 				},
 			},
-			"pr_automation_branch": schema.StringAttribute{
-				Description:         "Branch name of the PR Automation that should be triggered.",
-				MarkdownDescription: "Branch name of the PR Automation that should be triggered.",
+			"repo_slug": schema.StringAttribute{
+				Description:         "Repo slug of the repository PR Automation should be triggered against. If not provided PR Automation repo will be used. Format: <userOrOrg>/<repoName>",
+				MarkdownDescription: "Repo slug of the repository PR Automation should be triggered against. If not provided PR Automation repo will be used. Format: <userOrOrg>/<repoName>",
 				Optional:            true,
 			},
+			"pr_automation_branch": schema.StringAttribute{
+				Description:         "Branch that should be created against PR Automation base branch.",
+				MarkdownDescription: "Branch that should be created against PR Automation base branch.",
+				Required:            true,
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
+				},
+			},
 			"context": schema.MapAttribute{
-				Description:         "PR Automation context.",
-				MarkdownDescription: "PR Automation context.",
+				Description:         "PR Automation configuration context.",
+				MarkdownDescription: "PR Automation configuration context.",
 				Optional:            true,
 				ElementType:         types.StringType,
 			},
@@ -82,11 +89,10 @@ func (in *prAutomationTriggerResource) Create(ctx context.Context, request resou
 
 	_, err := in.client.CreatePullRequest(
 		ctx,
-		"test",
-		lo.ToPtr(""),
-		lo.ToPtr(""),
+		data.PrAutomationID.ValueString(),
+		data.RepoSlug.ValueStringPointer(),
+		data.PrAutomationBranch.ValueStringPointer(),
 		data.ContextJson(ctx, response.Diagnostics),
-		nil,
 	)
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create pull request, got error: %s", err))

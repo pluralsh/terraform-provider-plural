@@ -11,6 +11,7 @@ import (
 
 type PrAutomationTrigger struct {
 	PrAutomationID     types.String `tfsdk:"pr_automation_id"`
+	RepoSlug           types.String `tfsdk:"repo_slug"`
 	PrAutomationBranch types.String `tfsdk:"pr_automation_branch"`
 	Context            types.Map    `tfsdk:"context"`
 }
