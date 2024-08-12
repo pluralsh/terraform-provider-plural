@@ -6,6 +6,7 @@ import (
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
+	"terraform-provider-plural/internal/model"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -50,7 +51,7 @@ func (r *CustomStackRunResource) Configure(_ context.Context, req resource.Confi
 }
 
 func (r *CustomStackRunResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	data := new(customStackRun)
+	data := new(model.CustomStackRun)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -72,7 +73,7 @@ func (r *CustomStackRunResource) Create(ctx context.Context, req resource.Create
 }
 
 func (r *CustomStackRunResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	data := new(customStackRun)
+	data := new(model.CustomStackRun)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -89,7 +90,7 @@ func (r *CustomStackRunResource) Read(ctx context.Context, req resource.ReadRequ
 }
 
 func (r *CustomStackRunResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	data := new(customStackRun)
+	data := new(model.CustomStackRun)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -110,7 +111,7 @@ func (r *CustomStackRunResource) Update(ctx context.Context, req resource.Update
 }
 
 func (r *CustomStackRunResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	data := new(customStackRun)
+	data := new(model.CustomStackRun)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
