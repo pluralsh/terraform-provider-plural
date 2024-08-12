@@ -41,8 +41,8 @@ func (in *prAutomationTriggerResource) Schema(_ context.Context, _ resource.Sche
 				},
 			},
 			"repo_slug": schema.StringAttribute{
-				Description:         "Repo slug of the repository PR Automation should be triggered against. If not provided PR Automation repo will be used. Format: <userOrOrg>/<repoName>",
-				MarkdownDescription: "Repo slug of the repository PR Automation should be triggered against. If not provided PR Automation repo will be used. Format: <userOrOrg>/<repoName>",
+				Description:         "Repo slug of the repository PR Automation should be triggered against. If not provided PR Automation repo will be used. Example format for a github repository: <userOrOrg>/<repoName>",
+				MarkdownDescription: "Repo slug of the repository PR Automation should be triggered against. If not provided PR Automation repo will be used. Example format for a github repository: <userOrOrg>/<repoName>",
 				Optional:            true,
 			},
 			"pr_automation_branch": schema.StringAttribute{

@@ -23,4 +23,4 @@ description: |-
 ### Optional
 
 - `context` (Map of String) PR Automation configuration context.
-- `repo_slug` (String) Repo slug of the repository PR Automation should be triggered against. If not provided PR Automation repo will be used. Format: <userOrOrg>/<repoName>
+- `repo_slug` (String) Repo slug of the repository PR Automation should be triggered against. If not provided PR Automation repo will be used. Example format for a github repository: <userOrOrg>/<repoName>
