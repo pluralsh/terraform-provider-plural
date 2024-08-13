@@ -192,6 +192,7 @@ func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource
 		r.NewGroupMemberResource,
 		r.NewGroupResource,
 		r.NewPrAutomationTriggerResource,
+		r.NewStackRunTriggerResource,
 	}
 }
 
