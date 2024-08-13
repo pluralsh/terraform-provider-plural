@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -65,10 +66,8 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	data.FromCreate(result, ctx, resp.Diagnostics)
-
 	if data.HasKubeconfig() {
-		if data.DeployToken.IsNull() {
+		if result.CreateCluster.DeployToken == nil {
 			resp.Diagnostics.AddError("Client Error", "Unable to fetch cluster deploy token")
 			return
 		}
@@ -79,13 +78,14 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 			return
 		}
 
-		err = handler.InstallOrUpgrade(data.DeployToken.ValueString())
+		err = handler.InstallOrUpgrade(*result.CreateCluster.DeployToken)
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
 			return
 		}
 	}
 
+	data.FromCreate(result, ctx, resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -130,8 +130,9 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	if !data.HelmRepoUrl.Equal(state.HelmRepoUrl) && data.HasKubeconfig() {
-		if data.DeployToken.IsNull() {
-			resp.Diagnostics.AddError("Client Error", "Unable to fetch cluster deploy token")
+		clusterWithToken, err := r.client.GetClusterWithToken(ctx, data.Id.ValueStringPointer(), nil)
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to fetch cluster deploy token, got error: %s", err))
 			return
 		}
 
@@ -141,7 +142,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 			return
 		}
 
-		err = handler.InstallOrUpgrade(data.DeployToken.ValueString())
+		err = handler.InstallOrUpgrade(lo.FromPtr(clusterWithToken.Cluster.DeployToken))
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
 			return

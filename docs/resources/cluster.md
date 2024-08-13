@@ -34,7 +34,6 @@ A representation of a cluster you can deploy to.
 
 ### Read-Only
 
-- `deploy_token` (String, Sensitive) A auth token to be used by the deploy operator.
 - `id` (String) Internal identifier of this cluster.
 - `inserted_at` (String) Creation date of this cluster.
 

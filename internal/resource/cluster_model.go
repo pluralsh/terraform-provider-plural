@@ -32,7 +32,6 @@ type cluster struct {
 	HelmRepoUrl types.String `tfsdk:"helm_repo_url"`
 	HelmValues  types.String `tfsdk:"helm_values"`
 	Kubeconfig  *Kubeconfig  `tfsdk:"kubeconfig"`
-	DeployToken types.String `tfsdk:"deploy_token"`
 }
 
 // func (c *cluster) NodePoolsAttribute(ctx context.Context, d diag.Diagnostics) []*console.NodePoolAttributes {
@@ -123,7 +122,6 @@ func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.
 
 func (c *cluster) FromCreate(cc *console.CreateCluster, ctx context.Context, d diag.Diagnostics) {
 	c.Id = types.StringValue(cc.CreateCluster.ID)
-	c.DeployToken = types.StringPointerValue(cc.CreateCluster.DeployToken)
 	c.InsertedAt = types.StringPointerValue(cc.CreateCluster.InsertedAt)
 	c.Name = types.StringValue(cc.CreateCluster.Name)
 	c.Handle = types.StringPointerValue(cc.CreateCluster.Handle)
