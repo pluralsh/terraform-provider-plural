@@ -17,4 +17,4 @@ description: |-
 
 ### Required
 
-- `id` (String) ID of the Infrastructure Stack that should be used stack a new run from the newest SHA in the stack's run history.
+- `id` (String) ID of the Infrastructure Stack that should be used to start a new run from the newest SHA in the stack's run history.

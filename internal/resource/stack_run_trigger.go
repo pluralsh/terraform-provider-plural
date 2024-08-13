@@ -32,8 +32,8 @@ func (in *stackRunTriggerResource) Schema(_ context.Context, _ resource.SchemaRe
 	response.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Description:         "ID of the Infrastructure Stack that should be used stack a new run from the newest SHA in the stack's run history.",
-				MarkdownDescription: "ID of the Infrastructure Stack that should be used stack a new run from the newest SHA in the stack's run history.",
+				Description:         "ID of the Infrastructure Stack that should be used to start a new run from the newest SHA in the stack's run history.",
+				MarkdownDescription: "ID of the Infrastructure Stack that should be used to start a new run from the newest SHA in the stack's run history.",
 				Required:            true,
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
