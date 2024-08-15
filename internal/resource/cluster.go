@@ -129,7 +129,9 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	if !data.HelmRepoUrl.Equal(state.HelmRepoUrl) && data.HasKubeconfig() {
+	reinstallable := !data.HelmRepoUrl.Equal(state.HelmRepoUrl) || !data.GetKubeconfig().Unchanged(state.GetKubeconfig())
+
+	if reinstallable && data.HasKubeconfig() {
 		clusterWithToken, err := r.client.GetClusterWithToken(ctx, data.Id.ValueStringPointer(), nil)
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to fetch cluster deploy token, got error: %s", err))

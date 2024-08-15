@@ -255,3 +255,15 @@ type KubeconfigExec struct {
 	Env        types.Map    `tfsdk:"env"`
 	APIVersion types.String `tfsdk:"api_version"`
 }
+
+func (k *Kubeconfig) Unchanged(other *Kubeconfig) bool {
+	if k == nil {
+		return other == nil
+	}
+
+	if other == nil {
+		return false
+	}
+
+	return k.Host == other.Host
+}
