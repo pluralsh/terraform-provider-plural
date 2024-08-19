@@ -37,7 +37,7 @@ func (r *clusterResource) schema() schema.Schema {
 				Description:         "Human-readable name of this cluster, that also translates to cloud resource name.",
 				MarkdownDescription: "Human-readable name of this cluster, that also translates to cloud resource name.",
 				Required:            true,
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"handle": schema.StringAttribute{
 				Description:         "A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.",
