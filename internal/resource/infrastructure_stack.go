@@ -53,7 +53,7 @@ func (r *InfrastructureStackResource) Configure(_ context.Context, req resource.
 }
 
 func (r *InfrastructureStackResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	data := new(model.InfrastructureStack)
+	data := new(model.InfrastructureStackExtended)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -75,7 +75,7 @@ func (r *InfrastructureStackResource) Create(ctx context.Context, req resource.C
 }
 
 func (r *InfrastructureStackResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	data := new(model.InfrastructureStack)
+	data := new(model.InfrastructureStackExtended)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -92,7 +92,7 @@ func (r *InfrastructureStackResource) Read(ctx context.Context, req resource.Rea
 }
 
 func (r *InfrastructureStackResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	data := new(model.InfrastructureStack)
+	data := new(model.InfrastructureStackExtended)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -113,7 +113,7 @@ func (r *InfrastructureStackResource) Update(ctx context.Context, req resource.U
 }
 
 func (r *InfrastructureStackResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	data := new(model.InfrastructureStack)
+	data := new(model.InfrastructureStackExtended)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
