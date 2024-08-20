@@ -271,7 +271,7 @@ func (isc *InfrastructureStackConfiguration) From(ctx context.Context, configura
 	}
 
 	isc.Image = types.StringPointerValue(configuration.Image)
-	isc.Version = types.StringValue(configuration.Version)
+	isc.Version = types.StringPointerValue(configuration.Version)
 	isc.Hooks = infrastructureStackHooksFrom(ctx, configuration.Hooks, isc.Hooks, d)
 }
 
