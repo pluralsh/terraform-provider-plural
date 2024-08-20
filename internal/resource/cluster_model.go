@@ -92,6 +92,7 @@ func (c *cluster) Attributes(ctx context.Context, d diag.Diagnostics) console.Cl
 
 func (c *cluster) UpdateAttributes(ctx context.Context, d diag.Diagnostics) console.ClusterUpdateAttributes {
 	return console.ClusterUpdateAttributes{
+		Name: c.Name.ValueStringPointer(),
 		// Version: c.Version.ValueStringPointer(),
 		Handle:  c.Handle.ValueStringPointer(),
 		Protect: c.Protect.ValueBoolPointer(),
