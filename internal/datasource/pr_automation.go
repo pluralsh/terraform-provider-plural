@@ -104,7 +104,7 @@ func (r *PRAutomationDataSource) Read(ctx context.Context, req datasource.ReadRe
 
 	if fragment == nil && !data.Name.IsNull() {
 		if c, err := r.client.GetPrAutomationByName(ctx, data.Name.ValueString()); err != nil {
-			resp.Diagnostics.AddWarning("Client Error", fmt.Sprintf("Unable to read PR automation by handle, got error: %s", err))
+			resp.Diagnostics.AddWarning("Client Error", fmt.Sprintf("Unable to read PR automation by name, got error: %s", err))
 		} else {
 			fragment = c.PrAutomation
 		}
