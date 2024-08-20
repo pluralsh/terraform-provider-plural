@@ -3,12 +3,12 @@
 page_title: "plural_infrastructure_stack Data Source - terraform-provider-plural"
 subcategory: ""
 description: |-
-  PR automation data source.
+  Stack data source.
 ---
 
 # plural_infrastructure_stack (Data Source)
 
-PR automation data source.
+Stack data source.
 
 
 

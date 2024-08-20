@@ -20,7 +20,7 @@ func NewInfrastructureStackDataSource() datasource.DataSource {
 	return &InfrastructureStackDataSource{}
 }
 
-// InfrastructureStackDataSource defines the PR automation data source implementation.
+// InfrastructureStackDataSource defines the stack data source implementation.
 type InfrastructureStackDataSource struct {
 	client *client.Client
 }
@@ -31,7 +31,7 @@ func (r *InfrastructureStackDataSource) Metadata(_ context.Context, req datasour
 
 func (r *InfrastructureStackDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "PR automation data source.",
+		MarkdownDescription: "Stack data source.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Optional:            true,
@@ -81,7 +81,7 @@ func (r *InfrastructureStackDataSource) Configure(_ context.Context, req datasou
 	data, ok := req.ProviderData.(*common.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected PR Automation Resource Configure Type",
+			"Unexpected Infrastructure Stack Resource Configure Type",
 			fmt.Sprintf("Expected *common.ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
@@ -117,7 +117,7 @@ func (r *InfrastructureStackDataSource) Read(ctx context.Context, req datasource
 	//}
 
 	if fragment == nil {
-		resp.Diagnostics.AddError("Client Error", "Unable to read PR automation, see warnings for more information")
+		resp.Diagnostics.AddError("Client Error", "Unable to read stack, see warnings for more information")
 		return
 	}
 
