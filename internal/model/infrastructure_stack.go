@@ -15,14 +15,27 @@ import (
 )
 
 type InfrastructureStack struct {
-	Id            types.String                      `tfsdk:"id"`
-	Name          types.String                      `tfsdk:"name"`
-	Type          types.String                      `tfsdk:"type"`
+	Id        types.String `tfsdk:"id"`
+	Name      types.String `tfsdk:"name"`
+	Type      types.String `tfsdk:"type"`
+	Approval  types.Bool   `tfsdk:"approval"`
+	ProjectId types.String `tfsdk:"project_id"`
+	ClusterId types.String `tfsdk:"cluster_id"`
+}
+
+func (is *InfrastructureStack) From(stack *gqlclient.InfrastructureStackFragment) {
+	is.Id = types.StringPointerValue(stack.ID)
+	is.Name = types.StringValue(stack.Name)
+	is.Type = types.StringValue(string(stack.Type))
+	is.Approval = types.BoolPointerValue(stack.Approval)
+	is.ProjectId = common.ProjectFrom(stack.Project)
+	is.ClusterId = types.StringValue(stack.Cluster.ID)
+}
+
+type InfrastructureStackExtended struct {
+	InfrastructureStack
 	Actor         types.String                      `tfsdk:"actor"`
-	Approval      types.Bool                        `tfsdk:"approval"`
 	Detach        types.Bool                        `tfsdk:"detach"`
-	ProjectId     types.String                      `tfsdk:"project_id"`
-	ClusterId     types.String                      `tfsdk:"cluster_id"`
 	Repository    *InfrastructureStackRepository    `tfsdk:"repository"`
 	Configuration *InfrastructureStackConfiguration `tfsdk:"configuration"`
 	Files         types.Map                         `tfsdk:"files"`
@@ -31,7 +44,7 @@ type InfrastructureStack struct {
 	Bindings      *common.Bindings                  `tfsdk:"bindings"`
 }
 
-func (is *InfrastructureStack) Attributes(ctx context.Context, d diag.Diagnostics, client *client.Client) (*gqlclient.StackAttributes, error) {
+func (is *InfrastructureStackExtended) Attributes(ctx context.Context, d diag.Diagnostics, client *client.Client) (*gqlclient.StackAttributes, error) {
 	attr := &gqlclient.StackAttributes{
 		Name:          is.Name.ValueString(),
 		Type:          gqlclient.StackType(is.Type.ValueString()),
@@ -58,7 +71,7 @@ func (is *InfrastructureStack) Attributes(ctx context.Context, d diag.Diagnostic
 	return attr, nil
 }
 
-func (is *InfrastructureStack) FilesAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.StackFileAttributes {
+func (is *InfrastructureStackExtended) FilesAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.StackFileAttributes {
 	if is.Files.IsNull() {
 		return nil
 	}
@@ -74,7 +87,7 @@ func (is *InfrastructureStack) FilesAttributes(ctx context.Context, d diag.Diagn
 	return result
 }
 
-func (is *InfrastructureStack) EnvironmentAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.StackEnvironmentAttributes {
+func (is *InfrastructureStackExtended) EnvironmentAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.StackEnvironmentAttributes {
 	if is.Environment.IsNull() {
 		return nil
 	}
@@ -94,13 +107,8 @@ func (is *InfrastructureStack) EnvironmentAttributes(ctx context.Context, d diag
 	return result
 }
 
-func (is *InfrastructureStack) From(stack *gqlclient.InfrastructureStackFragment, ctx context.Context, d diag.Diagnostics) {
-	is.Id = types.StringPointerValue(stack.ID)
-	is.Name = types.StringValue(stack.Name)
-	is.Type = types.StringValue(string(stack.Type))
-	is.Approval = types.BoolPointerValue(stack.Approval)
-	is.ProjectId = common.ProjectFrom(stack.Project)
-	is.ClusterId = types.StringValue(stack.Cluster.ID)
+func (is *InfrastructureStackExtended) From(stack *gqlclient.InfrastructureStackFragment, ctx context.Context, d diag.Diagnostics) {
+	is.InfrastructureStack.From(stack)
 	is.Repository.From(stack.Repository, stack.Git)
 	is.Configuration.From(ctx, stack.Configuration, d)
 	is.Files = infrastructureStackFilesFrom(stack.Files, is.Files, d)
@@ -271,7 +279,7 @@ func (isc *InfrastructureStackConfiguration) From(ctx context.Context, configura
 	}
 
 	isc.Image = types.StringPointerValue(configuration.Image)
-	isc.Version = types.StringValue(configuration.Version)
+	isc.Version = types.StringPointerValue(configuration.Version)
 	isc.Hooks = infrastructureStackHooksFrom(ctx, configuration.Hooks, isc.Hooks, d)
 }
 

@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"terraform-provider-plural/internal/client"
@@ -38,6 +40,12 @@ func (in *stackRunTriggerResource) Schema(_ context.Context, _ resource.SchemaRe
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
 				},
+			},
+			"retrigger_key": schema.StringAttribute{
+				Description:         "Every time this key changes stack run will be retriggered.",
+				MarkdownDescription: "Every time this key changes stack run will be retriggered.",
+				Optional:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 		},
 	}
@@ -83,8 +91,26 @@ func (in *stackRunTriggerResource) Read(_ context.Context, _ resource.ReadReques
 	// Since this is only a trigger, there is no read API. Ignore.
 }
 
-func (in *stackRunTriggerResource) Update(_ context.Context, _ resource.UpdateRequest, _ *resource.UpdateResponse) {
-	// Since this is only a trigger, there is no update API. Ignore.
+func (in *stackRunTriggerResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data, state model.StackRunTrigger
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !data.RetriggerKey.Equal(state.RetriggerKey) || !data.ID.Equal(state.ID) {
+		_, err := in.client.TriggerRun(
+			ctx,
+			data.ID.ValueString(),
+		)
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to trigger stack run, got error: %s", err))
+			return
+		}
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (in *stackRunTriggerResource) Delete(_ context.Context, _ resource.DeleteRequest, _ *resource.DeleteResponse) {

@@ -14,6 +14,7 @@ type PrAutomationTrigger struct {
 	RepoSlug           types.String `tfsdk:"repo_slug"`
 	PrAutomationBranch types.String `tfsdk:"pr_automation_branch"`
 	Context            types.Map    `tfsdk:"context"`
+	RetriggerKey       types.String `tfsdk:"retrigger_key"`
 }
 
 func (in *PrAutomationTrigger) ContextJson(ctx context.Context, d diag.Diagnostics) *string {

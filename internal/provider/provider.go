@@ -205,6 +205,8 @@ func (p *PluralProvider) DataSources(_ context.Context) []func() datasource.Data
 		ds.NewGroupDataSource,
 		ds.NewUserDataSource,
 		ds.NewConfigDataSource,
+		ds.NewPRAutomationDataSource,
+		ds.NewInfrastructureStackDataSource,
 	}
 }
 

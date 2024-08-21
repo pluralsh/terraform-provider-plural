@@ -5,5 +5,6 @@ import (
 )
 
 type StackRunTrigger struct {
-	ID types.String `tfsdk:"id"`
+	ID           types.String `tfsdk:"id"`
+	RetriggerKey types.String `tfsdk:"retrigger_key"`
 }
