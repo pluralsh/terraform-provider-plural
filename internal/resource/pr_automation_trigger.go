@@ -122,7 +122,7 @@ func (in *prAutomationTriggerResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	if !data.RetriggerKey.Equal(state.RetriggerKey) {
+	if !data.RetriggerKey.Equal(state.RetriggerKey) || !data.PrAutomationID.Equal(state.PrAutomationID) {
 		_, err := in.client.CreatePullRequest(
 			ctx,
 			data.PrAutomationID.ValueString(),

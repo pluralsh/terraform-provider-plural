@@ -99,7 +99,7 @@ func (in *stackRunTriggerResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	if !data.RetriggerKey.Equal(state.RetriggerKey) {
+	if !data.RetriggerKey.Equal(state.RetriggerKey) || !data.ID.Equal(state.ID) {
 		_, err := in.client.TriggerRun(
 			ctx,
 			data.ID.ValueString(),
