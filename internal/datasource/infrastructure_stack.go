@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	console "github.com/pluralsh/console/go/client"
 )
 
 func NewInfrastructureStackDataSource() datasource.DataSource {
@@ -98,29 +97,17 @@ func (r *InfrastructureStackDataSource) Read(ctx context.Context, req datasource
 		return
 	}
 
-	var fragment *console.InfrastructureStackFragment
-	if !data.Id.IsNull() {
-		if c, err := r.client.GetInfrastructureStack(ctx, data.Id.ValueString()); err != nil {
-			resp.Diagnostics.AddWarning("Client Error", fmt.Sprintf("Unable to read stack by ID, got error: %s", err))
-		} else {
-			fragment = c.InfrastructureStack
-		}
-	}
-
-	// TODO: Add once API will allow it.
-	//if fragment == nil && !data.Name.IsNull() {
-	//	if c, err := r.client.GetInfrastructureStack(ctx, data.Name.ValueString()); err != nil {
-	//		resp.Diagnostics.AddWarning("Client Error", fmt.Sprintf("Unable to read stack by name, got error: %s", err))
-	//	} else {
-	//		fragment = c.InfrastructureStack
-	//	}
-	//}
-
-	if fragment == nil {
-		resp.Diagnostics.AddError("Client Error", "Unable to read stack, see warnings for more information")
+	response, err := r.client.GetInfrastructureStack(ctx, data.Id.ValueStringPointer(), data.Name.ValueStringPointer())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get stack, got error: %s", err))
 		return
 	}
 
-	data.From(fragment)
+	if response == nil || response.InfrastructureStack == nil {
+		resp.Diagnostics.AddError("Client Error", "Unable to find stack")
+		return
+	}
+
+	data.From(response.InfrastructureStack)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

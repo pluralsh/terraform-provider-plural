@@ -81,7 +81,7 @@ func (r *InfrastructureStackResource) Read(ctx context.Context, req resource.Rea
 		return
 	}
 
-	response, err := r.client.GetInfrastructureStack(ctx, data.Id.ValueString())
+	response, err := r.client.GetInfrastructureStack(ctx, data.Id.ValueStringPointer(), nil)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read infrastructure stack, got error: %s", err))
 		return
@@ -133,7 +133,7 @@ func (r *InfrastructureStackResource) Delete(ctx context.Context, req resource.D
 		}
 
 		err = wait.PollUntilContextCancel(ctx, 5*time.Second, true, func(ctx context.Context) (bool, error) {
-			_, err := r.client.GetInfrastructureStack(ctx, data.Id.ValueString())
+			_, err := r.client.GetInfrastructureStack(ctx, data.Id.ValueStringPointer(), nil)
 			if client.IsNotFound(err) {
 				return true, nil
 			}
