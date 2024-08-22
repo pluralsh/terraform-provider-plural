@@ -11,6 +11,11 @@ provider "plural" {
   use_cli = true
 }
 
+data "plural_infrastructure_stack" "test" {
+  name = "test-job"
+}
+
 resource "plural_stack_run_trigger" "trigger" {
-  id = "ecc8966a-edfe-4e48-b5ea-f87c3e97d0a3"
+  id = data.plural_infrastructure_stack.test.id
+  retrigger_key = "test"
 }

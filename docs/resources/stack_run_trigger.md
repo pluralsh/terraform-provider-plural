@@ -18,3 +18,7 @@ description: |-
 ### Required
 
 - `id` (String) ID of the Infrastructure Stack that should be used to start a new run from the newest SHA in the stack's run history.
+
+### Optional
+
+- `retrigger_key` (String) Every time this key changes stack run will be retriggered.

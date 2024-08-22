@@ -24,3 +24,4 @@ description: |-
 
 - `context` (Map of String) PR Automation configuration context.
 - `repo_slug` (String) Repo slug of the repository PR Automation should be triggered against. If not provided PR Automation repo will be used. Example format for a github repository: <userOrOrg>/<repoName>
+- `retrigger_key` (String) Every time this key changes PR automation will be retriggered.

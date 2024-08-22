@@ -3,12 +3,12 @@
 page_title: "plural_git_repository Data Source - terraform-provider-plural"
 subcategory: ""
 description: |-
-  GitRepository resource
+  Git repository data source.
 ---
 
 # plural_git_repository (Data Source)
 
-GitRepository resource
+Git repository data source.
 
 
 
@@ -17,5 +17,5 @@ GitRepository resource
 
 ### Optional
 
-- `id` (String) Internal identifier of this GitRepository.
-- `url` (String) URL of this GitRepository.
+- `id` (String) Internal identifier of this Git repository.
+- `url` (String) URL of this Git repository.

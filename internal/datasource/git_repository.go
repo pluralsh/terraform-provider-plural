@@ -30,20 +30,20 @@ func (r *GitRepositoryDataSource) Metadata(_ context.Context, req datasource.Met
 
 func (r *GitRepositoryDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "GitRepository resource",
+		MarkdownDescription: "Git repository data source.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Internal identifier of this GitRepository.",
-				MarkdownDescription: "Internal identifier of this GitRepository.",
+				Description:         "Internal identifier of this Git repository.",
+				MarkdownDescription: "Internal identifier of this Git repository.",
 				Validators: []validator.String{
 					stringvalidator.ConflictsWith(path.MatchRoot("url")),
 				},
 			},
 			"url": schema.StringAttribute{
 				Optional:            true,
-				Description:         "URL of this GitRepository.",
-				MarkdownDescription: "URL of this GitRepository.",
+				Description:         "URL of this Git repository.",
+				MarkdownDescription: "URL of this Git repository.",
 				Validators: []validator.String{
 					stringvalidator.ConflictsWith(path.MatchRoot("id")),
 				},
@@ -79,7 +79,7 @@ func (r *GitRepositoryDataSource) Read(ctx context.Context, req datasource.ReadR
 
 	response, err := r.client.GetGitRepository(ctx, data.Id.ValueStringPointer(), data.Url.ValueStringPointer())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get GitRepository, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get Git repository, got error: %s", err))
 		return
 	}
 
