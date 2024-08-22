@@ -132,15 +132,18 @@ func (r *InfrastructureStackResource) Delete(ctx context.Context, req resource.D
 			return
 		}
 
-		err = wait.PollUntilContextCancel(ctx, 5*time.Second, true, func(ctx context.Context) (bool, error) {
-			_, err := r.client.GetInfrastructureStack(ctx, data.Id.ValueStringPointer(), nil)
+		if err = wait.PollUntilContextTimeout(ctx, 10*time.Second, 10*time.Minute, true, func(ctx context.Context) (bool, error) {
+			response, err := r.client.GetInfrastructureStack(ctx, data.Id.ValueStringPointer(), nil)
 			if client.IsNotFound(err) {
 				return true, nil
 			}
 
+			if err == nil && (response == nil || response.InfrastructureStack == nil) {
+				return true, nil
+			}
+
 			return false, err
-		})
-		if err != nil {
+		}); err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error during watiting for infrastructure stack to be deleted, got error: %s", err))
 			return
 		}
