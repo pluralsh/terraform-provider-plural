@@ -117,15 +117,18 @@ func (r *ServiceDeploymentResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	err = wait.PollUntilContextCancel(ctx, 5*time.Second, true, func(ctx context.Context) (bool, error) {
-		_, err := r.client.GetServiceDeployment(ctx, data.Id.ValueString())
+	if err = wait.PollUntilContextTimeout(ctx, 10*time.Second, 10*time.Minute, true, func(ctx context.Context) (bool, error) {
+		response, err := r.client.GetServiceDeployment(ctx, data.Id.ValueString())
 		if client.IsNotFound(err) {
 			return true, nil
 		}
 
+		if err == nil && (response == nil || response.ServiceDeployment == nil) {
+			return true, nil
+		}
+
 		return false, err
-	})
-	if err != nil {
+	}); err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error during watiting for ServiceDeployment to be deleted, got error: %s", err))
 		return
 	}

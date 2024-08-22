@@ -264,15 +264,18 @@ func (r *providerResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	err = wait.PollUntilContextCancel(ctx, 5*time.Second, true, func(ctx context.Context) (bool, error) {
-		_, err := r.client.GetClusterProvider(ctx, data.Id.ValueString())
+	if err = wait.PollUntilContextTimeout(ctx, 10*time.Second, 10*time.Minute, true, func(ctx context.Context) (bool, error) {
+		response, err := r.client.GetClusterProvider(ctx, data.Id.ValueString())
 		if client.IsNotFound(err) {
 			return true, nil
 		}
 
+		if err == nil && (response == nil || response.ClusterProvider == nil) {
+			return true, nil
+		}
+
 		return false, err
-	})
-	if err != nil {
+	}); err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while watiting for provider to be deleted, got error: %s", err))
 		return
 	}
