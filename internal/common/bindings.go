@@ -91,6 +91,10 @@ func bindingsFrom(bindings []*console.PolicyBindingFragment, config types.Set, c
 	return setValue
 }
 
+func SetToPolicyBindingAttributes(set types.Set, ctx context.Context, d diag.Diagnostics) []*console.PolicyBindingAttributes {
+	return policyBindingAttributes(set, ctx, d)
+}
+
 type PolicyBinding struct {
 	GroupID types.String `tfsdk:"group_id"`
 	ID      types.String `tfsdk:"id"`
