@@ -122,8 +122,6 @@ func (r *GroupMemberResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 }
 
-func (r *GroupMemberResource) ImportState(
-	ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse,
-) {
+func (r *GroupMemberResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

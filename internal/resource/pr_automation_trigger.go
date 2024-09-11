@@ -3,8 +3,10 @@ package resource
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -38,9 +40,7 @@ func (in *prAutomationTriggerResource) Schema(_ context.Context, _ resource.Sche
 				Description:         "ID of the PR Automation that should be triggered.",
 				MarkdownDescription: "ID of the PR Automation that should be triggered.",
 				Required:            true,
-				Validators: []validator.String{
-					stringvalidator.LengthAtLeast(1),
-				},
+				Validators:          []validator.String{stringvalidator.LengthAtLeast(1)},
 			},
 			"repo_slug": schema.StringAttribute{
 				Description:         "Repo slug of the repository PR Automation should be triggered against. If not provided PR Automation repo will be used. Example format for a github repository: <userOrOrg>/<repoName>",
@@ -51,9 +51,7 @@ func (in *prAutomationTriggerResource) Schema(_ context.Context, _ resource.Sche
 				Description:         "Branch that should be created against PR Automation base branch.",
 				MarkdownDescription: "Branch that should be created against PR Automation base branch.",
 				Required:            true,
-				Validators: []validator.String{
-					stringvalidator.LengthAtLeast(1),
-				},
+				Validators:          []validator.String{stringvalidator.LengthAtLeast(1)},
 			},
 			"context": schema.MapAttribute{
 				Description:         "PR Automation configuration context.",
@@ -141,4 +139,19 @@ func (in *prAutomationTriggerResource) Update(ctx context.Context, req resource.
 
 func (in *prAutomationTriggerResource) Delete(_ context.Context, _ resource.DeleteRequest, _ *resource.DeleteResponse) {
 	// Since this is only a trigger, there is no delete API. Ignore.
+}
+
+func (in *prAutomationTriggerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	idParts := strings.Split(req.ID, ",")
+
+	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
+		resp.Diagnostics.AddError(
+			"Unexpected Import Identifier",
+			fmt.Sprintf("Expected import identifier with format: pr_automation_id,pr_automation_branch. Got: %q", req.ID),
+		)
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("pr_automation_id"), idParts[0])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("pr_automation_branch"), idParts[1])...)
 }
