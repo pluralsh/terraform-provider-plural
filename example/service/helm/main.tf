@@ -1,9 +1,18 @@
+terraform {
+  required_providers {
+    plural = {
+      source = "pluralsh/plural"
+      version = "0.2.1"
+    }
+  }
+}
+
 provider "plural" {
   use_cli = true
 }
 
-data "plural_cluster" "byok_workload_cluster" {
-  handle = "gcp-workload-cluster"
+data "plural_cluster" "cluster" {
+  handle = "mgmt"
 }
 
 resource "plural_service_deployment" "cd-test" {
@@ -12,7 +21,7 @@ resource "plural_service_deployment" "cd-test" {
   namespace = "tf-cd-helm-test"
 
   cluster = {
-    handle = data.plural_cluster.byok_workload_cluster.handle
+    handle = data.plural_cluster.cluster.handle
   }
 
   # Requires flux-source-controller addon to be installed and flux repo CRD for podinfo to exist
@@ -51,8 +60,4 @@ resource "plural_service_deployment" "cd-test" {
       }
     }
   }
-
-  depends_on = [
-    data.plural_cluster.byok_workload_cluster,
-  ]
 }
