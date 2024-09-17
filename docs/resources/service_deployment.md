@@ -83,9 +83,10 @@ Optional:
 
 - `chart` (String) The name of the chart to use.
 - `repository` (Attributes) Resource reference to the flux Helm repository used by this chart. (see [below for nested schema](#nestedatt--helm--repository))
+- `url` (String) Helm repository URL to use.
 - `values` (String) Helm values file to use with this service.
 - `values_files` (Set of String) List of relative paths to values files to use form Helm applies.
-- `version` (String) Chart version to use
+- `version` (String) Chart version to use.
 
 <a id="nestedatt--helm--repository"></a>
 ### Nested Schema for `helm.repository`
