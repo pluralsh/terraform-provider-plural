@@ -296,8 +296,8 @@ func (r *ServiceDeploymentResource) schemaHelm() schema.SingleNestedAttribute {
 			},
 			"url": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Helm repository URL use.",
-				MarkdownDescription: "Helm repository URL use.",
+				Description:         "Helm repository URL to use.",
+				MarkdownDescription: "Helm repository URL to use.",
 			},
 		},
 		Validators: []validator.Object{
