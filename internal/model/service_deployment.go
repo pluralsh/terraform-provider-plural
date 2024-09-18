@@ -291,6 +291,7 @@ type ServiceDeploymentHelm struct {
 	Values      types.String                     `tfsdk:"values"`
 	ValuesFiles types.Set                        `tfsdk:"values_files"`
 	Version     types.String                     `tfsdk:"version"`
+	URL         types.String                     `tfsdk:"url"`
 }
 
 func (this *ServiceDeploymentHelm) Attributes() *gqlclient.HelmConfigAttributes {
@@ -309,6 +310,7 @@ func (this *ServiceDeploymentHelm) Attributes() *gqlclient.HelmConfigAttributes 
 		Chart:      this.Chart.ValueStringPointer(),
 		Version:    this.Version.ValueStringPointer(),
 		Repository: this.Repository.Attributes(),
+		URL:        this.URL.ValueStringPointer(),
 	}
 }
 
