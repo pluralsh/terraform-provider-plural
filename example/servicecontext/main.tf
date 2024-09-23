@@ -12,7 +12,7 @@ provider "plural" {
 }
 
 resource "plural_service_context" "service_context" {
-  name           = "service-context-tf"
+  name           = "service-context-test"
   configuration = {
     "env" = "prod"
     "test" = "some-value"
@@ -23,5 +23,5 @@ resource "plural_service_context" "service_context" {
 }
 
 data "plural_service_context" "service_context" {
-  name = "service-context-tf"
+  name = plural_service_context.service_context.name
 }
