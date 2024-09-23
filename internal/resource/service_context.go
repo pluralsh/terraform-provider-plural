@@ -40,7 +40,7 @@ func (r *ServiceContextResource) Schema(_ context.Context, _ resource.SchemaRequ
 			"id": schema.StringAttribute{
 				Computed:            true,
 				Description:         "Internal identifier of this service context.",
-				MarkdownDescription: "Internal identifier of this provider.",
+				MarkdownDescription: "Internal identifier of this service context.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"name": schema.StringAttribute{
@@ -85,7 +85,7 @@ func (r *ServiceContextResource) Configure(_ context.Context, req resource.Confi
 }
 
 func (r *ServiceContextResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	data := new(model.ServiceContext)
+	data := new(model.ServiceContextExtended)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -102,7 +102,7 @@ func (r *ServiceContextResource) Create(ctx context.Context, req resource.Create
 }
 
 func (r *ServiceContextResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	data := new(model.ServiceContext)
+	data := new(model.ServiceContextExtended)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -119,7 +119,7 @@ func (r *ServiceContextResource) Read(ctx context.Context, req resource.ReadRequ
 }
 
 func (r *ServiceContextResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	data := new(model.ServiceContext)
+	data := new(model.ServiceContextExtended)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -135,7 +135,7 @@ func (r *ServiceContextResource) Update(ctx context.Context, req resource.Update
 }
 
 func (r *ServiceContextResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	data := new(model.ServiceContext)
+	data := new(model.ServiceContextExtended)
 	resp.Diagnostics.Append(req.State.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
