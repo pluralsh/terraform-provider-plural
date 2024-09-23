@@ -2,7 +2,7 @@ terraform {
   required_providers {
     plural = {
       source  = "pluralsh/plural"
-      version = "0.0.1"
+      version = "0.2.1"
     }
   }
 }
@@ -12,7 +12,7 @@ provider "plural" {
 }
 
 resource "plural_service_context" "service_context" {
-  name           = "service-context-tf"
+  name           = "service-context-test"
   configuration = {
     "env" = "prod"
     "test" = "some-value"
@@ -20,4 +20,8 @@ resource "plural_service_context" "service_context" {
   secrets = {
     "test" = "some-secret-value"
   }
+}
+
+data "plural_service_context" "service_context" {
+  name = plural_service_context.service_context.name
 }

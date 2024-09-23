@@ -14,7 +14,6 @@ type ServiceContext struct {
 	Id            types.String `tfsdk:"id"`
 	Name          types.String `tfsdk:"name"`
 	Configuration types.Map    `tfsdk:"configuration"`
-	Secrets       types.Map    `tfsdk:"secrets"`
 }
 
 func (sc *ServiceContext) From(response *console.ServiceContextFragment, ctx context.Context, d diag.Diagnostics) {
@@ -22,7 +21,12 @@ func (sc *ServiceContext) From(response *console.ServiceContextFragment, ctx con
 	sc.Configuration = common.MapFrom(response.Configuration, ctx, d)
 }
 
-func (sc *ServiceContext) Attributes(ctx context.Context, d diag.Diagnostics) console.ServiceContextAttributes {
+type ServiceContextExtended struct {
+	ServiceContext
+	Secrets types.Map `tfsdk:"secrets"`
+}
+
+func (sc *ServiceContextExtended) Attributes(ctx context.Context, d diag.Diagnostics) console.ServiceContextAttributes {
 	configuration := make(map[string]types.String, len(sc.Configuration.Elements()))
 	sc.Configuration.ElementsAs(ctx, &configuration, false)
 
