@@ -1,8 +1,6 @@
 module terraform-provider-plural
 
-go 1.22.4
-
-toolchain go1.22.5
+go 1.22.8
 
 require (
 	github.com/Yamashou/gqlgenc v0.23.2
