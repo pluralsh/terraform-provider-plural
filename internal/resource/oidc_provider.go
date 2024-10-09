@@ -8,12 +8,16 @@ import (
 	"terraform-provider-plural/internal/common"
 	"terraform-provider-plural/internal/model"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	gqlclient "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/polly/algorithms"
 )
 
 var _ resource.Resource = &OIDCProviderResource{}
@@ -50,6 +54,8 @@ func (r *OIDCProviderResource) Schema(_ context.Context, _ resource.SchemaReques
 			"type": schema.StringAttribute{
 				Required:      true,
 				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+				Validators: []validator.String{stringvalidator.OneOfCaseInsensitive(
+					algorithms.Map(gqlclient.AllOidcProviderType, func(t gqlclient.OidcProviderType) string { return string(t) })...)},
 			},
 			"description": schema.StringAttribute{
 				Description:         "Description of this OIDC provider.",
