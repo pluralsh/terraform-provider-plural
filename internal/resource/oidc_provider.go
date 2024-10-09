@@ -54,8 +54,11 @@ func (r *OIDCProviderResource) Schema(_ context.Context, _ resource.SchemaReques
 			"type": schema.StringAttribute{
 				Required:      true,
 				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
-				Validators: []validator.String{stringvalidator.OneOfCaseInsensitive(
-					algorithms.Map(gqlclient.AllOidcProviderType, func(t gqlclient.OidcProviderType) string { return string(t) })...)},
+				Validators: []validator.String{
+					stringvalidator.OneOfCaseInsensitive(
+						algorithms.Map(gqlclient.AllOidcProviderType,
+							func(t gqlclient.OidcProviderType) string { return string(t) })...),
+				},
 			},
 			"description": schema.StringAttribute{
 				Description:         "Description of this OIDC provider.",
