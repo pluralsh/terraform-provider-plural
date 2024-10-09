@@ -57,17 +57,17 @@ func (r *OIDCProviderResource) Schema(_ context.Context, _ resource.SchemaReques
 				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
-			"clientID": schema.StringAttribute{
+			"client_id": schema.StringAttribute{
 				Computed:      true,
 				Sensitive:     true,
 				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
-			"clientSecret": schema.StringAttribute{
+			"client_secret": schema.StringAttribute{
 				Computed:      true,
 				Sensitive:     true,
 				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
-			"redirectURIs": schema.SetAttribute{
+			"redirect_uris": schema.SetAttribute{
 				Optional:    true,
 				ElementType: types.StringType,
 			},

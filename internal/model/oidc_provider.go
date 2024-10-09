@@ -16,9 +16,9 @@ type OIDCProvider struct {
 	Name         types.String `tfsdk:"name"`
 	Type         types.String `tfsdk:"type"`
 	Description  types.String `tfsdk:"description"`
-	ClientID     types.String `tfsdk:"clientID"`
-	ClientSecret types.String `tfsdk:"clientSecret"`
-	RedirectURIs types.Set    `tfsdk:"redirectURIs"`
+	ClientID     types.String `tfsdk:"client_id"`
+	ClientSecret types.String `tfsdk:"client_secret"`
+	RedirectURIs types.Set    `tfsdk:"redirect_uris"`
 }
 
 func (p *OIDCProvider) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.OidcProviderAttributes {
