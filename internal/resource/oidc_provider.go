@@ -55,7 +55,7 @@ func (r *OIDCProviderResource) Schema(_ context.Context, _ resource.SchemaReques
 				Required:      true,
 				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				Validators: []validator.String{
-					stringvalidator.OneOfCaseInsensitive(
+					stringvalidator.OneOf(
 						algorithms.Map(gqlclient.AllOidcProviderType,
 							func(t gqlclient.OidcProviderType) string { return string(t) })...),
 				},
@@ -80,7 +80,7 @@ func (r *OIDCProviderResource) Schema(_ context.Context, _ resource.SchemaReques
 				Optional:      true,
 				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				Validators: []validator.String{
-					stringvalidator.OneOfCaseInsensitive(
+					stringvalidator.OneOf(
 						algorithms.Map(gqlclient.AllOidcAuthMethod,
 							func(t gqlclient.OidcAuthMethod) string { return string(t) })...),
 				},
