@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	gqlclient "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/polly/algorithms"
+	"github.com/samber/lo"
 )
 
 type OIDCProvider struct {
@@ -18,6 +19,7 @@ type OIDCProvider struct {
 	Description  types.String `tfsdk:"description"`
 	ClientID     types.String `tfsdk:"client_id"`
 	ClientSecret types.String `tfsdk:"client_secret"`
+	AuthMethod   types.String `tfsdk:"auth_method"`
 	RedirectURIs types.Set    `tfsdk:"redirect_uris"`
 }
 
@@ -25,8 +27,17 @@ func (p *OIDCProvider) Attributes(ctx context.Context, d diag.Diagnostics) gqlcl
 	return gqlclient.OidcProviderAttributes{
 		Name:         p.Name.ValueString(),
 		Description:  p.Description.ValueStringPointer(),
+		AuthMethod:   p.authMethodAttribute(),
 		RedirectUris: p.redirectURIsAttribute(ctx, d),
 	}
+}
+
+func (p *OIDCProvider) authMethodAttribute() *gqlclient.OidcAuthMethod {
+	if p.AuthMethod.IsNull() {
+		return nil
+	}
+
+	return lo.ToPtr(gqlclient.OidcAuthMethod(p.AuthMethod.ValueString()))
 }
 
 func (p *OIDCProvider) redirectURIsAttribute(ctx context.Context, d diag.Diagnostics) []*string {
@@ -45,5 +56,15 @@ func (p *OIDCProvider) From(response *gqlclient.OIDCProviderFragment, ctx contex
 	p.Description = types.StringPointerValue(response.Description)
 	p.ClientID = types.StringValue(response.ClientID)
 	p.ClientSecret = types.StringValue(response.ClientSecret)
+	p.AuthMethod = p.authMethodFrom(response.AuthMethod)
 	p.RedirectURIs = common.SetFrom(response.RedirectUris, ctx, d)
+
+}
+
+func (p *OIDCProvider) authMethodFrom(authMethod *gqlclient.OidcAuthMethod) types.String {
+	if authMethod == nil {
+		return types.StringNull()
+	}
+
+	return types.StringValue(string(*authMethod))
 }

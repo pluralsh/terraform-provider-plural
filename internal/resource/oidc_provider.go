@@ -76,6 +76,15 @@ func (r *OIDCProviderResource) Schema(_ context.Context, _ resource.SchemaReques
 				Sensitive:     true,
 				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
+			"auth_method": schema.StringAttribute{
+				Optional:      true,
+				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+				Validators: []validator.String{
+					stringvalidator.OneOfCaseInsensitive(
+						algorithms.Map(gqlclient.AllOidcAuthMethod,
+							func(t gqlclient.OidcAuthMethod) string { return string(t) })...),
+				},
+			},
 			"redirect_uris": schema.SetAttribute{
 				Optional:    true,
 				ElementType: types.StringType,
