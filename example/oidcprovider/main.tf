@@ -12,8 +12,9 @@ provider "plural" {
 }
 
 resource "plural_oidc_provider" "provider" {
-  name = "marcin"
+  name = "tf-test-provider"
+  auth_method = "BASIC"
   type = "PLURAL"
   description = "test provider"
-  redirect_uris = ["abc", "xyz"]
+  redirect_uris = ["localhost:8000"]
 }
