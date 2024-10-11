@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"terraform-provider-plural/internal/client"
+	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -116,7 +117,7 @@ func commandsFrom(commands []*gqlclient.StackCommandFragment, config types.Set, 
 	for i, command := range commands {
 		objValue, diags := types.ObjectValueFrom(ctx, CustomStackRunCommandAttrTypes, CustomStackRunCommand{
 			Cmd:  types.StringValue(command.Cmd),
-			Args: commandArgsFrom(command.Args, ctx, d),
+			Args: common.SetFrom(command.Args, types.SetNull(types.StringType), ctx, d),
 			Dir:  types.StringPointerValue(command.Dir),
 		})
 		values[i] = objValue
@@ -124,16 +125,6 @@ func commandsFrom(commands []*gqlclient.StackCommandFragment, config types.Set, 
 	}
 
 	setValue, diags := types.SetValue(basetypes.ObjectType{AttrTypes: CustomStackRunCommandAttrTypes}, values)
-	d.Append(diags...)
-	return setValue
-}
-
-func commandArgsFrom(values []*string, ctx context.Context, d diag.Diagnostics) types.Set {
-	if values == nil {
-		return types.SetNull(types.StringType)
-	}
-
-	setValue, diags := types.SetValueFrom(ctx, types.StringType, values)
 	d.Append(diags...)
 	return setValue
 }

@@ -194,6 +194,7 @@ func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource
 		r.NewPrAutomationTriggerResource,
 		r.NewStackRunTriggerResource,
 		r.NewSharedSecretResource,
+		r.NewOIDCProviderResourceResource,
 	}
 }
 
