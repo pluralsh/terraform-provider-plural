@@ -26,10 +26,19 @@ type OIDCProvider struct {
 func (p *OIDCProvider) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.OidcProviderAttributes {
 	return gqlclient.OidcProviderAttributes{
 		Name:         p.Name.ValueString(),
-		Description:  p.Description.ValueStringPointer(),
+		Description:  p.descriptionAttribute(),
 		AuthMethod:   p.authMethodAttribute(),
 		RedirectUris: p.redirectURIsAttribute(ctx, d),
 	}
+}
+
+func (p *OIDCProvider) descriptionAttribute() *string {
+	if p.Description.IsNull() {
+		// Setting to empty string as using null will have no effect even if it was deleted from config.
+		return lo.ToPtr("")
+	}
+
+	return p.Description.ValueStringPointer()
 }
 
 func (p *OIDCProvider) authMethodAttribute() *gqlclient.OidcAuthMethod {
@@ -58,7 +67,6 @@ func (p *OIDCProvider) From(response *gqlclient.OIDCProviderFragment, ctx contex
 	p.ClientSecret = types.StringValue(response.ClientSecret)
 	p.AuthMethod = p.authMethodFrom(response.AuthMethod)
 	p.RedirectURIs = common.SetFrom(response.RedirectUris, ctx, d)
-
 }
 
 func (p *OIDCProvider) authMethodFrom(authMethod *gqlclient.OidcAuthMethod) types.String {

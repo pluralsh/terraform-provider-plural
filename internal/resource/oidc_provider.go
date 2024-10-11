@@ -65,7 +65,7 @@ func (r *OIDCProviderResource) Schema(_ context.Context, _ resource.SchemaReques
 				Description:         "Description of this OIDC provider.",
 				MarkdownDescription: "Description of this OIDC provider.",
 				Optional:            true,
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+				Validators:          []validator.String{stringvalidator.LengthAtLeast(1)},
 			},
 			"client_id": schema.StringAttribute{
 				Computed:      true,
