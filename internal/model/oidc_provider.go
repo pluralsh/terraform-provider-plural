@@ -66,7 +66,7 @@ func (p *OIDCProvider) From(response *gqlclient.OIDCProviderFragment, ctx contex
 	p.ClientID = types.StringValue(response.ClientID)
 	p.ClientSecret = types.StringValue(response.ClientSecret)
 	p.AuthMethod = p.authMethodFrom(response.AuthMethod)
-	p.RedirectURIs = common.SetFrom(response.RedirectUris, ctx, d)
+	p.RedirectURIs = common.SetFrom(response.RedirectUris, p.RedirectURIs, ctx, d)
 }
 
 func (p *OIDCProvider) authMethodFrom(authMethod *gqlclient.OidcAuthMethod) types.String {

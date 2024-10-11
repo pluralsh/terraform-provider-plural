@@ -117,7 +117,7 @@ func commandsFrom(commands []*gqlclient.StackCommandFragment, config types.Set, 
 	for i, command := range commands {
 		objValue, diags := types.ObjectValueFrom(ctx, CustomStackRunCommandAttrTypes, CustomStackRunCommand{
 			Cmd:  types.StringValue(command.Cmd),
-			Args: common.SetFrom(command.Args, ctx, d),
+			Args: common.SetFrom(command.Args, types.SetNull(types.StringType), ctx, d),
 			Dir:  types.StringPointerValue(command.Dir),
 		})
 		values[i] = objValue
