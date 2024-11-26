@@ -104,7 +104,7 @@ func (r *UserResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	response, err := r.client.GetUser(ctx, data.Name.ValueString())
+	response, err := r.client.GetUser(ctx, data.Email.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get user, got error: %s", err))
 		return
@@ -142,5 +142,5 @@ func (r *UserResource) Delete(_ context.Context, _ resource.DeleteRequest, _ *re
 func (r *UserResource) ImportState(
 	ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse,
 ) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("email"), req, resp)
 }
