@@ -17,8 +17,8 @@ GroupMember resource
 
 ### Required
 
-- `group_id` (String) group id for this group member.
-- `user_id` (String) user id for this group member.
+- `group_id` (String) Group ID for this group member.
+- `user_id` (String) User ID for this group member.
 
 ### Read-Only
 
