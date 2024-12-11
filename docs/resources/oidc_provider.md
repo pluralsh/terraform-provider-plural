@@ -22,6 +22,7 @@ description: |-
 
 ### Optional
 
+- `auth_method` (String)
 - `description` (String) Description of this OIDC provider.
 - `redirect_uris` (Set of String)
 
