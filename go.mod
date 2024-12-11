@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.15.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/pluralsh/console/go/client v1.24.0
+	github.com/pluralsh/console/go/client v1.25.0
 	github.com/pluralsh/plural-cli v0.10.1
 	github.com/pluralsh/polly v0.1.10
 	github.com/samber/lo v1.47.0

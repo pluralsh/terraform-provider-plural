@@ -625,8 +625,8 @@ github.com/pjbgf/sha1cd v0.3.0/go.mod h1:nZ1rrWOcGJ5uZgEEVL1VUM9iRQiZvWdbZjkKyFz
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
-github.com/pluralsh/console/go/client v1.24.0 h1:50UUnjCJUPn65yL5L/zJzsYfG4hFMtcR5iGIwc9nYZo=
-github.com/pluralsh/console/go/client v1.24.0/go.mod h1:lpoWASYsM9keNePS3dpFiEisUHEfObIVlSL3tzpKn8k=
+github.com/pluralsh/console/go/client v1.25.0 h1:Q4Q1gmO9b7vlyUuU+TkLOCImfJeNyyUCVdi/Z5hfj7M=
+github.com/pluralsh/console/go/client v1.25.0/go.mod h1:lpoWASYsM9keNePS3dpFiEisUHEfObIVlSL3tzpKn8k=
 github.com/pluralsh/gqlclient v1.12.2 h1:BrEFAASktf4quFw57CIaLAd+NZUTLhG08fe6tnhBQN4=
 github.com/pluralsh/gqlclient v1.12.2/go.mod h1:OEjN9L63x8m3A3eQBv5kVkFgiY9fp2aZ0cgOF0uII58=
 github.com/pluralsh/plural-cli v0.10.1 h1:a+Ip1tCC925Zd9GIqyhLWfY/OD8d/4uODCbzVDGxINk=
