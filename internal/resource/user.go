@@ -87,13 +87,13 @@ func (r *UserResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	response, err := r.client.UpdateUser(ctx, nil, data.Attributes())
+	response, err := r.client.CreateUser(ctx, data.Attributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create user, got error: %s", err))
 		return
 	}
 
-	data.From(response.UpdateUser)
+	data.From(response.CreateUser)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
