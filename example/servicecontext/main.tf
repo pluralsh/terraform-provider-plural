@@ -16,6 +16,10 @@ resource "plural_service_context" "service_context" {
   configuration = jsonencode({
     "env" = "prod"
     "test" = "some-value"
+    "array" = [1, 2, 3]
+    "nested_field" = {
+      "test" = "nested-value"
+    }
   })
   secrets = {
     "test" = "some-secret-value"
