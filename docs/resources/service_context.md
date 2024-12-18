@@ -21,7 +21,7 @@ A representation of a service context that can be reused during service deployme
 
 ### Optional
 
-- `configuration` (Map of String)
+- `configuration` (String) Configuration in JSON format. Use `jsonencode` and `jsondecode` methods to encode and decode data.
 - `secrets` (Map of String, Sensitive)
 
 ### Read-Only

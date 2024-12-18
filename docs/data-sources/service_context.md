@@ -21,5 +21,5 @@ A representation of a service context that can be reused during service deployme
 
 ### Read-Only
 
-- `configuration` (Map of String)
+- `configuration` (String) Configuration in JSON format. Use `jsondecode` method to decode data.
 - `id` (String) Internal identifier of this service context.
