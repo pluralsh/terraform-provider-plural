@@ -1,6 +1,6 @@
 module terraform-provider-plural
 
-go 1.22.9
+go 1.22.10
 
 toolchain go1.23.4
 
