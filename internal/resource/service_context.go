@@ -49,11 +49,10 @@ func (r *ServiceContextResource) Schema(_ context.Context, _ resource.SchemaRequ
 				Required:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
-			"configuration": schema.MapAttribute{
-				Description:         "",
-				MarkdownDescription: "",
+			"configuration": schema.StringAttribute{
+				Description:         "Configuration in JSON format. Use 'jsonencode' and 'jsondecode' methods to encode and decode data.",
+				MarkdownDescription: "Configuration in JSON format. Use `jsonencode` and `jsondecode` methods to encode and decode data.",
 				Optional:            true,
-				ElementType:         types.StringType,
 			},
 			"secrets": schema.MapAttribute{
 				Description:         "",

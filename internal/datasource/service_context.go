@@ -10,7 +10,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 func NewServiceContextDataSource() datasource.DataSource {
@@ -39,11 +38,10 @@ func (d *serviceContextDataSource) Schema(_ context.Context, _ datasource.Schema
 				MarkdownDescription: "Human-readable name of this service context.",
 				Required:            true,
 			},
-			"configuration": schema.MapAttribute{
-				Description:         "",
-				MarkdownDescription: "",
+			"configuration": schema.StringAttribute{
+				Description:         "Configuration in JSON format. Use 'jsondecode' method to decode data.",
+				MarkdownDescription: "Configuration in JSON format. Use `jsondecode` method to decode data.",
 				Computed:            true,
-				ElementType:         types.StringType,
 			},
 		},
 	}
