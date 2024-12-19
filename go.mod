@@ -1,8 +1,8 @@
 module terraform-provider-plural
 
-go 1.22.5
+go 1.22.9
 
-toolchain go1.23.1
+toolchain go1.23.4
 
 require (
 	github.com/Yamashou/gqlgenc v0.23.2
@@ -12,8 +12,8 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.13.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/pluralsh/console/go/client v1.22.3
-	github.com/pluralsh/plural-cli v0.9.26-0.20241104114517-3fb8761ad0db
+	github.com/pluralsh/console/go/client v1.23.0
+	github.com/pluralsh/plural-cli v0.10.4
 	github.com/pluralsh/polly v0.1.10
 	github.com/samber/lo v1.46.0
 	github.com/sirupsen/logrus v1.9.3
@@ -28,7 +28,7 @@ require (
 require (
 	4d63.com/gocheckcompilerdirectives v1.2.1 // indirect
 	4d63.com/gochecknoglobals v0.2.1 // indirect
-	dario.cat/mergo v1.0.0 // indirect
+	dario.cat/mergo v1.0.1 // indirect
 	github.com/4meepo/tagalign v1.3.4 // indirect
 	github.com/99designs/gqlgen v0.17.49 // indirect
 	github.com/Abirdcfly/dupword v0.0.14 // indirect
@@ -108,7 +108,6 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/fzipp/gocyclo v0.6.0 // indirect
-	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/ghostiam/protogetter v0.3.6 // indirect
 	github.com/go-critic/go-critic v0.11.4 // indirect
 	github.com/go-errors/errors v1.5.1 // indirect
@@ -163,7 +162,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	github.com/hashicorp/go-hclog v1.5.0 // indirect
+	github.com/hashicorp/go-hclog v1.6.3 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-plugin v1.6.0 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
