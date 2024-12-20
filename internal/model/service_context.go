@@ -2,8 +2,8 @@ package model
 
 import (
 	"context"
-
-	"terraform-provider-plural/internal/common"
+	"encoding/json"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -13,12 +13,18 @@ import (
 type ServiceContext struct {
 	Id            types.String `tfsdk:"id"`
 	Name          types.String `tfsdk:"name"`
-	Configuration types.Map    `tfsdk:"configuration"`
+	Configuration types.String `tfsdk:"configuration"`
 }
 
 func (sc *ServiceContext) From(response *console.ServiceContextFragment, ctx context.Context, d diag.Diagnostics) {
+	configuration, err := json.Marshal(response.Configuration)
+	if err != nil {
+		d.AddError("Provider Error", fmt.Sprintf("Cannot marshall metadata, got error: %s", err))
+		return
+	}
+
 	sc.Id = types.StringValue(response.ID)
-	sc.Configuration = common.MapFrom(response.Configuration, ctx, d)
+	sc.Configuration = types.StringValue(string(configuration))
 }
 
 type ServiceContextExtended struct {
@@ -27,9 +33,6 @@ type ServiceContextExtended struct {
 }
 
 func (sc *ServiceContextExtended) Attributes(ctx context.Context, d diag.Diagnostics) console.ServiceContextAttributes {
-	configuration := make(map[string]types.String, len(sc.Configuration.Elements()))
-	sc.Configuration.ElementsAs(ctx, &configuration, false)
-
 	secrets := make(map[string]types.String, len(sc.Secrets.Elements()))
 	sc.Secrets.ElementsAs(ctx, &secrets, false)
 	configAttributes := make([]*console.ConfigAttributes, 0)
@@ -41,7 +44,7 @@ func (sc *ServiceContextExtended) Attributes(ctx context.Context, d diag.Diagnos
 	}
 
 	return console.ServiceContextAttributes{
-		Configuration: common.AttributesJson(configuration, d),
+		Configuration: sc.Configuration.ValueStringPointer(),
 		Secrets:       configAttributes,
 	}
 }
