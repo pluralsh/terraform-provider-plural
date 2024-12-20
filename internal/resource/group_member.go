@@ -42,19 +42,19 @@ func (r *GroupMemberResource) Schema(_ context.Context, _ resource.SchemaRequest
 				Computed:            true,
 				Description:         "Internal identifier of this group member.",
 				MarkdownDescription: "Internal identifier of this group member.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"user_id": schema.StringAttribute{
+				Description:         "User ID for this group member.",
+				MarkdownDescription: "User ID for this group member.",
 				Required:            true,
-				Description:         "user id for this group member.",
-				MarkdownDescription: "user id for this group member.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"group_id": schema.StringAttribute{
+				Description:         "Group ID for this group member.",
+				MarkdownDescription: "Group ID for this group member.",
 				Required:            true,
-				Description:         "group id for this group member.",
-				MarkdownDescription: "group id for this group member.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 		},
 	}
@@ -70,7 +70,7 @@ func (r *GroupMemberResource) Configure(
 	data, ok := req.ProviderData.(*common.ProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Git Repository Resource Configure Type",
+			"Unexpected Group Member Resource Configure Type",
 			fmt.Sprintf(
 				"Expected *common.ProviderData, got: %T. Please report this issue to the provider developers.",
 				req.ProviderData,
@@ -92,7 +92,7 @@ func (r *GroupMemberResource) Create(ctx context.Context, req resource.CreateReq
 
 	response, err := r.client.AddGroupMember(ctx, data.GroupId.ValueString(), data.UserId.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create GroupMember, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to add group member, got error: %s", err))
 		return
 	}
 
@@ -101,11 +101,11 @@ func (r *GroupMemberResource) Create(ctx context.Context, req resource.CreateReq
 }
 
 func (r *GroupMemberResource) Read(_ context.Context, _ resource.ReadRequest, _ *resource.ReadResponse) {
-	// ignore
+	// Ignore.
 }
 
-func (r *GroupMemberResource) Update(_ context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError("Client Error", "cannot update a group member")
+func (r *GroupMemberResource) Update(_ context.Context, _ resource.UpdateRequest, _ *resource.UpdateResponse) {
+	// Resource schema requires replacement on changes. Ignore.
 }
 
 func (r *GroupMemberResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -117,7 +117,7 @@ func (r *GroupMemberResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	_, err := r.client.DeleteGroupMember(ctx, data.UserId.ValueString(), data.GroupId.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete GroupMember, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete group member, got error: %s", err))
 		return
 	}
 }

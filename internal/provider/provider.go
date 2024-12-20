@@ -191,6 +191,7 @@ func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource
 		r.NewGlobalServiceResource,
 		r.NewGroupMemberResource,
 		r.NewGroupResource,
+		r.NewUserResource,
 		r.NewPrAutomationTriggerResource,
 		r.NewStackRunTriggerResource,
 		r.NewSharedSecretResource,
