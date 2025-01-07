@@ -14,7 +14,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pluralsh/console/go/client v1.25.0
 	github.com/pluralsh/plural-cli v0.10.4
-	github.com/pluralsh/polly v0.1.10
+	github.com/pluralsh/polly v0.1.11
 	github.com/samber/lo v1.47.0
 	github.com/sirupsen/logrus v1.9.3
 	gopkg.in/yaml.v2 v2.4.0
