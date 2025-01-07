@@ -16,3 +16,10 @@ func (u *User) From(response *console.UserFragment) {
 	u.Name = types.StringValue(response.Name)
 	u.Email = types.StringValue(response.Email)
 }
+
+func (u *User) Attributes() console.UserAttributes {
+	return console.UserAttributes{
+		Name:  u.Name.ValueStringPointer(),
+		Email: u.Email.ValueStringPointer(),
+	}
+}
