@@ -25,22 +25,22 @@ resource "plural_user" "spiderman" {
 # data "plural_group" "avengers" {
 #   name = "avengers"
 # }
-
-resource "plural_group" "avengers" {
-  name = "avengers"
-  description = "avengers group"
-}
-
-resource "plural_group_member" "spiderman" {
-  user_id = plural_user.spiderman.id
-  group_id = plural_group.avengers.id
-}
-
-resource "plural_group_member" "duplicate" {
-  user_id = plural_user.spiderman.id
-  group_id = plural_group.avengers.id
-}
-
+#
+# resource "plural_group" "avengers" {
+#   name = "avengers"
+#   description = "avengers group"
+# }
+#
+# resource "plural_group_member" "spiderman" {
+#   user_id = plural_user.spiderman.id
+#   group_id = plural_group.avengers.id
+# }
+#
+# resource "plural_group_member" "duplicate" {
+#   user_id = plural_user.spiderman.id
+#   group_id = plural_group.avengers.id
+# }
+#
 # resource "plural_rbac" "rbac" {
 #   service_id = "624bff88-05e3-45f6-bc3b-44708594e28e"
 #   bindings = {
