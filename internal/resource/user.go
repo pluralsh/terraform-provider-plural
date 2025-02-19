@@ -47,7 +47,7 @@ func (r *UserResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"name": schema.StringAttribute{
 				Description:         "Name of this user.",
 				MarkdownDescription: "Name of this user.",
-				Required:            true,
+				Optional:            true,
 			},
 			"email": schema.StringAttribute{
 				MarkdownDescription: "Email address of this user.",
