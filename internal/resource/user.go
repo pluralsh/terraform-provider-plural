@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	gqlclient "github.com/pluralsh/console/go/client"
 )
 
 var _ resource.Resource = &UserResource{}
@@ -90,30 +89,13 @@ func (r *UserResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	response, err := r.client.GetUser(ctx, data.Email.ValueString())
-	if err != nil && !client.IsNotFound(err) {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get user, got error: %s", err))
+	response, err := r.client.UpsertUser(ctx, data.Attributes())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create user, got error: %s", err))
 		return
 	}
 
-	var user *gqlclient.UserFragment
-	if response == nil || response.User == nil {
-		createResponse, err := r.client.CreateUser(ctx, data.Attributes())
-		if err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create user, got error: %s", err))
-			return
-		}
-		user = createResponse.CreateUser
-	} else {
-		updateResponse, err := r.client.UpdateUser(ctx, &response.User.ID, data.Attributes())
-		if err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update user, got error: %s", err))
-			return
-		}
-		user = updateResponse.UpdateUser
-	}
-
-	data.From(user)
+	data.From(response.UpsertUser)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
