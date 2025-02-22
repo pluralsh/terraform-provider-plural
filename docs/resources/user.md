@@ -18,6 +18,9 @@ user resource
 ### Required
 
 - `email` (String) Email address of this user.
+
+### Optional
+
 - `name` (String) Name of this user.
 
 ### Read-Only

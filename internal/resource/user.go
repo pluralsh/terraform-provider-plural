@@ -47,7 +47,9 @@ func (r *UserResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"name": schema.StringAttribute{
 				Description:         "Name of this user.",
 				MarkdownDescription: "Name of this user.",
-				Required:            true,
+				Optional:            true,
+				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"email": schema.StringAttribute{
 				MarkdownDescription: "Email address of this user.",
@@ -87,13 +89,13 @@ func (r *UserResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	response, err := r.client.CreateUser(ctx, data.Attributes())
+	response, err := r.client.UpsertUser(ctx, data.Attributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create user, got error: %s", err))
 		return
 	}
 
-	data.From(response.CreateUser)
+	data.From(response.UpsertUser)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 

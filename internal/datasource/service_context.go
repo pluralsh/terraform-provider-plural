@@ -76,6 +76,10 @@ func (d *serviceContextDataSource) Read(ctx context.Context, req datasource.Read
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read service context, got error: %s", err))
 		return
 	}
+	if response.ServiceContext == nil {
+		resp.Diagnostics.AddError("Client Error", "Unable to find service context, got no error")
+		return
+	}
 
 	data.From(response.ServiceContext, ctx, resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)

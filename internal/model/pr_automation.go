@@ -17,6 +17,6 @@ func (pra *PRAutomation) From(response *gqlclient.PrAutomationFragment) {
 	pra.Id = types.StringValue(response.ID)
 	pra.Name = types.StringValue(response.Name)
 	pra.Message = types.StringValue(response.Message)
-	pra.Identifier = types.StringValue(response.Identifier)
+	pra.Identifier = types.StringPointerValue(response.Identifier)
 	pra.Title = types.StringValue(response.Title)
 }
