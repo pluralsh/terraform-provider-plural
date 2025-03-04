@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -12,6 +14,7 @@ import (
 	gqlclient "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/plural-cli/pkg/console"
 	"github.com/pluralsh/plural-cli/pkg/helm"
+	"github.com/pluralsh/plural-cli/pkg/utils"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
@@ -40,9 +43,6 @@ type OperatorHandler struct {
 
 	// url is an url to the Console API, i.e. https://console.mycluster.onplural.sh
 	url string
-
-	// vendoredAgentChartURL is the URL of vendored deployment agent chart.
-	vendoredAgentChartURL string
 
 	// repoUrl is an URL of the deployment agent chart.
 	repoUrl string
@@ -238,11 +238,6 @@ func (oh *OperatorHandler) Upgrade(token string) error {
 }
 
 func NewOperatorHandler(ctx context.Context, client *client.Client, kubeconfig *Kubeconfig, repoUrl string, values *string, consoleUrl string) (*OperatorHandler, error) {
-	parsedConsoleURL, err := url.Parse(consoleUrl)
-	if err != nil {
-		panic(err)
-	}
-
 	vals := map[string]any{}
 	if values != nil {
 		if err := yaml.Unmarshal([]byte(*values), &vals); err != nil {
@@ -251,18 +246,40 @@ func NewOperatorHandler(ctx context.Context, client *client.Client, kubeconfig *
 	}
 
 	handler := &OperatorHandler{
-		client:                client,
-		ctx:                   ctx,
-		kubeconfig:            kubeconfig,
-		repoUrl:               repoUrl,
-		vendoredAgentChartURL: fmt.Sprintf("https://%s/ext/v1/agent/chart", parsedConsoleURL.Host),
-		url:                   consoleUrl,
-		vals:                  vals,
+		client:     client,
+		ctx:        ctx,
+		kubeconfig: kubeconfig,
+		repoUrl:    repoUrl,
+		url:        consoleUrl,
+		vals:       vals,
 	}
 
-	if err = handler.init(); err != nil {
+	if err := handler.init(); err != nil {
 		return nil, err
 	}
 
 	return handler, nil
+}
+
+func (oh *OperatorHandler) FetchVendoredAgentChart(consoleURL string) (string, error) {
+	directory, err := os.MkdirTemp("", "agent-chart-*****")
+	if err != nil {
+		return "", fmt.Errorf("cannot create directory: %s", err.Error())
+	}
+	defer os.RemoveAll(directory) // TODO ??
+
+	parsedConsoleURL, err := url.Parse(consoleURL)
+	if err != nil {
+		return "", fmt.Errorf("cannot parse console URL: %s", err.Error())
+	}
+
+	agentChartURL := fmt.Sprintf("https://%s/ext/v1/agent/chart", parsedConsoleURL.Host)
+	agentChartPath := filepath.Join(directory, "agent-chart.tgz")
+	if err = utils.DownloadFile(agentChartPath, agentChartURL); err != nil {
+		return "", fmt.Errorf("cannot download agent chart: %s", err.Error())
+	}
+
+	// TODO
+
+	return agentChartPath, nil
 }
