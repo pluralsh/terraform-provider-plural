@@ -3,6 +3,7 @@ package resource
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -39,6 +40,9 @@ type OperatorHandler struct {
 
 	// url is an url to the Console API, i.e. https://console.mycluster.onplural.sh
 	url string
+
+	// vendoredAgentChartURL is the URL of vendored deployment agent chart.
+	vendoredAgentChartURL string
 
 	// repoUrl is an URL of the deployment agent chart.
 	repoUrl string
@@ -234,6 +238,11 @@ func (oh *OperatorHandler) Upgrade(token string) error {
 }
 
 func NewOperatorHandler(ctx context.Context, client *client.Client, kubeconfig *Kubeconfig, repoUrl string, values *string, consoleUrl string) (*OperatorHandler, error) {
+	parsedConsoleURL, err := url.Parse(consoleUrl)
+	if err != nil {
+		panic(err)
+	}
+
 	vals := map[string]any{}
 	if values != nil {
 		if err := yaml.Unmarshal([]byte(*values), &vals); err != nil {
@@ -242,16 +251,16 @@ func NewOperatorHandler(ctx context.Context, client *client.Client, kubeconfig *
 	}
 
 	handler := &OperatorHandler{
-		client:     client,
-		ctx:        ctx,
-		kubeconfig: kubeconfig,
-		repoUrl:    repoUrl,
-		url:        consoleUrl,
-		vals:       vals,
+		client:                client,
+		ctx:                   ctx,
+		kubeconfig:            kubeconfig,
+		repoUrl:               repoUrl,
+		vendoredAgentChartURL: fmt.Sprintf("https://%s/ext/v1/agent/chart", parsedConsoleURL.Host),
+		url:                   consoleUrl,
+		vals:                  vals,
 	}
 
-	err := handler.init()
-	if err != nil {
+	if err = handler.init(); err != nil {
 		return nil, err
 	}
 
