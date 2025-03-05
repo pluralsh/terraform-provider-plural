@@ -63,7 +63,7 @@ func fetchVendoredAgentChart(consoleURL string) (string, string, error) {
 		return directory, "", fmt.Errorf("cannot create directory: %s", err.Error())
 	}
 
-	agentChartURL := fmt.Sprintf("https://%s.com/ext/v1/agent/chartxxfasw", parsedConsoleURL.Host)
+	agentChartURL := fmt.Sprintf("https://%s.com/ext/v1/agent/chart", parsedConsoleURL.Host)
 	agentChartPath := filepath.Join(directory, "agent-chart.tgz")
 	if err = utils.DownloadFile(agentChartPath, agentChartURL); err != nil {
 		return directory, "", fmt.Errorf("cannot download agent chart: %s", err.Error())
