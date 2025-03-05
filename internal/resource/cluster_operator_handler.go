@@ -45,20 +45,17 @@ type OperatorHandler struct {
 	// url is an url to the Console API, i.e. https://console.mycluster.onplural.sh
 	url string
 
-	// repoUrl is an URL of the deployment agent chart.
-	repoUrl string
+	token string
 
-	// agentChartPath contains a local path to vendored agent chart if it was downloadable, it is empty otherwise.
-	agentChartPath string
+	// repo contains a local path to vendored agent chart if it was downloadable,
+	// it is URL of the deployment agent chart otherwise.
+	repo string
 
 	// additional values used on install
 	vals map[string]any
 
-	// Preconfigured helm actions and chart
 	chart         *chart.Chart
 	configuration *action.Configuration
-	install       *action.Install
-	upgrade       *action.Upgrade
 }
 
 func (oh *OperatorHandler) init() error {
@@ -81,20 +78,11 @@ func (oh *OperatorHandler) init() error {
 
 	oh.initSettings()
 
-	repo := lo.Ternary(oh.agentChartPath != "", oh.agentChartPath, oh.repoUrl)
-	if err = helm.AddRepo(console.ReleaseName, repo); err != nil {
+	if err = helm.AddRepo(console.ReleaseName, oh.repo); err != nil {
 		return err
 	}
 
-	err = oh.initChart()
-	if err != nil {
-		return err
-	}
-
-	oh.initInstallAction()
-	oh.initUpgradeAction()
-
-	return nil
+	return oh.initChart()
 }
 
 func (oh *OperatorHandler) initSettings() {
@@ -123,26 +111,10 @@ func (oh *OperatorHandler) initChart() error {
 	return err
 }
 
-func (oh *OperatorHandler) initInstallAction() {
-	oh.install = action.NewInstall(oh.configuration)
-	oh.install.Namespace = console.OperatorNamespace
-	oh.install.ReleaseName = console.ReleaseName
-	oh.install.Timeout = 5 * time.Minute
-	oh.install.Wait = false
-	oh.install.CreateNamespace = true
-}
-
-func (oh *OperatorHandler) initUpgradeAction() {
-	oh.upgrade = action.NewUpgrade(oh.configuration)
-	oh.upgrade.Namespace = console.OperatorNamespace
-	oh.upgrade.Timeout = 5 * time.Minute
-	oh.upgrade.Wait = false
-}
-
 // chartExists checks whether a chart is already installed
 // in a namespace or not based on the provided chart spec.
 // Note that this function only considers the contained chart name and namespace.
-func (oh *OperatorHandler) chartExists() (bool, error) {
+func (oh *OperatorHandler) isChartInstalled() (bool, error) {
 	releases, err := oh.listReleases(action.ListAll)
 	if err != nil {
 		return false, err
@@ -164,11 +136,11 @@ func (oh *OperatorHandler) listReleases(state action.ListStates) ([]*release.Rel
 	return c.Run()
 }
 
-func (oh *OperatorHandler) values(token string) (map[string]any, error) {
+func (oh *OperatorHandler) values() (map[string]any, error) {
 	globalVals := map[string]any{}
 	vals := map[string]any{
 		"secrets": map[string]string{
-			"deployToken": token,
+			"deployToken": oh.token,
 		},
 		"consoleUrl": fmt.Sprintf("%s/ext/gql", oh.url),
 	}
@@ -181,7 +153,7 @@ func (oh *OperatorHandler) values(token string) (map[string]any, error) {
 	return algorithms.Merge(vals, oh.vals, globalVals), nil
 }
 
-func (oh *OperatorHandler) UpsertNamespace() error {
+func (oh *OperatorHandler) ensureNamespace() error {
 	_, err := oh.kube.CoreV1().Namespaces().Get(oh.ctx, console.OperatorNamespace, metav1.GetOptions{})
 	if err == nil {
 		return nil
@@ -196,26 +168,74 @@ func (oh *OperatorHandler) UpsertNamespace() error {
 			},
 		},
 	}, metav1.CreateOptions{})
-
 	return err
 }
 
-func (oh *OperatorHandler) Install(token string) error {
-	values, err := oh.values(token)
+func (oh *OperatorHandler) install() error {
+	install := action.NewInstall(oh.configuration)
+	install.Namespace = console.OperatorNamespace
+	install.ReleaseName = console.ReleaseName
+	install.Timeout = 5 * time.Minute
+	install.Wait = false
+	install.CreateNamespace = true
+
+	values, err := oh.values()
 	if err != nil {
 		return err
 	}
-	_, err = oh.install.Run(oh.chart, values)
+
+	_, err = install.Run(oh.chart, values)
 	return err
 }
 
-func (oh *OperatorHandler) Upgrade(token string) error {
-	values, err := oh.values(token)
+func (oh *OperatorHandler) upgrade() error {
+	upgrade := action.NewUpgrade(oh.configuration)
+	upgrade.Namespace = console.OperatorNamespace
+	upgrade.Timeout = 5 * time.Minute
+	upgrade.Wait = false
+
+	values, err := oh.values()
 	if err != nil {
 		return err
 	}
-	_, err = oh.upgrade.Run(console.ReleaseName, oh.chart, values)
+
+	_, err = upgrade.Run(console.ReleaseName, oh.chart, values)
 	return err
+}
+
+func (oh *OperatorHandler) Apply() error {
+	if err := oh.ensureNamespace(); err != nil {
+		return err
+	}
+
+	isChartInstalled, err := oh.isChartInstalled()
+	if err != nil {
+		return err
+	}
+
+	if isChartInstalled {
+		return oh.upgrade()
+	}
+
+	return oh.install()
+}
+
+func NewOperatorHandler(ctx context.Context, client *client.Client, kubeconfig *Kubeconfig, repo string, values map[string]any, consoleUrl, token string) (*OperatorHandler, error) {
+	handler := &OperatorHandler{
+		client:     client,
+		ctx:        ctx,
+		kubeconfig: kubeconfig,
+		repo:       repo,
+		url:        consoleUrl,
+		token:      token,
+		vals:       values,
+	}
+
+	if err := handler.init(); err != nil {
+		return nil, err
+	}
+
+	return handler, nil
 }
 
 func InstallOrUpgradeAgent(ctx context.Context, client *client.Client, kubeconfig *Kubeconfig, repoUrl string, values *string, consoleUrl string, token string, d diag.Diagnostics) error {
@@ -231,43 +251,23 @@ func InstallOrUpgradeAgent(ctx context.Context, client *client.Client, kubeconfi
 		}(workingDir)
 	}
 
+	repo := lo.Ternary(agentChartPath != "", agentChartPath, repoUrl)
+
 	vals := map[string]any{}
 	if values != nil {
-		if err := yaml.Unmarshal([]byte(*values), &vals); err != nil {
+		if err = yaml.Unmarshal([]byte(*values), &vals); err != nil {
 			return err
 		}
 	}
 
-	handler := &OperatorHandler{
-		client:         client,
-		ctx:            ctx,
-		kubeconfig:     kubeconfig,
-		repoUrl:        repoUrl,
-		agentChartPath: agentChartPath,
-		url:            consoleUrl,
-		vals:           vals,
-	}
-
-	if err := handler.init(); err != nil {
-		return err
-	}
-
-	if err = handler.UpsertNamespace(); err != nil {
-		return err
-	}
-
-	exists, err := handler.chartExists()
+	handler, err := NewOperatorHandler(ctx, client, kubeconfig, repo, vals, consoleUrl, token)
 	if err != nil {
 		return err
 	}
-	if exists {
-		return handler.Upgrade(token)
-	}
-	return handler.Install(token)
+
+	return handler.Apply()
 }
 
-// fetchVendoredAgentChart downloads vendored agent chart.
-// It returns the working directory name, chart path and any error encountered.
 func fetchVendoredAgentChart(consoleURL string) (string, string, error) {
 	parsedConsoleURL, err := url.Parse(consoleURL)
 	if err != nil {
