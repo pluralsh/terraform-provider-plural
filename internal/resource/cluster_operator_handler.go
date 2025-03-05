@@ -58,7 +58,7 @@ func fetchVendoredAgentChart(consoleURL string) (string, string, error) {
 		return "", "", fmt.Errorf("cannot parse console URL: %s", err.Error())
 	}
 
-	directory, err := os.MkdirTemp("", "agent-chart-*")
+	directory, err := os.MkdirTemp("", "agent-chart-")
 	if err != nil {
 		return directory, "", fmt.Errorf("cannot create directory: %s", err.Error())
 	}
