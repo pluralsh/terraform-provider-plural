@@ -81,8 +81,8 @@ func (oh *OperatorHandler) init() error {
 
 	oh.initSettings()
 
-	err = oh.initRepo()
-	if err != nil {
+	repo := lo.Ternary(oh.agentChartPath != "", oh.agentChartPath, oh.repoUrl)
+	if err = helm.AddRepo(console.ReleaseName, repo); err != nil {
 		return err
 	}
 
@@ -105,10 +105,6 @@ func (oh *OperatorHandler) initSettings() {
 	oh.settings = settings.DeploymentSettings
 }
 
-func (oh *OperatorHandler) initRepo() error {
-	return helm.AddRepo(console.ReleaseName, oh.repoUrl)
-}
-
 func (oh *OperatorHandler) initChart() error {
 	vsn := ""
 	if oh.settings != nil {
@@ -116,7 +112,7 @@ func (oh *OperatorHandler) initChart() error {
 	}
 
 	client := action.NewInstall(oh.configuration)
-	client.ChartPathOptions.Version = strings.TrimPrefix(vsn, "v")
+	client.ChartPathOptions.Version = strings.TrimPrefix(vsn, "v") // TODO ?
 	locateName := fmt.Sprintf("%s/%s", console.ReleaseName, console.ChartName)
 	path, err := client.ChartPathOptions.LocateChart(locateName, cli.New())
 	if err != nil {
@@ -163,10 +159,9 @@ func (oh *OperatorHandler) chartExists() (bool, error) {
 
 // listReleases lists all releases that match the given state.
 func (oh *OperatorHandler) listReleases(state action.ListStates) ([]*release.Release, error) {
-	client := action.NewList(oh.configuration)
-	client.StateMask = state
-
-	return client.Run()
+	c := action.NewList(oh.configuration)
+	c.StateMask = state
+	return c.Run()
 }
 
 func (oh *OperatorHandler) values(token string) (map[string]any, error) {
@@ -205,22 +200,6 @@ func (oh *OperatorHandler) UpsertNamespace() error {
 	return err
 }
 
-func (oh *OperatorHandler) InstallOrUpgrade(token string) error {
-	if err := oh.UpsertNamespace(); err != nil {
-		return err
-	}
-	exists, err := oh.chartExists()
-	if err != nil {
-		return err
-	}
-
-	if exists {
-		return oh.Upgrade(token)
-	}
-
-	return oh.Install(token)
-}
-
 func (oh *OperatorHandler) Install(token string) error {
 	values, err := oh.values(token)
 	if err != nil {
@@ -239,16 +218,23 @@ func (oh *OperatorHandler) Upgrade(token string) error {
 	return err
 }
 
-func NewOperatorHandler(ctx context.Context, client *client.Client, kubeconfig *Kubeconfig, repoUrl string, values *string, consoleUrl string, d diag.Diagnostics) (*OperatorHandler, error) {
-	agentChartPath, err := fetchVendoredAgentChart(consoleUrl)
+func InstallOrUpgradeAgent(ctx context.Context, client *client.Client, kubeconfig *Kubeconfig, repoUrl string, values *string, consoleUrl string, token string, d diag.Diagnostics) error {
+	workingDir, agentChartPath, err := fetchVendoredAgentChart(consoleUrl)
 	if err != nil {
 		d.AddWarning("Client Warning", fmt.Sprintf("Could not fetch vendored agent chart, using chart from the registry: %s", err))
+	}
+	if workingDir != "" {
+		defer func(path string) {
+			if err := os.RemoveAll(path); err != nil {
+				d.AddError("Provider Error", fmt.Sprintf("Cannot remove working directory, got error: %s", err))
+			}
+		}(workingDir)
 	}
 
 	vals := map[string]any{}
 	if values != nil {
 		if err := yaml.Unmarshal([]byte(*values), &vals); err != nil {
-			return nil, err
+			return err
 		}
 	}
 
@@ -263,29 +249,41 @@ func NewOperatorHandler(ctx context.Context, client *client.Client, kubeconfig *
 	}
 
 	if err := handler.init(); err != nil {
-		return nil, err
+		return err
 	}
 
-	return handler, nil
+	if err = handler.UpsertNamespace(); err != nil {
+		return err
+	}
+
+	exists, err := handler.chartExists()
+	if err != nil {
+		return err
+	}
+	if exists {
+		return handler.Upgrade(token)
+	}
+	return handler.Install(token)
 }
 
-func fetchVendoredAgentChart(consoleURL string) (string, error) {
+// fetchVendoredAgentChart downloads vendored agent chart.
+// It returns the working directory name, chart path and any error encountered.
+func fetchVendoredAgentChart(consoleURL string) (string, string, error) {
 	parsedConsoleURL, err := url.Parse(consoleURL)
 	if err != nil {
-		return "", fmt.Errorf("cannot parse console URL: %s", err.Error())
+		return "", "", fmt.Errorf("cannot parse console URL: %s", err.Error())
 	}
 
 	directory, err := os.MkdirTemp("", "agent-chart-*")
 	if err != nil {
-		return "", fmt.Errorf("cannot create directory: %s", err.Error())
+		return directory, "", fmt.Errorf("cannot create directory: %s", err.Error())
 	}
 
 	agentChartURL := fmt.Sprintf("https://%s/ext/v1/agent/chart", parsedConsoleURL.Host)
 	agentChartPath := filepath.Join(directory, "agent-chart.tgz")
 	if err = utils.DownloadFile(agentChartPath, agentChartURL); err != nil {
-		_ = os.RemoveAll(directory) // Clean up early in case of failure.
-		return "", fmt.Errorf("cannot download agent chart: %s", err.Error())
+		return directory, "", fmt.Errorf("cannot download agent chart: %s", err.Error())
 	}
 
-	return agentChartPath, nil
+	return directory, agentChartPath, nil
 }
