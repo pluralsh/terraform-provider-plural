@@ -73,7 +73,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		}
 
 		if err = InstallOrUpgradeAgent(ctx, r.client, data.GetKubeconfig(), data.HelmRepoUrl.ValueString(),
-			data.HelmValues.ValueStringPointer(), r.consoleUrl, lo.FromPtr(result.CreateCluster.DeployToken), resp.Diagnostics); err != nil {
+			data.HelmValues.ValueStringPointer(), r.consoleUrl, lo.FromPtr(result.CreateCluster.DeployToken), &resp.Diagnostics); err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
 			return
 		}
@@ -133,7 +133,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		}
 
 		if err = InstallOrUpgradeAgent(ctx, r.client, data.GetKubeconfig(), data.HelmRepoUrl.ValueString(),
-			data.HelmValues.ValueStringPointer(), r.consoleUrl, lo.FromPtr(clusterWithToken.Cluster.DeployToken), resp.Diagnostics); err != nil {
+			data.HelmValues.ValueStringPointer(), r.consoleUrl, lo.FromPtr(clusterWithToken.Cluster.DeployToken), &resp.Diagnostics); err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
 			return
 		}

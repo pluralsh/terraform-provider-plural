@@ -31,7 +31,7 @@ import (
 )
 
 func InstallOrUpgradeAgent(ctx context.Context, client *client.Client, kubeconfig *Kubeconfig, repoUrl string,
-	values *string, consoleUrl string, token string, d diag.Diagnostics) error {
+	values *string, consoleUrl string, token string, d *diag.Diagnostics) error {
 	workingDir, chartPath, err := fetchVendoredAgentChart(consoleUrl)
 	if err != nil {
 		d.AddWarning("Client Warning", fmt.Sprintf("Could not fetch vendored agent chart, using chart from the registry: %s", err))
@@ -63,7 +63,7 @@ func fetchVendoredAgentChart(consoleURL string) (string, string, error) {
 		return directory, "", fmt.Errorf("cannot create directory: %s", err.Error())
 	}
 
-	agentChartURL := fmt.Sprintf("https://%s/ext/v1/agent/chart", parsedConsoleURL.Host)
+	agentChartURL := fmt.Sprintf("https://%s.com/ext/v1/agent/chartxxfasw", parsedConsoleURL.Host)
 	agentChartPath := filepath.Join(directory, "agent-chart.tgz")
 	if err = utils.DownloadFile(agentChartPath, agentChartURL); err != nil {
 		return directory, "", fmt.Errorf("cannot download agent chart: %s", err.Error())
@@ -139,7 +139,7 @@ func (oh *OperatorHandler) init(kubeconfig *KubeConfig, repoUrl string) error {
 	}
 
 	chartName := ""
-	if oh.vendoredChartPath == "" {
+	if oh.vendoredChartPath != "" {
 		chartName = oh.vendoredChartPath
 	} else {
 		chartName = fmt.Sprintf("%s/%s", console.ReleaseName, console.ChartName)
