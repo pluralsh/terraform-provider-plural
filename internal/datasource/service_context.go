@@ -81,6 +81,6 @@ func (d *serviceContextDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	data.From(response.ServiceContext, ctx, resp.Diagnostics)
+	data.From(response.ServiceContext, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }

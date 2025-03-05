@@ -59,7 +59,7 @@ func (r *InfrastructureStackResource) Create(ctx context.Context, req resource.C
 		return
 	}
 
-	attr, err := data.Attributes(ctx, resp.Diagnostics, r.client)
+	attr, err := data.Attributes(ctx, &resp.Diagnostics, r.client)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get attributes, got error: %s", err))
 		return
@@ -70,7 +70,7 @@ func (r *InfrastructureStackResource) Create(ctx context.Context, req resource.C
 		return
 	}
 
-	data.From(sd.CreateStack, ctx, resp.Diagnostics)
+	data.From(sd.CreateStack, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
@@ -87,7 +87,7 @@ func (r *InfrastructureStackResource) Read(ctx context.Context, req resource.Rea
 		return
 	}
 
-	data.From(response.InfrastructureStack, ctx, resp.Diagnostics)
+	data.From(response.InfrastructureStack, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
@@ -98,7 +98,7 @@ func (r *InfrastructureStackResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
-	attr, err := data.Attributes(ctx, resp.Diagnostics, r.client)
+	attr, err := data.Attributes(ctx, &resp.Diagnostics, r.client)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get attributes, got error: %s", err))
 		return

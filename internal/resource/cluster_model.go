@@ -34,7 +34,7 @@ type cluster struct {
 	Kubeconfig  *Kubeconfig  `tfsdk:"kubeconfig"`
 }
 
-// func (c *cluster) NodePoolsAttribute(ctx context.Context, d diag.Diagnostics) []*console.NodePoolAttributes {
+// func (c *cluster) NodePoolsAttribute(ctx context.Context, d *diag.Diagnostics) []*console.NodePoolAttributes {
 // 	result := make([]*console.NodePoolAttributes, 0, len(c.NodePools.Elements()))
 // 	nodePools := make(map[string]common.ClusterNodePool, len(c.NodePools.Elements()))
 // 	d.Append(c.NodePools.ElementsAs(ctx, &nodePools, false)...)
@@ -57,7 +57,7 @@ type cluster struct {
 // 	return result
 // }
 
-func (c *cluster) TagsAttribute(ctx context.Context, d diag.Diagnostics) []*console.TagAttributes {
+func (c *cluster) TagsAttribute(ctx context.Context, d *diag.Diagnostics) []*console.TagAttributes {
 	if c.Tags.IsNull() {
 		return nil
 	}
@@ -73,7 +73,7 @@ func (c *cluster) TagsAttribute(ctx context.Context, d diag.Diagnostics) []*cons
 	return result
 }
 
-func (c *cluster) Attributes(ctx context.Context, d diag.Diagnostics) console.ClusterAttributes {
+func (c *cluster) Attributes(ctx context.Context, d *diag.Diagnostics) console.ClusterAttributes {
 	return console.ClusterAttributes{
 		Name:      c.Name.ValueString(),
 		Handle:    c.Handle.ValueStringPointer(),
@@ -90,7 +90,7 @@ func (c *cluster) Attributes(ctx context.Context, d diag.Diagnostics) console.Cl
 	}
 }
 
-func (c *cluster) UpdateAttributes(ctx context.Context, d diag.Diagnostics) console.ClusterUpdateAttributes {
+func (c *cluster) UpdateAttributes(ctx context.Context, d *diag.Diagnostics) console.ClusterUpdateAttributes {
 	return console.ClusterUpdateAttributes{
 		Name: c.Name.ValueStringPointer(),
 		// Version: c.Version.ValueStringPointer(),
@@ -102,7 +102,7 @@ func (c *cluster) UpdateAttributes(ctx context.Context, d diag.Diagnostics) cons
 	}
 }
 
-func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.Diagnostics) {
+func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d *diag.Diagnostics) {
 	metadata, err := json.Marshal(cl.Metadata)
 	if err != nil {
 		d.AddError("Provider Error", fmt.Sprintf("Cannot marshall metadata, got error: %s", err))
@@ -121,7 +121,7 @@ func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.
 	c.Metadata = types.StringValue(string(metadata))
 }
 
-func (c *cluster) FromCreate(cc *console.CreateCluster, ctx context.Context, d diag.Diagnostics) {
+func (c *cluster) FromCreate(cc *console.CreateCluster, ctx context.Context, d *diag.Diagnostics) {
 	c.Id = types.StringValue(cc.CreateCluster.ID)
 	c.InsertedAt = types.StringPointerValue(cc.CreateCluster.InsertedAt)
 	c.Name = types.StringValue(cc.CreateCluster.Name)

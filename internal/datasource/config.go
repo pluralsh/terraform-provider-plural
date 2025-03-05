@@ -66,6 +66,6 @@ func (d *configDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	data.From(resp.Diagnostics)
+	data.From(&resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

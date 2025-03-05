@@ -121,13 +121,13 @@ func (r *OIDCProviderResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	result, err := r.client.CreateOIDCProvider(ctx, data.TypeAttribute(), data.Attributes(ctx, resp.Diagnostics))
+	result, err := r.client.CreateOIDCProvider(ctx, data.TypeAttribute(), data.Attributes(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create OIDC provider, got error: %s", err))
 		return
 	}
 
-	data.From(result.CreateOidcProvider, ctx, resp.Diagnostics)
+	data.From(result.CreateOidcProvider, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
@@ -142,13 +142,13 @@ func (r *OIDCProviderResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	result, err := r.client.UpdateOIDCProvider(ctx, data.ID.ValueString(), data.TypeAttribute(), data.Attributes(ctx, resp.Diagnostics))
+	result, err := r.client.UpdateOIDCProvider(ctx, data.ID.ValueString(), data.TypeAttribute(), data.Attributes(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update OIDC provider, got error: %s", err))
 		return
 	}
 
-	data.From(result.UpdateOidcProvider, ctx, resp.Diagnostics)
+	data.From(result.UpdateOidcProvider, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 

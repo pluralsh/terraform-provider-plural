@@ -60,7 +60,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	result, err := r.client.CreateCluster(ctx, data.Attributes(ctx, resp.Diagnostics))
+	result, err := r.client.CreateCluster(ctx, data.Attributes(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create cluster, got error: %s", err))
 		return
@@ -79,7 +79,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		}
 	}
 
-	data.FromCreate(result, ctx, resp.Diagnostics)
+	data.FromCreate(result, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -100,7 +100,7 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	data.From(result.Cluster, ctx, resp.Diagnostics)
+	data.From(result.Cluster, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -117,7 +117,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	_, err := r.client.UpdateCluster(ctx, data.Id.ValueString(), data.UpdateAttributes(ctx, resp.Diagnostics))
+	_, err := r.client.UpdateCluster(ctx, data.Id.ValueString(), data.UpdateAttributes(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update cluster, got error: %s", err))
 		return

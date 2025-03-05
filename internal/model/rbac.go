@@ -16,7 +16,7 @@ type RBAC struct {
 	Bindings  *common.Bindings `tfsdk:"bindings"`
 }
 
-func (rbac *RBAC) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.RbacAttributes {
+func (rbac *RBAC) Attributes(ctx context.Context, d *diag.Diagnostics) gqlclient.RbacAttributes {
 	return gqlclient.RbacAttributes{
 		ReadBindings:  rbac.Bindings.ReadAttributes(ctx, d),
 		WriteBindings: rbac.Bindings.WriteAttributes(ctx, d),

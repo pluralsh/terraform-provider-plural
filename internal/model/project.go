@@ -18,7 +18,7 @@ type Project struct {
 	Bindings    *common.Bindings `tfsdk:"bindings"`
 }
 
-func (p *Project) Attributes(ctx context.Context, d diag.Diagnostics) (*gqlclient.ProjectAttributes, error) {
+func (p *Project) Attributes(ctx context.Context, d *diag.Diagnostics) (*gqlclient.ProjectAttributes, error) {
 	return &gqlclient.ProjectAttributes{
 		Name:          p.Name.ValueString(),
 		Description:   p.Description.ValueStringPointer(),
@@ -27,7 +27,7 @@ func (p *Project) Attributes(ctx context.Context, d diag.Diagnostics) (*gqlclien
 	}, nil
 }
 
-func (p *Project) From(response *gqlclient.ProjectFragment, ctx context.Context, d diag.Diagnostics) {
+func (p *Project) From(response *gqlclient.ProjectFragment, ctx context.Context, d *diag.Diagnostics) {
 	p.Id = types.StringValue(response.ID)
 	p.Name = types.StringValue(response.Name)
 	p.Description = types.StringPointerValue(response.Description)

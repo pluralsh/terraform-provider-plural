@@ -8,7 +8,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 )
 
-func TagsFrom(tags []*console.ClusterTags, config types.Map, d diag.Diagnostics) basetypes.MapValue {
+func TagsFrom(tags []*console.ClusterTags, config types.Map, d *diag.Diagnostics) basetypes.MapValue {
 	if len(tags) == 0 {
 		// Rewriting config to state to avoid inconsistent result errors.
 		// This could happen, for example, when sending "nil" to API and "{}" is returned as a result.

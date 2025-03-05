@@ -131,7 +131,7 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	attr, err := data.Attributes(ctx, resp.Diagnostics)
+	attr, err := data.Attributes(ctx, &resp.Diagnostics)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get attributes, got error: %s", err))
 		return
@@ -142,7 +142,7 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	data.From(sd.CreateProject, ctx, resp.Diagnostics)
+	data.From(sd.CreateProject, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
@@ -159,7 +159,7 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	data.From(response.Project, ctx, resp.Diagnostics)
+	data.From(response.Project, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
@@ -170,7 +170,7 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	attr, err := data.Attributes(ctx, resp.Diagnostics)
+	attr, err := data.Attributes(ctx, &resp.Diagnostics)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get attributes, got error: %s", err))
 		return

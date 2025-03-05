@@ -23,7 +23,7 @@ type OIDCProvider struct {
 	RedirectURIs types.Set    `tfsdk:"redirect_uris"`
 }
 
-func (p *OIDCProvider) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.OidcProviderAttributes {
+func (p *OIDCProvider) Attributes(ctx context.Context, d *diag.Diagnostics) gqlclient.OidcProviderAttributes {
 	return gqlclient.OidcProviderAttributes{
 		Name:         p.Name.ValueString(),
 		Description:  p.descriptionAttribute(),
@@ -49,7 +49,7 @@ func (p *OIDCProvider) authMethodAttribute() *gqlclient.OidcAuthMethod {
 	return lo.ToPtr(gqlclient.OidcAuthMethod(p.AuthMethod.ValueString()))
 }
 
-func (p *OIDCProvider) redirectURIsAttribute(ctx context.Context, d diag.Diagnostics) []*string {
+func (p *OIDCProvider) redirectURIsAttribute(ctx context.Context, d *diag.Diagnostics) []*string {
 	redirectURIs := make([]types.String, len(p.RedirectURIs.Elements()))
 	d.Append(p.RedirectURIs.ElementsAs(ctx, &redirectURIs, false)...)
 	return algorithms.Map(redirectURIs, func(v types.String) *string { return v.ValueStringPointer() })
@@ -59,7 +59,7 @@ func (p *OIDCProvider) TypeAttribute() gqlclient.OidcProviderType {
 	return gqlclient.OidcProviderType(p.Type.ValueString())
 }
 
-func (p *OIDCProvider) From(response *gqlclient.OIDCProviderFragment, ctx context.Context, d diag.Diagnostics) {
+func (p *OIDCProvider) From(response *gqlclient.OIDCProviderFragment, ctx context.Context, d *diag.Diagnostics) {
 	p.ID = types.StringValue(response.ID)
 	p.Name = types.StringValue(response.Name)
 	p.Description = types.StringPointerValue(response.Description)

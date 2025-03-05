@@ -16,7 +16,7 @@ type SharedSecret struct {
 	NotificationBindings types.Set    `tfsdk:"notification_bindings"`
 }
 
-func (in *SharedSecret) Attributes(ctx context.Context, d diag.Diagnostics) console.SharedSecretAttributes {
+func (in *SharedSecret) Attributes(ctx context.Context, d *diag.Diagnostics) console.SharedSecretAttributes {
 	return console.SharedSecretAttributes{
 		Name:                 in.Name.ValueString(),
 		Secret:               in.Secret.ValueString(),

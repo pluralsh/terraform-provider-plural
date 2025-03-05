@@ -30,7 +30,7 @@ var ClusterNodePoolAttrTypes = map[string]attr.Type{
 	"cloud_settings": types.ObjectType{AttrTypes: NodePoolCloudSettingsAttrTypes},
 }
 
-func (c *ClusterNodePool) LabelsAttribute(ctx context.Context, d diag.Diagnostics) *string {
+func (c *ClusterNodePool) LabelsAttribute(ctx context.Context, d *diag.Diagnostics) *string {
 	if c.Labels.IsNull() {
 		return nil
 	}
@@ -40,7 +40,7 @@ func (c *ClusterNodePool) LabelsAttribute(ctx context.Context, d diag.Diagnostic
 	return AttributesJson(elements, d)
 }
 
-func (c *ClusterNodePool) TaintsAttribute(ctx context.Context, d diag.Diagnostics) []*console.TaintAttributes {
+func (c *ClusterNodePool) TaintsAttribute(ctx context.Context, d *diag.Diagnostics) []*console.TaintAttributes {
 	if c.Taints.IsNull() {
 		return nil
 	}
@@ -130,7 +130,7 @@ func (c *NodePoolCloudSettingsAWS) Attributes() *console.AwsNodeCloudAttributes 
 	}
 }
 
-func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment, configNodePools types.Map, ctx context.Context, d diag.Diagnostics) types.Map {
+func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment, configNodePools types.Map, ctx context.Context, d *diag.Diagnostics) types.Map {
 	configNodePoolsElements := make(map[string]ClusterNodePool, len(configNodePools.Elements()))
 	d.Append(configNodePools.ElementsAs(ctx, &configNodePoolsElements, false)...)
 
@@ -154,7 +154,7 @@ func ClusterNodePoolsFrom(nodePools []*console.NodePoolFragment, configNodePools
 	return mapValue
 }
 
-func clusterNodePoolTaintsFrom(nodePool *console.NodePoolFragment, ctx context.Context, d diag.Diagnostics) types.Set {
+func clusterNodePoolTaintsFrom(nodePool *console.NodePoolFragment, ctx context.Context, d *diag.Diagnostics) types.Set {
 	if len(nodePool.Taints) == 0 {
 		return types.SetNull(basetypes.ObjectType{AttrTypes: NodePoolTaintAttrTypes})
 	}

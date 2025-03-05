@@ -27,7 +27,7 @@ type cluster struct {
 	NodePools      types.Map    `tfsdk:"node_pools"`
 }
 
-func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d diag.Diagnostics) {
+func (c *cluster) From(cl *console.ClusterFragment, ctx context.Context, d *diag.Diagnostics) {
 	metadata, err := json.Marshal(cl.Metadata)
 	if err != nil {
 		d.AddError("Provider Error", fmt.Sprintf("Cannot marshall metadata, got error: %s", err))

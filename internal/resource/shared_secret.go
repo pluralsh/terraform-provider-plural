@@ -102,7 +102,7 @@ func (in *sharedSecretResource) Create(ctx context.Context, request resource.Cre
 		return
 	}
 
-	_, err := in.client.ShareSecret(ctx, data.Attributes(ctx, response.Diagnostics))
+	_, err := in.client.ShareSecret(ctx, data.Attributes(ctx, &response.Diagnostics))
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to share a secret, got error: %s", err))
 		return
