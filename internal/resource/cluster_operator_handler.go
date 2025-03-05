@@ -182,12 +182,11 @@ func (oh *OperatorHandler) Apply() error {
 }
 
 func (oh *OperatorHandler) ensureNamespace() error {
-	_, err := oh.clientSet.CoreV1().Namespaces().Get(oh.ctx, console.OperatorNamespace, metav1.GetOptions{})
-	if err == nil {
+	if _, err := oh.clientSet.CoreV1().Namespaces().Get(oh.ctx, console.OperatorNamespace, metav1.GetOptions{}); err == nil {
 		return nil
 	}
 
-	_, err = oh.clientSet.CoreV1().Namespaces().Create(oh.ctx, &v1.Namespace{
+	_, err := oh.clientSet.CoreV1().Namespaces().Create(oh.ctx, &v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: console.OperatorNamespace,
 			Labels: map[string]string{
@@ -256,18 +255,15 @@ func (oh *OperatorHandler) install() error {
 }
 
 func (oh *OperatorHandler) values() (map[string]any, error) {
-	globalVals := map[string]any{}
-	vals := map[string]any{
-		"secrets": map[string]string{
-			"deployToken": oh.deployToken,
-		},
-		"consoleUrl": fmt.Sprintf("%s/ext/gql", oh.consoleURL),
-	}
-
+	settingsValues := map[string]any{}
 	if oh.settings != nil && oh.settings.AgentHelmValues != nil {
-		if err := yaml.Unmarshal([]byte(*oh.settings.AgentHelmValues), &globalVals); err != nil {
+		if err := yaml.Unmarshal([]byte(*oh.settings.AgentHelmValues), &settingsValues); err != nil {
 			return nil, err
 		}
 	}
-	return algorithms.Merge(vals, oh.additionalValues, globalVals), nil
+
+	return algorithms.Merge(map[string]any{
+		"secrets":    map[string]string{"deployToken": oh.deployToken},
+		"consoleUrl": fmt.Sprintf("%s/ext/gql", oh.consoleURL),
+	}, oh.additionalValues, settingsValues), nil
 }
