@@ -11,6 +11,7 @@ import (
 
 	"terraform-provider-plural/internal/client"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	gqlclient "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/plural-cli/pkg/console"
 	"github.com/pluralsh/plural-cli/pkg/helm"
@@ -46,6 +47,9 @@ type OperatorHandler struct {
 
 	// repoUrl is an URL of the deployment agent chart.
 	repoUrl string
+
+	// agentChartPath contains a local path to vendored agent chart if it was downloadable, it is empty otherwise.
+	agentChartPath string
 
 	// additional values used on install
 	vals map[string]any
@@ -125,7 +129,6 @@ func (oh *OperatorHandler) initChart() error {
 
 func (oh *OperatorHandler) initInstallAction() {
 	oh.install = action.NewInstall(oh.configuration)
-
 	oh.install.Namespace = console.OperatorNamespace
 	oh.install.ReleaseName = console.ReleaseName
 	oh.install.Timeout = 5 * time.Minute
@@ -135,7 +138,6 @@ func (oh *OperatorHandler) initInstallAction() {
 
 func (oh *OperatorHandler) initUpgradeAction() {
 	oh.upgrade = action.NewUpgrade(oh.configuration)
-
 	oh.upgrade.Namespace = console.OperatorNamespace
 	oh.upgrade.Timeout = 5 * time.Minute
 	oh.upgrade.Wait = false
@@ -237,7 +239,12 @@ func (oh *OperatorHandler) Upgrade(token string) error {
 	return err
 }
 
-func NewOperatorHandler(ctx context.Context, client *client.Client, kubeconfig *Kubeconfig, repoUrl string, values *string, consoleUrl string) (*OperatorHandler, error) {
+func NewOperatorHandler(ctx context.Context, client *client.Client, kubeconfig *Kubeconfig, repoUrl string, values *string, consoleUrl string, d diag.Diagnostics) (*OperatorHandler, error) {
+	agentChartPath, err := fetchVendoredAgentChart(consoleUrl)
+	if err != nil {
+		d.AddWarning("Client Warning", fmt.Sprintf("Could not fetch vendored agent chart, using chart from the registry: %s", err))
+	}
+
 	vals := map[string]any{}
 	if values != nil {
 		if err := yaml.Unmarshal([]byte(*values), &vals); err != nil {
@@ -246,12 +253,13 @@ func NewOperatorHandler(ctx context.Context, client *client.Client, kubeconfig *
 	}
 
 	handler := &OperatorHandler{
-		client:     client,
-		ctx:        ctx,
-		kubeconfig: kubeconfig,
-		repoUrl:    repoUrl,
-		url:        consoleUrl,
-		vals:       vals,
+		client:         client,
+		ctx:            ctx,
+		kubeconfig:     kubeconfig,
+		repoUrl:        repoUrl,
+		agentChartPath: agentChartPath,
+		url:            consoleUrl,
+		vals:           vals,
 	}
 
 	if err := handler.init(); err != nil {
@@ -261,25 +269,23 @@ func NewOperatorHandler(ctx context.Context, client *client.Client, kubeconfig *
 	return handler, nil
 }
 
-func (oh *OperatorHandler) FetchVendoredAgentChart(consoleURL string) (string, error) {
-	directory, err := os.MkdirTemp("", "agent-chart-*****")
-	if err != nil {
-		return "", fmt.Errorf("cannot create directory: %s", err.Error())
-	}
-	defer os.RemoveAll(directory) // TODO ??
-
+func fetchVendoredAgentChart(consoleURL string) (string, error) {
 	parsedConsoleURL, err := url.Parse(consoleURL)
 	if err != nil {
 		return "", fmt.Errorf("cannot parse console URL: %s", err.Error())
 	}
 
+	directory, err := os.MkdirTemp("", "agent-chart-*")
+	if err != nil {
+		return "", fmt.Errorf("cannot create directory: %s", err.Error())
+	}
+
 	agentChartURL := fmt.Sprintf("https://%s/ext/v1/agent/chart", parsedConsoleURL.Host)
 	agentChartPath := filepath.Join(directory, "agent-chart.tgz")
 	if err = utils.DownloadFile(agentChartPath, agentChartURL); err != nil {
+		_ = os.RemoveAll(directory) // Clean up early in case of failure.
 		return "", fmt.Errorf("cannot download agent chart: %s", err.Error())
 	}
-
-	// TODO
 
 	return agentChartPath, nil
 }

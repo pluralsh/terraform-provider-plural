@@ -72,7 +72,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 			return
 		}
 
-		handler, err := NewOperatorHandler(ctx, r.client, data.GetKubeconfig(), data.HelmRepoUrl.ValueString(), data.HelmValues.ValueStringPointer(), r.consoleUrl)
+		handler, err := NewOperatorHandler(ctx, r.client, data.GetKubeconfig(), data.HelmRepoUrl.ValueString(), data.HelmValues.ValueStringPointer(), r.consoleUrl, resp.Diagnostics)
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to init operator handler, got error: %s", err))
 			return
@@ -138,7 +138,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 			return
 		}
 
-		handler, err := NewOperatorHandler(ctx, r.client, data.GetKubeconfig(), data.HelmRepoUrl.ValueString(), data.HelmValues.ValueStringPointer(), r.consoleUrl)
+		handler, err := NewOperatorHandler(ctx, r.client, data.GetKubeconfig(), data.HelmRepoUrl.ValueString(), data.HelmValues.ValueStringPointer(), r.consoleUrl, resp.Diagnostics)
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to init operator handler, got error: %s", err))
 			return
