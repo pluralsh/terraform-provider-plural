@@ -149,7 +149,6 @@ func (oh *OperatorHandler) init(kubeconfig *KubeConfig, repoUrl string) error {
 
 		install := action.NewInstall(oh.configuration)
 		if oh.settings != nil {
-			// Add the version, it can be done even if using vendored chart as it is not used that case.
 			install.ChartPathOptions.Version = strings.TrimPrefix(oh.settings.AgentVsn, "v")
 		}
 
