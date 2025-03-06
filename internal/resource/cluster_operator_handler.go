@@ -138,26 +138,25 @@ func (oh *OperatorHandler) init(kubeconfig *KubeConfig, repoUrl string) error {
 		return err
 	}
 
-	chartName := ""
+	path := ""
+	var err error
 	if oh.vendoredChartPath != "" {
-		chartName = oh.vendoredChartPath
+		path = oh.vendoredChartPath
 	} else {
-		chartName = fmt.Sprintf("%s/%s", console.ReleaseName, console.ChartName)
-
 		if err := helm.AddRepo(console.ReleaseName, repoUrl); err != nil {
 			return err
 		}
-	}
 
-	install := action.NewInstall(oh.configuration)
-	if oh.settings != nil {
-		// Add the version, it can be done even if using vendored chart as it is not used that case.
-		install.ChartPathOptions.Version = strings.TrimPrefix(oh.settings.AgentVsn, "v")
-	}
+		install := action.NewInstall(oh.configuration)
+		if oh.settings != nil {
+			// Add the version, it can be done even if using vendored chart as it is not used that case.
+			install.ChartPathOptions.Version = strings.TrimPrefix(oh.settings.AgentVsn, "v")
+		}
 
-	path, err := install.ChartPathOptions.LocateChart(chartName, cli.New())
-	if err != nil {
-		return err
+		chartName := fmt.Sprintf("%s/%s", console.ReleaseName, console.ChartName)
+		if path, err = install.ChartPathOptions.LocateChart(chartName, cli.New()); err != nil {
+			return err
+		}
 	}
 
 	oh.chart, err = loader.Load(path)
