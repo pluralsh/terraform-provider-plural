@@ -60,7 +60,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	result, err := r.client.CreateCluster(ctx, data.Attributes(ctx, resp.Diagnostics))
+	result, err := r.client.CreateCluster(ctx, data.Attributes(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create cluster, got error: %s", err))
 		return
@@ -72,20 +72,14 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 			return
 		}
 
-		handler, err := NewOperatorHandler(ctx, r.client, data.GetKubeconfig(), data.HelmRepoUrl.ValueString(), data.HelmValues.ValueStringPointer(), r.consoleUrl)
-		if err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to init operator handler, got error: %s", err))
-			return
-		}
-
-		err = handler.InstallOrUpgrade(*result.CreateCluster.DeployToken)
-		if err != nil {
+		if err = InstallOrUpgradeAgent(ctx, r.client, data.GetKubeconfig(), data.HelmRepoUrl.ValueString(),
+			data.HelmValues.ValueStringPointer(), r.consoleUrl, lo.FromPtr(result.CreateCluster.DeployToken), &resp.Diagnostics); err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
 			return
 		}
 	}
 
-	data.FromCreate(result, ctx, resp.Diagnostics)
+	data.FromCreate(result, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -106,7 +100,7 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	data.From(result.Cluster, ctx, resp.Diagnostics)
+	data.From(result.Cluster, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -123,7 +117,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	_, err := r.client.UpdateCluster(ctx, data.Id.ValueString(), data.UpdateAttributes(ctx, resp.Diagnostics))
+	_, err := r.client.UpdateCluster(ctx, data.Id.ValueString(), data.UpdateAttributes(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update cluster, got error: %s", err))
 		return
@@ -138,14 +132,8 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 			return
 		}
 
-		handler, err := NewOperatorHandler(ctx, r.client, data.GetKubeconfig(), data.HelmRepoUrl.ValueString(), data.HelmValues.ValueStringPointer(), r.consoleUrl)
-		if err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to init operator handler, got error: %s", err))
-			return
-		}
-
-		err = handler.InstallOrUpgrade(lo.FromPtr(clusterWithToken.Cluster.DeployToken))
-		if err != nil {
+		if err = InstallOrUpgradeAgent(ctx, r.client, data.GetKubeconfig(), data.HelmRepoUrl.ValueString(),
+			data.HelmValues.ValueStringPointer(), r.consoleUrl, lo.FromPtr(clusterWithToken.Cluster.DeployToken), &resp.Diagnostics); err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
 			return
 		}

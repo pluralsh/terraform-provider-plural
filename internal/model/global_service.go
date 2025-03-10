@@ -21,7 +21,7 @@ type GlobalService struct {
 	Tags       types.Map    `tfsdk:"tags"`
 }
 
-func (gs *GlobalService) From(response *gqlclient.GlobalServiceFragment, d diag.Diagnostics) {
+func (gs *GlobalService) From(response *gqlclient.GlobalServiceFragment, d *diag.Diagnostics) {
 	gs.Id = types.StringValue(response.ID)
 	gs.Name = types.StringValue(response.Name)
 	gs.ServiceId = types.StringValue(response.Service.ID)
@@ -35,7 +35,7 @@ func (gs *GlobalService) From(response *gqlclient.GlobalServiceFragment, d diag.
 
 }
 
-func (gs *GlobalService) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.GlobalServiceAttributes {
+func (gs *GlobalService) Attributes(ctx context.Context, d *diag.Diagnostics) gqlclient.GlobalServiceAttributes {
 	var distro *gqlclient.ClusterDistro
 	if !gs.Distro.IsNull() {
 		distro = lo.ToPtr(gqlclient.ClusterDistro(strings.ToUpper(gs.Distro.ValueString())))
@@ -48,7 +48,7 @@ func (gs *GlobalService) Attributes(ctx context.Context, d diag.Diagnostics) gql
 	}
 }
 
-func (gs *GlobalService) TagsAttribute(ctx context.Context, d diag.Diagnostics) []*gqlclient.TagAttributes {
+func (gs *GlobalService) TagsAttribute(ctx context.Context, d *diag.Diagnostics) []*gqlclient.TagAttributes {
 	if gs.Tags.IsNull() {
 		return nil
 	}

@@ -17,7 +17,7 @@ type PrAutomationTrigger struct {
 	RetriggerKey       types.String `tfsdk:"retrigger_key"`
 }
 
-func (in *PrAutomationTrigger) ContextJson(ctx context.Context, d diag.Diagnostics) *string {
+func (in *PrAutomationTrigger) ContextJson(ctx context.Context, d *diag.Diagnostics) *string {
 	triggerContext := make(map[string]types.String, len(in.Context.Elements()))
 	in.Context.ElementsAs(ctx, &triggerContext, false)
 

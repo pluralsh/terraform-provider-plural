@@ -44,7 +44,7 @@ type InfrastructureStackExtended struct {
 	Bindings      *common.Bindings                  `tfsdk:"bindings"`
 }
 
-func (is *InfrastructureStackExtended) Attributes(ctx context.Context, d diag.Diagnostics, client *client.Client) (*gqlclient.StackAttributes, error) {
+func (is *InfrastructureStackExtended) Attributes(ctx context.Context, d *diag.Diagnostics, client *client.Client) (*gqlclient.StackAttributes, error) {
 	attr := &gqlclient.StackAttributes{
 		Name:          is.Name.ValueString(),
 		Type:          gqlclient.StackType(is.Type.ValueString()),
@@ -71,7 +71,7 @@ func (is *InfrastructureStackExtended) Attributes(ctx context.Context, d diag.Di
 	return attr, nil
 }
 
-func (is *InfrastructureStackExtended) FilesAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.StackFileAttributes {
+func (is *InfrastructureStackExtended) FilesAttributes(ctx context.Context, d *diag.Diagnostics) []*gqlclient.StackFileAttributes {
 	if is.Files.IsNull() {
 		return nil
 	}
@@ -87,7 +87,7 @@ func (is *InfrastructureStackExtended) FilesAttributes(ctx context.Context, d di
 	return result
 }
 
-func (is *InfrastructureStackExtended) EnvironmentAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.StackEnvironmentAttributes {
+func (is *InfrastructureStackExtended) EnvironmentAttributes(ctx context.Context, d *diag.Diagnostics) []*gqlclient.StackEnvironmentAttributes {
 	if is.Environment.IsNull() {
 		return nil
 	}
@@ -107,7 +107,7 @@ func (is *InfrastructureStackExtended) EnvironmentAttributes(ctx context.Context
 	return result
 }
 
-func (is *InfrastructureStackExtended) From(stack *gqlclient.InfrastructureStackFragment, ctx context.Context, d diag.Diagnostics) {
+func (is *InfrastructureStackExtended) From(stack *gqlclient.InfrastructureStackFragment, ctx context.Context, d *diag.Diagnostics) {
 	is.InfrastructureStack.From(stack)
 	is.Repository.From(stack.Repository, stack.Git)
 	is.Configuration.From(ctx, stack.Configuration, d)
@@ -117,7 +117,7 @@ func (is *InfrastructureStackExtended) From(stack *gqlclient.InfrastructureStack
 	is.JobSpec.From(stack.JobSpec, ctx, d)
 }
 
-func infrastructureStackFilesFrom(files []*gqlclient.StackFileFragment, config types.Map, d diag.Diagnostics) types.Map {
+func infrastructureStackFilesFrom(files []*gqlclient.StackFileFragment, config types.Map, d *diag.Diagnostics) types.Map {
 	if len(files) == 0 {
 		// Rewriting config to state to avoid inconsistent result errors.
 		// This could happen, for example, when sending "nil" to API and "{}" is returned as a result.
@@ -135,7 +135,7 @@ func infrastructureStackFilesFrom(files []*gqlclient.StackFileFragment, config t
 	return result
 }
 
-func infrastructureStackEnvironmentsFrom(envs []*gqlclient.StackEnvironmentFragment, config types.Set, ctx context.Context, d diag.Diagnostics) types.Set {
+func infrastructureStackEnvironmentsFrom(envs []*gqlclient.StackEnvironmentFragment, config types.Set, ctx context.Context, d *diag.Diagnostics) types.Set {
 	if len(envs) == 0 {
 		// Rewriting config to state to avoid inconsistent result errors.
 		// This could happen, for example, when sending "nil" to API and "[]" is returned as a result.
@@ -201,7 +201,7 @@ var InfrastructureStackHookTypes = map[string]attr.Type{
 	"after_stage": types.StringType,
 }
 
-func infrastructureStackHooksFrom(ctx context.Context, hooks []*gqlclient.StackHookFragment, configHooks types.Set, d diag.Diagnostics) types.Set {
+func infrastructureStackHooksFrom(ctx context.Context, hooks []*gqlclient.StackHookFragment, configHooks types.Set, d *diag.Diagnostics) types.Set {
 	if len(hooks) == 0 {
 		return configHooks
 	}
@@ -223,7 +223,7 @@ func infrastructureStackHooksFrom(ctx context.Context, hooks []*gqlclient.StackH
 	return setValue
 }
 
-func (sh *InfrastructureStackHookSpec) Attributes(ctx context.Context, d diag.Diagnostics) *gqlclient.StackHookAttributes {
+func (sh *InfrastructureStackHookSpec) Attributes(ctx context.Context, d *diag.Diagnostics) *gqlclient.StackHookAttributes {
 	if sh == nil {
 		return &gqlclient.StackHookAttributes{}
 	}
@@ -245,7 +245,7 @@ type InfrastructureStackConfiguration struct {
 	Hooks   types.Set    `tfsdk:"hooks"`
 }
 
-func (isc *InfrastructureStackConfiguration) HooksAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.StackHookAttributes {
+func (isc *InfrastructureStackConfiguration) HooksAttributes(ctx context.Context, d *diag.Diagnostics) []*gqlclient.StackHookAttributes {
 	if isc.Hooks.IsNull() {
 		return nil
 	}
@@ -261,7 +261,7 @@ func (isc *InfrastructureStackConfiguration) HooksAttributes(ctx context.Context
 	return result
 }
 
-func (isc *InfrastructureStackConfiguration) Attributes(ctx context.Context, d diag.Diagnostics) *gqlclient.StackConfigurationAttributes {
+func (isc *InfrastructureStackConfiguration) Attributes(ctx context.Context, d *diag.Diagnostics) *gqlclient.StackConfigurationAttributes {
 	if isc == nil {
 		return nil
 	}
@@ -273,7 +273,7 @@ func (isc *InfrastructureStackConfiguration) Attributes(ctx context.Context, d d
 	}
 }
 
-func (isc *InfrastructureStackConfiguration) From(ctx context.Context, configuration gqlclient.StackConfigurationFragment, d diag.Diagnostics) {
+func (isc *InfrastructureStackConfiguration) From(ctx context.Context, configuration gqlclient.StackConfigurationFragment, d *diag.Diagnostics) {
 	if isc == nil {
 		return
 	}
@@ -315,7 +315,7 @@ type InfrastructureStackJobSpec struct {
 	ServiceAccount types.String `tfsdk:"service_account"`
 }
 
-func (isjs *InfrastructureStackJobSpec) Attributes(ctx context.Context, d diag.Diagnostics) *gqlclient.GateJobAttributes {
+func (isjs *InfrastructureStackJobSpec) Attributes(ctx context.Context, d *diag.Diagnostics) *gqlclient.GateJobAttributes {
 	if isjs == nil {
 		return nil
 	}
@@ -330,7 +330,7 @@ func (isjs *InfrastructureStackJobSpec) Attributes(ctx context.Context, d diag.D
 	}
 }
 
-func (isjs *InfrastructureStackJobSpec) LabelsAttributes(ctx context.Context, d diag.Diagnostics) *string {
+func (isjs *InfrastructureStackJobSpec) LabelsAttributes(ctx context.Context, d *diag.Diagnostics) *string {
 	if isjs.Labels.IsNull() {
 		return nil
 	}
@@ -340,7 +340,7 @@ func (isjs *InfrastructureStackJobSpec) LabelsAttributes(ctx context.Context, d 
 	return common.AttributesJson(elements, d)
 }
 
-func (isjs *InfrastructureStackJobSpec) AnnotationsAttributes(ctx context.Context, d diag.Diagnostics) *string {
+func (isjs *InfrastructureStackJobSpec) AnnotationsAttributes(ctx context.Context, d *diag.Diagnostics) *string {
 	if isjs.Annotations.IsNull() {
 		return nil
 	}
@@ -350,7 +350,7 @@ func (isjs *InfrastructureStackJobSpec) AnnotationsAttributes(ctx context.Contex
 	return common.AttributesJson(elements, d)
 }
 
-func (isjs *InfrastructureStackJobSpec) ContainersAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.ContainerAttributes {
+func (isjs *InfrastructureStackJobSpec) ContainersAttributes(ctx context.Context, d *diag.Diagnostics) []*gqlclient.ContainerAttributes {
 	if isjs.Containers.IsNull() {
 		return nil
 	}
@@ -366,7 +366,7 @@ func (isjs *InfrastructureStackJobSpec) ContainersAttributes(ctx context.Context
 	return result
 }
 
-func (isjs *InfrastructureStackJobSpec) From(spec *gqlclient.JobSpecFragment, ctx context.Context, d diag.Diagnostics) {
+func (isjs *InfrastructureStackJobSpec) From(spec *gqlclient.JobSpecFragment, ctx context.Context, d *diag.Diagnostics) {
 	if isjs == nil {
 		return
 	}
@@ -379,7 +379,7 @@ func (isjs *InfrastructureStackJobSpec) From(spec *gqlclient.JobSpecFragment, ct
 	isjs.ServiceAccount = types.StringPointerValue(spec.ServiceAccount)
 }
 
-func infrastructureStackJobSpecContainersFrom(containers []*gqlclient.ContainerSpecFragment, config types.Set, ctx context.Context, d diag.Diagnostics) types.Set {
+func infrastructureStackJobSpecContainersFrom(containers []*gqlclient.ContainerSpecFragment, config types.Set, ctx context.Context, d *diag.Diagnostics) types.Set {
 	if len(containers) == 0 {
 		// Rewriting config to state to avoid inconsistent result errors.
 		// This could happen, for example, when sending "nil" to API and "[]" is returned as a result.
@@ -403,7 +403,7 @@ func infrastructureStackJobSpecContainersFrom(containers []*gqlclient.ContainerS
 	return setValue
 }
 
-func infrastructureStackContainerSpecArgsFrom(values []*string, ctx context.Context, d diag.Diagnostics) types.List {
+func infrastructureStackContainerSpecArgsFrom(values []*string, ctx context.Context, d *diag.Diagnostics) types.List {
 	if values == nil {
 		return types.ListNull(types.StringType)
 	}
@@ -413,7 +413,7 @@ func infrastructureStackContainerSpecArgsFrom(values []*string, ctx context.Cont
 	return listValue
 }
 
-func infrastructureStackContainerSpecEnvFrom(env []*gqlclient.ContainerSpecFragment_Env, d diag.Diagnostics) types.Map {
+func infrastructureStackContainerSpecEnvFrom(env []*gqlclient.ContainerSpecFragment_Env, d *diag.Diagnostics) types.Map {
 	if env == nil {
 		return types.MapNull(types.StringType)
 	}
@@ -429,7 +429,7 @@ func infrastructureStackContainerSpecEnvFrom(env []*gqlclient.ContainerSpecFragm
 	return result
 }
 
-func infrastructureStackContainerSpecEnvFromFrom(envFroms []*gqlclient.ContainerSpecFragment_EnvFrom, ctx context.Context, d diag.Diagnostics) types.Set {
+func infrastructureStackContainerSpecEnvFromFrom(envFroms []*gqlclient.ContainerSpecFragment_EnvFrom, ctx context.Context, d *diag.Diagnostics) types.Set {
 	if envFroms == nil {
 		return types.SetNull(basetypes.ObjectType{AttrTypes: InfrastructureStackContainerEnvFromAttrTypes})
 	}
@@ -463,7 +463,7 @@ var InfrastructureStackContainerSpecAttrTypes = map[string]attr.Type{
 	"env_from": types.SetType{ElemType: types.ObjectType{AttrTypes: InfrastructureStackContainerEnvFromAttrTypes}},
 }
 
-func (iscs *InfrastructureStackContainerSpec) Attributes(ctx context.Context, d diag.Diagnostics) *gqlclient.ContainerAttributes {
+func (iscs *InfrastructureStackContainerSpec) Attributes(ctx context.Context, d *diag.Diagnostics) *gqlclient.ContainerAttributes {
 	if iscs == nil {
 		return nil
 	}
@@ -476,7 +476,7 @@ func (iscs *InfrastructureStackContainerSpec) Attributes(ctx context.Context, d 
 	}
 }
 
-func (isjs *InfrastructureStackContainerSpec) ArgsAttributes(ctx context.Context, d diag.Diagnostics) []*string {
+func (isjs *InfrastructureStackContainerSpec) ArgsAttributes(ctx context.Context, d *diag.Diagnostics) []*string {
 	if isjs.Args.IsNull() {
 		return nil
 	}
@@ -486,7 +486,7 @@ func (isjs *InfrastructureStackContainerSpec) ArgsAttributes(ctx context.Context
 	return algorithms.Map(elements, func(v types.String) *string { return v.ValueStringPointer() })
 }
 
-func (isjs *InfrastructureStackContainerSpec) EnvAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.EnvAttributes {
+func (isjs *InfrastructureStackContainerSpec) EnvAttributes(ctx context.Context, d *diag.Diagnostics) []*gqlclient.EnvAttributes {
 	if isjs.Env.IsNull() {
 		return nil
 	}
@@ -502,7 +502,7 @@ func (isjs *InfrastructureStackContainerSpec) EnvAttributes(ctx context.Context,
 	return result
 }
 
-func (isjs *InfrastructureStackContainerSpec) EnvFromAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.EnvFromAttributes {
+func (isjs *InfrastructureStackContainerSpec) EnvFromAttributes(ctx context.Context, d *diag.Diagnostics) []*gqlclient.EnvFromAttributes {
 	if isjs.EnvFrom.IsNull() {
 		return nil
 	}

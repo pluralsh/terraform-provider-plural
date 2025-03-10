@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func AttributesJson(m map[string]types.String, d diag.Diagnostics) *string {
+func AttributesJson(m map[string]types.String, d *diag.Diagnostics) *string {
 	stringMap := map[string]string{}
 	for key, val := range m {
 		stringMap[key] = val.ValueString()

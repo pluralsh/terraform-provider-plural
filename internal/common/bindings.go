@@ -15,7 +15,7 @@ type Bindings struct {
 	Write types.Set `tfsdk:"write"`
 }
 
-func (cb *Bindings) ReadAttributes(ctx context.Context, d diag.Diagnostics) []*console.PolicyBindingAttributes {
+func (cb *Bindings) ReadAttributes(ctx context.Context, d *diag.Diagnostics) []*console.PolicyBindingAttributes {
 	if cb == nil {
 		return nil
 	}
@@ -23,7 +23,7 @@ func (cb *Bindings) ReadAttributes(ctx context.Context, d diag.Diagnostics) []*c
 	return policyBindingAttributes(cb.Read, ctx, d)
 }
 
-func (cb *Bindings) WriteAttributes(ctx context.Context, d diag.Diagnostics) []*console.PolicyBindingAttributes {
+func (cb *Bindings) WriteAttributes(ctx context.Context, d *diag.Diagnostics) []*console.PolicyBindingAttributes {
 	if cb == nil {
 		return nil
 	}
@@ -31,7 +31,7 @@ func (cb *Bindings) WriteAttributes(ctx context.Context, d diag.Diagnostics) []*
 	return policyBindingAttributes(cb.Write, ctx, d)
 }
 
-func policyBindingAttributes(bindings types.Set, ctx context.Context, d diag.Diagnostics) []*console.PolicyBindingAttributes {
+func policyBindingAttributes(bindings types.Set, ctx context.Context, d *diag.Diagnostics) []*console.PolicyBindingAttributes {
 	if bindings.IsNull() {
 		return nil
 	}
@@ -51,7 +51,7 @@ func policyBindingAttributes(bindings types.Set, ctx context.Context, d diag.Dia
 	return result
 }
 
-func (cb *Bindings) From(readBindings []*console.PolicyBindingFragment, writeBindings []*console.PolicyBindingFragment, ctx context.Context, d diag.Diagnostics) {
+func (cb *Bindings) From(readBindings []*console.PolicyBindingFragment, writeBindings []*console.PolicyBindingFragment, ctx context.Context, d *diag.Diagnostics) {
 	if cb == nil {
 		return
 	}
@@ -60,7 +60,7 @@ func (cb *Bindings) From(readBindings []*console.PolicyBindingFragment, writeBin
 	cb.Write = bindingsFrom(writeBindings, cb.Write, ctx, d)
 }
 
-func bindingsFrom(bindings []*console.PolicyBindingFragment, config types.Set, ctx context.Context, d diag.Diagnostics) types.Set {
+func bindingsFrom(bindings []*console.PolicyBindingFragment, config types.Set, ctx context.Context, d *diag.Diagnostics) types.Set {
 	if len(bindings) == 0 {
 		// Rewriting config to state to avoid inconsistent result errors.
 		// This could happen, for example, when sending "nil" to API and "[]" is returned as a result.
@@ -91,7 +91,7 @@ func bindingsFrom(bindings []*console.PolicyBindingFragment, config types.Set, c
 	return setValue
 }
 
-func SetToPolicyBindingAttributes(set types.Set, ctx context.Context, d diag.Diagnostics) []*console.PolicyBindingAttributes {
+func SetToPolicyBindingAttributes(set types.Set, ctx context.Context, d *diag.Diagnostics) []*console.PolicyBindingAttributes {
 	return policyBindingAttributes(set, ctx, d)
 }
 

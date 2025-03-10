@@ -98,7 +98,7 @@ func (in *prAutomationTriggerResource) Create(ctx context.Context, request resou
 		data.PrAutomationID.ValueString(),
 		data.RepoSlug.ValueStringPointer(),
 		data.PrAutomationBranch.ValueStringPointer(),
-		data.ContextJson(ctx, response.Diagnostics),
+		data.ContextJson(ctx, &response.Diagnostics),
 	)
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create pull request, got error: %s", err))
@@ -126,7 +126,7 @@ func (in *prAutomationTriggerResource) Update(ctx context.Context, req resource.
 			data.PrAutomationID.ValueString(),
 			data.RepoSlug.ValueStringPointer(),
 			data.PrAutomationBranch.ValueStringPointer(),
-			data.ContextJson(ctx, resp.Diagnostics),
+			data.ContextJson(ctx, &resp.Diagnostics),
 		)
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create pull request, got error: %s", err))

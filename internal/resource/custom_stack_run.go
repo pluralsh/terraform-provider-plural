@@ -57,7 +57,7 @@ func (r *CustomStackRunResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	attr, err := data.Attributes(ctx, resp.Diagnostics, r.client)
+	attr, err := data.Attributes(ctx, &resp.Diagnostics, r.client)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get attributes, got error: %s", err))
 		return
@@ -68,7 +68,7 @@ func (r *CustomStackRunResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	data.From(sd.CreateCustomStackRun, ctx, resp.Diagnostics)
+	data.From(sd.CreateCustomStackRun, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
@@ -85,7 +85,7 @@ func (r *CustomStackRunResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	data.From(response.CustomStackRun, ctx, resp.Diagnostics)
+	data.From(response.CustomStackRun, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
@@ -96,7 +96,7 @@ func (r *CustomStackRunResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	attr, err := data.Attributes(ctx, resp.Diagnostics, r.client)
+	attr, err := data.Attributes(ctx, &resp.Diagnostics, r.client)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get attributes, got error: %s", err))
 		return

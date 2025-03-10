@@ -24,7 +24,7 @@ type LocalConfigSpec struct {
 	Token string `yaml:"token"`
 }
 
-func (c *Config) From(d diag.Diagnostics) {
+func (c *Config) From(d *diag.Diagnostics) {
 	p, err := homedir.Expand("~/.plural/config.yml")
 	if err != nil {
 		d.AddError("Client Error", fmt.Sprintf("Could not find local plural config: %s", err))

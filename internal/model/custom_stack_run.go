@@ -23,7 +23,7 @@ type CustomStackRun struct {
 	Configuration types.Set    `tfsdk:"configuration"`
 }
 
-func (csr *CustomStackRun) Attributes(ctx context.Context, d diag.Diagnostics, client *client.Client) (*gqlclient.CustomStackRunAttributes, error) {
+func (csr *CustomStackRun) Attributes(ctx context.Context, d *diag.Diagnostics, client *client.Client) (*gqlclient.CustomStackRunAttributes, error) {
 	return &gqlclient.CustomStackRunAttributes{
 		Name:          csr.Name.ValueString(),
 		Documentation: csr.Documentation.ValueStringPointer(),
@@ -33,7 +33,7 @@ func (csr *CustomStackRun) Attributes(ctx context.Context, d diag.Diagnostics, c
 	}, nil
 }
 
-func (csr *CustomStackRun) commandsAttribute(ctx context.Context, d diag.Diagnostics) []*gqlclient.CommandAttributes {
+func (csr *CustomStackRun) commandsAttribute(ctx context.Context, d *diag.Diagnostics) []*gqlclient.CommandAttributes {
 	if csr.Commands.IsNull() {
 		return nil
 	}
@@ -56,7 +56,7 @@ func (csr *CustomStackRun) commandsAttribute(ctx context.Context, d diag.Diagnos
 	return result
 }
 
-func (csr *CustomStackRun) configurationAttribute(ctx context.Context, d diag.Diagnostics) []*gqlclient.PrConfigurationAttributes {
+func (csr *CustomStackRun) configurationAttribute(ctx context.Context, d *diag.Diagnostics) []*gqlclient.PrConfigurationAttributes {
 	if csr.Configuration.IsNull() {
 		return nil
 	}
@@ -81,7 +81,7 @@ func (csr *CustomStackRun) configurationAttribute(ctx context.Context, d diag.Di
 	return result
 }
 
-func (csr *CustomStackRun) From(customStackRun *gqlclient.CustomStackRunFragment, ctx context.Context, d diag.Diagnostics) {
+func (csr *CustomStackRun) From(customStackRun *gqlclient.CustomStackRunFragment, ctx context.Context, d *diag.Diagnostics) {
 	csr.Id = types.StringValue(customStackRun.ID)
 	csr.Name = types.StringValue(customStackRun.Name)
 	csr.Documentation = types.StringPointerValue(customStackRun.Documentation)
@@ -106,7 +106,7 @@ var CustomStackRunCommandAttrTypes = map[string]attr.Type{
 	"dir":  types.StringType,
 }
 
-func commandsFrom(commands []*gqlclient.StackCommandFragment, config types.Set, ctx context.Context, d diag.Diagnostics) types.Set {
+func commandsFrom(commands []*gqlclient.StackCommandFragment, config types.Set, ctx context.Context, d *diag.Diagnostics) types.Set {
 	if len(commands) == 0 {
 		// Rewriting config to state to avoid inconsistent result errors.
 		// This could happen, for example, when sending "nil" to API and "[]" is returned as a result.
@@ -151,7 +151,7 @@ var CustomStackRunConfigurationAttrTypes = map[string]attr.Type{
 	"condition":     types.ObjectType{AttrTypes: CustomStackRunCommandConditionAttrTypes},
 }
 
-func configurationFrom(configs []*gqlclient.PrConfigurationFragment, config types.Set, ctx context.Context, d diag.Diagnostics) types.Set {
+func configurationFrom(configs []*gqlclient.PrConfigurationFragment, config types.Set, ctx context.Context, d *diag.Diagnostics) types.Set {
 	if len(configs) == 0 {
 		// Rewriting config to state to avoid inconsistent result errors.
 		// This could happen, for example, when sending "nil" to API and "[]" is returned as a result.

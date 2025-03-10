@@ -41,7 +41,7 @@ func (this *ServiceDeployment) VersionString() *string {
 	return result
 }
 
-func (this *ServiceDeployment) FromCreate(response *gqlclient.ServiceDeploymentExtended, d diag.Diagnostics) {
+func (this *ServiceDeployment) FromCreate(response *gqlclient.ServiceDeploymentExtended, d *diag.Diagnostics) {
 	this.Id = types.StringValue(response.ID)
 	this.Name = types.StringValue(response.Name)
 	this.Namespace = types.StringValue(response.Namespace)
@@ -53,7 +53,7 @@ func (this *ServiceDeployment) FromCreate(response *gqlclient.ServiceDeploymentE
 	this.Templated = types.BoolPointerValue(response.Templated)
 }
 
-func (this *ServiceDeployment) FromGet(response *gqlclient.ServiceDeploymentExtended, d diag.Diagnostics) {
+func (this *ServiceDeployment) FromGet(response *gqlclient.ServiceDeploymentExtended, d *diag.Diagnostics) {
 	this.Id = types.StringValue(response.ID)
 	this.Name = types.StringValue(response.Name)
 	this.Namespace = types.StringValue(response.Namespace)
@@ -64,7 +64,7 @@ func (this *ServiceDeployment) FromGet(response *gqlclient.ServiceDeploymentExte
 	this.Templated = types.BoolPointerValue(response.Templated)
 }
 
-func (this *ServiceDeployment) Attributes(ctx context.Context, d diag.Diagnostics) gqlclient.ServiceDeploymentAttributes {
+func (this *ServiceDeployment) Attributes(ctx context.Context, d *diag.Diagnostics) gqlclient.ServiceDeploymentAttributes {
 	if this == nil {
 		return gqlclient.ServiceDeploymentAttributes{}
 	}
@@ -92,7 +92,7 @@ func (this *ServiceDeployment) Attributes(ctx context.Context, d diag.Diagnostic
 	}
 }
 
-func (this *ServiceDeployment) UpdateAttributes(ctx context.Context, d diag.Diagnostics) gqlclient.ServiceUpdateAttributes {
+func (this *ServiceDeployment) UpdateAttributes(ctx context.Context, d *diag.Diagnostics) gqlclient.ServiceUpdateAttributes {
 	if this == nil {
 		return gqlclient.ServiceUpdateAttributes{}
 	}
@@ -113,7 +113,7 @@ type ServiceDeploymentConfiguration struct {
 	Value types.String `tfsdk:"value"`
 }
 
-func ToServiceDeploymentConfiguration(configuration []*gqlclient.ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration, d diag.Diagnostics) basetypes.MapValue {
+func ToServiceDeploymentConfiguration(configuration []*gqlclient.ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration, d *diag.Diagnostics) basetypes.MapValue {
 	resultMap := make(map[string]attr.Value, len(configuration))
 	for _, c := range configuration {
 		resultMap[c.Name] = types.StringValue(c.Value)
@@ -125,7 +125,7 @@ func ToServiceDeploymentConfiguration(configuration []*gqlclient.ServiceDeployme
 	return result
 }
 
-func (this *ServiceDeployment) ToServiceDeploymentConfigAttributes(ctx context.Context, d diag.Diagnostics) []*gqlclient.ConfigAttributes {
+func (this *ServiceDeployment) ToServiceDeploymentConfigAttributes(ctx context.Context, d *diag.Diagnostics) []*gqlclient.ConfigAttributes {
 	result := make([]*gqlclient.ConfigAttributes, 0)
 	elements := make(map[string]types.String, len(this.Configuration.Elements()))
 	d.Append(this.Configuration.ElementsAs(ctx, &elements, false)...)
@@ -253,7 +253,7 @@ type ServiceDeploymentSyncConfig struct {
 	NamespaceMetadata *ServiceDeploymentNamespaceMetadata `tfsdk:"namespace_metadata"`
 }
 
-func (this *ServiceDeploymentSyncConfig) Attributes(d diag.Diagnostics) *gqlclient.SyncConfigAttributes {
+func (this *ServiceDeploymentSyncConfig) Attributes(d *diag.Diagnostics) *gqlclient.SyncConfigAttributes {
 	if this == nil {
 		return nil
 	}
@@ -268,7 +268,7 @@ type ServiceDeploymentNamespaceMetadata struct {
 	Labels      types.Map `tfsdk:"labels"`
 }
 
-func (this *ServiceDeploymentNamespaceMetadata) Attributes(d diag.Diagnostics) *gqlclient.MetadataAttributes {
+func (this *ServiceDeploymentNamespaceMetadata) Attributes(d *diag.Diagnostics) *gqlclient.MetadataAttributes {
 	if this == nil {
 		return nil
 	}

@@ -90,13 +90,13 @@ func (r *ServiceContextResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	sc, err := r.client.SaveServiceContext(ctx, data.Name.ValueString(), data.Attributes(ctx, resp.Diagnostics))
+	sc, err := r.client.SaveServiceContext(ctx, data.Name.ValueString(), data.Attributes(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create service context, got error: %s", err))
 		return
 	}
 
-	data.From(sc.SaveServiceContext, ctx, resp.Diagnostics)
+	data.From(sc.SaveServiceContext, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
@@ -117,7 +117,7 @@ func (r *ServiceContextResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	data.From(response.ServiceContext, ctx, resp.Diagnostics)
+	data.From(response.ServiceContext, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
@@ -128,7 +128,7 @@ func (r *ServiceContextResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	_, err := r.client.SaveServiceContext(ctx, data.Name.ValueString(), data.Attributes(ctx, resp.Diagnostics))
+	_, err := r.client.SaveServiceContext(ctx, data.Name.ValueString(), data.Attributes(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update service context, got error: %s", err))
 		return

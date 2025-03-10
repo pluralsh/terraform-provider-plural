@@ -137,6 +137,6 @@ func (d *projectDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	data.From(response.Project, ctx, resp.Diagnostics)
+	data.From(response.Project, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }

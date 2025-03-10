@@ -119,7 +119,7 @@ func (r *rbacResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	_, err := r.client.UpdateRbac(ctx, data.Attributes(ctx, resp.Diagnostics), data.ServiceId.ValueStringPointer(), data.ClusterId.ValueStringPointer(), nil)
+	_, err := r.client.UpdateRbac(ctx, data.Attributes(ctx, &resp.Diagnostics), data.ServiceId.ValueStringPointer(), data.ClusterId.ValueStringPointer(), nil)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update RBAC, got error: %s", err))
 		return
@@ -139,7 +139,7 @@ func (r *rbacResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	_, err := r.client.UpdateRbac(ctx, data.Attributes(ctx, resp.Diagnostics), data.ServiceId.ValueStringPointer(), data.ClusterId.ValueStringPointer(), nil)
+	_, err := r.client.UpdateRbac(ctx, data.Attributes(ctx, &resp.Diagnostics), data.ServiceId.ValueStringPointer(), data.ClusterId.ValueStringPointer(), nil)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update RBAC, got error: %s", err))
 		return

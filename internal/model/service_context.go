@@ -16,7 +16,7 @@ type ServiceContext struct {
 	Configuration types.String `tfsdk:"configuration"`
 }
 
-func (sc *ServiceContext) From(response *console.ServiceContextFragment, ctx context.Context, d diag.Diagnostics) {
+func (sc *ServiceContext) From(response *console.ServiceContextFragment, ctx context.Context, d *diag.Diagnostics) {
 	configuration, err := json.Marshal(response.Configuration)
 	if err != nil {
 		d.AddError("Provider Error", fmt.Sprintf("Cannot marshall metadata, got error: %s", err))
@@ -32,7 +32,7 @@ type ServiceContextExtended struct {
 	Secrets types.Map `tfsdk:"secrets"`
 }
 
-func (sc *ServiceContextExtended) Attributes(ctx context.Context, d diag.Diagnostics) console.ServiceContextAttributes {
+func (sc *ServiceContextExtended) Attributes(ctx context.Context, d *diag.Diagnostics) console.ServiceContextAttributes {
 	secrets := make(map[string]types.String, len(sc.Secrets.Elements()))
 	sc.Secrets.ElementsAs(ctx, &secrets, false)
 	configAttributes := make([]*console.ConfigAttributes, 0)

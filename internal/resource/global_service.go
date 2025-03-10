@@ -108,13 +108,13 @@ func (r *GlobalServiceResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	response, err := r.client.CreateGlobalServiceDeployment(ctx, data.ServiceId.ValueString(), data.Attributes(ctx, resp.Diagnostics))
+	response, err := r.client.CreateGlobalServiceDeployment(ctx, data.ServiceId.ValueString(), data.Attributes(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create GlobalService, got error: %s", err))
 		return
 	}
 
-	data.From(response.CreateGlobalService, resp.Diagnostics)
+	data.From(response.CreateGlobalService, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
@@ -135,7 +135,7 @@ func (r *GlobalServiceResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	_, err := r.client.UpdateGlobalService(ctx, data.Id.ValueString(), data.Attributes(ctx, resp.Diagnostics))
+	_, err := r.client.UpdateGlobalService(ctx, data.Id.ValueString(), data.Attributes(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update GlobalService, got error: %s", err))
 		return
