@@ -88,6 +88,7 @@ func (r *clusterResource) schema() schema.Schema {
 				Description:         "Arbitrary JSON metadata to store user-specific state of this cluster (e.g. IAM roles for add-ons). Use 'jsonencode' and 'jsondecode' methods to encode and decode data.",
 				MarkdownDescription: "Arbitrary JSON metadata to store user-specific state of this cluster (e.g. IAM roles for add-ons). Use `jsonencode` and `jsondecode` methods to encode and decode data.",
 				Optional:            true,
+				Computed:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			// "cloud": schema.StringAttribute{
