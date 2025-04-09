@@ -21,6 +21,7 @@ type OIDCProvider struct {
 	ClientSecret types.String `tfsdk:"client_secret"`
 	AuthMethod   types.String `tfsdk:"auth_method"`
 	RedirectURIs types.Set    `tfsdk:"redirect_uris"`
+	Bindings     types.Set    `tfsdk:"bindings"`
 }
 
 func (p *OIDCProvider) Attributes(ctx context.Context, d *diag.Diagnostics) gqlclient.OidcProviderAttributes {
@@ -29,6 +30,7 @@ func (p *OIDCProvider) Attributes(ctx context.Context, d *diag.Diagnostics) gqlc
 		Description:  p.descriptionAttribute(),
 		AuthMethod:   p.authMethodAttribute(),
 		RedirectUris: p.redirectURIsAttribute(ctx, d),
+		Bindings:     common.SetToPolicyBindingAttributes(p.Bindings, ctx, d),
 	}
 }
 

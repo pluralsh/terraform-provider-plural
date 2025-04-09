@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -91,6 +92,28 @@ func (r *OIDCProviderResource) Schema(_ context.Context, _ resource.SchemaReques
 			"redirect_uris": schema.SetAttribute{
 				Optional:    true,
 				ElementType: types.StringType,
+			},
+			"bindings": schema.SetNestedAttribute{
+				Description:         "The users and groups able to utilize this provider..",
+				MarkdownDescription: "The users and groups able to utilize this provider.",
+				Optional:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"group_id": schema.StringAttribute{
+							Optional:      true,
+							PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
+						},
+						"id": schema.StringAttribute{
+							Optional:      true,
+							PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
+						},
+						"user_id": schema.StringAttribute{
+							Optional:      true,
+							PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
+						},
+					},
+				},
+				PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace()},
 			},
 		},
 	}
