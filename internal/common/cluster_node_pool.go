@@ -110,7 +110,7 @@ func (c *NodePoolCloudSettings) Attributes() *console.NodePoolCloudAttributes {
 	}
 
 	if c.AWS != nil {
-		return &console.NodePoolCloudAttributes{Aws: c.AWS.Attributes()}
+		return &console.NodePoolCloudAttributes{AWS: c.AWS.Attributes()}
 	}
 
 	return nil
@@ -124,8 +124,8 @@ var NodePoolCloudSettingsAWSAttrTypes = map[string]attr.Type{
 	"launch_template_id": types.StringType,
 }
 
-func (c *NodePoolCloudSettingsAWS) Attributes() *console.AwsNodeCloudAttributes {
-	return &console.AwsNodeCloudAttributes{
+func (c *NodePoolCloudSettingsAWS) Attributes() *console.AWSNodeCloudAttributes {
+	return &console.AWSNodeCloudAttributes{
 		LaunchTemplateID: c.LaunchTemplateId.ValueStringPointer(),
 	}
 }

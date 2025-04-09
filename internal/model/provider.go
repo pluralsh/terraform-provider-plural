@@ -53,7 +53,7 @@ func (p *ProviderCloudSettings) Attributes() *console.CloudProviderSettingsAttri
 	}
 
 	if p.AWS != nil {
-		return &console.CloudProviderSettingsAttributes{Aws: p.AWS.Attributes()}
+		return &console.CloudProviderSettingsAttributes{AWS: p.AWS.Attributes()}
 	}
 
 	if p.Azure != nil {
@@ -61,7 +61,7 @@ func (p *ProviderCloudSettings) Attributes() *console.CloudProviderSettingsAttri
 	}
 
 	if p.GCP != nil {
-		return &console.CloudProviderSettingsAttributes{Gcp: p.GCP.Attributes()}
+		return &console.CloudProviderSettingsAttributes{GCP: p.GCP.Attributes()}
 	}
 
 	return nil
@@ -72,8 +72,8 @@ type ProviderCloudSettingsAWS struct {
 	SecretAccessKey types.String `tfsdk:"secret_access_key"`
 }
 
-func (p *ProviderCloudSettingsAWS) Attributes() *console.AwsSettingsAttributes {
-	return &console.AwsSettingsAttributes{
+func (p *ProviderCloudSettingsAWS) Attributes() *console.AWSSettingsAttributes {
+	return &console.AWSSettingsAttributes{
 		AccessKeyID:     p.AccessKeyId.ValueString(),
 		SecretAccessKey: p.SecretAccessKey.ValueString(),
 	}
@@ -99,8 +99,8 @@ type ProviderCloudSettingsGCP struct {
 	Credentials types.String `tfsdk:"credentials"`
 }
 
-func (p *ProviderCloudSettingsGCP) Attributes() *console.GcpSettingsAttributes {
-	return &console.GcpSettingsAttributes{
+func (p *ProviderCloudSettingsGCP) Attributes() *console.GCPSettingsAttributes {
+	return &console.GCPSettingsAttributes{
 		ApplicationCredentials: p.Credentials.ValueString(),
 	}
 }

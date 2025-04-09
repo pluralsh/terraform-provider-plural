@@ -23,6 +23,7 @@ description: |-
 ### Optional
 
 - `auth_method` (String)
+- `bindings` (Attributes Set) The users and groups able to utilize this provider. (see [below for nested schema](#nestedatt--bindings))
 - `description` (String) Description of this OIDC provider.
 - `redirect_uris` (Set of String)
 
@@ -31,3 +32,12 @@ description: |-
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
 - `id` (String) Internal identifier of this OIDC provider.
+
+<a id="nestedatt--bindings"></a>
+### Nested Schema for `bindings`
+
+Optional:
+
+- `group_id` (String)
+- `id` (String)
+- `user_id` (String)

@@ -174,7 +174,7 @@ func (c *ClusterCloudSettings) Attributes() *console.CloudSettingsAttributes {
 	}
 
 	if c.AWS != nil {
-		return &console.CloudSettingsAttributes{Aws: c.AWS.Attributes()}
+		return &console.CloudSettingsAttributes{AWS: c.AWS.Attributes()}
 	}
 
 	if c.Azure != nil {
@@ -182,7 +182,7 @@ func (c *ClusterCloudSettings) Attributes() *console.CloudSettingsAttributes {
 	}
 
 	if c.GCP != nil {
-		return &console.CloudSettingsAttributes{Gcp: c.GCP.Attributes()}
+		return &console.CloudSettingsAttributes{GCP: c.GCP.Attributes()}
 	}
 
 	return nil
@@ -192,8 +192,8 @@ type ClusterCloudSettingsAWS struct {
 	Region types.String `tfsdk:"region"`
 }
 
-func (c *ClusterCloudSettingsAWS) Attributes() *console.AwsCloudAttributes {
-	return &console.AwsCloudAttributes{
+func (c *ClusterCloudSettingsAWS) Attributes() *console.AWSCloudAttributes {
+	return &console.AWSCloudAttributes{
 		Region: c.Region.ValueStringPointer(),
 	}
 }
@@ -220,8 +220,8 @@ type ClusterCloudSettingsGCP struct {
 	Project types.String `tfsdk:"project"`
 }
 
-func (c *ClusterCloudSettingsGCP) Attributes() *console.GcpCloudAttributes {
-	return &console.GcpCloudAttributes{
+func (c *ClusterCloudSettingsGCP) Attributes() *console.GCPCloudAttributes {
+	return &console.GCPCloudAttributes{
 		Project: c.Project.ValueStringPointer(),
 		Network: c.Network.ValueStringPointer(),
 		Region:  c.Region.ValueStringPointer(),
