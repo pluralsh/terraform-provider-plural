@@ -94,9 +94,29 @@ func (r *OIDCProviderResource) Schema(_ context.Context, _ resource.SchemaReques
 				ElementType: types.StringType,
 			},
 			"bindings": schema.SetNestedAttribute{
-				Description:         "The users and groups able to utilize this provider..",
+				Description:         "The users and groups able to utilize this provider.",
 				MarkdownDescription: "The users and groups able to utilize this provider.",
 				Optional:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"group_id": schema.StringAttribute{
+							Optional:      true,
+							PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
+						},
+						"id": schema.StringAttribute{
+							Optional:      true,
+							PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
+						},
+						"user_id": schema.StringAttribute{
+							Optional:      true,
+							PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
+						},
+					},
+				},
+				PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace()},
+			},
+			"write_bindings": schema.SetNestedAttribute{
+				Optional: true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"group_id": schema.StringAttribute{
