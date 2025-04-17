@@ -13,24 +13,26 @@ import (
 )
 
 type OIDCProvider struct {
-	ID           types.String `tfsdk:"id"`
-	Name         types.String `tfsdk:"name"`
-	Type         types.String `tfsdk:"type"`
-	Description  types.String `tfsdk:"description"`
-	ClientID     types.String `tfsdk:"client_id"`
-	ClientSecret types.String `tfsdk:"client_secret"`
-	AuthMethod   types.String `tfsdk:"auth_method"`
-	RedirectURIs types.Set    `tfsdk:"redirect_uris"`
-	Bindings     types.Set    `tfsdk:"bindings"`
+	ID            types.String `tfsdk:"id"`
+	Name          types.String `tfsdk:"name"`
+	Type          types.String `tfsdk:"type"`
+	Description   types.String `tfsdk:"description"`
+	ClientID      types.String `tfsdk:"client_id"`
+	ClientSecret  types.String `tfsdk:"client_secret"`
+	AuthMethod    types.String `tfsdk:"auth_method"`
+	RedirectURIs  types.Set    `tfsdk:"redirect_uris"`
+	Bindings      types.Set    `tfsdk:"bindings"`
+	WriteBindings types.Set    `tfsdk:"write_bindings"`
 }
 
 func (p *OIDCProvider) Attributes(ctx context.Context, d *diag.Diagnostics) gqlclient.OidcProviderAttributes {
 	return gqlclient.OidcProviderAttributes{
-		Name:         p.Name.ValueString(),
-		Description:  p.descriptionAttribute(),
-		AuthMethod:   p.authMethodAttribute(),
-		RedirectUris: p.redirectURIsAttribute(ctx, d),
-		Bindings:     common.SetToPolicyBindingAttributes(p.Bindings, ctx, d),
+		Name:          p.Name.ValueString(),
+		Description:   p.descriptionAttribute(),
+		AuthMethod:    p.authMethodAttribute(),
+		RedirectUris:  p.redirectURIsAttribute(ctx, d),
+		Bindings:      common.SetToPolicyBindingAttributes(p.Bindings, ctx, d),
+		WriteBindings: common.SetToPolicyBindingAttributes(p.WriteBindings, ctx, d),
 	}
 }
 

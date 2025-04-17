@@ -26,6 +26,7 @@ description: |-
 - `bindings` (Attributes Set) The users and groups able to utilize this provider. (see [below for nested schema](#nestedatt--bindings))
 - `description` (String) Description of this OIDC provider.
 - `redirect_uris` (Set of String)
+- `write_bindings` (Attributes Set) (see [below for nested schema](#nestedatt--write_bindings))
 
 ### Read-Only
 
@@ -35,6 +36,16 @@ description: |-
 
 <a id="nestedatt--bindings"></a>
 ### Nested Schema for `bindings`
+
+Optional:
+
+- `group_id` (String)
+- `id` (String)
+- `user_id` (String)
+
+
+<a id="nestedatt--write_bindings"></a>
+### Nested Schema for `write_bindings`
 
 Optional:
 
