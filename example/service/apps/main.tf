@@ -38,4 +38,8 @@ resource "plural_service_deployment" "apps" {
   }
   templated = false
   # protect = true
+  # configuration = {
+  #   "host" = "tf-cd-test.gcp.plural.sh"
+  #   "tag" = "sha-4d01e86"
+  # }
 }

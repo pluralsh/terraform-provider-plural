@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -78,6 +79,7 @@ func (r *ServiceDeploymentResource) schema() schema.Schema {
 				Computed:            true,
 				ElementType:         types.StringType,
 				PlanModifiers:       []planmodifier.Map{mapplanmodifier.UseStateForUnknown()},
+				Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
 			},
 			"cluster":     r.schemaCluster(),
 			"repository":  r.schemaRepository(),
