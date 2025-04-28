@@ -31,8 +31,8 @@ type ServiceDeployment struct {
 	Helm          *ServiceDeploymentHelm       `tfsdk:"helm"`
 }
 
-func (this *ServiceDeployment) VersionString() *string {
-	result := this.Version.ValueStringPointer()
+func (sd *ServiceDeployment) VersionString() *string {
+	result := sd.Version.ValueStringPointer()
 	if result != nil && len(*result) == 0 {
 		result = nil
 	}
@@ -40,71 +40,71 @@ func (this *ServiceDeployment) VersionString() *string {
 	return result
 }
 
-func (this *ServiceDeployment) FromCreate(response *gqlclient.ServiceDeploymentExtended, d *diag.Diagnostics) {
-	this.Id = types.StringValue(response.ID)
-	this.Name = types.StringValue(response.Name)
-	this.Namespace = types.StringValue(response.Namespace)
-	this.Protect = types.BoolPointerValue(response.Protect)
-	this.Version = types.StringValue(response.Version)
-	this.Kustomize.From(response.Kustomize)
-	this.Configuration = configFrom(response.Configuration, d)
-	this.Cluster.From(response.Cluster)
-	this.Repository.From(response.Repository, response.Git)
-	this.Templated = types.BoolPointerValue(response.Templated)
+func (sd *ServiceDeployment) FromCreate(response *gqlclient.ServiceDeploymentExtended, d *diag.Diagnostics) {
+	sd.Id = types.StringValue(response.ID)
+	sd.Name = types.StringValue(response.Name)
+	sd.Namespace = types.StringValue(response.Namespace)
+	sd.Protect = types.BoolPointerValue(response.Protect)
+	sd.Version = types.StringValue(response.Version)
+	sd.Kustomize.From(response.Kustomize)
+	sd.Configuration = configFrom(response.Configuration, d)
+	sd.Cluster.From(response.Cluster)
+	sd.Repository.From(response.Repository, response.Git)
+	sd.Templated = types.BoolPointerValue(response.Templated)
 }
 
-func (this *ServiceDeployment) FromGet(response *gqlclient.ServiceDeploymentExtended, d *diag.Diagnostics) {
-	this.Id = types.StringValue(response.ID)
-	this.Name = types.StringValue(response.Name)
-	this.Namespace = types.StringValue(response.Namespace)
-	this.Protect = types.BoolPointerValue(response.Protect)
-	this.Kustomize.From(response.Kustomize)
-	this.Configuration = configFrom(response.Configuration, d)
-	this.Repository.From(response.Repository, response.Git)
-	this.Templated = types.BoolPointerValue(response.Templated)
+func (sd *ServiceDeployment) FromGet(response *gqlclient.ServiceDeploymentExtended, d *diag.Diagnostics) {
+	sd.Id = types.StringValue(response.ID)
+	sd.Name = types.StringValue(response.Name)
+	sd.Namespace = types.StringValue(response.Namespace)
+	sd.Protect = types.BoolPointerValue(response.Protect)
+	sd.Kustomize.From(response.Kustomize)
+	sd.Configuration = configFrom(response.Configuration, d)
+	sd.Repository.From(response.Repository, response.Git)
+	sd.Templated = types.BoolPointerValue(response.Templated)
 }
 
-func (this *ServiceDeployment) Attributes(ctx context.Context, d *diag.Diagnostics) gqlclient.ServiceDeploymentAttributes {
-	if this == nil {
+func (sd *ServiceDeployment) Attributes(ctx context.Context, d *diag.Diagnostics) gqlclient.ServiceDeploymentAttributes {
+	if sd == nil {
 		return gqlclient.ServiceDeploymentAttributes{}
 	}
 
 	var repositoryId *string = nil
-	if this.Repository != nil && this.Repository.Id.ValueStringPointer() != nil {
-		repositoryId = this.Repository.Id.ValueStringPointer()
+	if sd.Repository != nil && sd.Repository.Id.ValueStringPointer() != nil {
+		repositoryId = sd.Repository.Id.ValueStringPointer()
 	}
 
 	return gqlclient.ServiceDeploymentAttributes{
-		Name:          this.Name.ValueString(),
-		Namespace:     this.Namespace.ValueString(),
-		Version:       this.VersionString(),
-		DocsPath:      this.DocsPath.ValueStringPointer(),
-		SyncConfig:    this.SyncConfig.Attributes(d),
-		Protect:       this.Protect.ValueBoolPointer(),
+		Name:          sd.Name.ValueString(),
+		Namespace:     sd.Namespace.ValueString(),
+		Version:       sd.VersionString(),
+		DocsPath:      sd.DocsPath.ValueStringPointer(),
+		SyncConfig:    sd.SyncConfig.Attributes(d),
+		Protect:       sd.Protect.ValueBoolPointer(),
 		RepositoryID:  repositoryId,
-		Git:           this.Repository.Attributes(),
-		Kustomize:     this.Kustomize.Attributes(),
-		Configuration: this.ToServiceDeploymentConfigAttributes(ctx, d),
-		ReadBindings:  this.Bindings.ReadAttributes(ctx, d),
-		WriteBindings: this.Bindings.WriteAttributes(ctx, d),
-		Helm:          this.Helm.Attributes(),
-		Templated:     this.Templated.ValueBoolPointer(),
+		Git:           sd.Repository.Attributes(),
+		Kustomize:     sd.Kustomize.Attributes(),
+		Configuration: sd.ToServiceDeploymentConfigAttributes(ctx, d),
+		ReadBindings:  sd.Bindings.ReadAttributes(ctx, d),
+		WriteBindings: sd.Bindings.WriteAttributes(ctx, d),
+		Helm:          sd.Helm.Attributes(),
+		Templated:     sd.Templated.ValueBoolPointer(),
 	}
 }
 
-func (this *ServiceDeployment) UpdateAttributes(ctx context.Context, d *diag.Diagnostics) gqlclient.ServiceUpdateAttributes {
-	if this == nil {
+func (sd *ServiceDeployment) UpdateAttributes(ctx context.Context, d *diag.Diagnostics) gqlclient.ServiceUpdateAttributes {
+	if sd == nil {
 		return gqlclient.ServiceUpdateAttributes{}
 	}
 
 	return gqlclient.ServiceUpdateAttributes{
-		Version:       this.Version.ValueStringPointer(),
-		Protect:       this.Protect.ValueBoolPointer(),
-		Git:           this.Repository.Attributes(),
-		Configuration: this.ToServiceDeploymentConfigAttributes(ctx, d),
-		Kustomize:     this.Kustomize.Attributes(),
-		Helm:          this.Helm.Attributes(),
-		Templated:     this.Templated.ValueBoolPointer(),
+		Version:       sd.Version.ValueStringPointer(),
+		Protect:       sd.Protect.ValueBoolPointer(),
+		Git:           sd.Repository.Attributes(),
+		Configuration: sd.ToServiceDeploymentConfigAttributes(ctx, d),
+		Kustomize:     sd.Kustomize.Attributes(),
+		Helm:          sd.Helm.Attributes(),
+		Templated:     sd.Templated.ValueBoolPointer(),
 	}
 }
 
@@ -129,14 +129,14 @@ func configFrom(configuration []*gqlclient.ServiceDeploymentExtended_ServiceDepl
 	return result
 }
 
-func (this *ServiceDeployment) ToServiceDeploymentConfigAttributes(ctx context.Context, d *diag.Diagnostics) []*gqlclient.ConfigAttributes {
-	if this.Configuration.IsNull() || this.Configuration.IsUnknown() {
+func (sd *ServiceDeployment) ToServiceDeploymentConfigAttributes(ctx context.Context, d *diag.Diagnostics) []*gqlclient.ConfigAttributes {
+	if sd.Configuration.IsNull() || sd.Configuration.IsUnknown() {
 		return nil
 	}
 
 	result := make([]*gqlclient.ConfigAttributes, 0)
-	elements := make(map[string]types.String, len(this.Configuration.Elements()))
-	d.Append(this.Configuration.ElementsAs(ctx, &elements, false)...)
+	elements := make(map[string]types.String, len(sd.Configuration.Elements()))
+	d.Append(sd.Configuration.ElementsAs(ctx, &elements, false)...)
 
 	for k, v := range elements {
 		result = append(result, &gqlclient.ConfigAttributes{Name: k, Value: v.ValueStringPointer()})
@@ -165,33 +165,33 @@ type ServiceDeploymentRepository struct {
 	Folder types.String `tfsdk:"folder"`
 }
 
-func (this *ServiceDeploymentRepository) From(repository *gqlclient.GitRepositoryFragment, git *gqlclient.GitRefFragment) {
-	if this == nil {
+func (sdr *ServiceDeploymentRepository) From(repository *gqlclient.GitRepositoryFragment, git *gqlclient.GitRefFragment) {
+	if sdr == nil {
 		return
 	}
 
-	this.Id = types.StringValue(repository.ID)
+	sdr.Id = types.StringValue(repository.ID)
 
 	if git == nil {
 		return
 	}
 
-	this.Ref = types.StringValue(git.Ref)
-	this.Folder = types.StringValue(git.Folder)
+	sdr.Ref = types.StringValue(git.Ref)
+	sdr.Folder = types.StringValue(git.Folder)
 }
 
-func (this *ServiceDeploymentRepository) Attributes() *gqlclient.GitRefAttributes {
-	if this == nil {
+func (sdr *ServiceDeploymentRepository) Attributes() *gqlclient.GitRefAttributes {
+	if sdr == nil {
 		return nil
 	}
 
-	if len(this.Ref.ValueString()) == 0 && len(this.Folder.ValueString()) == 0 {
+	if len(sdr.Ref.ValueString()) == 0 && len(sdr.Folder.ValueString()) == 0 {
 		return nil
 	}
 
 	return &gqlclient.GitRefAttributes{
-		Ref:    this.Ref.ValueString(),
-		Folder: this.Folder.ValueString(),
+		Ref:    sdr.Ref.ValueString(),
+		Folder: sdr.Folder.ValueString(),
 	}
 }
 
@@ -221,13 +221,13 @@ type ServiceDeploymentSyncConfig struct {
 	NamespaceMetadata *ServiceDeploymentNamespaceMetadata `tfsdk:"namespace_metadata"`
 }
 
-func (this *ServiceDeploymentSyncConfig) Attributes(d *diag.Diagnostics) *gqlclient.SyncConfigAttributes {
-	if this == nil {
+func (sdsc *ServiceDeploymentSyncConfig) Attributes(d *diag.Diagnostics) *gqlclient.SyncConfigAttributes {
+	if sdsc == nil {
 		return nil
 	}
 
 	return &gqlclient.SyncConfigAttributes{
-		NamespaceMetadata: this.NamespaceMetadata.Attributes(d),
+		NamespaceMetadata: sdsc.NamespaceMetadata.Attributes(d),
 	}
 }
 
@@ -236,16 +236,16 @@ type ServiceDeploymentNamespaceMetadata struct {
 	Labels      types.Map `tfsdk:"labels"`
 }
 
-func (this *ServiceDeploymentNamespaceMetadata) Attributes(d *diag.Diagnostics) *gqlclient.MetadataAttributes {
-	if this == nil {
+func (sdnm *ServiceDeploymentNamespaceMetadata) Attributes(d *diag.Diagnostics) *gqlclient.MetadataAttributes {
+	if sdnm == nil {
 		return nil
 	}
 
-	annotations := make(map[string]types.String, len(this.Annotations.Elements()))
-	labels := make(map[string]types.String, len(this.Labels.Elements()))
+	annotations := make(map[string]types.String, len(sdnm.Annotations.Elements()))
+	labels := make(map[string]types.String, len(sdnm.Labels.Elements()))
 
-	this.Annotations.ElementsAs(context.Background(), &annotations, false)
-	this.Labels.ElementsAs(context.Background(), &labels, false)
+	sdnm.Annotations.ElementsAs(context.Background(), &annotations, false)
+	sdnm.Labels.ElementsAs(context.Background(), &labels, false)
 
 	return &gqlclient.MetadataAttributes{
 		Annotations: common.AttributesJson(annotations, d),
@@ -262,23 +262,23 @@ type ServiceDeploymentHelm struct {
 	URL         types.String                     `tfsdk:"url"`
 }
 
-func (this *ServiceDeploymentHelm) Attributes() *gqlclient.HelmConfigAttributes {
-	if this == nil {
+func (sdh *ServiceDeploymentHelm) Attributes() *gqlclient.HelmConfigAttributes {
+	if sdh == nil {
 		return nil
 	}
 
-	valuesFiles := make([]types.String, len(this.ValuesFiles.Elements()))
-	this.ValuesFiles.ElementsAs(context.Background(), &valuesFiles, false)
+	valuesFiles := make([]types.String, len(sdh.ValuesFiles.Elements()))
+	sdh.ValuesFiles.ElementsAs(context.Background(), &valuesFiles, false)
 
 	return &gqlclient.HelmConfigAttributes{
-		Values: this.Values.ValueStringPointer(),
+		Values: sdh.Values.ValueStringPointer(),
 		ValuesFiles: algorithms.Map(valuesFiles, func(v types.String) *string {
 			return v.ValueStringPointer()
 		}),
-		Chart:      this.Chart.ValueStringPointer(),
-		Version:    this.Version.ValueStringPointer(),
-		Repository: this.Repository.Attributes(),
-		URL:        this.URL.ValueStringPointer(),
+		Chart:      sdh.Chart.ValueStringPointer(),
+		Version:    sdh.Version.ValueStringPointer(),
+		Repository: sdh.Repository.Attributes(),
+		URL:        sdh.URL.ValueStringPointer(),
 	}
 }
 
@@ -287,13 +287,13 @@ type ServiceDeploymentNamespacedName struct {
 	Namespace types.String `tfsdk:"namespace"`
 }
 
-func (this *ServiceDeploymentNamespacedName) Attributes() *gqlclient.NamespacedName {
-	if this == nil {
+func (sdnn *ServiceDeploymentNamespacedName) Attributes() *gqlclient.NamespacedName {
+	if sdnn == nil {
 		return nil
 	}
 
 	return &gqlclient.NamespacedName{
-		Name:      this.Name.ValueString(),
-		Namespace: this.Namespace.ValueString(),
+		Name:      sdnn.Name.ValueString(),
+		Namespace: sdnn.Namespace.ValueString(),
 	}
 }
