@@ -27,7 +27,7 @@ type ServiceDeployment struct {
 	Configuration types.Map                    `tfsdk:"configuration"`
 	Cluster       *ServiceDeploymentCluster    `tfsdk:"cluster"`
 	Repository    *ServiceDeploymentRepository `tfsdk:"repository"`
-	Bindings      *ServiceDeploymentBindings   `tfsdk:"bindings"`
+	Bindings      *common.Bindings             `tfsdk:"bindings"`
 	SyncConfig    *ServiceDeploymentSyncConfig `tfsdk:"sync_config"`
 	Helm          *ServiceDeploymentHelm       `tfsdk:"helm"`
 }
@@ -85,8 +85,8 @@ func (this *ServiceDeployment) Attributes(ctx context.Context, d *diag.Diagnosti
 		Git:           this.Repository.Attributes(),
 		Kustomize:     this.Kustomize.Attributes(),
 		Configuration: this.ToServiceDeploymentConfigAttributes(ctx, d),
-		ReadBindings:  this.Bindings.ReadAttributes(),
-		WriteBindings: this.Bindings.WriteAttributes(),
+		ReadBindings:  this.Bindings.ReadAttributes(ctx, d),
+		WriteBindings: this.Bindings.WriteAttributes(ctx, d),
 		Helm:          this.Helm.Attributes(),
 		Templated:     this.Templated.ValueBoolPointer(),
 	}
@@ -207,46 +207,6 @@ func (this *ServiceDeploymentKustomize) Attributes() *gqlclient.KustomizeAttribu
 	return &gqlclient.KustomizeAttributes{
 		Path: this.Path.ValueString(),
 	}
-}
-
-type ServiceDeploymentBindings struct {
-	Read  []*ServiceDeploymentPolicyBinding `tfsdk:"read"`
-	Write []*ServiceDeploymentPolicyBinding `tfsdk:"write"`
-}
-
-func (this *ServiceDeploymentBindings) ReadAttributes() []*gqlclient.PolicyBindingAttributes {
-	if this == nil {
-		return []*gqlclient.PolicyBindingAttributes{}
-	}
-
-	return this.attributes(this.Read)
-}
-
-func (this *ServiceDeploymentBindings) WriteAttributes() []*gqlclient.PolicyBindingAttributes {
-	if this == nil {
-		return []*gqlclient.PolicyBindingAttributes{}
-	}
-
-	return this.attributes(this.Write)
-}
-
-func (this *ServiceDeploymentBindings) attributes(bindings []*ServiceDeploymentPolicyBinding) []*gqlclient.PolicyBindingAttributes {
-	result := make([]*gqlclient.PolicyBindingAttributes, len(bindings))
-	for i, b := range bindings {
-		result[i] = &gqlclient.PolicyBindingAttributes{
-			ID:      b.ID.ValueStringPointer(),
-			UserID:  b.UserID.ValueStringPointer(),
-			GroupID: b.GroupID.ValueStringPointer(),
-		}
-	}
-
-	return result
-}
-
-type ServiceDeploymentPolicyBinding struct {
-	GroupID types.String `tfsdk:"group_id"`
-	ID      types.String `tfsdk:"id"`
-	UserID  types.String `tfsdk:"user_id"`
 }
 
 type ServiceDeploymentSyncConfig struct {
