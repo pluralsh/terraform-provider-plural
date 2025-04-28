@@ -49,6 +49,7 @@ func (this *ServiceDeployment) FromCreate(response *gqlclient.ServiceDeploymentE
 	this.Version = types.StringValue(response.Version)
 	this.Kustomize.From(response.Kustomize)
 	this.Configuration = ToServiceDeploymentConfiguration(response.Configuration, d)
+	this.Cluster.From(response.Cluster)
 	this.Repository.From(response.Repository, response.Git)
 	this.Templated = types.BoolPointerValue(response.Templated)
 }
