@@ -19,8 +19,14 @@ data "plural_git_repository" "repository" {
   url = "https://github.com/pluralsh/plrl-cd-test.git"
 }
 
+resource "random_string" "random" {
+  length  = 5
+  upper   = false
+  special = false
+}
+
 resource "plural_service_deployment" "apps" {
-  name = "apps-copy"
+  name = "apps-${random_string.random.result}"
   namespace = "infra-copy"
   repository = {
     id = data.plural_git_repository.repository.id
@@ -31,6 +37,6 @@ resource "plural_service_deployment" "apps" {
     id = data.plural_cluster.mgmt.id
   }
 
-  protect = true
-  templated = true
+  # protect = true
+  # templated = true
 }
