@@ -47,7 +47,7 @@ func (this *ServiceDeployment) FromCreate(response *gqlclient.ServiceDeploymentE
 	this.Protect = types.BoolPointerValue(response.Protect)
 	this.Version = types.StringValue(response.Version)
 	this.Kustomize.From(response.Kustomize)
-	this.Configuration = ToServiceDeploymentConfiguration(response.Configuration, this.Configuration, d)
+	this.Configuration = configFrom(response.Configuration, d)
 	this.Cluster.From(response.Cluster)
 	this.Repository.From(response.Repository, response.Git)
 	this.Templated = types.BoolPointerValue(response.Templated)
@@ -59,7 +59,7 @@ func (this *ServiceDeployment) FromGet(response *gqlclient.ServiceDeploymentExte
 	this.Namespace = types.StringValue(response.Namespace)
 	this.Protect = types.BoolPointerValue(response.Protect)
 	this.Kustomize.From(response.Kustomize)
-	this.Configuration = ToServiceDeploymentConfiguration(response.Configuration, this.Configuration, d)
+	this.Configuration = configFrom(response.Configuration, d)
 	this.Repository.From(response.Repository, response.Git)
 	this.Templated = types.BoolPointerValue(response.Templated)
 }
@@ -113,11 +113,9 @@ type ServiceDeploymentConfiguration struct {
 	Value types.String `tfsdk:"value"`
 }
 
-func ToServiceDeploymentConfiguration(configuration []*gqlclient.ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration, config types.Map, d *diag.Diagnostics) basetypes.MapValue {
+func configFrom(configuration []*gqlclient.ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration, d *diag.Diagnostics) basetypes.MapValue {
 	if len(configuration) == 0 {
-		// Rewriting config to state to avoid inconsistent result errors.
-		// This could happen, for example, when sending "nil" to API and "{}" is returned as a result.
-		return config
+		return types.MapNull(types.StringType)
 	}
 
 	resultMap := make(map[string]attr.Value, len(configuration))
