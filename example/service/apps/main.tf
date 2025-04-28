@@ -26,8 +26,8 @@ resource "random_string" "random" {
 }
 
 resource "plural_service_deployment" "apps" {
-  name = "apps-${random_string.random.result}"
-  namespace = "infra-copy"
+  name = "test-${random_string.random.result}"
+  namespace = "test"
   repository = {
     id = data.plural_git_repository.repository.id
     ref    = "main"
@@ -36,7 +36,5 @@ resource "plural_service_deployment" "apps" {
   cluster = {
     id = data.plural_cluster.mgmt.id
   }
-
-  # protect = true
-  # templated = true
+  templated = true
 }

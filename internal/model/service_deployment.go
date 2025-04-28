@@ -3,16 +3,15 @@ package model
 import (
 	"context"
 
+	"terraform-provider-plural/internal/common"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
-	"terraform-provider-plural/internal/common"
-
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	gqlclient "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/polly/algorithms"
-	"github.com/samber/lo"
 )
 
 type ServiceDeployment struct {
@@ -48,7 +47,7 @@ func (this *ServiceDeployment) FromCreate(response *gqlclient.ServiceDeploymentE
 	this.Protect = types.BoolPointerValue(response.Protect)
 	this.Version = types.StringValue(response.Version)
 	this.Kustomize.From(response.Kustomize)
-	this.Configuration = ToServiceDeploymentConfiguration(response.Configuration, d)
+	this.Configuration = ToServiceDeploymentConfiguration(response.Configuration, this.Configuration, d)
 	this.Cluster.From(response.Cluster)
 	this.Repository.From(response.Repository, response.Git)
 	this.Templated = types.BoolPointerValue(response.Templated)
@@ -60,7 +59,7 @@ func (this *ServiceDeployment) FromGet(response *gqlclient.ServiceDeploymentExte
 	this.Namespace = types.StringValue(response.Namespace)
 	this.Protect = types.BoolPointerValue(response.Protect)
 	this.Kustomize.From(response.Kustomize)
-	this.Configuration = ToServiceDeploymentConfiguration(response.Configuration, d)
+	this.Configuration = ToServiceDeploymentConfiguration(response.Configuration, this.Configuration, d)
 	this.Repository.From(response.Repository, response.Git)
 	this.Templated = types.BoolPointerValue(response.Templated)
 }
@@ -114,25 +113,35 @@ type ServiceDeploymentConfiguration struct {
 	Value types.String `tfsdk:"value"`
 }
 
-func ToServiceDeploymentConfiguration(configuration []*gqlclient.ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration, d *diag.Diagnostics) basetypes.MapValue {
+func ToServiceDeploymentConfiguration(configuration []*gqlclient.ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration, config types.Map, d *diag.Diagnostics) basetypes.MapValue {
+	if len(configuration) == 0 {
+		// Rewriting config to state to avoid inconsistent result errors.
+		// This could happen, for example, when sending "nil" to API and "{}" is returned as a result.
+		return config
+	}
+
 	resultMap := make(map[string]attr.Value, len(configuration))
 	for _, c := range configuration {
 		resultMap[c.Name] = types.StringValue(c.Value)
 	}
 
-	result, tagsDiagnostics := types.MapValue(types.StringType, resultMap)
-	d.Append(tagsDiagnostics...)
+	result, diags := types.MapValue(types.StringType, resultMap)
+	d.Append(diags...)
 
 	return result
 }
 
 func (this *ServiceDeployment) ToServiceDeploymentConfigAttributes(ctx context.Context, d *diag.Diagnostics) []*gqlclient.ConfigAttributes {
+	if this.Configuration.IsNull() || this.Configuration.IsUnknown() {
+		return nil
+	}
+
 	result := make([]*gqlclient.ConfigAttributes, 0)
 	elements := make(map[string]types.String, len(this.Configuration.Elements()))
 	d.Append(this.Configuration.ElementsAs(ctx, &elements, false)...)
 
 	for k, v := range elements {
-		result = append(result, &gqlclient.ConfigAttributes{Name: k, Value: lo.ToPtr(v.ValueString())})
+		result = append(result, &gqlclient.ConfigAttributes{Name: k, Value: v.ValueStringPointer()})
 	}
 
 	return result
