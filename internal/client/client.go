@@ -26,7 +26,7 @@ func (c *Client) CreateServiceDeployment(ctx context.Context, id, handle *string
 		return res.CreateServiceDeployment, err
 	}
 
-	res, err := c.ConsoleClient.CreateServiceDeploymentWithHandle(ctx, *handle, attrs)
+	res, err := c.CreateServiceDeploymentWithHandle(ctx, *handle, attrs)
 	if err != nil {
 		return nil, err
 	}

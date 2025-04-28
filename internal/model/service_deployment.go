@@ -150,13 +150,13 @@ type ServiceDeploymentCluster struct {
 	Handle types.String `tfsdk:"handle"`
 }
 
-func (this *ServiceDeploymentCluster) From(cluster *gqlclient.BaseClusterFragment) {
-	if this == nil {
+func (sdc *ServiceDeploymentCluster) From(cluster *gqlclient.BaseClusterFragment) {
+	if sdc == nil {
 		return
 	}
 
-	this.Id = types.StringValue(cluster.ID)
-	this.Handle = types.StringPointerValue(cluster.Handle)
+	sdc.Id = types.StringValue(cluster.ID)
+	sdc.Handle = types.StringPointerValue(cluster.Handle)
 }
 
 type ServiceDeploymentRepository struct {
@@ -199,21 +199,21 @@ type ServiceDeploymentKustomize struct {
 	Path types.String `tfsdk:"path"`
 }
 
-func (this *ServiceDeploymentKustomize) From(kustomize *gqlclient.KustomizeFragment) {
-	if this == nil {
+func (sdk *ServiceDeploymentKustomize) From(kustomize *gqlclient.KustomizeFragment) {
+	if sdk == nil {
 		return
 	}
 
-	this.Path = types.StringValue(kustomize.Path)
+	sdk.Path = types.StringValue(kustomize.Path)
 }
 
-func (this *ServiceDeploymentKustomize) Attributes() *gqlclient.KustomizeAttributes {
-	if this == nil {
+func (sdk *ServiceDeploymentKustomize) Attributes() *gqlclient.KustomizeAttributes {
+	if sdk == nil {
 		return nil
 	}
 
 	return &gqlclient.KustomizeAttributes{
-		Path: this.Path.ValueString(),
+		Path: sdk.Path.ValueString(),
 	}
 }
 
