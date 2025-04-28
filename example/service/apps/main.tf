@@ -36,6 +36,6 @@ resource "plural_service_deployment" "apps" {
   cluster = {
     id = data.plural_cluster.mgmt.id
   }
-  templated = true
+  templated = false
   # protect = true
 }
