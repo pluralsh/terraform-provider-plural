@@ -32,7 +32,6 @@ func (gs *GlobalService) From(response *gqlclient.GlobalServiceFragment, d *diag
 		gs.ProviderId = types.StringValue(response.Provider.ID)
 	}
 	gs.Tags = common.TagsFrom(response.Tags, gs.Tags, d)
-
 }
 
 func (gs *GlobalService) Attributes(ctx context.Context, d *diag.Diagnostics) gqlclient.GlobalServiceAttributes {

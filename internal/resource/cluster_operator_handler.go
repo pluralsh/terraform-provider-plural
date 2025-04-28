@@ -138,7 +138,7 @@ func (oh *OperatorHandler) init(kubeconfig *KubeConfig, repoUrl string) error {
 		return err
 	}
 
-	path := ""
+	var path string
 	var err error
 	if oh.vendoredChartPath != "" {
 		path = oh.vendoredChartPath
