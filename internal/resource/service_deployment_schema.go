@@ -124,6 +124,7 @@ func (r *ServiceDeploymentResource) schemaCluster() schema.SingleNestedAttribute
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "ID of the cluster to use",
 				MarkdownDescription: "ID of the cluster to use",
 				Validators: []validator.String{
@@ -136,6 +137,7 @@ func (r *ServiceDeploymentResource) schemaCluster() schema.SingleNestedAttribute
 			},
 			"handle": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "A short, unique human readable name used to identify the cluster",
 				MarkdownDescription: "A short, unique human readable name used to identify the cluster",
 				Validators: []validator.String{
