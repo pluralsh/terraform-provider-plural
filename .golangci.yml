@@ -1,27 +1,44 @@
-# Visit https://golangci-lint.run/ for usage documentation
-# and information on other useful linters
-args: --timeout=10m
-issues:
-  max-per-linter: 0
-  max-same-issues: 0
+version: "2"
+run:
+  modules-download-mode: readonly
+  allow-parallel-runners: true
 linters:
-  disable-all: true
+  default: none
   enable:
-    - durationcheck
+    - copyloopvar
     - errcheck
-    - exportloopref
-    - forcetypeassert
-    - godot
-    - gofmt
-    - gosimple
-    - ineffassign
-    - makezero
-    - misspell
-    - nilerr
-    - predeclared
-    - staticcheck
-    - tenv
-    - unconvert
-    - unparam
-    - unused
+    - errname
+    - errorlint
+    - goconst
+    - gocyclo
     - govet
+    - importas
+    - ineffassign
+    - misspell
+    - prealloc
+    - staticcheck
+    - unused
+    - usestdlibvars
+    - wastedassign
+    - whitespace
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

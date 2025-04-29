@@ -138,7 +138,7 @@ func (oh *OperatorHandler) init(kubeconfig *KubeConfig, repoUrl string) error {
 		return err
 	}
 
-	path := ""
+	var path string
 	var err error
 	if oh.vendoredChartPath != "" {
 		path = oh.vendoredChartPath
@@ -149,11 +149,11 @@ func (oh *OperatorHandler) init(kubeconfig *KubeConfig, repoUrl string) error {
 
 		install := action.NewInstall(oh.configuration)
 		if oh.settings != nil {
-			install.ChartPathOptions.Version = strings.TrimPrefix(oh.settings.AgentVsn, "v")
+			install.Version = strings.TrimPrefix(oh.settings.AgentVsn, "v")
 		}
 
 		chartName := fmt.Sprintf("%s/%s", console.ReleaseName, console.ChartName)
-		if path, err = install.ChartPathOptions.LocateChart(chartName, cli.New()); err != nil {
+		if path, err = install.LocateChart(chartName, cli.New()); err != nil {
 			return err
 		}
 	}

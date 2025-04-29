@@ -6,6 +6,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -56,8 +59,10 @@ func (r *ServiceDeploymentResource) schema() schema.Schema {
 			},
 			"protect": schema.BoolAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "If true, deletion of this service is not allowed.",
 				MarkdownDescription: "If true, deletion of this service is not allowed.",
+				PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 			},
 			"templated": schema.BoolAttribute{
 				Optional:            true,
@@ -73,6 +78,8 @@ func (r *ServiceDeploymentResource) schema() schema.Schema {
 				Optional:            true,
 				Computed:            true,
 				ElementType:         types.StringType,
+				PlanModifiers:       []planmodifier.Map{mapplanmodifier.UseStateForUnknown()},
+				Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
 			},
 			"cluster":     r.schemaCluster(),
 			"repository":  r.schemaRepository(),
@@ -124,6 +131,7 @@ func (r *ServiceDeploymentResource) schemaCluster() schema.SingleNestedAttribute
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "ID of the cluster to use",
 				MarkdownDescription: "ID of the cluster to use",
 				Validators: []validator.String{
@@ -136,6 +144,7 @@ func (r *ServiceDeploymentResource) schemaCluster() schema.SingleNestedAttribute
 			},
 			"handle": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "A short, unique human readable name used to identify the cluster",
 				MarkdownDescription: "A short, unique human readable name used to identify the cluster",
 				Validators: []validator.String{
