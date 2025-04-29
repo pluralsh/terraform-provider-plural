@@ -13,4 +13,4 @@ DESTINATION="${HOME}/.terraform.d/plugins/${PLUGIN}/${VERSION//v}/${OS}_${ARCH}/
 
 mkdir -p "$(dirname "${DESTINATION}")"
 mv "${PLUGIN_LOCATION}" "${DESTINATION}"
-echo "Installed ${PLUGIN} into ${DESTINATION}"
+echo "Installed ${PLUGIN} ${VERSION} into ${DESTINATION}"
