@@ -122,11 +122,11 @@ func (r *ObservabilityWebhookResource) Read(ctx context.Context, req resource.Re
 
 	response, err := r.client.GetObservabilityWebhook(ctx, data.Id.ValueStringPointer(), nil)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Observability webhook, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read observability webhook, got error: %s", err))
 		return
 	}
 	if response.ObservabilityWebhook == nil {
-		resp.Diagnostics.AddError("Client Error", "Unable to find Observability webhook, got no error")
+		resp.Diagnostics.AddError("Client Error", "Unable to find observability webhook, got no error")
 		return
 	}
 
@@ -143,7 +143,7 @@ func (r *ObservabilityWebhookResource) Update(ctx context.Context, req resource.
 
 	_, err := r.client.UpsertObservabilityWebhook(ctx, data.Attributes())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update service context, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update observability webhook, got error: %s", err))
 		return
 	}
 
