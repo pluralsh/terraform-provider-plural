@@ -197,6 +197,7 @@ func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource
 		r.NewSharedSecretResource,
 		r.NewOIDCProviderResourceResource,
 		r.NewSCMWebhookResource,
+		r.NewObservabilityWebhookResource,
 	}
 }
 
