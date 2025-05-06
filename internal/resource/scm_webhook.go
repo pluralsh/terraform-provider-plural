@@ -108,13 +108,13 @@ func (r *SCMWebhookResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	sc, err := r.client.CreateScmWebhook(ctx, "", "") // TODO: Which mutation should be used here?
+	sc, err := r.client.CreateScmWebhookPointer(ctx, data.Attributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create SCM webhook, got error: %s", err))
 		return
 	}
 
-	data.From(sc.CreateScmWebhook)
+	data.From(sc.CreateScmWebhookPointer)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
