@@ -48,18 +48,20 @@ func (r *SCMWebhookResource) Schema(_ context.Context, _ resource.SchemaRequest,
 			"name": schema.StringAttribute{
 				Description:         "Human-readable name of this SCM webhook.",
 				MarkdownDescription: "Human-readable name of this SCM webhook.",
-				Required:            true,
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"owner": schema.StringAttribute{
 				Description:         "Owner for this webhook in your SCM, eg. a GitHub org or GitLab group.",
 				MarkdownDescription: "Owner for this webhook in your SCM, eg. a GitHub org or GitLab group.",
-				Optional:            true,
+				Required:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"type": schema.StringAttribute{
 				Description:         "SCM webhook type.",
 				MarkdownDescription: "SCM webhook type.",
 				Required:            true,
+				Computed:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Validators: []validator.String{
 					stringvalidator.OneOf(
@@ -70,8 +72,8 @@ func (r *SCMWebhookResource) Schema(_ context.Context, _ resource.SchemaRequest,
 			"url": schema.StringAttribute{
 				Description:         "SCM webhook URL.",
 				MarkdownDescription: "SCM webhook URL.",
-				Required:            true,
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"hmac": schema.StringAttribute{
 				Description:         "Secret token for authenticating this webhook via hmac signature.",

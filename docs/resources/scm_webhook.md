@@ -18,14 +18,11 @@ description: |-
 ### Required
 
 - `hmac` (String) Secret token for authenticating this webhook via hmac signature.
-- `name` (String) Human-readable name of this SCM webhook.
-- `type` (String) SCM webhook type.
-- `url` (String) SCM webhook URL.
-
-### Optional
-
 - `owner` (String) Owner for this webhook in your SCM, eg. a GitHub org or GitLab group.
+- `type` (String) SCM webhook type.
 
 ### Read-Only
 
 - `id` (String) Internal identifier of this SCM webhook.
+- `name` (String) Human-readable name of this SCM webhook.
+- `url` (String) SCM webhook URL.
