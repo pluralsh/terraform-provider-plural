@@ -10,7 +10,7 @@ type ObservabilityWebhook struct {
 	Name   types.String `tfsdk:"name"`
 	Type   types.String `tfsdk:"type"`
 	URL    types.String `tfsdk:"url"`
-	Secret types.String `tfsdk:"hmac"`
+	Secret types.String `tfsdk:"secret"`
 }
 
 func (ow *ObservabilityWebhook) From(response *console.ObservabilityWebhookFragment) {

@@ -22,3 +22,9 @@ resource "plural_scm_webhook" "duplicate" {
   owner = "pluralsh"
   hmac = "test"
 }
+
+resource "plural_observability_webhook" "test" {
+  name = "test"
+  type = "NEWRELIC"
+  # secret = "test"
+}

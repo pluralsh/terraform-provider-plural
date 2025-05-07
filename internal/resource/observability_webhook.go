@@ -55,7 +55,7 @@ func (r *ObservabilityWebhookResource) Schema(_ context.Context, _ resource.Sche
 				Description:         "Observability webhook type.",
 				MarkdownDescription: "Observability webhook type.",
 				Required:            true,
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				Validators: []validator.String{
 					stringvalidator.OneOf(
 						algorithms.Map(gqlclient.AllObservabilityWebhookType,
@@ -72,7 +72,7 @@ func (r *ObservabilityWebhookResource) Schema(_ context.Context, _ resource.Sche
 				Description:         "Observability webhook secret.",
 				MarkdownDescription: "Observability webhook secret.",
 				Optional:            true,
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 		},
 	}
@@ -120,7 +120,7 @@ func (r *ObservabilityWebhookResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	response, err := r.client.GetObservabilityWebhook(ctx, data.Id.ValueStringPointer(), nil)
+	response, err := r.client.GetObservabilityWebhook(ctx, nil, data.Name.ValueStringPointer())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read observability webhook, got error: %s", err))
 		return
