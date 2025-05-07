@@ -18,10 +18,13 @@ description: |-
 ### Required
 
 - `name` (String) Human-readable name of this observability webhook.
-- `secret` (String) Observability webhook secret.
 - `type` (String) Observability webhook type.
-- `url` (String) Observability webhook URL.
+
+### Optional
+
+- `secret` (String) Observability webhook secret.
 
 ### Read-Only
 
 - `id` (String) Internal identifier of this observability webhook.
+- `url` (String) Observability webhook URL.

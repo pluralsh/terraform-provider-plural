@@ -61,7 +61,6 @@ func (r *SCMWebhookResource) Schema(_ context.Context, _ resource.SchemaRequest,
 				Description:         "SCM webhook type.",
 				MarkdownDescription: "SCM webhook type.",
 				Required:            true,
-				Computed:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Validators: []validator.String{
 					stringvalidator.OneOf(

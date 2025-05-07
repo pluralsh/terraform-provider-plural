@@ -65,13 +65,13 @@ func (r *ObservabilityWebhookResource) Schema(_ context.Context, _ resource.Sche
 			"url": schema.StringAttribute{
 				Description:         "Observability webhook URL.",
 				MarkdownDescription: "Observability webhook URL.",
-				Required:            true,
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"secret": schema.StringAttribute{
 				Description:         "Observability webhook secret.",
 				MarkdownDescription: "Observability webhook secret.",
-				Required:            true,
+				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 		},
