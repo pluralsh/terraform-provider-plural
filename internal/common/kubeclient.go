@@ -1,4 +1,4 @@
-package resource
+package common
 
 import (
 	"bytes"
@@ -23,11 +23,11 @@ import (
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
-type KubeConfig struct {
+type KubeClient struct {
 	ClientConfig clientcmd.ClientConfig
 }
 
-func (k *KubeConfig) ToClientSet() (*kubernetes.Clientset, error) {
+func (k *KubeClient) ToClientSet() (*kubernetes.Clientset, error) {
 	config, err := k.ToRawKubeConfigLoader().ClientConfig()
 	if err != nil {
 		return nil, err
@@ -35,11 +35,11 @@ func (k *KubeConfig) ToClientSet() (*kubernetes.Clientset, error) {
 	return kubernetes.NewForConfig(config)
 }
 
-func (k *KubeConfig) ToRESTConfig() (*rest.Config, error) {
+func (k *KubeClient) ToRESTConfig() (*rest.Config, error) {
 	return k.ToRawKubeConfigLoader().ClientConfig()
 }
 
-func (k *KubeConfig) ToDiscoveryClient() (discovery.CachedDiscoveryInterface, error) {
+func (k *KubeClient) ToDiscoveryClient() (discovery.CachedDiscoveryInterface, error) {
 	config, err := k.ToRESTConfig()
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func (k *KubeConfig) ToDiscoveryClient() (discovery.CachedDiscoveryInterface, er
 	return disk.NewCachedDiscoveryClientForConfig(config, os.TempDir(), os.TempDir(), 1*time.Minute)
 }
 
-func (k *KubeConfig) ToRESTMapper() (meta.RESTMapper, error) {
+func (k *KubeClient) ToRESTMapper() (meta.RESTMapper, error) {
 	client, err := k.ToDiscoveryClient()
 	if err != nil {
 		return nil, err
@@ -57,11 +57,11 @@ func (k *KubeConfig) ToRESTMapper() (meta.RESTMapper, error) {
 	return restmapper.NewShortcutExpander(restmapper.NewDeferredDiscoveryRESTMapper(client), client, nil), nil
 }
 
-func (k *KubeConfig) ToRawKubeConfigLoader() clientcmd.ClientConfig {
+func (k *KubeClient) ToRawKubeConfigLoader() clientcmd.ClientConfig {
 	return k.ClientConfig
 }
 
-func newKubeconfig(ctx context.Context, kubeconfig *Kubeconfig, namespace *string) (*KubeConfig, error) {
+func NewKubeClient(ctx context.Context, kubeconfig *Kubeconfig, namespace *string) (*KubeClient, error) {
 	overrides := &clientcmd.ConfigOverrides{}
 	loader := &clientcmd.ClientConfigLoadingRules{}
 
@@ -186,5 +186,5 @@ func newKubeconfig(ctx context.Context, kubeconfig *Kubeconfig, namespace *strin
 	}
 
 	tflog.Trace(ctx, "successfully initialized kubernetes config")
-	return &KubeConfig{ClientConfig: client}, nil
+	return &KubeClient{ClientConfig: client}, nil
 }
