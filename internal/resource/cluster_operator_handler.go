@@ -80,7 +80,7 @@ func NewOperatorHandler(ctx context.Context, client *client.Client, kubeconfig *
 		return nil, err
 	}
 
-	k, err := common.NewKubeconfig(ctx, kubeconfig, lo.ToPtr(console.OperatorNamespace))
+	k, err := common.NewKubeClient(ctx, kubeconfig, lo.ToPtr(console.OperatorNamespace))
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +129,7 @@ type OperatorHandler struct {
 	additionalValues map[string]any
 }
 
-func (oh *OperatorHandler) init(kubeconfig *common.KubeConfig, repoUrl string) error {
+func (oh *OperatorHandler) init(kubeconfig *common.KubeClient, repoUrl string) error {
 	if oh.configuration != nil {
 		return fmt.Errorf("operator handler is already initialized")
 	}
