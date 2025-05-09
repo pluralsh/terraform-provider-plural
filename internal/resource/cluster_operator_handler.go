@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"terraform-provider-plural/internal/client"
+	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	gqlclient "github.com/pluralsh/console/go/client"
@@ -30,7 +31,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func InstallOrUpgradeAgent(ctx context.Context, client *client.Client, kubeconfig *Kubeconfig, repoUrl string,
+func InstallOrUpgradeAgent(ctx context.Context, client *client.Client, kubeconfig *common.Kubeconfig, repoUrl string,
 	values *string, consoleUrl string, token string, d *diag.Diagnostics) error {
 	workingDir, chartPath, err := fetchVendoredAgentChart(consoleUrl)
 	if err != nil {
@@ -72,14 +73,14 @@ func fetchVendoredAgentChart(consoleURL string) (string, string, error) {
 	return directory, agentChartPath, nil
 }
 
-func NewOperatorHandler(ctx context.Context, client *client.Client, kubeconfig *Kubeconfig, repoUrl, chartPath string,
+func NewOperatorHandler(ctx context.Context, client *client.Client, kubeconfig *common.Kubeconfig, repoUrl, chartPath string,
 	values *string, consoleUrl, token string) (*OperatorHandler, error) {
 	settings, err := client.GetDeploymentSettings(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	k, err := newKubeconfig(ctx, kubeconfig, lo.ToPtr(console.OperatorNamespace))
+	k, err := common.NewKubeconfig(ctx, kubeconfig, lo.ToPtr(console.OperatorNamespace))
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +129,7 @@ type OperatorHandler struct {
 	additionalValues map[string]any
 }
 
-func (oh *OperatorHandler) init(kubeconfig *KubeConfig, repoUrl string) error {
+func (oh *OperatorHandler) init(kubeconfig *common.KubeConfig, repoUrl string) error {
 	if oh.configuration != nil {
 		return fmt.Errorf("operator handler is already initialized")
 	}
