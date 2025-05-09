@@ -84,6 +84,7 @@ func (p *PluralProvider) Schema(_ context.Context, _ provider.SchemaRequest, res
 					),
 				},
 			},
+			"kubeconfig": common.KubeconfigResourceSchema(),
 		},
 	}
 }
