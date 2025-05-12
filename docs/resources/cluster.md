@@ -26,7 +26,7 @@ A representation of a cluster you can deploy to.
 - `handle` (String) A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.
 - `helm_repo_url` (String) Helm repository URL you'd like to use in deployment agent Helm install.
 - `helm_values` (String) Additional Helm values you'd like to use in deployment agent Helm installs. This is useful for BYOK clusters that need to use custom images or other constructs.
-- `kubeconfig` (Attributes) (see [below for nested schema](#nestedatt--kubeconfig))
+- `kubeconfig` (Attributes, Deprecated) (see [below for nested schema](#nestedatt--kubeconfig))
 - `metadata` (String) Arbitrary JSON metadata to store user-specific state of this cluster (e.g. IAM roles for add-ons). Use `jsonencode` and `jsondecode` methods to encode and decode data.
 - `project_id` (String) ID of the project that this cluster belongs to.
 - `protect` (Boolean) If set to `true` then this cluster cannot be deleted.
@@ -71,21 +71,21 @@ Optional:
 
 Optional:
 
-- `client_certificate` (String) The path to a client cert file for TLS. Can be sourced from `PLURAL_KUBE_CLIENT_CERT_DATA`.
-- `client_key` (String, Sensitive) The path to a client key file for TLS. Can be sourced from `PLURAL_KUBE_CLIENT_KEY_DATA`.
-- `cluster_ca_certificate` (String) The path to a cert file for the certificate authority. Can be sourced from `PLURAL_KUBE_CLUSTER_CA_CERT_DATA`.
-- `config_context` (String) kubeconfig context to use. Can be sourced from `PLURAL_KUBE_CTX`.
-- `config_context_auth_info` (String) Can be sourced from `PLURAL_KUBE_CTX_AUTH_INFO`.
-- `config_context_cluster` (String) Can be sourced from `PLURAL_KUBE_CTX_CLUSTER`.
-- `config_path` (String) Path to the kubeconfig file. Can be sourced from `PLURAL_KUBE_CONFIG_PATH`.
+- `client_certificate` (String) The path to a client cert file for TLS.
+- `client_key` (String, Sensitive) The path to a client key file for TLS.
+- `cluster_ca_certificate` (String) The path to a cert file for the certificate authority.
+- `config_context` (String) kubeconfig context to use.
+- `config_context_auth_info` (String)
+- `config_context_cluster` (String)
+- `config_path` (String) Path to the kubeconfig file.
 - `exec` (Attributes List) Specifies a command to provide client credentials (see [below for nested schema](#nestedatt--kubeconfig--exec))
-- `host` (String) The complete address of the Kubernetes cluster, using scheme://hostname:port format. Can be sourced from `PLURAL_KUBE_HOST`.
-- `insecure` (Boolean) Skips the validity check for the server's certificate. This will make your HTTPS connections insecure. Can be sourced from `PLURAL_KUBE_INSECURE`.
-- `password` (String, Sensitive) The password for basic authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_PASSWORD`.
-- `proxy_url` (String) The URL to the proxy to be used for all requests made by this client. Can be sourced from `PLURAL_KUBE_PROXY_URL`.
-- `tls_server_name` (String) TLS server name is used to check server certificate. If it is empty, the hostname used to contact the server is used. Can be sourced from `PLURAL_KUBE_TLS_SERVER_NAME`.
-- `token` (String, Sensitive) Token is the bearer token for authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_TOKEN`.
-- `username` (String) The username for basic authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_USER`.
+- `host` (String) The complete address of the Kubernetes cluster, using scheme://hostname:port format.
+- `insecure` (Boolean) Skips the validity check for the server's certificate. This will make your HTTPS connections insecure.
+- `password` (String, Sensitive) The password for basic authentication to the Kubernetes cluster.
+- `proxy_url` (String) The URL to the proxy to be used for all requests made by this client.
+- `tls_server_name` (String) TLS server name is used to check server certificate. If it is empty, the hostname used to contact the server is used.
+- `token` (String, Sensitive) Token is the bearer token for authentication to the Kubernetes cluster.
+- `username` (String) The username for basic authentication to the Kubernetes cluster.
 
 <a id="nestedatt--kubeconfig--exec"></a>
 ### Nested Schema for `kubeconfig.exec`
