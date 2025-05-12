@@ -19,7 +19,7 @@ description: |-
 
 - `access_token` (String, Sensitive) Plural Console access token. Can be sourced from `PLURAL_ACCESS_TOKEN`.
 - `console_url` (String) Plural Console URL, i.e. `https://console.demo.onplural.sh`. Can be sourced from `PLURAL_CONSOLE_URL`.
-- `kubeconfig` (Attributes) (see [below for nested schema](#nestedatt--kubeconfig))
+- `kubeconfig` (Attributes) Kubeconfig for cluster access. In order to source its fields from environment variables it has to be defined, at least as an empty object. (see [below for nested schema](#nestedatt--kubeconfig))
 - `use_cli` (Boolean) Use Plural CLI `plural cd login` command for authentication. Can be sourced from `PLURAL_USE_CLI`.
 
 <a id="nestedatt--kubeconfig"></a>

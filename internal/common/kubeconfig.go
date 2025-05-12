@@ -113,7 +113,9 @@ type KubeconfigExec struct {
 
 func KubeconfigProviderSchema() providerschema.SingleNestedAttribute {
 	return providerschema.SingleNestedAttribute{
-		Optional: true,
+		Description:         "Kubeconfig for cluster access. In order to source its fields from environment variables it has to be defined, at least as an empty object.",
+		MarkdownDescription: "Kubeconfig for cluster access. In order to source its fields from environment variables it has to be defined, at least as an empty object.",
+		Optional:            true,
 		Attributes: map[string]providerschema.Attribute{
 			"host": providerschema.StringAttribute{
 				Optional:            true,
