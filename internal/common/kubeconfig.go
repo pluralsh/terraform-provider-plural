@@ -1,7 +1,8 @@
 package common
 
 import (
-	"terraform-provider-plural/internal/defaults"
+	"os"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	providerschema "github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -40,6 +41,65 @@ func (k *Kubeconfig) Unchanged(other *Kubeconfig) bool {
 	return k.Host == other.Host
 }
 
+func (k *Kubeconfig) FromEnvVars() {
+	if k.Host.IsNull() {
+		k.Host = types.StringValue(os.Getenv("PLURAL_KUBE_HOST"))
+	}
+
+	if k.Username.IsNull() {
+		k.Username = types.StringValue(os.Getenv("PLURAL_KUBE_USER"))
+	}
+
+	if k.Password.IsNull() {
+		k.Password = types.StringValue(os.Getenv("PLURAL_KUBE_PASSWORD"))
+	}
+
+	if k.Insecure.IsNull() {
+		insecure, _ := strconv.ParseBool(os.Getenv("PLURAL_KUBE_INSECURE"))
+		k.Insecure = types.BoolValue(insecure)
+	}
+
+	if k.TlsServerName.IsNull() {
+		k.TlsServerName = types.StringValue(os.Getenv("PLURAL_KUBE_TLS_SERVER_NAME"))
+	}
+
+	if k.ClientCertificate.IsNull() {
+		k.ClientCertificate = types.StringValue(os.Getenv("PLURAL_KUBE_CLIENT_CERT_DATA"))
+	}
+
+	if k.ClientKey.IsNull() {
+		k.ClientKey = types.StringValue(os.Getenv("PLURAL_KUBE_CLIENT_KEY_DATA"))
+	}
+
+	if k.ClusterCACertificate.IsNull() {
+		k.ClusterCACertificate = types.StringValue(os.Getenv("PLURAL_KUBE_CLUSTER_CA_CERT_DATA"))
+	}
+
+	if k.ConfigPath.IsNull() {
+		k.ConfigPath = types.StringValue(os.Getenv("PLURAL_KUBE_CONFIG_PATH"))
+	}
+
+	if k.ConfigContext.IsNull() {
+		k.ConfigContext = types.StringValue(os.Getenv("PLURAL_KUBE_CTX"))
+	}
+
+	if k.ConfigContext.IsNull() {
+		k.ConfigContext = types.StringValue(os.Getenv("PLURAL_KUBE_CTX_AUTH_INFO"))
+	}
+
+	if k.ConfigContextCluster.IsNull() {
+		k.ConfigContextCluster = types.StringValue(os.Getenv("PLURAL_KUBE_CTX_CLUSTER"))
+	}
+
+	if k.Token.IsNull() {
+		k.Token = types.StringValue(os.Getenv("PLURAL_KUBE_TOKEN"))
+	}
+
+	if k.ProxyURL.IsNull() {
+		k.ProxyURL = types.StringValue(os.Getenv("PLURAL_KUBE_PROXY_URL"))
+	}
+}
+
 type KubeconfigExec struct {
 	Command    types.String `tfsdk:"command"`
 	Args       types.List   `tfsdk:"args"`
@@ -53,88 +113,74 @@ func KubeconfigProviderSchema() providerschema.SingleNestedAttribute {
 		Attributes: map[string]providerschema.Attribute{
 			"host": providerschema.StringAttribute{
 				Optional:            true,
-				Default:             defaults.Env("PLURAL_KUBE_HOST", ""),
 				Description:         "The complete address of the Kubernetes cluster, using scheme://hostname:port format. Can be sourced from PLURAL_KUBE_HOST.",
 				MarkdownDescription: "The complete address of the Kubernetes cluster, using scheme://hostname:port format. Can be sourced from `PLURAL_KUBE_HOST`.",
 			},
 			"username": providerschema.StringAttribute{
 				Optional:            true,
-				Default:             defaults.Env("PLURAL_KUBE_USER", ""),
 				Description:         "The username for basic authentication to the Kubernetes cluster. Can be sourced from PLURAL_KUBE_USER.",
 				MarkdownDescription: "The username for basic authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_USER`.",
 			},
 			"password": providerschema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
-				Default:             defaults.Env("PLURAL_KUBE_PASSWORD", ""),
 				Description:         "The password for basic authentication to the Kubernetes cluster. Can be sourced from PLURAL_KUBE_PASSWORD.",
 				MarkdownDescription: "The password for basic authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_PASSWORD`.",
 			},
 			"insecure": providerschema.BoolAttribute{
 				Optional:            true,
-				Default:             defaults.Env("PLURAL_KUBE_INSECURE", false),
 				Description:         "Skips the validity check for the server's certificate. This will make your HTTPS connections insecure. Can be sourced from PLURAL_KUBE_INSECURE.",
 				MarkdownDescription: "Skips the validity check for the server's certificate. This will make your HTTPS connections insecure. Can be sourced from `PLURAL_KUBE_INSECURE`.",
 			},
 			"tls_server_name": providerschema.StringAttribute{
 				Optional:            true,
-				Default:             defaults.Env("PLURAL_KUBE_TLS_SERVER_NAME", ""),
 				Description:         "TLS server name is used to check server certificate. If it is empty, the hostname used to contact the server is used. Can be sourced from PLURAL_KUBE_TLS_SERVER_NAME.",
 				MarkdownDescription: "TLS server name is used to check server certificate. If it is empty, the hostname used to contact the server is used. Can be sourced from `PLURAL_KUBE_TLS_SERVER_NAME`.",
 			},
 			"client_certificate": providerschema.StringAttribute{
 				Optional:            true,
-				Default:             defaults.Env("PLURAL_KUBE_CLIENT_CERT_DATA", ""),
 				Description:         "The path to a client cert file for TLS. Can be sourced from PLURAL_KUBE_CLIENT_CERT_DATA.",
 				MarkdownDescription: "The path to a client cert file for TLS. Can be sourced from `PLURAL_KUBE_CLIENT_CERT_DATA`.",
 			},
 			"client_key": providerschema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
-				Default:             defaults.Env("PLURAL_KUBE_CLIENT_KEY_DATA", ""),
 				Description:         "The path to a client key file for TLS. Can be sourced from PLURAL_KUBE_CLIENT_KEY_DATA.",
 				MarkdownDescription: "The path to a client key file for TLS. Can be sourced from `PLURAL_KUBE_CLIENT_KEY_DATA`.",
 			},
 			"cluster_ca_certificate": providerschema.StringAttribute{
 				Optional:            true,
-				Default:             defaults.Env("PLURAL_KUBE_CLUSTER_CA_CERT_DATA", ""),
 				Description:         "The path to a cert file for the certificate authority. Can be sourced from PLURAL_KUBE_CLUSTER_CA_CERT_DATA.",
 				MarkdownDescription: "The path to a cert file for the certificate authority. Can be sourced from `PLURAL_KUBE_CLUSTER_CA_CERT_DATA`.",
 			},
 			"config_path": providerschema.StringAttribute{
 				Optional:            true,
-				Default:             defaults.Env("PLURAL_KUBE_CONFIG_PATH", ""),
 				Description:         "Path to the kubeconfig file. Can be sourced from PLURAL_KUBE_CONFIG_PATH.",
 				MarkdownDescription: "Path to the kubeconfig file. Can be sourced from `PLURAL_KUBE_CONFIG_PATH`.",
 			},
 			"config_context": providerschema.StringAttribute{
 				Optional:            true,
-				Default:             defaults.Env("PLURAL_KUBE_CTX", ""),
 				Description:         "kubeconfig context to use. Can be sourced from PLURAL_KUBE_CTX.",
 				MarkdownDescription: "kubeconfig context to use. Can be sourced from `PLURAL_KUBE_CTX`.",
 			},
 			"config_context_auth_info": providerschema.StringAttribute{
 				Optional:            true,
-				Default:             defaults.Env("PLURAL_KUBE_CTX_AUTH_INFO", ""),
 				Description:         "Can be sourced from PLURAL_KUBE_CTX_AUTH_INFO.",
 				MarkdownDescription: "Can be sourced from `PLURAL_KUBE_CTX_AUTH_INFO`.",
 			},
 			"config_context_cluster": providerschema.StringAttribute{
 				Optional:            true,
-				Default:             defaults.Env("PLURAL_KUBE_CTX_CLUSTER", ""),
 				Description:         "Can be sourced from PLURAL_KUBE_CTX_CLUSTER.",
 				MarkdownDescription: "Can be sourced from `PLURAL_KUBE_CTX_CLUSTER`.",
 			},
 			"token": providerschema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
-				Default:             defaults.Env("PLURAL_KUBE_TOKEN", ""),
 				Description:         "Token is the bearer token for authentication to the Kubernetes cluster. Can be sourced from PLURAL_KUBE_TOKEN.",
 				MarkdownDescription: "Token is the bearer token for authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_TOKEN`.",
 			},
 			"proxy_url": providerschema.StringAttribute{
 				Optional:            true,
-				Default:             defaults.Env("PLURAL_KUBE_PROXY_URL", ""),
 				Description:         "The URL to the proxy to be used for all requests made by this client. Can be sourced from PLURAL_KUBE_PROXY_URL.",
 				MarkdownDescription: "The URL to the proxy to be used for all requests made by this client. Can be sourced from `PLURAL_KUBE_PROXY_URL`.",
 			},
