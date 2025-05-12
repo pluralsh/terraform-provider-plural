@@ -42,6 +42,10 @@ func (k *Kubeconfig) Unchanged(other *Kubeconfig) bool {
 }
 
 func (k *Kubeconfig) FromEnvVars() {
+	if k == nil {
+		return
+	}
+
 	if k.Host.IsNull() {
 		k.Host = types.StringValue(os.Getenv("PLURAL_KUBE_HOST"))
 	}
