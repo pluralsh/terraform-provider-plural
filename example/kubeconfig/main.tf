@@ -21,7 +21,8 @@ terraform {
 #   protect  = "false"
 #   detach   = true
 #   kubeconfig = {
-#     config_path = pathexpand("~/.kube/config") # This can no longer be sourced from environment variables.
+#     # It can no longer be sourced from environment variables.
+#     config_path = pathexpand("~/.kube/config")
 #   }
 # }
 
@@ -32,8 +33,8 @@ provider "plural" {
   alias   = "new"
   use_cli = true
   kubeconfig = {
-    # Can be sourced from environment variables, export PLURAL_KUBE_CONFIG_PATH to read from local file:
-    # export PLURAL_KUBE_CONFIG_PATH=$KUBECONFIG
+    # It can be sourced from environment variables instead, i.e.: export PLURAL_KUBE_CONFIG_PATH=$KUBECONFIG
+    config_path = pathexpand("~/.kube/config")
   }
 }
 
