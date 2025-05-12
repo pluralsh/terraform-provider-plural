@@ -163,10 +163,13 @@ func (p *PluralProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	}
 
 	data.Kubeconfig.FromEnvVars()
-
-	kubeClient, err := common.NewKubeClient(ctx, data.Kubeconfig, lo.ToPtr(console.OperatorNamespace))
-	if err != nil {
-		resp.Diagnostics.AddError("Cannot Create Kubernetes Client", err.Error())
+	var kubeClient *common.KubeClient
+	var err error
+	if data.Kubeconfig != nil {
+		kubeClient, err = common.NewKubeClient(ctx, data.Kubeconfig, lo.ToPtr(console.OperatorNamespace))
+		if err != nil {
+			resp.Diagnostics.AddError("Cannot Create Kubernetes Client", err.Error())
+		}
 	}
 
 	if resp.Diagnostics.HasError() {
