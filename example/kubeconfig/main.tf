@@ -43,12 +43,4 @@ resource "plural_cluster" "new" {
   name     = "byok"
   protect  = "false"
   detach   = true
-
-  metadata = jsonencode({
-    test1 = "test"
-    test2 = false
-    test3 = jsonencode({
-      abc = false
-    })
-  })
 }
