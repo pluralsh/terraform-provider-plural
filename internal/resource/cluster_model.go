@@ -29,9 +29,9 @@ type cluster struct {
 	Bindings *common.Bindings `tfsdk:"bindings"`
 	// NodePools      types.Map               `tfsdk:"node_pools"`
 	// CloudSettings *ClusterCloudSettings `tfsdk:"cloud_settings"`
-	HelmRepoUrl types.String `tfsdk:"helm_repo_url"`
-	HelmValues  types.String `tfsdk:"helm_values"`
-	Kubeconfig  *Kubeconfig  `tfsdk:"kubeconfig"`
+	HelmRepoUrl types.String       `tfsdk:"helm_repo_url"`
+	HelmValues  types.String       `tfsdk:"helm_values"`
+	Kubeconfig  *common.Kubeconfig `tfsdk:"kubeconfig"`
 }
 
 // func (c *cluster) NodePoolsAttribute(ctx context.Context, d *diag.Diagnostics) []*console.NodePoolAttributes {
@@ -153,7 +153,7 @@ func (c *cluster) HasKubeconfig() bool {
 	return c.Kubeconfig != nil // || (c.CloudSettings != nil && c.CloudSettings.BYOK != nil && c.CloudSettings.BYOK.Kubeconfig != nil)
 }
 
-func (c *cluster) GetKubeconfig() *Kubeconfig {
+func (c *cluster) GetKubeconfig() *common.Kubeconfig {
 	if !c.HasKubeconfig() {
 		return nil
 	}
@@ -229,42 +229,5 @@ func (c *ClusterCloudSettingsGCP) Attributes() *console.GCPCloudAttributes {
 }
 
 type ClusterCloudSettingsBYOK struct {
-	Kubeconfig *Kubeconfig `tfsdk:"kubeconfig"`
-}
-
-type Kubeconfig struct {
-	Host                  types.String    `tfsdk:"host"`
-	Username              types.String    `tfsdk:"username"`
-	Password              types.String    `tfsdk:"password"`
-	Insecure              types.Bool      `tfsdk:"insecure"`
-	TlsServerName         types.String    `tfsdk:"tls_server_name"`
-	ClientCertificate     types.String    `tfsdk:"client_certificate"`
-	ClientKey             types.String    `tfsdk:"client_key"`
-	ClusterCACertificate  types.String    `tfsdk:"cluster_ca_certificate"`
-	ConfigPath            types.String    `tfsdk:"config_path"`
-	ConfigContext         types.String    `tfsdk:"config_context"`
-	ConfigContextAuthInfo types.String    `tfsdk:"config_context_auth_info"`
-	ConfigContextCluster  types.String    `tfsdk:"config_context_cluster"`
-	Token                 types.String    `tfsdk:"token"`
-	ProxyURL              types.String    `tfsdk:"proxy_url"`
-	Exec                  *KubeconfigExec `tfsdk:"exec"`
-}
-
-type KubeconfigExec struct {
-	Command    types.String `tfsdk:"command"`
-	Args       types.List   `tfsdk:"args"`
-	Env        types.Map    `tfsdk:"env"`
-	APIVersion types.String `tfsdk:"api_version"`
-}
-
-func (k *Kubeconfig) Unchanged(other *Kubeconfig) bool {
-	if k == nil {
-		return other == nil
-	}
-
-	if other == nil {
-		return false
-	}
-
-	return k.Host == other.Host
+	Kubeconfig *common.Kubeconfig `tfsdk:"kubeconfig"`
 }

@@ -23,6 +23,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/plural-cli/pkg/console"
+	"github.com/samber/lo"
 )
 
 var _ provider.Provider = &PluralProvider{}
@@ -34,9 +35,10 @@ type PluralProvider struct {
 
 // pluralProviderModel describes the Plural provider data model.
 type pluralProviderModel struct {
-	ConsoleUrl  types.String `tfsdk:"console_url"`
-	AccessToken types.String `tfsdk:"access_token"`
-	UseCli      types.Bool   `tfsdk:"use_cli"`
+	ConsoleUrl  types.String       `tfsdk:"console_url"`
+	AccessToken types.String       `tfsdk:"access_token"`
+	UseCli      types.Bool         `tfsdk:"use_cli"`
+	Kubeconfig  *common.Kubeconfig `tfsdk:"kubeconfig"`
 }
 
 type authedTransport struct {
@@ -84,6 +86,7 @@ func (p *PluralProvider) Schema(_ context.Context, _ provider.SchemaRequest, res
 					),
 				},
 			},
+			"kubeconfig": common.KubeconfigProviderSchema(),
 		},
 	}
 }
@@ -159,6 +162,16 @@ func (p *PluralProvider) Configure(ctx context.Context, req provider.ConfigureRe
 		}
 	}
 
+	data.Kubeconfig.FromEnvVars()
+	var kubeClient *common.KubeClient
+	var err error
+	if data.Kubeconfig != nil {
+		kubeClient, err = common.NewKubeClient(ctx, data.Kubeconfig, lo.ToPtr(console.OperatorNamespace))
+		if err != nil {
+			resp.Diagnostics.AddError("Cannot Create Kubernetes Client", err.Error())
+		}
+	}
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -173,8 +186,8 @@ func (p *PluralProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	consoleClient := client.NewClient(&httpClient, fmt.Sprintf("%s/gql", consoleUrl), nil)
 	internalClient := internalclient.NewClient(consoleClient)
 
-	resp.ResourceData = common.NewProviderData(internalClient, consoleUrl)
-	resp.DataSourceData = common.NewProviderData(internalClient, consoleUrl)
+	resp.ResourceData = common.NewProviderData(internalClient, consoleUrl, kubeClient)
+	resp.DataSourceData = common.NewProviderData(internalClient, consoleUrl, kubeClient)
 }
 
 func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource {
