@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"terraform-provider-plural/internal/client"
+	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	gqlclient "github.com/pluralsh/console/go/client"
@@ -30,8 +31,8 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func InstallOrUpgradeAgent(ctx context.Context, client *client.Client, kubeconfig *Kubeconfig, repoUrl string,
-	values *string, consoleUrl string, token string, d *diag.Diagnostics) error {
+func InstallOrUpgradeAgent(ctx context.Context, client *client.Client, kubeconfig *common.Kubeconfig, kubeClient *common.KubeClient,
+	repoUrl string, values *string, consoleUrl string, token string, d *diag.Diagnostics) error {
 	workingDir, chartPath, err := fetchVendoredAgentChart(consoleUrl)
 	if err != nil {
 		d.AddWarning("Client Warning", fmt.Sprintf("Could not fetch vendored agent chart, using chart from the registry: %s", err))
@@ -44,7 +45,15 @@ func InstallOrUpgradeAgent(ctx context.Context, client *client.Client, kubeconfi
 		}(workingDir)
 	}
 
-	handler, err := NewOperatorHandler(ctx, client, kubeconfig, repoUrl, chartPath, values, consoleUrl, token)
+	// kubeconfig defined on a cluster level can override one defined on the provider level.
+	if kubeconfig != nil {
+		kubeClient, err = common.NewKubeClient(ctx, kubeconfig, lo.ToPtr(console.OperatorNamespace))
+		if err != nil {
+			return err
+		}
+	}
+
+	handler, err := NewOperatorHandler(ctx, client, kubeClient, repoUrl, chartPath, values, consoleUrl, token)
 	if err != nil {
 		return err
 	}
@@ -72,19 +81,14 @@ func fetchVendoredAgentChart(consoleURL string) (string, string, error) {
 	return directory, agentChartPath, nil
 }
 
-func NewOperatorHandler(ctx context.Context, client *client.Client, kubeconfig *Kubeconfig, repoUrl, chartPath string,
-	values *string, consoleUrl, token string) (*OperatorHandler, error) {
+func NewOperatorHandler(ctx context.Context, client *client.Client, kubeClient *common.KubeClient,
+	repoUrl, chartPath string, values *string, consoleUrl, token string) (*OperatorHandler, error) {
 	settings, err := client.GetDeploymentSettings(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	k, err := newKubeconfig(ctx, kubeconfig, lo.ToPtr(console.OperatorNamespace))
-	if err != nil {
-		return nil, err
-	}
-
-	clientSet, err := k.ToClientSet()
+	clientSet, err := kubeClient.ToClientSet()
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +110,7 @@ func NewOperatorHandler(ctx context.Context, client *client.Client, kubeconfig *
 		additionalValues:  additionalValues,
 	}
 
-	if err := handler.init(k, repoUrl); err != nil {
+	if err := handler.init(kubeClient, repoUrl); err != nil {
 		return nil, err
 	}
 
@@ -128,7 +132,7 @@ type OperatorHandler struct {
 	additionalValues map[string]any
 }
 
-func (oh *OperatorHandler) init(kubeconfig *KubeConfig, repoUrl string) error {
+func (oh *OperatorHandler) init(kubeconfig *common.KubeClient, repoUrl string) error {
 	if oh.configuration != nil {
 		return fmt.Errorf("operator handler is already initialized")
 	}

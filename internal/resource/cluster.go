@@ -25,6 +25,7 @@ func NewClusterResource() resource.Resource {
 type clusterResource struct {
 	client     *client.Client
 	consoleUrl string
+	kubeClient *common.KubeClient
 }
 
 func (r *clusterResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -51,6 +52,7 @@ func (r *clusterResource) Configure(_ context.Context, req resource.ConfigureReq
 
 	r.client = data.Client
 	r.consoleUrl = data.ConsoleUrl
+	r.kubeClient = data.KubeClient
 }
 
 func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -66,13 +68,13 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	if data.HasKubeconfig() {
+	if r.kubeClient != nil || data.HasKubeconfig() {
 		if result.CreateCluster.DeployToken == nil {
 			resp.Diagnostics.AddError("Client Error", "Unable to fetch cluster deploy token")
 			return
 		}
 
-		if err = InstallOrUpgradeAgent(ctx, r.client, data.GetKubeconfig(), data.HelmRepoUrl.ValueString(),
+		if err = InstallOrUpgradeAgent(ctx, r.client, data.GetKubeconfig(), r.kubeClient, data.HelmRepoUrl.ValueString(),
 			data.HelmValues.ValueStringPointer(), r.consoleUrl, lo.FromPtr(result.CreateCluster.DeployToken), &resp.Diagnostics); err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
 			return
@@ -123,16 +125,16 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	reinstallable := !data.HelmRepoUrl.Equal(state.HelmRepoUrl) || !data.GetKubeconfig().Unchanged(state.GetKubeconfig())
-
-	if reinstallable && data.HasKubeconfig() {
+	kubeconfigChanged := data.HasKubeconfig() && !data.GetKubeconfig().Unchanged(state.GetKubeconfig())
+	reinstallable := !data.HelmRepoUrl.Equal(state.HelmRepoUrl) || kubeconfigChanged
+	if reinstallable && (r.kubeClient != nil || data.HasKubeconfig()) {
 		clusterWithToken, err := r.client.GetClusterWithToken(ctx, data.Id.ValueStringPointer(), nil)
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to fetch cluster deploy token, got error: %s", err))
 			return
 		}
 
-		if err = InstallOrUpgradeAgent(ctx, r.client, data.GetKubeconfig(), data.HelmRepoUrl.ValueString(),
+		if err = InstallOrUpgradeAgent(ctx, r.client, data.GetKubeconfig(), r.kubeClient, data.HelmRepoUrl.ValueString(),
 			data.HelmValues.ValueStringPointer(), r.consoleUrl, lo.FromPtr(clusterWithToken.Cluster.DeployToken), &resp.Diagnostics); err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
 			return

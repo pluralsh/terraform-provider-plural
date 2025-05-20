@@ -1,18 +1,16 @@
 package resource
 
 import (
+	"terraform-provider-plural/internal/common"
+
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/pluralsh/plural-cli/pkg/console"
 
-	"terraform-provider-plural/internal/defaults"
-
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -89,6 +87,7 @@ func (r *clusterResource) schema() schema.Schema {
 				MarkdownDescription: "Arbitrary JSON metadata to store user-specific state of this cluster (e.g. IAM roles for add-ons). Use `jsonencode` and `jsondecode` methods to encode and decode data.",
 				Optional:            true,
 				Computed:            true,
+				Default:             stringdefault.StaticString("{}"),
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			// "cloud": schema.StringAttribute{
@@ -136,7 +135,7 @@ func (r *clusterResource) schema() schema.Schema {
 				MarkdownDescription: "Additional Helm values you'd like to use in deployment agent Helm installs. This is useful for BYOK clusters that need to use custom images or other constructs.",
 				Optional:            true,
 			},
-			"kubeconfig": r.kubeconfigSchema(false),
+			"kubeconfig": common.KubeconfigResourceSchema(),
 			// "node_pools": schema.MapNestedAttribute{
 			// 	Description:         "Experimental, not ready for production use. Map of node pool specs managed by this cluster, where the key is name of the node pool and value contains the spec. Leave empty for bring your own cluster.",
 			// 	MarkdownDescription: "**Experimental, not ready for production use.** Map of node pool specs managed by this cluster, where the key is name of the node pool and value contains the spec. Leave empty for bring your own cluster.",
@@ -341,153 +340,6 @@ func (r *clusterResource) schema() schema.Schema {
 //		},
 //	}
 //}
-
-func (r *clusterResource) kubeconfigSchema(deprecated bool) schema.SingleNestedAttribute {
-	return schema.SingleNestedAttribute{
-		DeprecationMessage: func() string {
-			if deprecated {
-				return "kubeconfig configuration has been moved from byok cloud settings to the cluster"
-			}
-
-			return ""
-		}(),
-		Optional: true,
-		Attributes: map[string]schema.Attribute{
-			"host": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				Default:             defaults.Env("PLURAL_KUBE_HOST", ""),
-				Description:         "The complete address of the Kubernetes cluster, using scheme://hostname:port format. Can be sourced from PLURAL_KUBE_HOST.",
-				MarkdownDescription: "The complete address of the Kubernetes cluster, using scheme://hostname:port format. Can be sourced from `PLURAL_KUBE_HOST`.",
-			},
-			"username": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				Default:             defaults.Env("PLURAL_KUBE_USER", ""),
-				Description:         "The username for basic authentication to the Kubernetes cluster. Can be sourced from PLURAL_KUBE_USER.",
-				MarkdownDescription: "The username for basic authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_USER`.",
-			},
-			"password": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				Sensitive:           true,
-				Default:             defaults.Env("PLURAL_KUBE_PASSWORD", ""),
-				Description:         "The password for basic authentication to the Kubernetes cluster. Can be sourced from PLURAL_KUBE_PASSWORD.",
-				MarkdownDescription: "The password for basic authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_PASSWORD`.",
-			},
-			"insecure": schema.BoolAttribute{
-				Optional:            true,
-				Computed:            true,
-				Default:             defaults.Env("PLURAL_KUBE_INSECURE", false),
-				Description:         "Skips the validity check for the server's certificate. This will make your HTTPS connections insecure. Can be sourced from PLURAL_KUBE_INSECURE.",
-				MarkdownDescription: "Skips the validity check for the server's certificate. This will make your HTTPS connections insecure. Can be sourced from `PLURAL_KUBE_INSECURE`.",
-			},
-			"tls_server_name": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				Default:             defaults.Env("PLURAL_KUBE_TLS_SERVER_NAME", ""),
-				Description:         "TLS server name is used to check server certificate. If it is empty, the hostname used to contact the server is used. Can be sourced from PLURAL_KUBE_TLS_SERVER_NAME.",
-				MarkdownDescription: "TLS server name is used to check server certificate. If it is empty, the hostname used to contact the server is used. Can be sourced from `PLURAL_KUBE_TLS_SERVER_NAME`.",
-			},
-			"client_certificate": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				Default:             defaults.Env("PLURAL_KUBE_CLIENT_CERT_DATA", ""),
-				Description:         "The path to a client cert file for TLS. Can be sourced from PLURAL_KUBE_CLIENT_CERT_DATA.",
-				MarkdownDescription: "The path to a client cert file for TLS. Can be sourced from `PLURAL_KUBE_CLIENT_CERT_DATA`.",
-			},
-			"client_key": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				Sensitive:           true,
-				Default:             defaults.Env("PLURAL_KUBE_CLIENT_KEY_DATA", ""),
-				Description:         "The path to a client key file for TLS. Can be sourced from PLURAL_KUBE_CLIENT_KEY_DATA.",
-				MarkdownDescription: "The path to a client key file for TLS. Can be sourced from `PLURAL_KUBE_CLIENT_KEY_DATA`.",
-			},
-			"cluster_ca_certificate": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				Default:             defaults.Env("PLURAL_KUBE_CLUSTER_CA_CERT_DATA", ""),
-				Description:         "The path to a cert file for the certificate authority. Can be sourced from PLURAL_KUBE_CLUSTER_CA_CERT_DATA.",
-				MarkdownDescription: "The path to a cert file for the certificate authority. Can be sourced from `PLURAL_KUBE_CLUSTER_CA_CERT_DATA`.",
-			},
-			"config_path": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				Default:             defaults.Env("PLURAL_KUBE_CONFIG_PATH", ""),
-				Description:         "Path to the kubeconfig file. Can be sourced from PLURAL_KUBE_CONFIG_PATH.",
-				MarkdownDescription: "Path to the kubeconfig file. Can be sourced from `PLURAL_KUBE_CONFIG_PATH`.",
-			},
-			"config_context": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				Default:             defaults.Env("PLURAL_KUBE_CTX", ""),
-				Description:         "kubeconfig context to use. Can be sourced from PLURAL_KUBE_CTX.",
-				MarkdownDescription: "kubeconfig context to use. Can be sourced from `PLURAL_KUBE_CTX`.",
-			},
-			"config_context_auth_info": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				Default:             defaults.Env("PLURAL_KUBE_CTX_AUTH_INFO", ""),
-				Description:         "Can be sourced from PLURAL_KUBE_CTX_AUTH_INFO.",
-				MarkdownDescription: "Can be sourced from `PLURAL_KUBE_CTX_AUTH_INFO`.",
-			},
-			"config_context_cluster": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				Default:             defaults.Env("PLURAL_KUBE_CTX_CLUSTER", ""),
-				Description:         "Can be sourced from PLURAL_KUBE_CTX_CLUSTER.",
-				MarkdownDescription: "Can be sourced from `PLURAL_KUBE_CTX_CLUSTER`.",
-			},
-			"token": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				Sensitive:           true,
-				Default:             defaults.Env("PLURAL_KUBE_TOKEN", ""),
-				Description:         "Token is the bearer token for authentication to the Kubernetes cluster. Can be sourced from PLURAL_KUBE_TOKEN.",
-				MarkdownDescription: "Token is the bearer token for authentication to the Kubernetes cluster. Can be sourced from `PLURAL_KUBE_TOKEN`.",
-			},
-			"proxy_url": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				Default:             defaults.Env("PLURAL_KUBE_PROXY_URL", ""),
-				Description:         "The URL to the proxy to be used for all requests made by this client. Can be sourced from PLURAL_KUBE_PROXY_URL.",
-				MarkdownDescription: "The URL to the proxy to be used for all requests made by this client. Can be sourced from `PLURAL_KUBE_PROXY_URL`.",
-			},
-			"exec": schema.ListNestedAttribute{
-				Optional:            true,
-				MarkdownDescription: "Specifies a command to provide client credentials",
-				Validators:          []validator.List{listvalidator.SizeAtMost(1)},
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"command": schema.StringAttribute{
-							Description:         "Command to execute.",
-							MarkdownDescription: "Command to execute.",
-							Required:            true,
-						},
-						"args": schema.ListAttribute{
-							Description:         "Arguments to pass to the command when executing it.",
-							MarkdownDescription: "Arguments to pass to the command when executing it.",
-							Optional:            true,
-							ElementType:         types.StringType,
-						},
-						"env": schema.MapAttribute{
-							Description:         "Defines environment variables to expose to the process.",
-							MarkdownDescription: "Defines environment variables to expose to the process.",
-							Optional:            true,
-							ElementType:         types.StringType,
-						},
-						"api_version": schema.StringAttribute{
-							Description:         "Preferred input version.",
-							MarkdownDescription: "Preferred input version.",
-							Required:            true,
-						},
-					},
-				},
-			},
-		},
-	}
-}
 
 //func (r *clusterResource) byokCloudSettingsSchema() schema.SingleNestedAttribute {
 //	return schema.SingleNestedAttribute{
