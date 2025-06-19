@@ -651,8 +651,6 @@ github.com/pjbgf/sha1cd v0.3.2/go.mod h1:zQWigSxVmsHEZow5qaLtPYxpcKMMQpa09ixqBxu
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
-github.com/pluralsh/console/go/client v1.41.0 h1:crSRnRx0wQ4TloFmq8Q/tUgv1sRLXiHmp+xbAFCQQlc=
-github.com/pluralsh/console/go/client v1.41.0/go.mod h1:8XlMMN3LLAN9JZo69f8X/XN7Qt1+aaKpgTvvQGfSiEU=
 github.com/pluralsh/gqlclient v1.12.2 h1:BrEFAASktf4quFw57CIaLAd+NZUTLhG08fe6tnhBQN4=
 github.com/pluralsh/gqlclient v1.12.2/go.mod h1:OEjN9L63x8m3A3eQBv5kVkFgiY9fp2aZ0cgOF0uII58=
 github.com/pluralsh/plural-cli v0.12.3 h1:hwu8yMZ8YBby+H3XSMLyJbV6XkIv6yrF6M2LfEa/dMA=
