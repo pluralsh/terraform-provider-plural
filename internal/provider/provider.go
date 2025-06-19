@@ -211,6 +211,7 @@ func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource
 		r.NewOIDCProviderResourceResource,
 		r.NewSCMWebhookResource,
 		r.NewObservabilityWebhookResource,
+		r.NewCloudConnectionResource,
 	}
 }
 
@@ -226,6 +227,7 @@ func (p *PluralProvider) DataSources(_ context.Context) []func() datasource.Data
 		ds.NewPRAutomationDataSource,
 		ds.NewInfrastructureStackDataSource,
 		ds.NewServiceContextDataSource,
+		ds.NewCloudConnectionDataSource,
 	}
 }
 
