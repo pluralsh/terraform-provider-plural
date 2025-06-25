@@ -56,6 +56,9 @@ func (r *GroupResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 				Description:         "Description of this group.",
 				MarkdownDescription: "Description of this group.",
 			},
+			"global": schema.BoolAttribute{
+				Optional: true,
+			},
 		},
 	}
 }

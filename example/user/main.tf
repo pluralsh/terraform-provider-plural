@@ -2,7 +2,7 @@ terraform {
   required_providers {
     plural = {
       source  = "pluralsh/plural"
-      version = "0.2.1"
+      version = "0.2.25"
     }
   }
 }
@@ -24,11 +24,13 @@ resource "plural_user" "spiderman" {
 
 # data "plural_group" "avengers" {
 #   name = "avengers"
+#   global = "false"
 # }
 #
 # resource "plural_group" "avengers" {
 #   name = "avengers"
 #   description = "avengers group"
+#   global = "false"
 # }
 #
 # resource "plural_group_member" "spiderman" {
