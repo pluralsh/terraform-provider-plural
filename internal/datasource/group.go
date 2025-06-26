@@ -43,6 +43,9 @@ func (d *groupDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 				MarkdownDescription: "Description of this group.",
 				Computed:            true,
 			},
+			"global": schema.BoolAttribute{
+				Optional: true,
+			},
 		},
 	}
 }
