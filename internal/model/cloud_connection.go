@@ -13,16 +13,16 @@ import (
 )
 
 type CloudConnection struct {
-	Id           types.String `tfsdk:"id"`
-	Name         types.String `tfsdk:"name"`
-	Provider     types.String `tfsdk:"provider"`
-	ReadBindings types.Set    `tfsdk:"read_bindings"`
+	Id            types.String `tfsdk:"id"`
+	Name          types.String `tfsdk:"name"`
+	CloudProvider types.String `tfsdk:"cloud_provider"`
+	ReadBindings  types.Set    `tfsdk:"read_bindings"`
 }
 
 func (c *CloudConnection) Attributes(ctx context.Context, d *diag.Diagnostics) (*gqlclient.CloudConnectionAttributes, error) {
 	return &gqlclient.CloudConnectionAttributes{
 		Name:         c.Name.ValueString(),
-		Provider:     gqlclient.Provider(c.Provider.ValueString()),
+		Provider:     gqlclient.Provider(c.CloudProvider.ValueString()),
 		ReadBindings: common.SetToPolicyBindingAttributes(c.ReadBindings, ctx, d),
 	}, nil
 }
@@ -30,7 +30,7 @@ func (c *CloudConnection) Attributes(ctx context.Context, d *diag.Diagnostics) (
 func (c *CloudConnection) From(response *gqlclient.CloudConnectionFragment, ctx context.Context, d *diag.Diagnostics) {
 	c.Id = types.StringValue(response.ID)
 	c.Name = types.StringValue(response.Name)
-	c.Provider = types.StringValue(string(response.Provider))
+	c.CloudProvider = types.StringValue(string(response.Provider))
 	c.ReadBindings = cloudConnectionReadBindingsFrom(response.ReadBindings, ctx, d)
 }
 

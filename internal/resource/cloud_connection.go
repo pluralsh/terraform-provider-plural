@@ -23,13 +23,13 @@ func NewCloudConnectionResource() resource.Resource {
 	return &CloudConnectionResource{}
 }
 
-// ProjectResource defines the project resource implementation.
+// CloudConnectionResource defines the cloud connection resource implementation.
 type CloudConnectionResource struct {
 	client *client.Client
 }
 
 func (r *CloudConnectionResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_project"
+	resp.TypeName = req.ProviderTypeName + "_cloud_connection"
 }
 
 func (r *CloudConnectionResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -48,9 +48,9 @@ func (r *CloudConnectionResource) Schema(_ context.Context, _ resource.SchemaReq
 				Required:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
-			"provider": schema.StringAttribute{
-				Description:         "Cloud provider type (AWS, GCP, etc).",
-				MarkdownDescription: "Cloud provider type (AWS, GCP, etc).",
+			"cloud_provider": schema.StringAttribute{
+				Description:         "Cloud provider type (aws, gcp, etc).",
+				MarkdownDescription: "Cloud provider type (aws, gcp, etc).",
 				Required:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
