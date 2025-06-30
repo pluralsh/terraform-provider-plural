@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	console "github.com/pluralsh/console/go/client"
 )
 
@@ -86,7 +85,7 @@ func bindingsFrom(bindings []*console.PolicyBindingFragment, config types.Set, c
 		d.Append(diags...)
 	}
 
-	setValue, diags := types.SetValue(basetypes.ObjectType{AttrTypes: PolicyBindingAttrTypes}, values)
+	setValue, diags := types.SetValue(types.ObjectType{AttrTypes: PolicyBindingAttrTypes}, values)
 	d.Append(diags...)
 	return setValue
 }

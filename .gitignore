@@ -14,3 +14,4 @@ example/**/.terraform/
 example/**/.terraform.lock.hcl
 example/**/terraform.tfstate*
 example/**/terraform.tfplan
+example/**/terraform.tfvars

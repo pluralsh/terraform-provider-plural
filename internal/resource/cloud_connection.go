@@ -7,6 +7,7 @@ import (
 	"terraform-provider-plural/internal/common"
 	"terraform-provider-plural/internal/model"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -49,19 +50,69 @@ func (r *CloudConnectionResource) Schema(_ context.Context, _ resource.SchemaReq
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"cloud_provider": schema.StringAttribute{
-				Description:         "Cloud provider type (aws, gcp, etc).",
-				MarkdownDescription: "Cloud provider type (aws, gcp, etc).",
+				Description:         "Cloud provider type (AWS, GCP, etc).",
+				MarkdownDescription: "Cloud provider type (AWS, GCP, etc).",
 				Required:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
-			"read_bindings": schema.SetAttribute{
-				Description:         "The read bindings for this cloud connection.",
-				MarkdownDescription: "The read bindings for this cloud connection.",
-				Computed:            true,
-				ElementType:         types.ObjectType{AttrTypes: common.PolicyBindingAttrTypes},
-				PlanModifiers:       []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
+			"configuration": schema.SingleNestedAttribute{
+				Required:            true,
+				MarkdownDescription: "Cloud provider configuration block.",
+				Attributes: map[string]schema.Attribute{
+					"aws": schema.ObjectAttribute{
+						Optional:            true,
+						MarkdownDescription: "AWS-specific configuration.",
+						AttributeTypes:      r.awsCloudConnectionAttrTypes(),
+					},
+					"gcp": schema.ObjectAttribute{
+						Optional:            true,
+						MarkdownDescription: "GCP-specific configuration.",
+						AttributeTypes:      r.gcpCloudConnectionAttrTypes(),
+					},
+					"azure": schema.ObjectAttribute{
+						Optional:            true,
+						MarkdownDescription: "Azure-specific configuration.",
+						AttributeTypes:      r.azureCloudConnectionAttrTypes(),
+					},
+				},
+			},
+			"read_bindings": schema.SetNestedAttribute{
+				Optional: true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"group_id": schema.StringAttribute{Optional: true},
+						"user_id":  schema.StringAttribute{Optional: true},
+						"id":       schema.StringAttribute{Optional: true},
+					},
+				},
+				PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
 			},
 		},
+	}
+}
+
+func (r *CloudConnectionResource) awsCloudConnectionAttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"access_key_id":     types.StringType,
+		"secret_access_key": types.StringType,
+		"region":            types.StringType,
+	}
+}
+
+func (r *CloudConnectionResource) gcpCloudConnectionAttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"service_account_key": types.StringType,
+		"project_id":          types.StringType,
+	}
+}
+
+func (r *CloudConnectionResource) azureCloudConnectionAttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+
+		"subscription_id": types.StringType,
+		"tenant_id":       types.StringType,
+		"client_id":       types.StringType,
+		"client_secret":   types.StringType,
 	}
 }
 
@@ -84,11 +135,37 @@ func (r *CloudConnectionResource) Configure(_ context.Context, req resource.Conf
 }
 
 func (r *CloudConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	// Ignore
+	var data model.CloudConnection
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	result, err := r.client.UpsertCloudConnection(ctx, data.Attributes(ctx, &resp.Diagnostics))
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create cloud connection, got error: %s", err))
+		return
+	}
+
+	data.FromUpsert(result, ctx, &resp.Diagnostics)
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
 func (r *CloudConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	// Ignore
+	var data model.CloudConnection
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	response, err := r.client.GetCloudConnection(ctx, data.Id.ValueStringPointer(), data.Name.ValueStringPointer())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read cloud connection, got error: %s", err))
+		return
+	}
+
+	data.From(response.CloudConnection, ctx, &resp.Diagnostics)
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
 func (r *CloudConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -98,13 +175,9 @@ func (r *CloudConnectionResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	attr, err := data.Attributes(ctx, &resp.Diagnostics)
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get attributes, got error: %s", err))
-		return
-	}
+	attr := data.Attributes(ctx, &resp.Diagnostics)
 
-	_, err = r.client.UpsertCloudConnection(ctx, *attr)
+	_, err := r.client.UpsertCloudConnection(ctx, attr)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update cloud connection, got error: %s", err))
 		return
