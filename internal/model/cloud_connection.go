@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"fmt"
+
 	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -116,7 +117,7 @@ func cloudConnectionReadBindingsFrom(bindings []*console.PolicyBindingFragment, 
 		return types.SetNull(types.ObjectType{AttrTypes: common.PolicyBindingAttrTypes})
 	}
 
-	var values []attr.Value
+	values := make([]attr.Value, 0, len(bindings))
 	for _, binding := range bindings {
 		var userID, groupID types.String
 
