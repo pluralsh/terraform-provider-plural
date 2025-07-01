@@ -50,7 +50,7 @@ func (r *CloudConnectionResource) Schema(_ context.Context, _ resource.SchemaReq
 				Required:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
-			"cloud_provider": schema.StringAttribute{
+			"provider": schema.StringAttribute{
 				Description:         "Cloud provider type (AWS, GCP, etc).",
 				MarkdownDescription: "Cloud provider type (AWS, GCP, etc).",
 				Required:            true,

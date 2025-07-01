@@ -16,7 +16,7 @@ import (
 type CloudConnection struct {
 	Id            types.String                  `tfsdk:"id"`
 	Name          types.String                  `tfsdk:"name"`
-	CloudProvider types.String                  `tfsdk:"cloud_provider"`
+	CloudProvider types.String                  `tfsdk:"provider"`
 	Configuration *CloudConnectionConfiguration `tfsdk:"configuration"`
 	ReadBindings  types.Set                     `tfsdk:"read_bindings"`
 }

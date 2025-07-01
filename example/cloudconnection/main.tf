@@ -51,7 +51,7 @@ resource "plural_group" "cloud_admins" {
 # Cloud-connection resource (AWS example)
 resource "plural_cloud_connection" "aws" {
   name           = "your-connection-name"
-  cloud_provider = "AWS"
+  provider = "AWS"
 
   configuration = {
     aws = {
