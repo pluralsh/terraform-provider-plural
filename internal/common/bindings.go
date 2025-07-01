@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	console "github.com/pluralsh/console/go/client"
 )
 
@@ -86,7 +85,36 @@ func bindingsFrom(bindings []*console.PolicyBindingFragment, config types.Set, c
 		d.Append(diags...)
 	}
 
-	setValue, diags := types.SetValue(basetypes.ObjectType{AttrTypes: PolicyBindingAttrTypes}, values)
+	setValue, diags := types.SetValue(types.ObjectType{AttrTypes: PolicyBindingAttrTypes}, values)
+	d.Append(diags...)
+	return setValue
+}
+
+func BindingsFromReadOnly(bindings []*console.PolicyBindingFragment, ctx context.Context, d *diag.Diagnostics) types.Set {
+	if len(bindings) == 0 {
+		return types.SetNull(types.ObjectType{AttrTypes: PolicyBindingAttrTypes})
+	}
+
+	values := make([]attr.Value, len(bindings))
+	for i, binding := range bindings {
+		value := PolicyBinding{
+			ID: types.StringPointerValue(binding.ID),
+		}
+
+		if binding.User != nil {
+			value.UserID = types.StringValue(binding.User.ID)
+		}
+
+		if binding.Group != nil {
+			value.GroupID = types.StringValue(binding.Group.ID)
+		}
+
+		objValue, diags := types.ObjectValueFrom(ctx, PolicyBindingAttrTypes, value)
+		values[i] = objValue
+		d.Append(diags...)
+	}
+
+	setValue, diags := types.SetValue(types.ObjectType{AttrTypes: PolicyBindingAttrTypes}, values)
 	d.Append(diags...)
 	return setValue
 }
