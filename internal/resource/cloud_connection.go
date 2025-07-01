@@ -3,6 +3,7 @@ package resource
 import (
 	"context"
 	"fmt"
+
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
 	"terraform-provider-plural/internal/model"
@@ -147,7 +148,7 @@ func (r *CloudConnectionResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	data.FromUpsert(result, ctx, &resp.Diagnostics)
+	data.From(result.UpsertCloudConnection, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 

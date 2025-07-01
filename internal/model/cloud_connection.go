@@ -98,13 +98,6 @@ func (c *CloudConnection) Attributes(ctx context.Context, d *diag.Diagnostics) c
 	}
 }
 
-func (c *CloudConnection) FromUpsert(cc *console.UpsertCloudConnection, ctx context.Context, d *diag.Diagnostics) {
-	c.Id = types.StringValue(cc.UpsertCloudConnection.ID)
-	c.Name = types.StringValue(cc.UpsertCloudConnection.Name)
-	c.CloudProvider = types.StringValue(string(cc.UpsertCloudConnection.Provider))
-	c.ReadBindings = cloudConnectionReadBindingsFrom(cc.UpsertCloudConnection.ReadBindings, ctx, d)
-}
-
 func (c *CloudConnection) From(cc *console.CloudConnectionFragment, ctx context.Context, d *diag.Diagnostics) {
 	c.Id = types.StringValue(cc.ID)
 	c.Name = types.StringValue(cc.Name)
