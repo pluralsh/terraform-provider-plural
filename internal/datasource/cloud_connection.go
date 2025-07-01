@@ -45,7 +45,7 @@ func (d *cloudConnectionDataSource) Schema(_ context.Context, _ datasource.Schem
 				Computed:            true,
 				Validators:          []validator.String{stringvalidator.ExactlyOneOf(path.MatchRoot("id"))},
 			},
-			"provider": schema.StringAttribute{
+			"cloud_provider": schema.StringAttribute{
 				Description:         "The cloud provider of this cloud connection.",
 				MarkdownDescription: "The cloud provider of this cloud connection.",
 				Required:            true,
