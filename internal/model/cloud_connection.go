@@ -2,11 +2,9 @@ package model
 
 import (
 	"context"
-	"fmt"
 
 	"terraform-provider-plural/internal/common"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -102,49 +100,5 @@ func (c *CloudConnection) From(cc *console.CloudConnectionFragment, ctx context.
 	c.Id = types.StringValue(cc.ID)
 	c.Name = types.StringValue(cc.Name)
 	c.CloudProvider = types.StringValue(string(cc.Provider))
-	c.ReadBindings = cloudConnectionReadBindingsFrom(cc.ReadBindings, ctx, d)
-}
-
-func cloudConnectionReadBindingsFrom(bindings []*console.PolicyBindingFragment, ctx context.Context, d *diag.Diagnostics) types.Set {
-	if len(bindings) == 0 {
-		return types.SetNull(types.ObjectType{AttrTypes: common.PolicyBindingAttrTypes})
-	}
-
-	values := make([]attr.Value, 0, len(bindings))
-	for _, binding := range bindings {
-		var userID, groupID types.String
-
-		if binding.User != nil && binding.Group == nil {
-			userID = types.StringValue(binding.User.ID)
-			groupID = types.StringNull()
-		} else if binding.Group != nil && binding.User == nil {
-			groupID = types.StringValue(binding.Group.ID)
-			userID = types.StringNull()
-		} else {
-			// Skip invalid binding (either both or neither set)
-			continue
-		}
-
-		id := types.StringNull()
-		if !userID.IsNull() {
-			id = types.StringValue(fmt.Sprintf("user:%s", userID.ValueString()))
-		} else if !groupID.IsNull() {
-			id = types.StringValue(fmt.Sprintf("group:%s", groupID.ValueString()))
-		}
-
-		objValue, diags := types.ObjectValueFrom(ctx, common.PolicyBindingAttrTypes, common.PolicyBinding{
-			ID:      id,
-			UserID:  userID,
-			GroupID: groupID,
-		})
-		values = append(values, objValue)
-		d.Append(diags...)
-	}
-
-	setValue, diags := types.SetValue(
-		types.ObjectType{AttrTypes: common.PolicyBindingAttrTypes},
-		values,
-	)
-	d.Append(diags...)
-	return setValue
+	c.ReadBindings = common.BindingsFromReadOnly(cc.ReadBindings, ctx, d)
 }

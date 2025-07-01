@@ -63,14 +63,18 @@ resource "plural_cloud_connection" "aws" {
 
   read_bindings = [
     {
-      user_id  = data.plural_user.john.id
+      id      = "1122"
+      user_id = data.plural_user.john.id
     },
     {
+      id      = "2233"
+      group_id = plural_group.cloud_admins.id
+    },
+    {
+      id      = "4444"
       group_id = plural_group.cloud_admins.id
     }
   ]
-
-
 }
 
 ###############################################################################
