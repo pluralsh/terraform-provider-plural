@@ -48,7 +48,7 @@ func (r *CloudConnectionResource) Schema(_ context.Context, _ resource.SchemaReq
 				Description:         "Name of this cloud connection.",
 				MarkdownDescription: "Name of this cloud connection.",
 				Required:            true,
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"cloud_provider": schema.StringAttribute{
 				Description:         "Cloud provider type (AWS, GCP, etc).",
