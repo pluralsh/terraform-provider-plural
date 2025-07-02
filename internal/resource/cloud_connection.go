@@ -86,7 +86,7 @@ func (r *CloudConnectionResource) Schema(_ context.Context, _ resource.SchemaReq
 						"id":       schema.StringAttribute{Optional: true},
 					},
 				},
-				PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
+				PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace()},
 			},
 		},
 	}

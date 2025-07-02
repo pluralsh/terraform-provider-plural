@@ -43,9 +43,9 @@ data "plural_user" "john_doe" {
 ###############################################################################
 
 # Group that will get read access to the cloud connection
-resource "plural_group" "cloud_admins" {
-  name        = "cloud-admins"
-  description = "Group with access to cloud connections"
+
+data "plural_group" "existing-cloud_admins" {
+  name        = "existing-cloud-admins"
 }
 
 # Cloud-connection resource (AWS example)
@@ -63,13 +63,10 @@ resource "plural_cloud_connection" "aws" {
 
   read_bindings = [
     {
-      user_id = data.plural_user.john.id
+      user_id = data.plural_user.john_doe.id
     },
     {
-      group_id = plural_group.cloud_admins.id
-    },
-    {
-      group_id = plural_group.cloud_admins.id
+      group_id = data.plural_group.existing-cloud_admins.id
     }
   ]
 }
@@ -90,6 +87,6 @@ output "cloud_connection_details" {
 }
 
 output "group_id" {
-  value       = plural_group.cloud_admins.id
+  value       = data.plural_group.existing-cloud_admins.id
   description = "ID of the created group"
 }
