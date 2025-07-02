@@ -90,9 +90,11 @@ func bindingsFrom(bindings []*console.PolicyBindingFragment, config types.Set, c
 	return setValue
 }
 
-func BindingsFromReadOnly(bindings []*console.PolicyBindingFragment, ctx context.Context, d *diag.Diagnostics) types.Set {
+func BindingsFromReadOnly(bindings []*console.PolicyBindingFragment, planned types.Set, ctx context.Context, d *diag.Diagnostics) types.Set {
 	if len(bindings) == 0 {
-		return types.SetNull(types.ObjectType{AttrTypes: PolicyBindingAttrTypes})
+		// Rewriting planned to state to avoid inconsistent result errors.
+		// This could happen, for example, when sending "nil" to API and "[]" is returned as a result.
+		return planned
 	}
 
 	values := make([]attr.Value, len(bindings))

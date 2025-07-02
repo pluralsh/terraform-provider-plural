@@ -44,7 +44,7 @@ data "plural_user" "john_doe" {
 
 # Group that will get read access to the cloud connection
 resource "plural_group" "cloud_admins" {
-  name        = "cloud-admins"
+  name        = "cloud-admins-2"
   description = "Group with access to cloud connections"
 }
 
@@ -63,15 +63,12 @@ resource "plural_cloud_connection" "aws" {
 
   read_bindings = [
     {
-      id      = "1122"
       user_id = data.plural_user.john.id
     },
     {
-      id      = "2233"
       group_id = plural_group.cloud_admins.id
     },
     {
-      id      = "4444"
       group_id = plural_group.cloud_admins.id
     }
   ]

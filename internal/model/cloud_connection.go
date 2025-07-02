@@ -100,5 +100,5 @@ func (c *CloudConnection) From(cc *console.CloudConnectionFragment, ctx context.
 	c.Id = types.StringValue(cc.ID)
 	c.Name = types.StringValue(cc.Name)
 	c.CloudProvider = types.StringValue(string(cc.Provider))
-	c.ReadBindings = common.BindingsFromReadOnly(cc.ReadBindings, ctx, d)
+	c.ReadBindings = common.BindingsFromReadOnly(cc.ReadBindings, c.ReadBindings, ctx, d)
 }

@@ -109,7 +109,6 @@ func (r *CloudConnectionResource) gcpCloudConnectionAttrTypes() map[string]attr.
 
 func (r *CloudConnectionResource) azureCloudConnectionAttrTypes() map[string]attr.Type {
 	return map[string]attr.Type{
-
 		"subscription_id": types.StringType,
 		"tenant_id":       types.StringType,
 		"client_id":       types.StringType,
