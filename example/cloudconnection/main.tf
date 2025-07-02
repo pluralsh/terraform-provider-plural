@@ -44,7 +44,7 @@ data "plural_user" "john_doe" {
 
 # Group that will get read access to the cloud connection
 resource "plural_group" "cloud_admins" {
-  name        = "cloud-admins-2"
+  name        = "cloud-admins"
   description = "Group with access to cloud connections"
 }
 
