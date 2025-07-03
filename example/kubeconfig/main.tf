@@ -2,7 +2,7 @@ terraform {
   required_providers {
     plural = {
       source  = "pluralsh/plural"
-      version = "0.2.25"
+      version = "0.2.27"
     }
   }
 }
