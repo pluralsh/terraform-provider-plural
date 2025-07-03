@@ -22,6 +22,7 @@ group resource
 ### Optional
 
 - `description` (String) Description of this group.
+- `global` (Boolean)
 
 ### Read-Only
 
