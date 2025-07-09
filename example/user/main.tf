@@ -2,7 +2,7 @@ terraform {
   required_providers {
     plural = {
       source  = "pluralsh/plural"
-      version = "0.2.25"
+      version = "0.2.27"
     }
   }
 }
@@ -27,17 +27,17 @@ resource "plural_user" "spiderman" {
 #   global = "false"
 # }
 #
-# resource "plural_group" "avengers" {
-#   name = "avengers"
-#   description = "avengers group"
-#   global = "false"
-# }
-#
-# resource "plural_group_member" "spiderman" {
-#   user_id = plural_user.spiderman.id
-#   group_id = plural_group.avengers.id
-# }
-#
+resource "plural_group" "avengers" {
+  name = "avengers"
+  description = "avengers group"
+  global = "false"
+}
+
+resource "plural_group_member" "spiderman" {
+  user_id = plural_user.spiderman.id
+  group_id = plural_group.avengers.id
+}
+
 # resource "plural_group_member" "duplicate" {
 #   user_id = plural_user.spiderman.id
 #   group_id = plural_group.avengers.id
