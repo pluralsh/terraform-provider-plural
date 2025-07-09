@@ -19,6 +19,10 @@ A representation of a group to organize authorization in your plural console.
 
 - `name` (String) Name of this group.
 
+### Optional
+
+- `global` (Boolean)
+
 ### Read-Only
 
 - `description` (String) Description of this group.
