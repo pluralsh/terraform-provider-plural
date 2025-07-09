@@ -117,8 +117,7 @@ func (r *CustomStackRunResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	_, err := r.client.DeleteCustomStackRun(ctx, data.Id.ValueString())
-	if err != nil {
+	if _, err := r.client.DeleteCustomStackRun(ctx, data.Id.ValueString()); err != nil && !client.IsNotFound(err) {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete custom stack run, got error: %s", err))
 		return
 	}

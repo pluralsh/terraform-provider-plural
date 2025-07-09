@@ -148,8 +148,7 @@ func (r *GroupResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 		return
 	}
 
-	_, err := r.client.DeleteGroup(ctx, data.Id.ValueString())
-	if err != nil && !client.IsNotFound(err) {
+	if _, err := r.client.DeleteGroup(ctx, data.Id.ValueString()); err != nil && !client.IsNotFound(err) {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete group, got error: %s", err))
 		return
 	}

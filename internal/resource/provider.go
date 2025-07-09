@@ -258,13 +258,12 @@ func (r *providerResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	_, err := r.client.DeleteClusterProvider(ctx, data.Id.ValueString())
-	if err != nil {
+	if _, err := r.client.DeleteClusterProvider(ctx, data.Id.ValueString()); err != nil && !client.IsNotFound(err) {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete provider, got error: %s", err))
 		return
 	}
 
-	if err = wait.PollUntilContextTimeout(ctx, 10*time.Second, 10*time.Minute, true, func(ctx context.Context) (bool, error) {
+	if err := wait.PollUntilContextTimeout(ctx, 10*time.Second, 10*time.Minute, true, func(ctx context.Context) (bool, error) {
 		response, err := r.client.GetClusterProvider(ctx, data.Id.ValueString())
 		if client.IsNotFound(err) {
 			return true, nil
