@@ -184,7 +184,7 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
-func (r *ProjectResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *ProjectResource) Delete(_ context.Context, _ resource.DeleteRequest, _ *resource.DeleteResponse) {
 	// Ignore.
 }
 

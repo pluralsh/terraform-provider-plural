@@ -151,8 +151,7 @@ func (r *GlobalServiceResource) Delete(ctx context.Context, req resource.DeleteR
 		return
 	}
 
-	_, err := r.client.DeleteGlobalService(ctx, data.Id.ValueString())
-	if err != nil {
+	if _, err := r.client.DeleteGlobalService(ctx, data.Id.ValueString()); err != nil && !client.IsNotFound(err) {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete GlobalService, got error: %s", err))
 		return
 	}

@@ -202,8 +202,7 @@ func (r *OIDCProviderResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	_, err := r.client.DeleteOIDCProvider(ctx, data.ID.ValueString(), data.TypeAttribute())
-	if err != nil {
+	if _, err := r.client.DeleteOIDCProvider(ctx, data.ID.ValueString(), data.TypeAttribute()); err != nil && !client.IsNotFound(err) {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete OIDC provider, got error: %s", err))
 		return
 	}

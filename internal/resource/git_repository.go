@@ -206,8 +206,7 @@ func (r *GitRepositoryResource) Delete(ctx context.Context, req resource.DeleteR
 		return
 	}
 
-	_, err := r.client.DeleteGitRepository(ctx, data.Id.ValueString())
-	if err != nil {
+	if _, err := r.client.DeleteGitRepository(ctx, data.Id.ValueString()); err != nil && !client.IsNotFound(err) {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete GitRepository, got error: %s", err))
 		return
 	}

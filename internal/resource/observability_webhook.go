@@ -157,8 +157,7 @@ func (r *ObservabilityWebhookResource) Delete(ctx context.Context, req resource.
 		return
 	}
 
-	_, err := r.client.DeleteObservabilityWebhook(ctx, data.Id.ValueString())
-	if err != nil {
+	if _, err := r.client.DeleteObservabilityWebhook(ctx, data.Id.ValueString()); err != nil && !client.IsNotFound(err) {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete observability webhook, got error: %s", err))
 		return
 	}
