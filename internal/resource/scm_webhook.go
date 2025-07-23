@@ -151,8 +151,7 @@ func (r *SCMWebhookResource) Delete(ctx context.Context, req resource.DeleteRequ
 		return
 	}
 
-	_, err := r.client.DeleteScmWebhook(ctx, data.Id.ValueString())
-	if err != nil {
+	if _, err := r.client.DeleteScmWebhook(ctx, data.Id.ValueString()); err != nil && !client.IsNotFound(err) {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete SCM webhook, got error: %s", err))
 		return
 	}
