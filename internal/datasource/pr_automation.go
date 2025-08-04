@@ -96,7 +96,7 @@ func (r *PRAutomationDataSource) Read(ctx context.Context, req datasource.ReadRe
 	var fragment *console.PrAutomationFragment
 	if !data.Id.IsNull() {
 		if c, err := r.client.GetPrAutomation(ctx, data.Id.ValueString()); err != nil {
-			resp.Diagnostics.AddWarning("Client Error", fmt.Sprintf("Unable to read PR automation by ID, got error: %s", err))
+			resp.Diagnostics.AddWarning("Client Error", fmt.Sprintf("Unable to find PR automation by ID, got error: %s", err))
 		} else {
 			fragment = c.PrAutomation
 		}
@@ -104,14 +104,14 @@ func (r *PRAutomationDataSource) Read(ctx context.Context, req datasource.ReadRe
 
 	if fragment == nil && !data.Name.IsNull() {
 		if c, err := r.client.GetPrAutomationByName(ctx, data.Name.ValueString()); err != nil {
-			resp.Diagnostics.AddWarning("Client Error", fmt.Sprintf("Unable to read PR automation by name, got error: %s", err))
+			resp.Diagnostics.AddWarning("Client Error", fmt.Sprintf("Unable to find PR automation by name, got error: %s", err))
 		} else {
 			fragment = c.PrAutomation
 		}
 	}
 
 	if fragment == nil {
-		resp.Diagnostics.AddError("Client Error", "Unable to read PR automation, see warnings for more information")
+		resp.Diagnostics.AddError("Client Error", "PR automation not found")
 		return
 	}
 
