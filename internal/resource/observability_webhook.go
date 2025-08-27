@@ -126,7 +126,8 @@ func (r *ObservabilityWebhookResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 	if response.ObservabilityWebhook == nil {
-		resp.Diagnostics.AddError("Client Error", "Unable to find observability webhook, got no error")
+		// Resource not found, remove from state
+		resp.State.RemoveResource(ctx)
 		return
 	}
 

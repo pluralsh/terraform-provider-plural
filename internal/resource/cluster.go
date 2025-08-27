@@ -98,7 +98,8 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 	if result == nil || result.Cluster == nil {
-		resp.Diagnostics.AddError("Not Found", "Unable to find cluster, it looks like it was deleted manually")
+		// Resource not found, remove from state
+		resp.State.RemoveResource(ctx)
 		return
 	}
 

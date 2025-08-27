@@ -131,8 +131,9 @@ func (r *SCMWebhookResource) Read(ctx context.Context, req resource.ReadRequest,
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read SCM webhook, got error: %s", err))
 		return
 	}
-	if response.ScmWebhook == nil {
-		resp.Diagnostics.AddError("Client Error", "Unable to find SCM webhook, got no error")
+	if response == nil || response.ScmWebhook == nil {
+		// Resource not found, remove from state
+		resp.State.RemoveResource(ctx)
 		return
 	}
 

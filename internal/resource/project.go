@@ -158,6 +158,11 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read project, got error: %s", err))
 		return
 	}
+	if response == nil || response.Project == nil {
+		// Resource not found, remove from state
+		resp.State.RemoveResource(ctx)
+		return
+	}
 
 	data.From(response.Project, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)

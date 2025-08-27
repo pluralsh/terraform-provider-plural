@@ -26,6 +26,6 @@ resource "plural_service_context" "service_context" {
   }
 }
 
-data "plural_service_context" "service_context" {
-  name = plural_service_context.service_context.name
-}
+# data "plural_service_context" "service_context" {
+#   name = plural_service_context.service_context.name
+# }
