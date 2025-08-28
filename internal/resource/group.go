@@ -115,9 +115,9 @@ func (r *GroupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get group, got error: %s", err))
 		return
 	}
-
 	if response == nil || response.Group == nil {
-		resp.Diagnostics.AddError("Client Error", "Unable to find group")
+		// Resource not found, remove from state
+		resp.State.RemoveResource(ctx)
 		return
 	}
 

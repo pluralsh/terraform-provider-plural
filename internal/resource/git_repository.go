@@ -173,9 +173,9 @@ func (r *GitRepositoryResource) Read(ctx context.Context, req resource.ReadReque
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get GitRepository, got error: %s", err))
 		return
 	}
-
 	if response == nil || response.GitRepository == nil {
-		resp.Diagnostics.AddError("Client Error", "Unable to find GitRepository")
+		// Resource not found, remove from state
+		resp.State.RemoveResource(ctx)
 		return
 	}
 
