@@ -212,6 +212,7 @@ func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource
 		r.NewSCMWebhookResource,
 		r.NewObservabilityWebhookResource,
 		r.NewCloudConnectionResource,
+		r.NewServiceAccountResource,
 	}
 }
 
