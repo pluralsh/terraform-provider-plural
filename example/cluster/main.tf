@@ -14,7 +14,8 @@ provider "plural" {
 resource "plural_cluster" "test" {
   name = "test-cluster"
   handle = "test"
-  protect = "false"
+  protect = false
+  detach = true
   tags = {
     "managed-by" = "terraform-provider-plural"
   }
