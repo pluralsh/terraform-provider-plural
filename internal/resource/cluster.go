@@ -93,18 +93,32 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	result, err := r.client.GetCluster(ctx, data.Id.ValueStringPointer())
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read cluster, got error: %s", err))
-		return
-	}
-	if result == nil || result.Cluster == nil {
-		// Resource not found, remove from state
-		resp.State.RemoveResource(ctx)
-		return
+	if !data.Id.IsNull() {
+		result, err := r.client.GetCluster(ctx, data.Id.ValueStringPointer())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read asdas dasd cluster, got error: %s", err))
+			return
+		}
+		if result == nil || result.Cluster == nil {
+			// Resource not found, remove from state
+			resp.State.RemoveResource(ctx)
+			return
+		}
+		data.From(result.Cluster, ctx, &resp.Diagnostics)
+	} else if !data.Handle.IsNull() {
+		result, err := r.client.GetClusterByHandle(ctx, data.Handle.ValueStringPointer())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to 222 read cluster, got error: %s", err))
+			return
+		}
+		if result == nil || result.Cluster == nil {
+			// Resource not found, remove from state
+			resp.State.RemoveResource(ctx)
+			return
+		}
+		data.From(result.Cluster, ctx, &resp.Diagnostics)
 	}
 
-	data.From(result.Cluster, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -191,6 +205,7 @@ func (r *clusterResource) ImportState(ctx context.Context, req resource.ImportSt
 	if strings.HasPrefix(req.ID, "@") && len(req.ID) > 1 {
 		req.ID = req.ID[1:]
 		resource.ImportStatePassthroughID(ctx, path.Root("handle"), req, resp)
+		return
 	}
 
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
