@@ -96,7 +96,7 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 	if !data.Id.IsNull() {
 		result, err := r.client.GetCluster(ctx, data.Id.ValueStringPointer())
 		if err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read asdas dasd cluster, got error: %s", err))
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read cluster, got error: %s", err))
 			return
 		}
 		if result == nil || result.Cluster == nil {
@@ -108,7 +108,7 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 	} else if !data.Handle.IsNull() {
 		result, err := r.client.GetClusterByHandle(ctx, data.Handle.ValueStringPointer())
 		if err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to 222 read cluster, got error: %s", err))
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read cluster, got error: %s", err))
 			return
 		}
 		if result == nil || result.Cluster == nil {
