@@ -81,6 +81,10 @@ func (c *cluster) From(cl *console.ClusterFragment, _ context.Context, d *diag.D
 	c.Protect = types.BoolPointerValue(cl.Protect)
 	c.Tags = common.TagsFrom(cl.Tags, c.Tags, d)
 	c.Metadata = types.StringValue(string(metadata))
+
+	if cl.Project != nil && cl.Project.ID != "" {
+		c.ProjectId = types.StringValue(cl.Project.ID)
+	}
 }
 
 func (c *cluster) FromCreate(cc *console.CreateCluster, _ context.Context, d *diag.Diagnostics) {
