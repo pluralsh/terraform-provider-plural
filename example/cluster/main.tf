@@ -12,7 +12,7 @@ provider "plural" {
 }
 
 data "plural_project" "test" {
-  handle = "test"
+  name = "test"
 }
 
 resource "plural_cluster" "test" {
