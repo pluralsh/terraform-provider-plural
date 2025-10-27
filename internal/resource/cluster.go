@@ -3,6 +3,7 @@ package resource
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"terraform-provider-plural/internal/client"
@@ -187,5 +188,10 @@ func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 }
 
 func (r *clusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if strings.HasPrefix(req.ID, "@") && len(req.ID) > 1 {
+		req.ID = req.ID[1:]
+		resource.ImportStatePassthroughID(ctx, path.Root("handle"), req, resp)
+	}
+
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
