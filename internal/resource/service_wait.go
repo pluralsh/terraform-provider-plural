@@ -65,12 +65,12 @@ func (in *serviceWaitResource) Schema(_ context.Context, _ resource.SchemaReques
 				Validators:          []validator.String{customvalidator.Duration()},
 			},
 			"duration": schema.StringAttribute{
-				Description:         "Maximum duration to wait for the service deployment to become healthy. Defaults to 10 minutes.",
-				MarkdownDescription: "Maximum duration to wait for the service deployment to become healthy. Defaults to 10 minutes.",
+				Description:         "Maximum duration to wait for the service deployment to become healthy. Minimum 1 minute. Defaults to 10 minutes.",
+				MarkdownDescription: "Maximum duration to wait for the service deployment to become healthy. Minimum 1 minute. Defaults to 10 minutes.",
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString("10m"),
-				Validators:          []validator.String{customvalidator.Duration()},
+				Validators:          []validator.String{customvalidator.MinDuration(time.Minute)},
 			},
 		},
 	}

@@ -21,5 +21,5 @@ description: |-
 
 ### Optional
 
-- `duration` (String) Maximum duration to wait for the service deployment to become healthy. Defaults to 10 minutes.
+- `duration` (String) Maximum duration to wait for the service deployment to become healthy. Minimum 1 minute. Defaults to 10 minutes.
 - `warmup` (String) Initial delay before checking the service deployment health. Defaults to 5 minutes.
