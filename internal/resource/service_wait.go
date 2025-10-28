@@ -7,6 +7,7 @@ import (
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
+	customvalidator "terraform-provider-plural/internal/validator"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -62,7 +63,7 @@ func (in *serviceWaitResource) Schema(_ context.Context, _ resource.SchemaReques
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString("5m"),
-				Validators:          []validator.String{stringvalidator.LengthAtLeast(1)}, // TODO
+				Validators:          []validator.String{customvalidator.Duration()},
 			},
 			"duration": schema.StringAttribute{
 				Description:         "Maximum duration to wait for the service deployment to become healthy. Defaults to 10 minutes.",
@@ -70,7 +71,7 @@ func (in *serviceWaitResource) Schema(_ context.Context, _ resource.SchemaReques
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString("10m"),
-				Validators:          []validator.String{stringvalidator.LengthAtLeast(1)}, // TODO
+				Validators:          []validator.String{customvalidator.Duration()},
 			},
 		},
 	}
@@ -112,7 +113,7 @@ func (in *serviceWaitResource) Read(_ context.Context, _ resource.ReadRequest, _
 	// Ignore.
 }
 
-func (in *serviceWaitResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (in *serviceWaitResource) Update(_ context.Context, _ resource.UpdateRequest, _ *resource.UpdateResponse) {
 	// Ignore.
 }
 
