@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	console "github.com/pluralsh/console/go/client"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
@@ -100,7 +101,7 @@ func (in *serviceWaitResource) Create(ctx context.Context, request resource.Crea
 		return
 	}
 
-	if err := in.Wait(data); err != nil {
+	if err := in.Wait(ctx, data); err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Got error while waiting for service: %s", err))
 		return
 	}
@@ -124,7 +125,7 @@ func (in *serviceWaitResource) ImportState(ctx context.Context, req resource.Imp
 	resource.ImportStatePassthroughID(ctx, path.Root("service_id"), req, resp)
 }
 
-func (in *serviceWaitResource) Wait(data *serviceWait) error {
+func (in *serviceWaitResource) Wait(ctx context.Context, data *serviceWait) error {
 	warmup, err := data.ParseWarmup()
 	if err != nil {
 		return fmt.Errorf("unable to parse warmup duration, got error: %s", err.Error())
@@ -135,20 +136,24 @@ func (in *serviceWaitResource) Wait(data *serviceWait) error {
 		return fmt.Errorf("unable to parse duration, got error: %s", err.Error())
 	}
 
+	tflog.Info(ctx, fmt.Sprintf("waiting for warmup period of %s before starting health checks...", warmup))
 	time.Sleep(warmup)
+	tflog.Info(ctx, "warmup period completed, starting health checks")
 
-	var status console.ServiceDeploymentStatus
-	if err = wait.PollUntilContextTimeout(context.Background(), 30*time.Second, duration, true, func(ctx context.Context) (done bool, err error) {
-		service, err := in.client.GetServiceDeployment(ctx, data.ServiceID.ValueString())
+	if err = wait.PollUntilContextTimeout(context.Background(), 30*time.Second, duration, true, func(pollCtx context.Context) (done bool, err error) {
+		service, err := in.client.GetServiceDeployment(pollCtx, data.ServiceID.ValueString())
 		if err != nil {
+			tflog.Warn(ctx, fmt.Sprintf("failed to get service %s, got error: %s", data.ServiceID.ValueString(), err.Error()))
 			return false, nil
 		}
 
-		status = service.ServiceDeployment.Status
-		return status == console.ServiceDeploymentStatusHealthy, nil
+		tflog.Debug(ctx, fmt.Sprintf("service %s is %s", service.ServiceDeployment.ID, service.ServiceDeployment.Status))
+		return service.ServiceDeployment.Status == console.ServiceDeploymentStatusHealthy, nil
 	}); err != nil {
-		return fmt.Errorf("service is %s, got error: %s", status, err.Error())
+		tflog.Warn(ctx, fmt.Sprintf("service %s did not become healthy within %s, got error: %s", data.ServiceID.ValueString(), duration, err.Error()))
+		return fmt.Errorf("service %s did not become healthy within %s, got error: %s", data.ServiceID.ValueString(), duration, err.Error())
 	}
 
+	tflog.Info(ctx, fmt.Sprintf("service %s health check completed successfully", data.ServiceID.ValueString()))
 	return nil
 }
