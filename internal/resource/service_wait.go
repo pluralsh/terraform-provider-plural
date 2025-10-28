@@ -9,7 +9,6 @@ import (
 	"terraform-provider-plural/internal/common"
 	customvalidator "terraform-provider-plural/internal/validator"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -55,7 +54,7 @@ func (in *serviceWaitResource) Schema(_ context.Context, _ resource.SchemaReques
 				Description:         "ID the service deployment that should be checked.",
 				MarkdownDescription: "ID the service deployment that should be checked.",
 				Required:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtLeast(1)}, // TODO
+				Validators:          []validator.String{customvalidator.UUID()},
 			},
 			"warmup": schema.StringAttribute{
 				Description:         "Initial delay before checking the service deployment health. Defaults to 5 minutes.",
