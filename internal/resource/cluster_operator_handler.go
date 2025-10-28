@@ -190,11 +190,8 @@ func (oh *OperatorHandler) ensureNamespace() error {
 
 	_, err := oh.clientSet.CoreV1().Namespaces().Create(oh.ctx, &v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: console.OperatorNamespace,
-			Labels: map[string]string{
-				"app.kubernetes.io/managed-by": "plural",
-				"app.plural.sh/name":           console.OperatorNamespace,
-			},
+			Name:   console.OperatorNamespace,
+			Labels: map[string]string{"app.plural.sh/name": console.OperatorNamespace},
 		},
 	}, metav1.CreateOptions{})
 	return err
@@ -266,6 +263,6 @@ func (oh *OperatorHandler) values() (map[string]any, error) {
 
 	return algorithms.Merge(map[string]any{
 		"secrets":    map[string]string{"deployToken": oh.deployToken},
-		"consoleUrl": fmt.Sprintf("%s/ext/gql", oh.consoleURL),
+		"consoleUrl": console.NormalizeExtUrl(oh.consoleURL),
 	}, oh.additionalValues, settingsValues), nil
 }
