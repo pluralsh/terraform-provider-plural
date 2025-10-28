@@ -1,0 +1,57 @@
+---
+page_title: "{{.Type}} {{.Name}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+{{ if .HasExample -}}
+## Example Usage
+
+{{ tffile .ExampleFile }}
+{{- end }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+The `plural_cluster` resource supports importing existing clusters using either the cluster ID or the cluster handle.
+
+### Import by Cluster ID
+
+To import a cluster using its ID:
+
+```shell
+terraform import plural_cluster.example <cluster-id>
+```
+
+Example:
+
+```shell
+terraform import plural_cluster.my_cluster 9c5b94b1-35ad-49bb-b118-8e8fc24abf80
+```
+
+### Import by Cluster Handle
+
+To import a cluster using its handle, prefix the handle with `@`:
+
+```shell
+terraform import plural_cluster.example @<cluster-handle>
+```
+
+Example:
+
+```shell
+terraform import plural_cluster.my_cluster @production-cluster
+```
+
+### Notes
+
+- When importing by handle, the `@` prefix is required and must be followed by the actual handle name.
+- After importing, run `terraform plan` to see any configuration differences.
+- Use `terraform state show plural_cluster.example` to verify the imported resource and populate your configuration with the current attributes.
+
