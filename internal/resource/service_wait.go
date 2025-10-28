@@ -138,18 +138,16 @@ func (in *serviceWaitResource) Wait(data *serviceWait) error {
 	time.Sleep(warmup)
 
 	var status console.ServiceDeploymentStatus
-	if err = wait.PollUntilContextTimeout(context.Background(), 30*time.Second, duration, true,
-		func(ctx context.Context) (done bool, err error) {
-			service, err := in.client.GetServiceDeployment(ctx, data.ServiceID.ValueString())
-			if err != nil {
-				return false, nil
-			}
+	if err = wait.PollUntilContextTimeout(context.Background(), 30*time.Second, duration, true, func(ctx context.Context) (done bool, err error) {
+		service, err := in.client.GetServiceDeployment(ctx, data.ServiceID.ValueString())
+		if err != nil {
+			return false, nil
+		}
 
-			status = service.ServiceDeployment.Status
-
-			return status == console.ServiceDeploymentStatusHealthy, nil
-		}); err != nil {
-		return fmt.Errorf("service did not became healthy, got error: %s", err.Error())
+		status = service.ServiceDeployment.Status
+		return status == console.ServiceDeploymentStatusHealthy, nil
+	}); err != nil {
+		return fmt.Errorf("service is %s, got error: %s", status, err.Error())
 	}
 
 	return nil
