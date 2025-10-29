@@ -12,8 +12,9 @@ provider "plural" {
 }
 
 resource "plural_service_wait" "test" {
-  service_id = "b775ef81-b469-4c8c-969d-1d35e97a4ce5"
-  warmup     = "0s"
+  cluster = "mgmt"
+  service = "console"
+  warmup     = "10s"
   duration   = "1m"
 }
 

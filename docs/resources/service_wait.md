@@ -17,7 +17,8 @@ description: |-
 
 ### Required
 
-- `service_id` (String) ID the service deployment that should be checked.
+- `cluster` (String) Handle of the cluster where the service is deployed.
+- `service` (String) Name the service deployment that should be checked.
 
 ### Optional
 
