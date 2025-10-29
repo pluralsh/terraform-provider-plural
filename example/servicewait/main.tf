@@ -14,7 +14,7 @@ provider "plural" {
 resource "plural_service_wait" "test" {
   cluster = "mgmt"
   service = "console"
-  warmup     = "10s"
+  warmup     = "5s"
   duration   = "1m"
 }
 

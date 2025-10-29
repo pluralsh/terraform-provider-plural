@@ -121,8 +121,10 @@ func (in *serviceWaitResource) Read(_ context.Context, _ resource.ReadRequest, _
 	// Ignore.
 }
 
-func (in *serviceWaitResource) Update(_ context.Context, _ resource.UpdateRequest, _ *resource.UpdateResponse) {
-	// Ignore.
+func (in *serviceWaitResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data serviceWait
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (in *serviceWaitResource) Delete(_ context.Context, _ resource.DeleteRequest, _ *resource.DeleteResponse) {
