@@ -79,11 +79,11 @@ func (r *ServiceDeploymentResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	response, err := r.client.GetServiceDeployment(ctx, data.Id.ValueString())
-	if err != nil {
+	if err != nil && !client.IsNotFound(err) {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read ServiceDeployment, got error: %s", err))
 		return
 	}
-	if response == nil || response.ServiceDeployment == nil {
+	if response == nil || response.ServiceDeployment == nil || client.IsNotFound(err) {
 		// Resource not found, remove from state
 		resp.State.RemoveResource(ctx)
 		return
