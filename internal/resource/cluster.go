@@ -130,7 +130,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	if !data.ProjectId.Equal(state.ProjectId) {
+	if !data.ProjectId.Equal(state.ProjectId) && !data.ProjectId.IsNull() {
 		resp.Diagnostics.AddError("Invalid Configuration", "Unable to update cluster, project ID must not be modified")
 		return
 	}
