@@ -32,7 +32,7 @@ import (
 )
 
 func InstallOrUpgradeAgent(ctx context.Context, client *client.Client, kubeconfig *common.Kubeconfig, kubeClient *common.KubeClient,
-	repoUrl string, values *string, consoleUrl string, token string, d *diag.Diagnostics) error {
+	repoUrl string, values *string, consoleUrl string, token string, clusterId string, d *diag.Diagnostics) error {
 	workingDir, chartPath, err := fetchVendoredAgentChart(consoleUrl)
 	if err != nil {
 		d.AddWarning("Client Warning", fmt.Sprintf("Could not fetch vendored agent chart, using chart from the registry: %s", err))
@@ -53,7 +53,7 @@ func InstallOrUpgradeAgent(ctx context.Context, client *client.Client, kubeconfi
 		}
 	}
 
-	handler, err := NewOperatorHandler(ctx, client, kubeClient, repoUrl, chartPath, values, consoleUrl, token)
+	handler, err := NewOperatorHandler(ctx, client, kubeClient, repoUrl, chartPath, values, consoleUrl, token, clusterId)
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func fetchVendoredAgentChart(consoleURL string) (string, string, error) {
 }
 
 func NewOperatorHandler(ctx context.Context, client *client.Client, kubeClient *common.KubeClient,
-	repoUrl, chartPath string, values *string, consoleUrl, token string) (*OperatorHandler, error) {
+	repoUrl, chartPath string, values *string, consoleUrl, token string, clusterId string) (*OperatorHandler, error) {
 	settings, err := client.GetDeploymentSettings(ctx)
 	if err != nil {
 		return nil, err
@@ -108,6 +108,7 @@ func NewOperatorHandler(ctx context.Context, client *client.Client, kubeClient *
 		clientSet:         clientSet,
 		vendoredChartPath: chartPath,
 		additionalValues:  additionalValues,
+		clusterId:         clusterId,
 	}
 
 	if err := handler.init(kubeClient, repoUrl); err != nil {
@@ -123,6 +124,7 @@ type OperatorHandler struct {
 	deployToken string
 	settings    *gqlclient.DeploymentSettingsFragment
 	clientSet   *kubernetes.Clientset
+	clusterId   string
 
 	// vendoredChartPath contains a local path to vendored agent chart if it was downloadable, it is empty otherwise.
 	vendoredChartPath string
@@ -264,5 +266,6 @@ func (oh *OperatorHandler) values() (map[string]any, error) {
 	return algorithms.Merge(map[string]any{
 		"secrets":    map[string]string{"deployToken": oh.deployToken},
 		"consoleUrl": console.NormalizeExtUrl(oh.consoleURL),
+		"clusterId":  oh.clusterId,
 	}, oh.additionalValues, settingsValues), nil
 }
