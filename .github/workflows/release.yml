@@ -19,6 +19,8 @@ jobs:
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
+    env:
+      DOCKER_CLI_EXPERIMENTAL: "enabled"
     steps:
       - uses: actions/checkout@v5
         with:
@@ -27,6 +29,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
+      - uses: sigstore/cosign-installer@v3.6.0
       - shell: bash
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       - uses: actions/cache@v4
@@ -53,14 +56,21 @@ jobs:
           passphrase: ${{ secrets.PLURAL_GPG_KEY_PASSWORD }}
       - uses: goreleaser/goreleaser-action@v6
         with:
+          distribution: goreleaser-pro
+          version: '~> v2'
           args: release --clean --split
         env:
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
 
   release:
     name: Release
     runs-on: ubuntu-latest
+    env:
+      DOCKER_CLI_EXPERIMENTAL: "enabled"
     needs: prepare
     steps:
       - uses: jlumbroso/free-disk-space@v1.3.1
@@ -73,6 +83,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
+      - uses: sigstore/cosign-installer@v3.6.0
       - shell: bash
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       - uses: actions/cache@v4
@@ -97,7 +108,12 @@ jobs:
       - uses: goreleaser/goreleaser-action@v6
         if: steps.cache.outputs.cache-hit != 'true' # do not run if cache hit
         with:
+          distribution: goreleaser-pro
+          version: '~> v2'
           args: continue --merge
         env:
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
