@@ -69,6 +69,11 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
+	data.FromCreate(result, ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	if r.kubeClient != nil || data.HasKubeconfig() {
 		if result.CreateCluster.DeployToken == nil {
 			resp.Diagnostics.AddError("Client Error", "Unable to fetch cluster deploy token")
@@ -82,7 +87,6 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		}
 	}
 
-	data.FromCreate(result, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
