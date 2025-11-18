@@ -83,7 +83,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 			resp.Diagnostics.AddWarning("Agent Installation Failed", fmt.Sprintf(
 				"Unable to install agent, in order to retry run `terraform apply` again. Got error: %s", err))
 		} else {
-			data.AgentDeployed = types.BoolValue(true)
+			data.AgentDeployed = types.BoolValue(false) // TODO: Test change, set to true.
 		}
 	}
 
@@ -145,8 +145,9 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
+	needsAgentReinstall := !data.AgentDeployed.ValueBool()
 	kubeconfigChanged := data.HasKubeconfig() && !data.GetKubeconfig().Unchanged(state.GetKubeconfig())
-	reinstallable := !data.HelmRepoUrl.Equal(state.HelmRepoUrl) || kubeconfigChanged
+	reinstallable := !data.HelmRepoUrl.Equal(state.HelmRepoUrl) || kubeconfigChanged || needsAgentReinstall
 	if reinstallable && (r.kubeClient != nil || data.HasKubeconfig()) {
 		clusterWithToken, err := r.client.GetClusterWithToken(ctx, data.Id.ValueStringPointer(), nil)
 		if err != nil {
@@ -159,6 +160,10 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
 			return
 		}
+
+		data.AgentDeployed = types.BoolValue(true)
+		data.ReapplyKey = types.Int32Value(state.ReapplyKey.ValueInt32() + 1)
+
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 
 	"terraform-provider-plural/internal/common"
 
@@ -28,6 +29,7 @@ type cluster struct {
 	Kubeconfig    *common.Kubeconfig `tfsdk:"kubeconfig"`
 	Created       types.Bool         `tfsdk:"created"`
 	AgentDeployed types.Bool         `tfsdk:"agent_deployed"`
+	ReapplyKey    types.Int32        `tfsdk:"reapply_key"`
 }
 
 func (c *cluster) TagsAttribute(ctx context.Context, d *diag.Diagnostics) []*console.TagAttributes {
@@ -87,6 +89,10 @@ func (c *cluster) From(cl *console.ClusterFragment, _ context.Context, d *diag.D
 	if cl.Project != nil && cl.Project.ID != "" {
 		c.ProjectId = types.StringValue(cl.Project.ID)
 	}
+
+	if !c.AgentDeployed.ValueBool() {
+		c.ReapplyKey = types.Int32Value(rand.Int31())
+	}
 }
 
 func (c *cluster) FromCreate(cc *console.CreateCluster, _ context.Context, d *diag.Diagnostics) {
@@ -98,6 +104,7 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, _ context.Context, d *di
 	c.Tags = common.TagsFrom(cc.CreateCluster.Tags, c.Tags, d)
 	c.Created = types.BoolValue(true)
 	c.AgentDeployed = types.BoolValue(false)
+	c.ReapplyKey = types.Int32Value(0)
 }
 
 func (c *cluster) ClusterVersionFrom(prov *console.ClusterProviderFragment, version, currentVersion *string) types.String {

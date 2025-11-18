@@ -2,6 +2,7 @@ package resource
 
 import (
 	"terraform-provider-plural/internal/common"
+	resource "terraform-provider-plural/internal/planmodifier"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/pluralsh/plural-cli/pkg/console"
@@ -143,6 +144,12 @@ func (r *clusterResource) schema() schema.Schema {
 				Description:         "Whether the agent was deployed to the cluster.",
 				MarkdownDescription: "Whether the agent was deployed to the cluster.",
 				Computed:            true,
+			},
+			"reapply_key": schema.Int32Attribute{
+				Description:         "Reapply key used to trigger reinstallation of the agent.",
+				MarkdownDescription: "Reapply key used to trigger reinstallation of the agent.",
+				Computed:            true,
+				PlanModifiers:       []planmodifier.Int32{resource.EnsureAgent()},
 			},
 		},
 	}
