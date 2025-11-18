@@ -33,6 +33,10 @@ import (
 
 func InstallOrUpgradeAgent(ctx context.Context, client *client.Client, kubeconfig *common.Kubeconfig, kubeClient *common.KubeClient,
 	repoUrl string, values *string, consoleUrl string, token string, clusterId string, d *diag.Diagnostics) error {
+	if lo.IsEmpty(token) {
+		return fmt.Errorf("deploy token cannot be empty")
+	}
+
 	workingDir, chartPath, err := fetchVendoredAgentChart(consoleUrl)
 	if err != nil {
 		d.AddWarning("Client Warning", fmt.Sprintf("Could not fetch vendored agent chart, using chart from the registry: %s", err))

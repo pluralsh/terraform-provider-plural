@@ -134,6 +134,14 @@ func (r *clusterResource) schema() schema.Schema {
 				},
 				PlanModifiers: []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 			},
+			"created": schema.BoolAttribute{
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+			},
+			"agent_deployed": schema.BoolAttribute{
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+			},
 		},
 	}
 }

@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
@@ -75,15 +76,14 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	if r.kubeClient != nil || data.HasKubeconfig() {
-		if result.CreateCluster.DeployToken == nil {
-			resp.Diagnostics.AddError("Client Error", "Unable to fetch cluster deploy token")
-			return
-		}
-
-		if err = InstallOrUpgradeAgent(ctx, r.client, data.GetKubeconfig(), r.kubeClient, data.HelmRepoUrl.ValueString(),
-			data.HelmValues.ValueStringPointer(), r.consoleUrl, lo.FromPtr(result.CreateCluster.DeployToken), result.CreateCluster.ID, &resp.Diagnostics); err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
-			return
+		err = InstallOrUpgradeAgent(ctx, r.client, data.GetKubeconfig(), r.kubeClient, data.HelmRepoUrl.ValueString(),
+			data.HelmValues.ValueStringPointer(), r.consoleUrl, lo.FromPtr(result.CreateCluster.DeployToken),
+			result.CreateCluster.ID, &resp.Diagnostics)
+		if err != nil {
+			resp.Diagnostics.AddWarning("Agent Installation Failed", fmt.Sprintf(
+				"Unable to install agent, in order to retry run `terraform apply` again. Got error: %s", err))
+		} else {
+			data.AgentDeployed = types.BoolValue(true)
 		}
 	}
 
