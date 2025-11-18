@@ -69,11 +69,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create cluster, got error: %s", err))
 		return
 	}
-
 	data.FromCreate(result, ctx, &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 
 	if r.kubeClient != nil || data.HasKubeconfig() {
 		err = InstallOrUpgradeAgent(ctx, r.client, data.GetKubeconfig(), r.kubeClient, data.HelmRepoUrl.ValueString(),
@@ -83,7 +79,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 			resp.Diagnostics.AddWarning("Agent Installation Failed", fmt.Sprintf(
 				"Unable to install agent, in order to retry run `terraform apply` again. Got error: %s", err))
 		} else {
-			data.AgentDeployed = types.BoolValue(false) // TODO: Test change, set to true.
+			data.AgentDeployed = types.BoolValue(true)
 		}
 	}
 
@@ -145,9 +141,8 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	needsAgentReinstall := !data.AgentDeployed.ValueBool()
 	kubeconfigChanged := data.HasKubeconfig() && !data.GetKubeconfig().Unchanged(state.GetKubeconfig())
-	reinstallable := !data.HelmRepoUrl.Equal(state.HelmRepoUrl) || kubeconfigChanged || needsAgentReinstall
+	reinstallable := !data.AgentDeployed.ValueBool() || !data.HelmRepoUrl.Equal(state.HelmRepoUrl) || kubeconfigChanged
 	if reinstallable && (r.kubeClient != nil || data.HasKubeconfig()) {
 		clusterWithToken, err := r.client.GetClusterWithToken(ctx, data.Id.ValueStringPointer(), nil)
 		if err != nil {
@@ -162,7 +157,6 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		}
 
 		data.AgentDeployed = types.BoolValue(true)
-
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
