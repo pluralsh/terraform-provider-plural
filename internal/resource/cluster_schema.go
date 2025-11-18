@@ -135,12 +135,14 @@ func (r *clusterResource) schema() schema.Schema {
 				PlanModifiers: []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 			},
 			"created": schema.BoolAttribute{
-				Computed: true,
-				Default:  booldefault.StaticBool(false),
+				Description:         "Whether the cluster was created in the Console API.",
+				MarkdownDescription: "Whether the cluster was created in the Console API.",
+				Computed:            true,
 			},
 			"agent_deployed": schema.BoolAttribute{
-				Computed: true,
-				Default:  booldefault.StaticBool(false),
+				Description:         "Whether the agent was deployed to the cluster.",
+				MarkdownDescription: "Whether the agent was deployed to the cluster.",
+				Computed:            true,
 			},
 		},
 	}
