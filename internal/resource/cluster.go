@@ -162,7 +162,6 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		}
 
 		data.AgentDeployed = types.BoolValue(true)
-		data.ReapplyKey = types.Int32Value(state.ReapplyKey.ValueInt32() + 1)
 
 	}
 

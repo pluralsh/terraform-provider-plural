@@ -18,7 +18,7 @@ func (in ensureAgentPlanModifier) MarkdownDescription(_ context.Context) string 
 	return "Forces resource update when agent is not deployed"
 }
 
-func (in ensureAgentPlanModifier) PlanModifyInt32(ctx context.Context, req planmodifier.Int32Request, resp *planmodifier.Int32Response) {
+func (in ensureAgentPlanModifier) PlanModifyBool(ctx context.Context, req planmodifier.BoolRequest, resp *planmodifier.BoolResponse) {
 	if req.State.Raw.IsNull() {
 		return
 	}
@@ -29,12 +29,12 @@ func (in ensureAgentPlanModifier) PlanModifyInt32(ctx context.Context, req planm
 		return
 	}
 
-	// If agent is not deployed, mark reapply key as unknown to force update
+	// If the agent is not deployed, force update by setting the field to unknown.
 	if !agentDeployed.IsNull() && !agentDeployed.ValueBool() {
-		resp.PlanValue = types.Int32Unknown()
+		resp.PlanValue = types.BoolUnknown()
 	}
 }
 
-func EnsureAgent() planmodifier.Int32 {
+func EnsureAgent() planmodifier.Bool {
 	return ensureAgentPlanModifier{}
 }
