@@ -36,7 +36,6 @@ A representation of a cluster you can deploy to.
 - `agent_deployed` (Boolean) Whether the agent was deployed to the cluster.
 - `id` (String) Internal identifier of this cluster.
 - `inserted_at` (String) Creation date of this cluster.
-- `state_version` (Number) Version of the cluster resource schema in state. Helpful for migrations.
 
 <a id="nestedatt--bindings"></a>
 ### Nested Schema for `bindings`

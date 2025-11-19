@@ -214,9 +214,9 @@ func (r *clusterResource) ImportState(ctx context.Context, req resource.ImportSt
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (r *clusterResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+func (r *clusterResource) UpgradeState(_ context.Context) map[int64]resource.StateUpgrader {
 	return map[int64]resource.StateUpgrader{
-		// State upgrade implementation from 0 to 1
+		// State upgrade from 0 to 1
 		0: {
 			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
 				resp.Diagnostics.Append(resp.State.Set(ctx, cluster{AgentDeployed: types.BoolValue(true)})...)
