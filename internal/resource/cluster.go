@@ -11,7 +11,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/pluralsh/plural-cli/pkg/console"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
@@ -218,8 +225,134 @@ func (r *clusterResource) UpgradeState(_ context.Context) map[int64]resource.Sta
 	return map[int64]resource.StateUpgrader{
 		// State upgrade from 0 to 1
 		0: {
+			PriorSchema: &schema.Schema{
+				Version: 0,
+				Attributes: map[string]schema.Attribute{
+					"id": schema.StringAttribute{
+						Computed:      true,
+						PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+					},
+					"inserted_at": schema.StringAttribute{
+						Computed:      true,
+						PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+					},
+					"name": schema.StringAttribute{
+						Required:      true,
+						PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+					},
+					"handle": schema.StringAttribute{
+						Optional:      true,
+						Computed:      true,
+						PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+					},
+					"project_id": schema.StringAttribute{
+						Optional: true,
+					},
+					"detach": schema.BoolAttribute{
+						Optional: true,
+						Computed: true,
+						Default:  booldefault.StaticBool(false),
+					},
+					"metadata": schema.StringAttribute{
+						Optional:      true,
+						Computed:      true,
+						Default:       stringdefault.StaticString("{}"),
+						PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+					},
+					"helm_repo_url": schema.StringAttribute{
+						Optional: true,
+						Computed: true,
+						Default:  stringdefault.StaticString(console.RepoUrl),
+					},
+					"helm_values": schema.StringAttribute{
+						Optional: true,
+					},
+					"kubeconfig": common.KubeconfigResourceSchema(),
+					"protect": schema.BoolAttribute{
+						Optional: true,
+						Computed: true,
+						Default:  booldefault.StaticBool(false),
+					},
+					"tags": schema.MapAttribute{
+						Optional:    true,
+						ElementType: types.StringType,
+					},
+					"bindings": schema.SingleNestedAttribute{
+						Optional: true,
+						Attributes: map[string]schema.Attribute{
+							"read": schema.SetNestedAttribute{
+								Optional: true,
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"group_id": schema.StringAttribute{Optional: true},
+										"id":       schema.StringAttribute{Optional: true},
+										"user_id":  schema.StringAttribute{Optional: true},
+									},
+								},
+							},
+							"write": schema.SetNestedAttribute{
+								Optional:            true,
+								Description:         "Write policies of this cluster.",
+								MarkdownDescription: "Write policies of this cluster.",
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"group_id": schema.StringAttribute{
+											Optional: true,
+										},
+										"id": schema.StringAttribute{
+											Optional: true,
+										},
+										"user_id": schema.StringAttribute{
+											Optional: true,
+										},
+									},
+								},
+							},
+						},
+						PlanModifiers: []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
+					},
+				},
+			},
 			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
-				resp.Diagnostics.Append(resp.State.Set(ctx, cluster{AgentDeployed: types.BoolValue(true)})...)
+				var priorStateData struct {
+					Id          types.String       `tfsdk:"id"`
+					InsertedAt  types.String       `tfsdk:"inserted_at"`
+					Name        types.String       `tfsdk:"name"`
+					Handle      types.String       `tfsdk:"handle"`
+					ProjectId   types.String       `tfsdk:"project_id"`
+					Detach      types.Bool         `tfsdk:"detach"`
+					Protect     types.Bool         `tfsdk:"protect"`
+					Tags        types.Map          `tfsdk:"tags"`
+					Metadata    types.String       `tfsdk:"metadata"`
+					Bindings    *common.Bindings   `tfsdk:"bindings"`
+					HelmRepoUrl types.String       `tfsdk:"helm_repo_url"`
+					HelmValues  types.String       `tfsdk:"helm_values"`
+					Kubeconfig  *common.Kubeconfig `tfsdk:"kubeconfig"`
+				}
+
+				resp.Diagnostics.Append(req.State.Get(ctx, &priorStateData)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+
+				upgradedStateData := cluster{
+					Id:            priorStateData.Id,
+					InsertedAt:    priorStateData.InsertedAt,
+					Name:          priorStateData.Name,
+					Handle:        priorStateData.Handle,
+					ProjectId:     priorStateData.ProjectId,
+					Detach:        priorStateData.Detach,
+					Protect:       priorStateData.Protect,
+					Tags:          priorStateData.Tags,
+					Metadata:      priorStateData.Metadata,
+					Bindings:      priorStateData.Bindings,
+					HelmRepoUrl:   priorStateData.HelmRepoUrl,
+					HelmValues:    priorStateData.HelmValues,
+					Kubeconfig:    priorStateData.Kubeconfig,
+					AgentDeployed: types.BoolValue(true),
+				}
+
+				resp.Diagnostics.Append(resp.State.Set(ctx, upgradedStateData)...)
 			},
 		},
 	}
