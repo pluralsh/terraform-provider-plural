@@ -15,12 +15,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-const clusterSchemaVersion int32 = 1
-
 func (r *clusterResource) schema() schema.Schema {
 	return schema.Schema{
 		Description:         "A representation of a cluster you can deploy to.",
 		MarkdownDescription: "A representation of a cluster you can deploy to.",
+		Version:             1,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description:         "Internal identifier of this cluster.",
@@ -142,11 +141,6 @@ func (r *clusterResource) schema() schema.Schema {
 				MarkdownDescription: "Whether the agent was deployed to the cluster.",
 				Computed:            true,
 				PlanModifiers:       []planmodifier.Bool{resource.EnsureAgent()},
-			},
-			"state_version": schema.Int32Attribute{
-				Description:         "Version of the cluster resource schema in state. Helpful for migrations.",
-				MarkdownDescription: "Version of the cluster resource schema in state. Helpful for migrations.",
-				Computed:            true,
 			},
 		},
 	}
