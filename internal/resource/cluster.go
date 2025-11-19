@@ -11,12 +11,21 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/pluralsh/plural-cli/pkg/console"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 var _ resource.Resource = &clusterResource{}
 var _ resource.ResourceWithImportState = &clusterResource{}
+var _ resource.ResourceWithUpgradeState = &clusterResource{}
 
 func NewClusterResource() resource.Resource {
 	return &clusterResource{}
@@ -68,21 +77,20 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create cluster, got error: %s", err))
 		return
 	}
+	data.FromCreate(result, ctx, &resp.Diagnostics)
 
 	if r.kubeClient != nil || data.HasKubeconfig() {
-		if result.CreateCluster.DeployToken == nil {
-			resp.Diagnostics.AddError("Client Error", "Unable to fetch cluster deploy token")
-			return
-		}
-
-		if err = InstallOrUpgradeAgent(ctx, r.client, data.GetKubeconfig(), r.kubeClient, data.HelmRepoUrl.ValueString(),
-			data.HelmValues.ValueStringPointer(), r.consoleUrl, lo.FromPtr(result.CreateCluster.DeployToken), result.CreateCluster.ID, &resp.Diagnostics); err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
-			return
+		err = InstallOrUpgradeAgent(ctx, r.client, data.GetKubeconfig(), r.kubeClient, data.HelmRepoUrl.ValueString(),
+			data.HelmValues.ValueStringPointer(), r.consoleUrl, lo.FromPtr(result.CreateCluster.DeployToken),
+			result.CreateCluster.ID, &resp.Diagnostics)
+		if err != nil {
+			resp.Diagnostics.AddWarning("Agent Installation Failed", fmt.Sprintf(
+				"Unable to install agent, in order to retry run `terraform apply` again. Got error: %s", err))
+		} else {
+			data.AgentDeployed = types.BoolValue(true)
 		}
 	}
 
-	data.FromCreate(result, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -142,7 +150,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	kubeconfigChanged := data.HasKubeconfig() && !data.GetKubeconfig().Unchanged(state.GetKubeconfig())
-	reinstallable := !data.HelmRepoUrl.Equal(state.HelmRepoUrl) || kubeconfigChanged
+	reinstallable := !data.AgentDeployed.ValueBool() || !data.HelmRepoUrl.Equal(state.HelmRepoUrl) || kubeconfigChanged
 	if reinstallable && (r.kubeClient != nil || data.HasKubeconfig()) {
 		clusterWithToken, err := r.client.GetClusterWithToken(ctx, data.Id.ValueStringPointer(), nil)
 		if err != nil {
@@ -155,6 +163,8 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
 			return
 		}
+
+		data.AgentDeployed = types.BoolValue(true)
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -209,4 +219,141 @@ func (r *clusterResource) ImportState(ctx context.Context, req resource.ImportSt
 	}
 
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *clusterResource) UpgradeState(_ context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		// State upgrade from 0 to 1
+		0: {
+			PriorSchema: &schema.Schema{
+				Version: 0,
+				Attributes: map[string]schema.Attribute{
+					"id": schema.StringAttribute{
+						Computed:      true,
+						PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+					},
+					"inserted_at": schema.StringAttribute{
+						Computed:      true,
+						PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+					},
+					"name": schema.StringAttribute{
+						Required:      true,
+						PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+					},
+					"handle": schema.StringAttribute{
+						Optional:      true,
+						Computed:      true,
+						PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+					},
+					"project_id": schema.StringAttribute{
+						Optional: true,
+					},
+					"detach": schema.BoolAttribute{
+						Optional: true,
+						Computed: true,
+						Default:  booldefault.StaticBool(false),
+					},
+					"metadata": schema.StringAttribute{
+						Optional:      true,
+						Computed:      true,
+						Default:       stringdefault.StaticString("{}"),
+						PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+					},
+					"helm_repo_url": schema.StringAttribute{
+						Optional: true,
+						Computed: true,
+						Default:  stringdefault.StaticString(console.RepoUrl),
+					},
+					"helm_values": schema.StringAttribute{
+						Optional: true,
+					},
+					"kubeconfig": common.KubeconfigResourceSchema(),
+					"protect": schema.BoolAttribute{
+						Optional: true,
+						Computed: true,
+						Default:  booldefault.StaticBool(false),
+					},
+					"tags": schema.MapAttribute{
+						Optional:    true,
+						ElementType: types.StringType,
+					},
+					"bindings": schema.SingleNestedAttribute{
+						Optional: true,
+						Attributes: map[string]schema.Attribute{
+							"read": schema.SetNestedAttribute{
+								Optional: true,
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"group_id": schema.StringAttribute{Optional: true},
+										"id":       schema.StringAttribute{Optional: true},
+										"user_id":  schema.StringAttribute{Optional: true},
+									},
+								},
+							},
+							"write": schema.SetNestedAttribute{
+								Optional:            true,
+								Description:         "Write policies of this cluster.",
+								MarkdownDescription: "Write policies of this cluster.",
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"group_id": schema.StringAttribute{
+											Optional: true,
+										},
+										"id": schema.StringAttribute{
+											Optional: true,
+										},
+										"user_id": schema.StringAttribute{
+											Optional: true,
+										},
+									},
+								},
+							},
+						},
+						PlanModifiers: []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
+					},
+				},
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var priorStateData struct {
+					Id          types.String       `tfsdk:"id"`
+					InsertedAt  types.String       `tfsdk:"inserted_at"`
+					Name        types.String       `tfsdk:"name"`
+					Handle      types.String       `tfsdk:"handle"`
+					ProjectId   types.String       `tfsdk:"project_id"`
+					Detach      types.Bool         `tfsdk:"detach"`
+					Protect     types.Bool         `tfsdk:"protect"`
+					Tags        types.Map          `tfsdk:"tags"`
+					Metadata    types.String       `tfsdk:"metadata"`
+					Bindings    *common.Bindings   `tfsdk:"bindings"`
+					HelmRepoUrl types.String       `tfsdk:"helm_repo_url"`
+					HelmValues  types.String       `tfsdk:"helm_values"`
+					Kubeconfig  *common.Kubeconfig `tfsdk:"kubeconfig"`
+				}
+
+				resp.Diagnostics.Append(req.State.Get(ctx, &priorStateData)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+
+				upgradedStateData := cluster{
+					Id:            priorStateData.Id,
+					InsertedAt:    priorStateData.InsertedAt,
+					Name:          priorStateData.Name,
+					Handle:        priorStateData.Handle,
+					ProjectId:     priorStateData.ProjectId,
+					Detach:        priorStateData.Detach,
+					Protect:       priorStateData.Protect,
+					Tags:          priorStateData.Tags,
+					Metadata:      priorStateData.Metadata,
+					Bindings:      priorStateData.Bindings,
+					HelmRepoUrl:   priorStateData.HelmRepoUrl,
+					HelmValues:    priorStateData.HelmValues,
+					Kubeconfig:    priorStateData.Kubeconfig,
+					AgentDeployed: types.BoolValue(true),
+				}
+
+				resp.Diagnostics.Append(resp.State.Set(ctx, upgradedStateData)...)
+			},
+		},
+	}
 }

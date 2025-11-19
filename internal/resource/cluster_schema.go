@@ -2,6 +2,7 @@ package resource
 
 import (
 	"terraform-provider-plural/internal/common"
+	resource "terraform-provider-plural/internal/planmodifier"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/pluralsh/plural-cli/pkg/console"
@@ -18,6 +19,7 @@ func (r *clusterResource) schema() schema.Schema {
 	return schema.Schema{
 		Description:         "A representation of a cluster you can deploy to.",
 		MarkdownDescription: "A representation of a cluster you can deploy to.",
+		Version:             1,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description:         "Internal identifier of this cluster.",
@@ -133,6 +135,12 @@ func (r *clusterResource) schema() schema.Schema {
 					},
 				},
 				PlanModifiers: []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
+			},
+			"agent_deployed": schema.BoolAttribute{
+				Description:         "Whether the agent was deployed to the cluster.",
+				MarkdownDescription: "Whether the agent was deployed to the cluster.",
+				Computed:            true,
+				PlanModifiers:       []planmodifier.Bool{resource.EnsureAgent()},
 			},
 		},
 	}
