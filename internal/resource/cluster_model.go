@@ -26,8 +26,8 @@ type cluster struct {
 	HelmRepoUrl   types.String       `tfsdk:"helm_repo_url"`
 	HelmValues    types.String       `tfsdk:"helm_values"`
 	Kubeconfig    *common.Kubeconfig `tfsdk:"kubeconfig"`
-	Created       types.Bool         `tfsdk:"created"`
 	AgentDeployed types.Bool         `tfsdk:"agent_deployed"`
+	StateVersion  types.Int32        `tfsdk:"state_version"`
 }
 
 func (c *cluster) TagsAttribute(ctx context.Context, d *diag.Diagnostics) []*console.TagAttributes {
@@ -96,8 +96,8 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, _ context.Context, d *di
 	c.Handle = types.StringPointerValue(cc.CreateCluster.Handle)
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
 	c.Tags = common.TagsFrom(cc.CreateCluster.Tags, c.Tags, d)
-	c.Created = types.BoolValue(true)
 	c.AgentDeployed = types.BoolValue(false)
+	c.StateVersion = types.Int32Value(clusterSchemaVersion)
 }
 
 func (c *cluster) ClusterVersionFrom(prov *console.ClusterProviderFragment, version, currentVersion *string) types.String {

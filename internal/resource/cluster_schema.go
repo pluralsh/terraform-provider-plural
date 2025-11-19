@@ -15,6 +15,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+const clusterSchemaVersion int32 = 1
+
 func (r *clusterResource) schema() schema.Schema {
 	return schema.Schema{
 		Description:         "A representation of a cluster you can deploy to.",
@@ -135,16 +137,16 @@ func (r *clusterResource) schema() schema.Schema {
 				},
 				PlanModifiers: []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 			},
-			"created": schema.BoolAttribute{
-				Description:         "Whether the cluster was created in the Console API.",
-				MarkdownDescription: "Whether the cluster was created in the Console API.",
-				Computed:            true,
-			},
 			"agent_deployed": schema.BoolAttribute{
 				Description:         "Whether the agent was deployed to the cluster.",
 				MarkdownDescription: "Whether the agent was deployed to the cluster.",
 				Computed:            true,
 				PlanModifiers:       []planmodifier.Bool{resource.EnsureAgent()},
+			},
+			"state_version": schema.Int32Attribute{
+				Description:         "Version of the cluster resource schema in state. Helpful for migrations.",
+				MarkdownDescription: "Version of the cluster resource schema in state. Helpful for migrations.",
+				Computed:            true,
 			},
 		},
 	}

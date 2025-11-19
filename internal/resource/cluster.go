@@ -141,6 +141,11 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
+	// Avoid agent redeploy on existing clusters with different state versions (without the agent deployed field).
+	if data.StateVersion.ValueInt32() != clusterSchemaVersion {
+		data.AgentDeployed = types.BoolValue(true)
+	}
+
 	kubeconfigChanged := data.HasKubeconfig() && !data.GetKubeconfig().Unchanged(state.GetKubeconfig())
 	reinstallable := !data.AgentDeployed.ValueBool() || !data.HelmRepoUrl.Equal(state.HelmRepoUrl) || kubeconfigChanged
 	if reinstallable && (r.kubeClient != nil || data.HasKubeconfig()) {
