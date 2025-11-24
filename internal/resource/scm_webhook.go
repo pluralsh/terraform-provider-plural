@@ -38,7 +38,7 @@ func (r *SCMWebhookResource) Metadata(_ context.Context, req resource.MetadataRe
 
 func (r *SCMWebhookResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "SCM connection is a container for credentials to a SCM provider.",
+		MarkdownDescription: "SCM webhook resource.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
