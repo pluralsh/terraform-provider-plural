@@ -19,9 +19,9 @@ Infrastructure stack provides a scalable framework to manage infrastructure as c
 
 - `cluster_id` (String) The cluster on which the stack will be applied.
 - `configuration` (Attributes) Stack configuration. (see [below for nested schema](#nestedatt--configuration))
-- `name` (String) Name of this stack. If not provided, the name from InfrastructureStack.ObjectMeta will be used.
+- `name` (String) Name of this stack.
 - `repository` (Attributes) Repository information used to pull stack. (see [below for nested schema](#nestedatt--repository))
-- `type` (String) Type specifies the IaC tool to use for executing the stack. One of TERRAFORM, ANSIBLE, CUSTOM. Allowed values include `ANSIBLE` and `TERRAFORM`.
+- `type` (String) A type for the stack, specifies the tool to use to apply it. Allowed values include `ANSIBLE` and `TERRAFORM`.
 
 ### Optional
 

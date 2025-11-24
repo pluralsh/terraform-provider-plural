@@ -28,17 +28,16 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"name": schema.StringAttribute{
-				Description:         "Name of this stack. If not provided, the name from InfrastructureStack.ObjectMeta will be used.",
-				MarkdownDescription: "Name of this stack. If not provided, the name from InfrastructureStack.ObjectMeta will be used.",
+				Description:         "Name of this stack.",
+				MarkdownDescription: "Name of this stack.",
 				Required:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"type": schema.StringAttribute{
-				Description:         fmt.Sprintf("Type specifies the IaC tool to use for executing the stack. One of TERRAFORM, ANSIBLE, CUSTOM. Allowed values include \"%s\" and \"%s\".", gqlclient.StackTypeAnsible, gqlclient.StackTypeTerraform),
-				MarkdownDescription: fmt.Sprintf("Type specifies the IaC tool to use for executing the stack. One of TERRAFORM, ANSIBLE, CUSTOM. Allowed values include `%s` and `%s`.", gqlclient.StackTypeAnsible, gqlclient.StackTypeTerraform),
-				Required:            true,
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
-				Validators:          []validator.String{stringvalidator.OneOf(string(gqlclient.StackTypeAnsible), string(gqlclient.StackTypeTerraform))},
+				Description:         fmt.Sprintf("A type for the stack, specifies the tool to use to apply it. Allowed values include \"%s\" and \"%s\".", gqlclient.StackTypeAnsible, gqlclient.StackTypeTerraform),
+				MarkdownDescription: fmt.Sprintf("A type for the stack, specifies the tool to use to apply it. Allowed values include `%s` and `%s`.", gqlclient.StackTypeAnsible, gqlclient.StackTypeTerraform), Required: true,
+				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+				Validators:    []validator.String{stringvalidator.OneOf(string(gqlclient.StackTypeAnsible), string(gqlclient.StackTypeTerraform))},
 			},
 			"approval": schema.BoolAttribute{
 				Description:         "Determines whether to require approval.",
