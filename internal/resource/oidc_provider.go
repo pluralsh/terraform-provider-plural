@@ -49,8 +49,8 @@ func (r *OIDCProviderResource) Schema(_ context.Context, _ resource.SchemaReques
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"name": schema.StringAttribute{
-				Description:         "Name of this OIDC provider. If not provided, the name from the resource metadata will be used.",
-				MarkdownDescription: "Name of this OIDC provider. If not provided, the name from the resource metadata will be used.",
+				Description:         "Name of this OIDC provider.",
+				MarkdownDescription: "Name of this OIDC provider.",
 				Required:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},

@@ -17,7 +17,7 @@ OIDC provider configures OpenID Connect (OIDC) authentication for external appli
 
 ### Required
 
-- `name` (String) Name of this OIDC provider. If not provided, the name from the resource metadata will be used.
+- `name` (String) Name of this OIDC provider.
 - `type` (String)
 
 ### Optional
