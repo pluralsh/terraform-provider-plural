@@ -3,12 +3,12 @@
 page_title: "plural_service_account Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  service account resource
+  Service account provides a programmatic identity for automated processes and tools to interact with the Plural Console API. Unlike user accounts, service accounts are designed for non-human authentication and can be scoped to specific APIs and resources for secure, limited access. This enables to authenticate and perform operations within defined permissions boundaries.
 ---
 
 # plural_service_account (Resource)
 
-service account resource
+Service account provides a programmatic identity for automated processes and tools to interact with the Plural Console API. Unlike user accounts, service accounts are designed for non-human authentication and can be scoped to specific APIs and resources for secure, limited access. This enables to authenticate and perform operations within defined permissions boundaries.
 
 
 

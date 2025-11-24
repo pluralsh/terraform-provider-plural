@@ -3,12 +3,12 @@
 page_title: "plural_service_context Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  A representation of a service context that can be reused during service deployment templating.
+  Service context provides a reusable bundle of configuration. It enables sharing configuration data across multiple services. This is particularly useful for passing outputs from infrastructure-as-code tools to Kubernetes services.
 ---
 
 # plural_service_context (Resource)
 
-A representation of a service context that can be reused during service deployment templating.
+Service context provides a reusable bundle of configuration. It enables sharing configuration data across multiple services. This is particularly useful for passing outputs from infrastructure-as-code tools to Kubernetes services.
 
 
 

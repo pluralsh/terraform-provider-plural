@@ -36,7 +36,7 @@ func (r *GroupMemberResource) Metadata(
 
 func (r *GroupMemberResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "GroupMember resource",
+		MarkdownDescription: "Group member represents the membership relationship between a user and a group. It enables user assignment to groups for access control and permission management within the Plural Console.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,

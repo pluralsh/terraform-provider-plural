@@ -38,7 +38,7 @@ func (r *GlobalServiceResource) Metadata(
 
 func (r *GlobalServiceResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "GlobalService resource",
+		MarkdownDescription: "GlobalService handles the deployment and management of services across multiple clusters. It provides a centralized way to define service deployments that should be replicated across a fleet of Kubernetes clusters, with flexible targeting based on cluster properties, tags, and organizational boundaries.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -50,12 +50,13 @@ func (r *GlobalServiceResource) Schema(_ context.Context, _ resource.SchemaReque
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
-				Description:         "Name of this GlobalService.",
-				MarkdownDescription: "Name of this GlobalService.",
+				Description:         "Name of this service. If not provided, the name from GlobalService.ObjectMeta will be used.",
+				MarkdownDescription: "Name of this service. If not provided, the name from GlobalService.ObjectMeta will be used.",
 			},
 			"distro": schema.StringAttribute{
-				Optional:    true,
-				Description: "Kubernetes distribution for this global servie, eg EKS, AKS, GKE, K3S.",
+				Optional:            true,
+				Description:         "Kubernetes distribution for this global service, eg EKS, AKS, GKE, K3S.",
+				MarkdownDescription: "Kubernetes distribution for this global service, eg EKS, AKS, GKE, K3S.",
 			},
 			"provider_id": schema.StringAttribute{
 				Optional:            true,
@@ -68,8 +69,8 @@ func (r *GlobalServiceResource) Schema(_ context.Context, _ resource.SchemaReque
 				MarkdownDescription: "The id of the service that will be replicated by this global service.",
 			},
 			"tags": schema.MapAttribute{
-				Description:         "Key-value tags used to target clusters for this global service.",
-				MarkdownDescription: "Key-value tags used to target clusters for this global service.",
+				Description:         "Tags specify a set of key-value pairs used to select target clusters for this global service. Only clusters that match all specified tags will be included in the deployment scope. This provides a flexible mechanism for targeting specific cluster groups or environments.",
+				MarkdownDescription: "Tags specify a set of key-value pairs used to select target clusters for this global service. Only clusters that match all specified tags will be included in the deployment scope. This provides a flexible mechanism for targeting specific cluster groups or environments.",
 				Optional:            true,
 				ElementType:         types.StringType,
 				PlanModifiers:       []planmodifier.Map{mapplanmodifier.RequiresReplace()},

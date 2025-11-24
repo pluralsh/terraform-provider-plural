@@ -3,12 +3,12 @@
 page_title: "plural_scm_webhook Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  
+  SCM connection is a container for credentials to a SCM provider.
 ---
 
 # plural_scm_webhook (Resource)
 
-
+SCM connection is a container for credentials to a SCM provider.
 
 
 

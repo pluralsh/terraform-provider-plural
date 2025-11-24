@@ -2,12 +2,12 @@
 page_title: "Resource plural_cluster - terraform-provider-plural"
 subcategory: ""
 description: |-
-  A representation of a cluster you can deploy to.
+  Cluster represents a Kubernetes cluster managed by the Plural Console for continuous deployment. Clusters serve as deployment targets for services and can be either management clusters (hosting the Plural Console and operators) or workload clusters (running application workloads). The Console tracks cluster health, versions, and coordinates service deployments across the fleet.
 ---
 
 # plural_cluster (Resource)
 
-A representation of a cluster you can deploy to.
+Cluster represents a Kubernetes cluster managed by the Plural Console for continuous deployment. Clusters serve as deployment targets for services and can be either management clusters (hosting the Plural Console and operators) or workload clusters (running application workloads). The Console tracks cluster health, versions, and coordinates service deployments across the fleet.
 
 
 

@@ -36,7 +36,7 @@ func (r *GroupResource) Metadata(
 
 func (r *GroupResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "group resource",
+		MarkdownDescription: "Group represents a group of users within the system, managed via the Console API. It includes specifications for the group's name and description.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,

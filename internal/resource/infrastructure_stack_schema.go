@@ -19,6 +19,7 @@ import (
 
 func (r *InfrastructureStackResource) schema() schema.Schema {
 	return schema.Schema{
+		MarkdownDescription: "Infrastructure stack provides a scalable framework to manage infrastructure as code with a K8s-friendly, API-driven approach. It declaratively defines a stack with a type, Git repository location, and target cluster for execution. On each commit to the tracked repository, a run is created which the Plural deployment operator detects and executes on the targeted cluster, enabling fine-grained permissions and network location control for IaC runs.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description:         "Internal identifier of this stack.",
@@ -27,14 +28,14 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"name": schema.StringAttribute{
-				Description:         "Human-readable name of this stack.",
-				MarkdownDescription: "Human-readable name of this stack.",
+				Description:         "Name of this stack. If not provided, the name from InfrastructureStack.ObjectMeta will be used.",
+				MarkdownDescription: "Name of this stack. If not provided, the name from InfrastructureStack.ObjectMeta will be used.",
 				Required:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"type": schema.StringAttribute{
-				Description:         fmt.Sprintf("A type for the stack, specifies the tool to use to apply it. Allowed values include \"%s\" and \"%s\".", gqlclient.StackTypeAnsible, gqlclient.StackTypeTerraform),
-				MarkdownDescription: fmt.Sprintf("A type for the stack, specifies the tool to use to apply it. Allowed values include `%s` and `%s`.", gqlclient.StackTypeAnsible, gqlclient.StackTypeTerraform),
+				Description:         fmt.Sprintf("Type specifies the IaC tool to use for executing the stack. One of TERRAFORM, ANSIBLE, CUSTOM. Allowed values include \"%s\" and \"%s\".", gqlclient.StackTypeAnsible, gqlclient.StackTypeTerraform),
+				MarkdownDescription: fmt.Sprintf("Type specifies the IaC tool to use for executing the stack. One of TERRAFORM, ANSIBLE, CUSTOM. Allowed values include `%s` and `%s`.", gqlclient.StackTypeAnsible, gqlclient.StackTypeTerraform),
 				Required:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				Validators:          []validator.String{stringvalidator.OneOf(string(gqlclient.StackTypeAnsible), string(gqlclient.StackTypeTerraform))},

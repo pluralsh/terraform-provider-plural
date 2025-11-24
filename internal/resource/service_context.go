@@ -35,7 +35,7 @@ func (r *ServiceContextResource) Metadata(_ context.Context, req resource.Metada
 
 func (r *ServiceContextResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "A representation of a service context that can be reused during service deployment templating.",
+		MarkdownDescription: "Service context provides a reusable bundle of configuration. It enables sharing configuration data across multiple services. This is particularly useful for passing outputs from infrastructure-as-code tools to Kubernetes services.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,

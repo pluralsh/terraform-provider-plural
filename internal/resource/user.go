@@ -36,7 +36,7 @@ func (r *UserResource) Metadata(
 
 func (r *UserResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "user resource",
+		MarkdownDescription: "User account within the Plural Console.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description:         "Internal identifier of this user.",
