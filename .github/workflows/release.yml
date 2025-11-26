@@ -3,6 +3,9 @@ on:
   push:
     tags:
       - 'v*'
+  pull_request:
+    branches:
+      - main # todo remove
 permissions:
   contents: write
 jobs:
@@ -55,7 +58,6 @@ jobs:
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-
   release:
     name: Release
     runs-on: ubuntu-latest
@@ -66,7 +68,7 @@ jobs:
       - uses: jlumbroso/free-disk-space@v1.3.1
         with:
           tool-cache: false
-      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: actions/setup-go@v6
@@ -99,7 +101,7 @@ jobs:
         with:
           distribution: goreleaser-pro
           version: '~> v2'
-          args: continue --merge
+          args: continue --merge --skip-validate --skip-publish # todo remove skip args
         env:
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
