@@ -3,9 +3,6 @@ on:
   push:
     tags:
       - 'v*'
-  pull_request:
-    branches:
-      - main # todo remove
 permissions:
   contents: write
 jobs:
@@ -99,7 +96,7 @@ jobs:
         with:
           distribution: goreleaser-pro
           version: '~> v2'
-          args: continue --merge --skip=publish # todo remove skip args
+          args: continue --merge
         env:
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
