@@ -99,7 +99,7 @@ jobs:
         with:
           distribution: goreleaser-pro
           version: '~> v2'
-          args: continue --merge --skip-validate --skip-publish # todo remove skip args
+          args: continue --merge --skip-publish # todo remove skip args
         env:
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
