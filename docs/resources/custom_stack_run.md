@@ -3,12 +3,12 @@
 page_title: "plural_custom_stack_run Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  
+  A custom stack run resource that allows users to define custom commands that can be executed as part of a stack run.
 ---
 
 # plural_custom_stack_run (Resource)
 
-
+A custom stack run resource that allows users to define custom commands that can be executed as part of a stack run.
 
 
 

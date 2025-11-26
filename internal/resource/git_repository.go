@@ -39,7 +39,7 @@ func (r *GitRepositoryResource) Metadata(
 
 func (r *GitRepositoryResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "GitRepository resource",
+		MarkdownDescription: "GitRepository provides Git-based source control integration for Plural's GitOps workflows. It represents a Git repository available for deployments, enabling automated fetching of manifests, IaC code, and configuration from version-controlled sources.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,

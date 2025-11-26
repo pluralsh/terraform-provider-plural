@@ -3,12 +3,12 @@
 page_title: "plural_scm_webhook Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  
+  SCM webhook resource.
 ---
 
 # plural_scm_webhook (Resource)
 
-
+SCM webhook resource.
 
 
 

@@ -3,12 +3,12 @@
 page_title: "plural_git_repository Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  GitRepository resource
+  GitRepository provides Git-based source control integration for Plural's GitOps workflows. It represents a Git repository available for deployments, enabling automated fetching of manifests, IaC code, and configuration from version-controlled sources.
 ---
 
 # plural_git_repository (Resource)
 
-GitRepository resource
+GitRepository provides Git-based source control integration for Plural's GitOps workflows. It represents a Git repository available for deployments, enabling automated fetching of manifests, IaC code, and configuration from version-controlled sources.
 
 
 

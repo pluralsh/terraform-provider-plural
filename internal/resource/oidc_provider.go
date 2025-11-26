@@ -40,6 +40,7 @@ func (r *OIDCProviderResource) Metadata(_ context.Context, req resource.Metadata
 
 func (r *OIDCProviderResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		MarkdownDescription: "OIDC provider configures OpenID Connect (OIDC) authentication for external applications and services. It enables third-party applications to authenticate users through the Plural Console using the standard OIDC protocol. This is useful for integrating external tools, dashboards, or custom applications with Plural's authentication system while maintaining centralized user management and access control. Common use cases include connecting monitoring dashboards, CI/CD tools, or custom applications that need to authenticate users against the Plural Console's user directory.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description:         "Internal identifier of this OIDC provider.",
@@ -48,8 +49,8 @@ func (r *OIDCProviderResource) Schema(_ context.Context, _ resource.SchemaReques
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"name": schema.StringAttribute{
-				Description:         "Human-readable name of this OIDC provider.",
-				MarkdownDescription: "Human-readable name of this OIDC provider.",
+				Description:         "Name of this OIDC provider.",
+				MarkdownDescription: "Name of this OIDC provider.",
 				Required:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},

@@ -3,12 +3,12 @@
 page_title: "plural_infrastructure_stack Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  
+  Infrastructure stack provides a scalable framework to manage infrastructure as code with a K8s-friendly, API-driven approach. It declaratively defines a stack with a type, Git repository location, and target cluster for execution. On each commit to the tracked repository, a run is created which the Plural deployment operator detects and executes on the targeted cluster, enabling fine-grained permissions and network location control for IaC runs.
 ---
 
 # plural_infrastructure_stack (Resource)
 
-
+Infrastructure stack provides a scalable framework to manage infrastructure as code with a K8s-friendly, API-driven approach. It declaratively defines a stack with a type, Git repository location, and target cluster for execution. On each commit to the tracked repository, a run is created which the Plural deployment operator detects and executes on the targeted cluster, enabling fine-grained permissions and network location control for IaC runs.
 
 
 
@@ -19,7 +19,7 @@ description: |-
 
 - `cluster_id` (String) The cluster on which the stack will be applied.
 - `configuration` (Attributes) Stack configuration. (see [below for nested schema](#nestedatt--configuration))
-- `name` (String) Human-readable name of this stack.
+- `name` (String) Name of this stack.
 - `repository` (Attributes) Repository information used to pull stack. (see [below for nested schema](#nestedatt--repository))
 - `type` (String) A type for the stack, specifies the tool to use to apply it. Allowed values include `ANSIBLE` and `TERRAFORM`.
 

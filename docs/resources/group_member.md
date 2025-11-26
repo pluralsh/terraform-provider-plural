@@ -3,12 +3,12 @@
 page_title: "plural_group_member Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  GroupMember resource
+  Group member represents the membership relationship between a user and a group. It enables user assignment to groups for access control and permission management within the Plural Console.
 ---
 
 # plural_group_member (Resource)
 
-GroupMember resource
+Group member represents the membership relationship between a user and a group. It enables user assignment to groups for access control and permission management within the Plural Console.
 
 
 

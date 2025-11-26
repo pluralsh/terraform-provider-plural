@@ -3,12 +3,12 @@
 page_title: "plural_pr_automation_trigger Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  
+  PR automation trigger initiates the execution of a PR automation with specific parameters. This resource enables automated, event-driven, or scheduled generation of pull requests by providing configuration context and branch information to an existing PR automation.
 ---
 
 # plural_pr_automation_trigger (Resource)
 
-
+PR automation trigger initiates the execution of a PR automation with specific parameters. This resource enables automated, event-driven, or scheduled generation of pull requests by providing configuration context and branch information to an existing PR automation.
 
 
 

@@ -3,12 +3,12 @@
 page_title: "plural_project Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  
+  Project provides organizational segmentation and multi-tenancy capabilities within Plural Console. It serves as a unit of an organization to control permissions for sets of resources, enabling enterprise-grade fleet management while maintaining security boundaries. Projects allow resource owners to manage their domain without accessing resources outside their scope, supporting principles of least privilege and preventing credential sprawl across the entire fleet.
 ---
 
 # plural_project (Resource)
 
-
+Project provides organizational segmentation and multi-tenancy capabilities within Plural Console. It serves as a unit of an organization to control permissions for sets of resources, enabling enterprise-grade fleet management while maintaining security boundaries. Projects allow resource owners to manage their domain without accessing resources outside their scope, supporting principles of least privilege and preventing credential sprawl across the entire fleet.
 
 
 
@@ -21,8 +21,8 @@ description: |-
 
 ### Optional
 
-- `bindings` (Attributes) Read and write policies of this project. (see [below for nested schema](#nestedatt--bindings))
-- `description` (String) Description of this project.
+- `bindings` (Attributes) Bindings contain read and write policies that control access to all resources within this project, enabling fine-grained permission management and multi-tenancy. (see [below for nested schema](#nestedatt--bindings))
+- `description` (String) Description provides a human-readable explanation of this project's purpose and the resources it manages within the organizational hierarchy.
 
 ### Read-Only
 

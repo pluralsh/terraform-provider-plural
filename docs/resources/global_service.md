@@ -3,12 +3,12 @@
 page_title: "plural_global_service Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  GlobalService resource
+  GlobalService handles the deployment and management of services across multiple clusters. It provides a centralized way to define service deployments that should be replicated across a fleet of Kubernetes clusters, with flexible targeting based on cluster properties, tags, and organizational boundaries.
 ---
 
 # plural_global_service (Resource)
 
-GlobalService resource
+GlobalService handles the deployment and management of services across multiple clusters. It provides a centralized way to define service deployments that should be replicated across a fleet of Kubernetes clusters, with flexible targeting based on cluster properties, tags, and organizational boundaries.
 
 
 
@@ -17,14 +17,14 @@ GlobalService resource
 
 ### Required
 
-- `name` (String) Name of this GlobalService.
+- `name` (String) Name of this service. If not provided, the name from GlobalService.ObjectMeta will be used.
 - `service_id` (String) The id of the service that will be replicated by this global service.
 
 ### Optional
 
-- `distro` (String) Kubernetes distribution for this global servie, eg EKS, AKS, GKE, K3S.
+- `distro` (String) Kubernetes distribution for this global service, eg EKS, AKS, GKE, K3S.
 - `provider_id` (String) Id of a CAPI provider that this global service targets.
-- `tags` (Map of String) Key-value tags used to target clusters for this global service.
+- `tags` (Map of String) Tags specify a set of key-value pairs used to select target clusters for this global service. Only clusters that match all specified tags will be included in the deployment scope. This provides a flexible mechanism for targeting specific cluster groups or environments.
 
 ### Read-Only
 
