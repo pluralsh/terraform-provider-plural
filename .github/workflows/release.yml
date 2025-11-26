@@ -1,15 +1,10 @@
 name: Release
-
 on:
   push:
     tags:
       - 'v*'
-
 permissions:
   contents: write
-  id-token: write
-  packages: write
-
 jobs:
   prepare:
     name: Prepare
@@ -71,7 +66,7 @@ jobs:
       - uses: jlumbroso/free-disk-space@v1.3.1
         with:
           tool-cache: false
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
         with:
           fetch-depth: 0
       - uses: actions/setup-go@v6

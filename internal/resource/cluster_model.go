@@ -13,19 +13,20 @@ import (
 )
 
 type cluster struct {
-	Id          types.String       `tfsdk:"id"`
-	InsertedAt  types.String       `tfsdk:"inserted_at"`
-	Name        types.String       `tfsdk:"name"`
-	Handle      types.String       `tfsdk:"handle"`
-	ProjectId   types.String       `tfsdk:"project_id"`
-	Detach      types.Bool         `tfsdk:"detach"`
-	Protect     types.Bool         `tfsdk:"protect"`
-	Tags        types.Map          `tfsdk:"tags"`
-	Metadata    types.String       `tfsdk:"metadata"`
-	Bindings    *common.Bindings   `tfsdk:"bindings"`
-	HelmRepoUrl types.String       `tfsdk:"helm_repo_url"`
-	HelmValues  types.String       `tfsdk:"helm_values"`
-	Kubeconfig  *common.Kubeconfig `tfsdk:"kubeconfig"`
+	Id            types.String       `tfsdk:"id"`
+	InsertedAt    types.String       `tfsdk:"inserted_at"`
+	Name          types.String       `tfsdk:"name"`
+	Handle        types.String       `tfsdk:"handle"`
+	ProjectId     types.String       `tfsdk:"project_id"`
+	Detach        types.Bool         `tfsdk:"detach"`
+	Protect       types.Bool         `tfsdk:"protect"`
+	Tags          types.Map          `tfsdk:"tags"`
+	Metadata      types.String       `tfsdk:"metadata"`
+	Bindings      *common.Bindings   `tfsdk:"bindings"`
+	HelmRepoUrl   types.String       `tfsdk:"helm_repo_url"`
+	HelmValues    types.String       `tfsdk:"helm_values"`
+	Kubeconfig    *common.Kubeconfig `tfsdk:"kubeconfig"`
+	AgentDeployed types.Bool         `tfsdk:"agent_deployed"`
 }
 
 func (c *cluster) TagsAttribute(ctx context.Context, d *diag.Diagnostics) []*console.TagAttributes {
@@ -94,6 +95,7 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, _ context.Context, d *di
 	c.Handle = types.StringPointerValue(cc.CreateCluster.Handle)
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
 	c.Tags = common.TagsFrom(cc.CreateCluster.Tags, c.Tags, d)
+	c.AgentDeployed = types.BoolValue(false)
 }
 
 func (c *cluster) ClusterVersionFrom(prov *console.ClusterProviderFragment, version, currentVersion *string) types.String {
