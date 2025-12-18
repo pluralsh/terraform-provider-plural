@@ -3,12 +3,12 @@
 page_title: "plural_service_wait Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  
+  Service wait provides a utility resource to wait for a service deployment to reach a healthy and synchronized state before proceeding. This is useful for orchestrating dependencies between services and ensuring deployment order.
 ---
 
 # plural_service_wait (Resource)
 
-
+Service wait provides a utility resource to wait for a service deployment to reach a healthy and synchronized state before proceeding. This is useful for orchestrating dependencies between services and ensuring deployment order.
 
 
 

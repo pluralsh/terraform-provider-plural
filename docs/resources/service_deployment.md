@@ -3,12 +3,12 @@
 page_title: "plural_service_deployment Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  
+  Service deployment represents a Kubernetes service deployed and managed by Plural Console. It defines how applications are deployed to clusters using GitOps principles, supporting multiple deployment methods including Helm charts, Kustomize, and raw manifests. Services can be templated, configured with secrets and dependencies, and monitored for health and sync status across the deployment lifecycle.
 ---
 
 # plural_service_deployment (Resource)
 
-
+Service deployment represents a Kubernetes service deployed and managed by Plural Console. It defines how applications are deployed to clusters using GitOps principles, supporting multiple deployment methods including Helm charts, Kustomize, and raw manifests. Services can be templated, configured with secrets and dependencies, and monitored for health and sync status across the deployment lifecycle.
 
 
 

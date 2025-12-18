@@ -34,7 +34,7 @@ func (r *rbacResource) Metadata(_ context.Context, req resource.MetadataRequest,
 
 func (r *rbacResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "A representation of rbac settings for a provider or cluster.",
+		MarkdownDescription: "RBAC resource provides role-based access control settings for clusters and services. It defines read and write bindings to control user and group permissions for accessing and managing resources within the Plural Console.",
 		Attributes: map[string]schema.Attribute{
 			"cluster_id": schema.StringAttribute{
 				Description:         "The cluster id for these rbac settings",

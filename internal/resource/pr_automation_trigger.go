@@ -35,6 +35,7 @@ func (in *prAutomationTriggerResource) Metadata(_ context.Context, request resou
 
 func (in *prAutomationTriggerResource) Schema(_ context.Context, _ resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
+		MarkdownDescription: "PR automation trigger initiates the execution of a PR automation with specific parameters. This resource enables automated, event-driven, or scheduled generation of pull requests by providing configuration context and branch information to an existing PR automation.",
 		Attributes: map[string]schema.Attribute{
 			"pr_automation_id": schema.StringAttribute{
 				Description:         "ID of the PR Automation that should be triggered.",

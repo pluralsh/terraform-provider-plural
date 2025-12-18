@@ -3,12 +3,12 @@
 page_title: "plural_stack_run_trigger Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  
+  Stack run trigger initiates the execution of an infrastructure stack from the newest SHA in the stack's run history. This resource enables programmatic triggering of infrastructure runs, allowing for event-driven or scheduled infrastructure updates.
 ---
 
 # plural_stack_run_trigger (Resource)
 
-
+Stack run trigger initiates the execution of an infrastructure stack from the newest SHA in the stack's run history. This resource enables programmatic triggering of infrastructure runs, allowing for event-driven or scheduled infrastructure updates.
 
 
 

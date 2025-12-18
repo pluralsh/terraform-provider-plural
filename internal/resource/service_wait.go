@@ -52,6 +52,7 @@ func (in *serviceWaitResource) Metadata(_ context.Context, request resource.Meta
 
 func (in *serviceWaitResource) Schema(_ context.Context, _ resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
+		MarkdownDescription: "Service wait provides a utility resource to wait for a service deployment to reach a healthy and synchronized state before proceeding. This is useful for orchestrating dependencies between services and ensuring deployment order.",
 		Attributes: map[string]schema.Attribute{
 			"cluster": schema.StringAttribute{
 				Description:         "Handle of the cluster where the service is deployed.",

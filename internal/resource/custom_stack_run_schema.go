@@ -12,6 +12,7 @@ import (
 
 func (r *CustomStackRunResource) schema() schema.Schema {
 	return schema.Schema{
+		MarkdownDescription: "A custom stack run resource that allows users to define custom commands that can be executed as part of a stack run.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description:         "Internal identifier of this custom run.",

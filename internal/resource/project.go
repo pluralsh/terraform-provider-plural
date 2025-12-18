@@ -35,6 +35,7 @@ func (r *ProjectResource) Metadata(_ context.Context, req resource.MetadataReque
 
 func (r *ProjectResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		MarkdownDescription: "Project provides organizational segmentation and multi-tenancy capabilities within Plural Console. It serves as a unit of an organization to control permissions for sets of resources, enabling enterprise-grade fleet management while maintaining security boundaries. Projects allow resource owners to manage their domain without accessing resources outside their scope, supporting principles of least privilege and preventing credential sprawl across the entire fleet.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description:         "Internal identifier of this project.",
@@ -49,8 +50,8 @@ func (r *ProjectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"description": schema.StringAttribute{
-				Description:         "Description of this project.",
-				MarkdownDescription: "Description of this project.",
+				Description:         "Description provides a human-readable explanation of this project's purpose and the resources it manages within the organizational hierarchy.",
+				MarkdownDescription: "Description provides a human-readable explanation of this project's purpose and the resources it manages within the organizational hierarchy.",
 				Optional:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
@@ -59,8 +60,8 @@ func (r *ProjectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 			},
 			"bindings": schema.SingleNestedAttribute{
-				Description:         "Read and write policies of this project.",
-				MarkdownDescription: "Read and write policies of this project.",
+				Description:         "Bindings contain read and write policies that control access to all resources within this project, enabling fine-grained permission management and multi-tenancy.",
+				MarkdownDescription: "Bindings contain read and write policies that control access to all resources within this project, enabling fine-grained permission management and multi-tenancy.",
 				Optional:            true,
 				Attributes: map[string]schema.Attribute{
 					"read": schema.SetNestedAttribute{

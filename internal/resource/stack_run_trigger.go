@@ -33,6 +33,7 @@ func (in *stackRunTriggerResource) Metadata(_ context.Context, request resource.
 
 func (in *stackRunTriggerResource) Schema(_ context.Context, _ resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
+		MarkdownDescription: "Stack run trigger initiates the execution of an infrastructure stack from the newest SHA in the stack's run history. This resource enables programmatic triggering of infrastructure runs, allowing for event-driven or scheduled infrastructure updates.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description:         "ID of the Infrastructure Stack that should be used to start a new run from the newest SHA in the stack's run history.",

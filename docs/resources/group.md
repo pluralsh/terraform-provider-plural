@@ -3,12 +3,12 @@
 page_title: "plural_group Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  group resource
+  Group represents a group of users within the system, managed via the Console API. It includes specifications for the group's name and description.
 ---
 
 # plural_group (Resource)
 
-group resource
+Group represents a group of users within the system, managed via the Console API. It includes specifications for the group's name and description.
 
 
 

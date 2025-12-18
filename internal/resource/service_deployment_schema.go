@@ -18,6 +18,7 @@ import (
 
 func (r *ServiceDeploymentResource) schema() schema.Schema {
 	return schema.Schema{
+		MarkdownDescription: "Service deployment represents a Kubernetes service deployed and managed by Plural Console. It defines how applications are deployed to clusters using GitOps principles, supporting multiple deployment methods including Helm charts, Kustomize, and raw manifests. Services can be templated, configured with secrets and dependencies, and monitored for health and sync status across the deployment lifecycle.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,

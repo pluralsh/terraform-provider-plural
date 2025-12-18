@@ -3,12 +3,12 @@
 page_title: "plural_observability_webhook Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  
+  Observability provider configures external monitoring and observability platforms for use with Plural Console. It enables integration with services like Datadog and New Relic to provide enhanced monitoring capabilities for infrastructure stacks and service deployments. The provider can be used by infrastructure stacks to monitor metrics and determine if operations should be cancelled based on system health indicators.
 ---
 
 # plural_observability_webhook (Resource)
 
-
+Observability provider configures external monitoring and observability platforms for use with Plural Console. It enables integration with services like Datadog and New Relic to provide enhanced monitoring capabilities for infrastructure stacks and service deployments. The provider can be used by infrastructure stacks to monitor metrics and determine if operations should be cancelled based on system health indicators.
 
 
 

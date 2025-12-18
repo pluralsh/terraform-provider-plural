@@ -3,12 +3,12 @@
 page_title: "plural_oidc_provider Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  
+  OIDC provider configures OpenID Connect (OIDC) authentication for external applications and services. It enables third-party applications to authenticate users through the Plural Console using the standard OIDC protocol. This is useful for integrating external tools, dashboards, or custom applications with Plural's authentication system while maintaining centralized user management and access control. Common use cases include connecting monitoring dashboards, CI/CD tools, or custom applications that need to authenticate users against the Plural Console's user directory.
 ---
 
 # plural_oidc_provider (Resource)
 
-
+OIDC provider configures OpenID Connect (OIDC) authentication for external applications and services. It enables third-party applications to authenticate users through the Plural Console using the standard OIDC protocol. This is useful for integrating external tools, dashboards, or custom applications with Plural's authentication system while maintaining centralized user management and access control. Common use cases include connecting monitoring dashboards, CI/CD tools, or custom applications that need to authenticate users against the Plural Console's user directory.
 
 
 
@@ -17,7 +17,7 @@ description: |-
 
 ### Required
 
-- `name` (String) Human-readable name of this OIDC provider.
+- `name` (String) Name of this OIDC provider.
 - `type` (String)
 
 ### Optional

@@ -19,6 +19,7 @@ import (
 
 func (r *InfrastructureStackResource) schema() schema.Schema {
 	return schema.Schema{
+		MarkdownDescription: "Infrastructure stack provides a scalable framework to manage infrastructure as code with a K8s-friendly, API-driven approach. It declaratively defines a stack with a type, Git repository location, and target cluster for execution. On each commit to the tracked repository, a run is created which the Plural deployment operator detects and executes on the targeted cluster, enabling fine-grained permissions and network location control for IaC runs.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description:         "Internal identifier of this stack.",
@@ -27,8 +28,8 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"name": schema.StringAttribute{
-				Description:         "Human-readable name of this stack.",
-				MarkdownDescription: "Human-readable name of this stack.",
+				Description:         "Name of this stack.",
+				MarkdownDescription: "Name of this stack.",
 				Required:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},

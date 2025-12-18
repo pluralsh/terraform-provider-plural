@@ -3,12 +3,12 @@
 page_title: "plural_rbac Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  A representation of rbac settings for a provider or cluster.
+  RBAC resource provides role-based access control settings for clusters and services. It defines read and write bindings to control user and group permissions for accessing and managing resources within the Plural Console.
 ---
 
 # plural_rbac (Resource)
 
-A representation of rbac settings for a provider or cluster.
+RBAC resource provides role-based access control settings for clusters and services. It defines read and write bindings to control user and group permissions for accessing and managing resources within the Plural Console.
 
 
 

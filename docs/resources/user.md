@@ -3,12 +3,12 @@
 page_title: "plural_user Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  user resource
+  User account within the Plural Console.
 ---
 
 # plural_user (Resource)
 
-user resource
+User account within the Plural Console.
 
 
 
