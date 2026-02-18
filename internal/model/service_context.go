@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	console "github.com/pluralsh/console/go/client"
+	"github.com/samber/lo"
 )
 
 type ServiceContext struct {
@@ -35,12 +36,15 @@ type ServiceContextExtended struct {
 func (sc *ServiceContextExtended) Attributes(ctx context.Context, d *diag.Diagnostics) console.ServiceContextAttributes {
 	secrets := make(map[string]types.String, len(sc.Secrets.Elements()))
 	sc.Secrets.ElementsAs(ctx, &secrets, false)
-	configAttributes := make([]*console.ConfigAttributes, 0)
+	configAttributes := make([]*console.ConfigAttributes, len(secrets))
+
+	ind := 0
 	for key, val := range secrets {
-		configAttributes = append(configAttributes, &console.ConfigAttributes{
+		configAttributes[ind] = &console.ConfigAttributes{
 			Name:  key,
-			Value: val.ValueStringPointer(),
-		})
+			Value: lo.ToPtr(val.ValueString()),
+		}
+		ind++
 	}
 
 	return console.ServiceContextAttributes{
