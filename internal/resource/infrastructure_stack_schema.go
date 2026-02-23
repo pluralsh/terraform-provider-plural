@@ -175,6 +175,11 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 								Optional:            true,
 								ElementType:         types.StringType,
 							},
+							"private_key_file": schema.StringAttribute{
+								Description:         "Path to the private key file for SSH authentication.",
+								MarkdownDescription: "Path to the private key file for SSH authentication.",
+								Optional:            true,
+							},
 						},
 					},
 					"ai_approval": schema.SingleNestedAttribute{
