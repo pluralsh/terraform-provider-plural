@@ -150,7 +150,7 @@ func (r *WorkbenchToolResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	attrs, err := data.Attributes(ctx, &resp.Diagnostics)
+	attrs, err := data.Attributes(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get attributes, got error: %s", err))
 		return
@@ -162,7 +162,7 @@ func (r *WorkbenchToolResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	data.From(response.CreateWorkbenchTool)
+	data.From(response.CreateWorkbenchTool, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
@@ -184,7 +184,7 @@ func (r *WorkbenchToolResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
-	data.From(response.WorkbenchTool)
+	data.From(response.WorkbenchTool, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
@@ -195,7 +195,7 @@ func (r *WorkbenchToolResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	attrs, err := data.Attributes(ctx, &resp.Diagnostics)
+	attrs, err := data.Attributes(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get attributes, got error: %s", err))
 		return

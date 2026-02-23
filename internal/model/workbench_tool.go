@@ -22,7 +22,7 @@ type WorkbenchTool struct {
 	Configuration *WorkbenchToolConfiguration `tfsdk:"configuration"`
 }
 
-func (in *WorkbenchTool) Attributes(ctx context.Context, d *diag.Diagnostics) (*gqlclient.WorkbenchToolAttributes, error) {
+func (in *WorkbenchTool) Attributes(ctx context.Context) (*gqlclient.WorkbenchToolAttributes, error) {
 	categories := make([]types.String, len(in.Categories.Elements()))
 	in.Categories.ElementsAs(ctx, &categories, false)
 
