@@ -2,6 +2,9 @@ package model
 
 import (
 	"context"
+	"fmt"
+
+	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -41,6 +44,37 @@ func (in *Workbench) Attributes(agentRuntimeID *string, ctx context.Context, d *
 		Skills:           in.Skills.Attributes(ctx),
 		ToolAssociations: tools,
 	}, nil
+}
+
+func (in *Workbench) From(response *gqlclient.WorkbenchFragment, ctx context.Context, d *diag.Diagnostics) {
+	in.Id = types.StringValue(response.ID)
+	in.Name = types.StringValue(response.Name)
+	in.Description = types.StringPointerValue(response.Description)
+	in.SystemPrompt = types.StringPointerValue(response.SystemPrompt)
+	in.ProjectID = types.StringValue(response.Project.ID)
+	in.RepositoryID = types.StringValue(response.Repository.ID)
+
+	if response.AgentRuntime != nil && response.AgentRuntime.Cluster != nil && response.AgentRuntime.Cluster.Handle != nil {
+		in.AgentRuntime = types.StringValue(fmt.Sprintf("%s/%s", *response.AgentRuntime.Cluster.Handle, response.AgentRuntime.ID))
+	}
+
+	// TODO Configuration and skills.
+
+	in.Tools = in.toolsFrom(response.Tools, in.Tools, ctx, d)
+}
+
+func (in *Workbench) toolsFrom(tools []*gqlclient.WorkbenchToolFragment, config types.Set, ctx context.Context, d *diag.Diagnostics) types.Set {
+	if len(tools) == 0 {
+		// Rewriting config to state to avoid inconsistent result errors.
+		// This could happen, for example, when sending "nil" to API and "[]" is returned as a result.
+		return config
+	}
+
+	toolIDs := lo.Map(tools, func(tool *gqlclient.WorkbenchToolFragment, _ int) *string {
+		return &tool.ID
+	})
+
+	return common.SetFrom(toolIDs, config, ctx, d)
 }
 
 type WorkbenchConfiguration struct {
