@@ -19,7 +19,7 @@ type Workbench struct {
 	AgentRuntime  types.String            `tfsdk:"agent_runtime"`
 	Configuration *WorkbenchConfiguration `tfsdk:"configuration"`
 	Skills        *WorkbenchSkills        `tfsdk:"skills"`
-	Tools         types.Set               `tfsdk:"tools"`
+	Tools         types.Set               `tfsdk:"tool_ids"`
 }
 
 func (in *Workbench) Attributes(agentRuntimeID *string, ctx context.Context, d *diag.Diagnostics) (*gqlclient.WorkbenchAttributes, error) {

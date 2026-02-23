@@ -227,5 +227,5 @@ func (r *WorkbenchToolResource) Delete(ctx context.Context, req resource.DeleteR
 func (r *WorkbenchToolResource) ImportState(
 	ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse,
 ) {
-	resource.ImportStatePassthroughID(ctx, path.Root("email"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
