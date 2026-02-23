@@ -2,6 +2,10 @@ package model
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+
+	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -18,19 +22,36 @@ type WorkbenchTool struct {
 	Configuration *WorkbenchToolConfiguration `tfsdk:"configuration"`
 }
 
-func (wt *WorkbenchTool) Attributes(ctx context.Context, d *diag.Diagnostics) (*gqlclient.WorkbenchToolAttributes, error) {
-	categories := make([]types.String, len(wt.Categories.Elements()))
-	wt.Categories.ElementsAs(ctx, &categories, false)
+func (in *WorkbenchTool) Attributes(ctx context.Context, d *diag.Diagnostics) (*gqlclient.WorkbenchToolAttributes, error) {
+	categories := make([]types.String, len(in.Categories.Elements()))
+	in.Categories.ElementsAs(ctx, &categories, false)
 
 	return &gqlclient.WorkbenchToolAttributes{
-		Name: wt.Name.ValueString(),
-		Tool: gqlclient.WorkbenchToolType(wt.Tool.ValueString()),
+		Name: in.Name.ValueString(),
+		Tool: gqlclient.WorkbenchToolType(in.Tool.ValueString()),
 		Categories: lo.Map(categories, func(v types.String, _ int) *gqlclient.WorkbenchToolCategory {
 			return lo.ToPtr(gqlclient.WorkbenchToolCategory(v.ValueString()))
 		}),
-		ProjectID:     wt.ProjectID.ValueStringPointer(),
-		Configuration: wt.Configuration.Attributes(ctx),
+		ProjectID:     in.ProjectID.ValueStringPointer(),
+		Configuration: in.Configuration.Attributes(ctx),
 	}, nil
+}
+
+func (in *WorkbenchTool) From(response *gqlclient.WorkbenchToolFragment, ctx context.Context, d *diag.Diagnostics) {
+	in.Id = types.StringValue(response.ID)
+	in.Name = types.StringValue(response.Name)
+	in.Tool = types.StringValue(string(response.Tool))
+	in.Categories = common.SetFrom(lo.Map(response.Categories, func(v *gqlclient.WorkbenchToolCategory, _ int) *string {
+		return lo.Ternary(v == nil, nil, lo.ToPtr(string(*v)))
+	}), in.Categories, ctx, d)
+
+	if response.Project != nil {
+		in.ProjectID = types.StringValue(response.Project.ID)
+	}
+
+	if response.Configuration != nil {
+		in.Configuration.From(response.Configuration, ctx, d)
+	}
 }
 
 type WorkbenchToolConfiguration struct {
@@ -44,6 +65,16 @@ func (in *WorkbenchToolConfiguration) Attributes(ctx context.Context) *gqlclient
 
 	return &gqlclient.WorkbenchToolConfigurationAttributes{
 		HTTP: in.HTTP.Attributes(ctx),
+	}
+}
+
+func (in *WorkbenchToolConfiguration) From(configuration *gqlclient.WorkbenchToolFragment_Configuration, ctx context.Context, d *diag.Diagnostics) {
+	if configuration == nil {
+		return
+	}
+
+	if configuration.HTTP != nil {
+		in.HTTP.From(configuration.HTTP, ctx, d)
 	}
 }
 
@@ -72,4 +103,39 @@ func (in *WorkbenchToolHTTPConfig) Attributes(ctx context.Context) *gqlclient.Wo
 		Body:        in.Body.ValueStringPointer(),
 		InputSchema: in.InputSchema.ValueStringPointer(),
 	}
+}
+
+func (in *WorkbenchToolHTTPConfig) From(configuration *gqlclient.WorkbenchToolFragment_Configuration_HTTP, ctx context.Context, d *diag.Diagnostics) {
+	if configuration == nil {
+		return
+	}
+
+	in.URL = types.StringPointerValue(configuration.URL)
+	in.Method = types.StringPointerValue(configuration.Method)
+
+	if configuration.Headers != nil {
+		headers := make(map[string]any, len(configuration.Headers))
+		for _, v := range configuration.Headers {
+			if v.Value != nil {
+				headers[*v.Name] = *v.Value
+			}
+		}
+
+		in.Headers = common.MapFrom(headers, ctx, d)
+	}
+
+	if configuration.Body != nil {
+		in.Body = types.StringPointerValue(configuration.Body)
+	}
+
+	if configuration.InputSchema != nil {
+		inputSchema, err := json.Marshal(configuration.InputSchema)
+		if err != nil {
+			d.AddError("Provider Error", fmt.Sprintf("Cannot marshall input schema, got error: %s", err))
+			return
+		}
+
+		in.InputSchema = types.StringValue(string(inputSchema))
+	}
+
 }
