@@ -240,9 +240,72 @@ func (sh *InfrastructureStackHookSpec) Attributes(ctx context.Context, d *diag.D
 }
 
 type InfrastructureStackConfiguration struct {
-	Image   types.String `tfsdk:"image"`
-	Version types.String `tfsdk:"version"`
-	Hooks   types.Set    `tfsdk:"hooks"`
+	Image      types.String                         `tfsdk:"image"`
+	Version    types.String                         `tfsdk:"version"`
+	Tag        types.String                         `tfsdk:"tag"`
+	Hooks      types.Set                            `tfsdk:"hooks"`
+	Terraform  *InfrastructureStackTerraformConfig  `tfsdk:"terraform"`
+	Ansible    *InfrastructureStackAnsibleConfig    `tfsdk:"ansible"`
+	AiApproval *InfrastructureStackAiApprovalConfig `tfsdk:"ai_approval"`
+}
+
+type InfrastructureStackTerraformConfig struct {
+	Parallelism  types.Int64 `tfsdk:"parallelism"`
+	Refresh      types.Bool  `tfsdk:"refresh"`
+	ApproveEmpty types.Bool  `tfsdk:"approve_empty"`
+}
+
+type InfrastructureStackAnsibleConfig struct {
+	Playbook       types.String `tfsdk:"playbook"`
+	Inventory      types.String `tfsdk:"inventory"`
+	AdditionalArgs types.List   `tfsdk:"additional_args"`
+}
+
+type InfrastructureStackAiApprovalConfig struct {
+	Enabled      types.Bool                           `tfsdk:"enabled"`
+	IgnoreCancel types.Bool                           `tfsdk:"ignore_cancel"`
+	Git          *InfrastructureStackAiApprovalGitRef `tfsdk:"git"`
+	File         types.String                         `tfsdk:"file"`
+}
+
+type InfrastructureStackAiApprovalGitRef struct {
+	Ref    types.String `tfsdk:"ref"`
+	Folder types.String `tfsdk:"folder"`
+}
+
+func (c *InfrastructureStackAnsibleConfig) Attributes(ctx context.Context, d *diag.Diagnostics) *gqlclient.AnsibleConfigurationAttributes {
+	if c == nil {
+		return nil
+	}
+	var additionalArgs []*string
+	if !c.AdditionalArgs.IsNull() {
+		elements := make([]types.String, len(c.AdditionalArgs.Elements()))
+		d.Append(c.AdditionalArgs.ElementsAs(ctx, &elements, false)...)
+		additionalArgs = algorithms.Map(elements, func(v types.String) *string { return v.ValueStringPointer() })
+	}
+	return &gqlclient.AnsibleConfigurationAttributes{
+		Playbook:       c.Playbook.ValueStringPointer(),
+		Inventory:      c.Inventory.ValueStringPointer(),
+		AdditionalArgs: additionalArgs,
+	}
+}
+
+func (c *InfrastructureStackAiApprovalConfig) Attributes(ctx context.Context, d *diag.Diagnostics) *gqlclient.AiApprovalAttributes {
+	if c == nil {
+		return nil
+	}
+	attr := &gqlclient.AiApprovalAttributes{
+		Enabled:      c.Enabled.ValueBool(),
+		IgnoreCancel: c.IgnoreCancel.ValueBool(),
+		File:         c.File.ValueString(),
+	}
+	if c.Git != nil {
+		attr.Git = gqlclient.GitRefAttributes{
+			Ref:    c.Git.Ref.ValueString(),
+			Folder: c.Git.Folder.ValueString(),
+		}
+	}
+	return attr
 }
 
 func (isc *InfrastructureStackConfiguration) HooksAttributes(ctx context.Context, d *diag.Diagnostics) []*gqlclient.StackHookAttributes {
@@ -266,11 +329,25 @@ func (isc *InfrastructureStackConfiguration) Attributes(ctx context.Context, d *
 		return nil
 	}
 
-	return &gqlclient.StackConfigurationAttributes{
+	attr := &gqlclient.StackConfigurationAttributes{
 		Image:   isc.Image.ValueStringPointer(),
 		Version: isc.Version.ValueStringPointer(),
+		Tag:     isc.Tag.ValueStringPointer(),
 		Hooks:   isc.HooksAttributes(ctx, d),
 	}
+	if isc.Terraform != nil {
+		attr.Terraform = &gqlclient.TerraformConfigurationAttributes{
+			Parallelism: isc.Terraform.Parallelism.ValueInt64Pointer(),
+			Refresh:     isc.Terraform.Refresh.ValueBoolPointer(),
+		}
+	}
+	if isc.Ansible != nil {
+		attr.Ansible = isc.Ansible.Attributes(ctx, d)
+	}
+	if isc.AiApproval != nil {
+		attr.AiApproval = isc.AiApproval.Attributes(ctx, d)
+	}
+	return attr
 }
 
 func (isc *InfrastructureStackConfiguration) From(ctx context.Context, configuration gqlclient.StackConfigurationFragment, d *diag.Diagnostics) {
@@ -280,7 +357,17 @@ func (isc *InfrastructureStackConfiguration) From(ctx context.Context, configura
 
 	isc.Image = types.StringPointerValue(configuration.Image)
 	isc.Version = types.StringPointerValue(configuration.Version)
+	isc.Tag = types.StringPointerValue(configuration.Tag)
 	isc.Hooks = infrastructureStackHooksFrom(ctx, configuration.Hooks, isc.Hooks, d)
+	if configuration.Terraform != nil {
+		if isc.Terraform == nil {
+			isc.Terraform = &InfrastructureStackTerraformConfig{}
+		}
+		isc.Terraform.Parallelism = types.Int64PointerValue(configuration.Terraform.Parallelism)
+		isc.Terraform.Refresh = types.BoolPointerValue(configuration.Terraform.Refresh)
+		// ApproveEmpty: set when StackConfigurationFragment_Terraform includes it in the client
+	}
+	// Ansible and AiApproval are not in StackConfigurationFragment; they remain from state when set
 }
 
 type InfrastructureStackEnvironment struct {

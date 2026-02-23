@@ -47,8 +47,45 @@ Required:
 
 Optional:
 
+- `ai_approval` (Attributes) The ai approval configuration for this stack. (see [below for nested schema](#nestedatt--configuration--ai_approval))
+- `ansible` (Attributes) The ansible configuration for this stack. (see [below for nested schema](#nestedatt--configuration--ansible))
 - `hooks` (Attributes Set) The hooks to customize execution for this stack. (see [below for nested schema](#nestedatt--configuration--hooks))
 - `image` (String) Optional custom image you might want to use.
+- `tag` (String) The docker image tag you wish to use if you're customizing the version.
+- `terraform` (Attributes) The terraform configuration for this stack. (see [below for nested schema](#nestedatt--configuration--terraform))
+
+<a id="nestedatt--configuration--ai_approval"></a>
+### Nested Schema for `configuration.ai_approval`
+
+Required:
+
+- `enabled` (Boolean) Whether ai approval is enabled for this stack.
+- `file` (String) The rules file to use alongside the git reference.
+- `git` (Attributes) The git reference to use for the ai approval rules. (see [below for nested schema](#nestedatt--configuration--ai_approval--git))
+
+Optional:
+
+- `ignore_cancel` (Boolean) Whether to ignore the cancellation of a stack run by ai, this allows human approval to override.
+
+<a id="nestedatt--configuration--ai_approval--git"></a>
+### Nested Schema for `configuration.ai_approval.git`
+
+Required:
+
+- `folder` (String) The subdirectory in the git repository to use.
+- `ref` (String) A general git ref, either a branch name or commit sha.
+
+
+
+<a id="nestedatt--configuration--ansible"></a>
+### Nested Schema for `configuration.ansible`
+
+Optional:
+
+- `additional_args` (List of String) Additional args for the playbook.
+- `inventory` (String) The ansible inventory file to use. We recommend checking this into git alongside your playbook files.
+- `playbook` (String) The playbook to run.
+
 
 <a id="nestedatt--configuration--hooks"></a>
 ### Nested Schema for `configuration.hooks`
@@ -61,6 +98,16 @@ Required:
 Optional:
 
 - `args` (List of String) Arguments to pass to the command when executing it.
+
+
+<a id="nestedatt--configuration--terraform"></a>
+### Nested Schema for `configuration.terraform`
+
+Optional:
+
+- `approve_empty` (Boolean) Whether to auto-approve a plan if there are no changes, preventing a stack from being blocked.
+- `parallelism` (Number) Equivalent to the -parallelism flag in terraform.
+- `refresh` (Boolean) Equivalent to the -refresh flag in terraform.
 
 
 

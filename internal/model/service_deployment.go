@@ -113,7 +113,7 @@ type ServiceDeploymentConfiguration struct {
 	Value types.String `tfsdk:"value"`
 }
 
-func configFrom(configuration []*gqlclient.ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration, d *diag.Diagnostics) basetypes.MapValue {
+func configFrom(configuration []*gqlclient.ServiceDeploymentExtended_Configuration, d *diag.Diagnostics) basetypes.MapValue {
 	if len(configuration) == 0 {
 		return types.MapNull(types.StringType)
 	}
