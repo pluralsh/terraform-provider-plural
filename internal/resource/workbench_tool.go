@@ -102,6 +102,7 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 							"headers": schema.MapAttribute{
 								Description:         "The request headers.",
 								MarkdownDescription: "The request headers.",
+								ElementType:         types.StringType,
 								Optional:            true,
 							},
 							"body": schema.StringAttribute{
