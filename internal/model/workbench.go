@@ -58,7 +58,8 @@ func (in *Workbench) From(response *gqlclient.WorkbenchFragment, ctx context.Con
 		in.AgentRuntime = types.StringValue(fmt.Sprintf("%s/%s", *response.AgentRuntime.Cluster.Handle, response.AgentRuntime.ID))
 	}
 
-	// TODO Configuration and skills.
+	in.Configuration.From(response.Configuration, ctx, d)
+	in.Skills.From(response.Skills, ctx, d)
 
 	in.Tools = in.toolsFrom(response.Tools, in.Tools, ctx, d)
 }
@@ -70,9 +71,7 @@ func (in *Workbench) toolsFrom(tools []*gqlclient.WorkbenchToolFragment, config 
 		return config
 	}
 
-	toolIDs := lo.Map(tools, func(tool *gqlclient.WorkbenchToolFragment, _ int) *string {
-		return &tool.ID
-	})
+	toolIDs := lo.Map(tools, func(tool *gqlclient.WorkbenchToolFragment, _ int) *string { return &tool.ID })
 
 	return common.SetFrom(toolIDs, config, ctx, d)
 }
@@ -93,6 +92,15 @@ func (in *WorkbenchConfiguration) Attributes(ctx context.Context) *gqlclient.Wor
 	}
 }
 
+func (in *WorkbenchConfiguration) From(configuration *gqlclient.WorkbenchFragment_Configuration, ctx context.Context, d *diag.Diagnostics) {
+	if configuration == nil {
+		return
+	}
+
+	in.Coding.From(configuration.Coding, ctx, d)
+	in.Infrastructure.From(configuration.Infrastructure)
+}
+
 type WorkbenchInfrastructure struct {
 	Services   types.Bool `tfsdk:"services"`
 	Stacks     types.Bool `tfsdk:"stacks"`
@@ -109,6 +117,16 @@ func (in *WorkbenchInfrastructure) Attributes() *gqlclient.WorkbenchInfrastructu
 		Stacks:     in.Stacks.ValueBoolPointer(),
 		Kubernetes: in.Kubernetes.ValueBoolPointer(),
 	}
+}
+
+func (in *WorkbenchInfrastructure) From(configuration *gqlclient.WorkbenchFragment_Configuration_Infrastructure) {
+	if configuration == nil {
+		return
+	}
+
+	in.Services = types.BoolPointerValue(configuration.Services)
+	in.Stacks = types.BoolPointerValue(configuration.Stacks)
+	in.Kubernetes = types.BoolPointerValue(configuration.Kubernetes)
 }
 
 type WorkbenchCoding struct {
@@ -128,6 +146,20 @@ func (in *WorkbenchCoding) Attributes(ctx context.Context) *gqlclient.WorkbenchC
 		Mode:         lo.ToPtr(gqlclient.AgentRunMode(in.Mode.ValueString())),
 		Repositories: lo.Map(repositories, func(v types.String, _ int) *string { return lo.ToPtr(v.ValueString()) }),
 	}
+}
+
+func (in *WorkbenchCoding) From(configuration *gqlclient.WorkbenchFragment_Configuration_Coding, ctx context.Context, d *diag.Diagnostics) {
+	if configuration == nil {
+		return
+	}
+
+	var mode *string
+	if configuration.Mode != nil {
+		mode = lo.ToPtr(string(*configuration.Mode))
+	}
+
+	in.Mode = types.StringPointerValue(mode)
+	in.Repositories = common.SetFrom(configuration.Repositories, in.Repositories, ctx, d)
 }
 
 type WorkbenchSkills struct {

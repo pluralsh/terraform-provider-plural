@@ -49,9 +49,7 @@ func (in *WorkbenchTool) From(response *gqlclient.WorkbenchToolFragment, ctx con
 		in.ProjectID = types.StringValue(response.Project.ID)
 	}
 
-	if response.Configuration != nil {
-		in.Configuration.From(response.Configuration, ctx, d)
-	}
+	in.Configuration.From(response.Configuration, ctx, d)
 }
 
 type WorkbenchToolConfiguration struct {
@@ -73,9 +71,7 @@ func (in *WorkbenchToolConfiguration) From(configuration *gqlclient.WorkbenchToo
 		return
 	}
 
-	if configuration.HTTP != nil {
-		in.HTTP.From(configuration.HTTP, ctx, d)
-	}
+	in.HTTP.From(configuration.HTTP, ctx, d)
 }
 
 type WorkbenchToolHTTPConfig struct {
