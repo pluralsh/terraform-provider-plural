@@ -176,9 +176,18 @@ func (in *WorkbenchSkills) Attributes(ctx context.Context) *gqlclient.WorkbenchS
 	in.Files.ElementsAs(ctx, &files, false)
 
 	return &gqlclient.WorkbenchSkillsAttributes{
-		Ref:   in.Ref.Attributes(),
+		Ref:   in.Ref.Attributes(ctx),
 		Files: lo.Map(files, func(v types.String, _ int) *string { return v.ValueStringPointer() }),
 	}
+}
+
+func (in *WorkbenchSkills) From(response *gqlclient.WorkbenchFragment_Skills, ctx context.Context, d *diag.Diagnostics) {
+	if response == nil {
+		return
+	}
+
+	in.Ref.From(response.Ref, ctx, d)
+	in.Files = common.SetFrom(response.Files, in.Files, ctx, d)
 }
 
 type WorkbenchGitRef struct {
@@ -187,17 +196,27 @@ type WorkbenchGitRef struct {
 	Files  types.Set    `tfsdk:"files"`
 }
 
-func (in *WorkbenchGitRef) Attributes() *gqlclient.GitRefAttributes {
+func (in *WorkbenchGitRef) Attributes(ctx context.Context) *gqlclient.GitRefAttributes {
 	if in == nil {
 		return nil
 	}
 
 	files := make([]types.String, len(in.Files.Elements()))
-	in.Files.ElementsAs(context.Background(), &files, false)
+	in.Files.ElementsAs(ctx, &files, false)
 
 	return &gqlclient.GitRefAttributes{
 		Ref:    in.Ref.ValueString(),
 		Folder: in.Folder.ValueString(),
 		Files:  lo.Map(files, func(v types.String, _ int) string { return v.ValueString() }),
 	}
+}
+
+func (in *WorkbenchGitRef) From(response *gqlclient.WorkbenchFragment_Skills_Ref, ctx context.Context, d *diag.Diagnostics) {
+	if response == nil {
+		return
+	}
+
+	in.Ref = types.StringValue(response.Ref)
+	in.Folder = types.StringValue(response.Folder)
+	in.Files = common.SetFrom(lo.ToSlicePtr(response.Files), in.Files, ctx, d)
 }
