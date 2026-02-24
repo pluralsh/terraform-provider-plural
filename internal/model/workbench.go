@@ -99,6 +99,13 @@ func (in *Workbench) agentRuntimeAttribute(client *client.Client, ctx context.Co
 }
 
 func (in *Workbench) From(response *gqlclient.WorkbenchFragment, ctx context.Context, d *diag.Diagnostics) {
+	if in == nil {
+		return
+	}
+	if response == nil {
+		return
+	}
+
 	in.Id = types.StringValue(response.ID)
 	in.Name = types.StringValue(response.Name)
 	in.Description = types.StringPointerValue(response.Description)
@@ -145,6 +152,9 @@ func (in *WorkbenchConfiguration) Attributes(ctx context.Context) *gqlclient.Wor
 }
 
 func (in *WorkbenchConfiguration) From(configuration *gqlclient.WorkbenchFragment_Configuration, ctx context.Context, d *diag.Diagnostics) {
+	if in == nil {
+		return
+	}
 	if configuration == nil {
 		return
 	}
@@ -172,6 +182,9 @@ func (in *WorkbenchInfrastructure) Attributes() *gqlclient.WorkbenchInfrastructu
 }
 
 func (in *WorkbenchInfrastructure) From(configuration *gqlclient.WorkbenchFragment_Configuration_Infrastructure) {
+	if in == nil {
+		return
+	}
 	if configuration == nil {
 		return
 	}
@@ -201,6 +214,9 @@ func (in *WorkbenchCoding) Attributes(ctx context.Context) *gqlclient.WorkbenchC
 }
 
 func (in *WorkbenchCoding) From(configuration *gqlclient.WorkbenchFragment_Configuration_Coding, ctx context.Context, d *diag.Diagnostics) {
+	if in == nil {
+		return
+	}
 	if configuration == nil {
 		return
 	}
@@ -234,6 +250,9 @@ func (in *WorkbenchSkills) Attributes(ctx context.Context) *gqlclient.WorkbenchS
 }
 
 func (in *WorkbenchSkills) From(response *gqlclient.WorkbenchFragment_Skills, ctx context.Context, d *diag.Diagnostics) {
+	if in == nil {
+		return
+	}
 	if response == nil {
 		return
 	}
@@ -264,6 +283,9 @@ func (in *WorkbenchGitRef) Attributes(ctx context.Context) *gqlclient.GitRefAttr
 }
 
 func (in *WorkbenchGitRef) From(response *gqlclient.WorkbenchFragment_Skills_Ref, ctx context.Context, d *diag.Diagnostics) {
+	if in == nil {
+		return
+	}
 	if response == nil {
 		return
 	}
