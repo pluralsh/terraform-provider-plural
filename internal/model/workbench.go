@@ -51,10 +51,10 @@ func (in *Workbench) toolsAttribute(ctx context.Context, d *diag.Diagnostics) []
 		return nil
 	}
 
-	result := make([]*gqlclient.WorkbenchToolAssociationAttributes, 0, len(toolIDs))
 	toolIDs := make([]types.String, len(in.Tools.Elements()))
 	d.Append(in.Tools.ElementsAs(ctx, &toolIDs, false)...)
 
+	result := make([]*gqlclient.WorkbenchToolAssociationAttributes, 0, len(toolIDs))
 	for _, toolID := range toolIDs {
 		if toolID.IsNull() {
 			continue
