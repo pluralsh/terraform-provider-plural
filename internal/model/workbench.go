@@ -3,7 +3,9 @@ package model
 import (
 	"context"
 	"fmt"
+	"strings"
 
+	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -25,7 +27,12 @@ type Workbench struct {
 	Tools         types.Set               `tfsdk:"tool_ids"`
 }
 
-func (in *Workbench) Attributes(agentRuntimeID *string, ctx context.Context, d *diag.Diagnostics) (*gqlclient.WorkbenchAttributes, error) {
+func (in *Workbench) Attributes(client *client.Client, ctx context.Context, d *diag.Diagnostics) (*gqlclient.WorkbenchAttributes, error) {
+	agentRuntimeID, err := in.agentRuntimeAttribute(client, ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	tools := make([]*gqlclient.WorkbenchToolAssociationAttributes, len(in.Tools.Elements()))
 	elements := make([]WorkbenchTool, len(in.Tools.Elements()))
 	d.Append(in.Tools.ElementsAs(ctx, &elements, false)...)
@@ -44,6 +51,38 @@ func (in *Workbench) Attributes(agentRuntimeID *string, ctx context.Context, d *
 		Skills:           in.Skills.Attributes(ctx),
 		ToolAssociations: tools,
 	}, nil
+}
+
+func (in *Workbench) agentRuntimeAttribute(client *client.Client, ctx context.Context) (*string, error) {
+	ref := in.AgentRuntime.ValueString()
+
+	if lo.IsEmpty(ref) {
+		return nil, nil
+	}
+
+	split := strings.Split(ref, "/")
+	if len(split) != 2 {
+		return nil, fmt.Errorf("invalid agent runtime reference: %s", ref)
+	}
+
+	clusterHandle, runtimeName := split[0], split[1]
+	cluster, err := client.GetClusterByHandle(ctx, lo.ToPtr(clusterHandle))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get cluster: %s", err.Error())
+	}
+	if cluster == nil {
+		return nil, fmt.Errorf("cluster not found: %s", clusterHandle)
+	}
+
+	agentRuntime, err := client.GetAgentRuntimeByName(ctx, runtimeName, cluster.Cluster.ID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get agent runtime: %s", err.Error())
+	}
+	if agentRuntime == nil {
+		return nil, fmt.Errorf("agent runtime not found: %s", runtimeName)
+	}
+
+	return &agentRuntime.AgentRuntime.ID, nil
 }
 
 func (in *Workbench) From(response *gqlclient.WorkbenchFragment, ctx context.Context, d *diag.Diagnostics) {

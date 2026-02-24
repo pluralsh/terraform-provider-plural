@@ -174,7 +174,7 @@ func (r *WorkbenchToolResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
-	response, err := r.client.GetWorkbenchTool(ctx, data.Id.ValueString())
+	response, err := r.client.GetWorkbenchTool(ctx, data.Id.ValueStringPointer(), nil)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get workbench tool, got error: %s", err))
 		return
