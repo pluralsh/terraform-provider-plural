@@ -33,13 +33,6 @@ func (in *Workbench) Attributes(client *client.Client, ctx context.Context, d *d
 		return nil, err
 	}
 
-	tools := make([]*gqlclient.WorkbenchToolAssociationAttributes, len(in.Tools.Elements()))
-	elements := make([]WorkbenchTool, len(in.Tools.Elements()))
-	d.Append(in.Tools.ElementsAs(ctx, &elements, false)...)
-	for i, tool := range elements {
-		tools[i] = &gqlclient.WorkbenchToolAssociationAttributes{ToolID: tool.Id.ValueString()}
-	}
-
 	return &gqlclient.WorkbenchAttributes{
 		Name:             in.Name.ValueStringPointer(),
 		Description:      in.Description.ValueStringPointer(),
@@ -49,8 +42,28 @@ func (in *Workbench) Attributes(client *client.Client, ctx context.Context, d *d
 		AgentRuntimeID:   agentRuntimeID,
 		Configuration:    in.Configuration.Attributes(ctx),
 		Skills:           in.Skills.Attributes(ctx),
-		ToolAssociations: tools,
+		ToolAssociations: in.toolsAttribute(ctx, d),
 	}, nil
+}
+
+func (in *Workbench) toolsAttribute(ctx context.Context, d *diag.Diagnostics) []*gqlclient.WorkbenchToolAssociationAttributes {
+	if in.Tools.IsNull() {
+		return nil
+	}
+
+	result := make([]*gqlclient.WorkbenchToolAssociationAttributes, 0, len(toolIDs))
+	toolIDs := make([]types.String, len(in.Tools.Elements()))
+	d.Append(in.Tools.ElementsAs(ctx, &toolIDs, false)...)
+
+	for _, toolID := range toolIDs {
+		if toolID.IsNull() {
+			continue
+		}
+
+		result = append(result, &gqlclient.WorkbenchToolAssociationAttributes{ToolID: toolID.ValueString()})
+	}
+
+	return result
 }
 
 func (in *Workbench) agentRuntimeAttribute(client *client.Client, ctx context.Context) (*string, error) {
