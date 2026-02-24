@@ -80,6 +80,7 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 				MarkdownDescription: "ID of the project that this workbench belongs to.",
 				Optional:            true,
 				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Description:         "Configuration of this workbench tool.",
