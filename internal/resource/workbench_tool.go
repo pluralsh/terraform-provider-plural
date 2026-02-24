@@ -76,9 +76,10 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 				ElementType:         types.StringType,
 			},
 			"project_id": schema.StringAttribute{
-				Description:         "ID of the project that this workbench tool belongs to.",
-				MarkdownDescription: "ID of the project that this workbench tool belongs to.",
+				Description:         "ID of the project that this workbench belongs to.",
+				MarkdownDescription: "ID of the project that this workbench belongs to.",
 				Optional:            true,
+				Computed:            true,
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Description:         "Configuration of this workbench tool.",

@@ -24,7 +24,7 @@ Workbench tool resource.
 - `categories` (Set of String) Categories of this workbench tool.
 - `configuration` (Attributes) Configuration of this workbench tool. (see [below for nested schema](#nestedatt--configuration))
 - `name` (String) Name of this workbench tool.
-- `project_id` (String) ID of the project that this workbench tool belongs to.
+- `project_id` (String) ID of the project that this workbench belongs to.
 
 ### Read-Only
 

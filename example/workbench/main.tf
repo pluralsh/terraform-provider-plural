@@ -63,6 +63,11 @@ resource "plural_workbench_tool" "status" {
   }
 }
 
+resource "plural_workbench_tool" "minimal" {
+  name       = "minimal"
+  tool       = "HTTP"
+}
+
 resource "plural_workbench" "full" {
   name        = "full"
   description = "Sample workbench with two HTTP tools and other optional fields set."
