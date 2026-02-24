@@ -133,5 +133,4 @@ func (in *WorkbenchToolHTTPConfig) From(configuration *gqlclient.WorkbenchToolFr
 
 		in.InputSchema = types.StringValue(string(inputSchema))
 	}
-
 }
