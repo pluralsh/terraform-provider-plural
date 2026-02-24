@@ -81,13 +81,13 @@ resource "plural_workbench" "full" {
       kubernetes = true
     }
   }
-  skills = {
-    ref = {
-      ref = "main"
-      folder = "examples/echo-skill"
-      files = ["skill.py"]
-    }
-  }
+  # skills = {
+  #   ref = {
+  #     ref = "main"
+  #     folder = "examples/echo-skill"
+  #     files = ["skill.py"]
+  #   }
+  # }
   tool_ids    = [plural_workbench_tool.echo.id, plural_workbench_tool.status.id]
 }
 
