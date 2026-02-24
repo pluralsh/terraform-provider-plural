@@ -44,7 +44,7 @@ Optional:
 
 Optional:
 
-- `mode` (String) The coding mode to use.
+- `mode` (String) The coding mode to use. Valid values: `ANALYZE` or `WRITE`.
 - `repositories` (Set of String) Allowed repository identifiers.
 
 

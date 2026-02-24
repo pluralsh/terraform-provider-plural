@@ -72,7 +72,7 @@ resource "plural_workbench" "full" {
   agent_runtime = "mgmt/gemini"
   configuration = {
     coding = {
-      mode = "agent"
+      mode = "WRITE"
       repositories = ["https://github.com/pluralsh/echo-skill"]
     }
     infrastructure = {

@@ -9,11 +9,13 @@ import (
 
 	"terraform-provider-plural/internal/client"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -89,9 +91,10 @@ func (r *WorkbenchResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 						Optional:            true,
 						Attributes: map[string]schema.Attribute{
 							"mode": schema.StringAttribute{
-								Description:         "The coding mode to use.",
-								MarkdownDescription: "The coding mode to use.",
+								Description:         "The coding mode to use. Valid values: ANALYZE or WRITE.",
+								MarkdownDescription: "The coding mode to use. Valid values: `ANALYZE` or `WRITE`.",
 								Optional:            true,
+								Validators:          []validator.String{stringvalidator.OneOf("ANALYZE", "WRITE")},
 							},
 							"repositories": schema.SetAttribute{
 								Description:         "Allowed repository identifiers.",
