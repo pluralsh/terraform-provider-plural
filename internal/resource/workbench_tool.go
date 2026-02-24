@@ -6,6 +6,7 @@ import (
 
 	"terraform-provider-plural/internal/common"
 	"terraform-provider-plural/internal/model"
+	planmod "terraform-provider-plural/internal/planmodifier"
 
 	"terraform-provider-plural/internal/client"
 
@@ -71,6 +72,7 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 				Description:         "Categories of this workbench tool.",
 				MarkdownDescription: "Categories of this workbench tool.",
 				Optional:            true,
+				Computed:            true,
 				ElementType:         types.StringType,
 			},
 			"project_id": schema.StringAttribute{
@@ -98,6 +100,7 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 								Description:         "The HTTP method.",
 								MarkdownDescription: "The HTTP method.",
 								Required:            true,
+								PlanModifiers:       []planmodifier.String{planmod.UppercaseString()},
 							},
 							"headers": schema.MapAttribute{
 								Description:         "The request headers.",

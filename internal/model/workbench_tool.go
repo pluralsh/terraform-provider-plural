@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"terraform-provider-plural/internal/common"
 
@@ -92,7 +93,7 @@ func (in *WorkbenchToolHTTPConfig) Attributes(ctx context.Context) *gqlclient.Wo
 
 	return &gqlclient.WorkbenchToolHTTPConfigurationAttributes{
 		URL:    in.URL.ValueString(),
-		Method: gqlclient.WorkbenchToolHTTPMethod(in.Method.ValueString()),
+		Method: gqlclient.WorkbenchToolHTTPMethod(strings.ToUpper(in.Method.ValueString())),
 		Headers: lo.MapToSlice(headers, func(k string, v types.String) *gqlclient.WorkbenchToolHTTPHeaderAttributes {
 			return &gqlclient.WorkbenchToolHTTPHeaderAttributes{Name: &k, Value: v.ValueStringPointer()}
 		}),
@@ -107,7 +108,9 @@ func (in *WorkbenchToolHTTPConfig) From(configuration *gqlclient.WorkbenchToolFr
 	}
 
 	in.URL = types.StringPointerValue(configuration.URL)
-	in.Method = types.StringPointerValue(configuration.Method)
+	if configuration.Method != nil {
+		in.Method = types.StringValue(strings.ToUpper(*configuration.Method))
+	}
 
 	if configuration.Headers != nil {
 		headers := make(map[string]any, len(configuration.Headers))
@@ -117,7 +120,7 @@ func (in *WorkbenchToolHTTPConfig) From(configuration *gqlclient.WorkbenchToolFr
 			}
 		}
 
-		in.Headers = common.MapFrom(headers, ctx, d)
+		in.Headers = common.MapFromWithConfig(headers, in.Headers, ctx, d)
 	}
 
 	if configuration.Body != nil {
