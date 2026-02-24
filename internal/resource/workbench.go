@@ -66,6 +66,7 @@ func (r *WorkbenchResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				Description:         "ID of the project that this workbench belongs to.",
 				MarkdownDescription: "ID of the project that this workbench belongs to.",
 				Optional:            true,
+				Computed:            true,
 			},
 			"repository_id": schema.StringAttribute{
 				Description:         "The Git repository for this workbench.",
