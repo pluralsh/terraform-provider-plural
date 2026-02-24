@@ -106,6 +106,11 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 						MarkdownDescription: "The semver of the tool you wish to use.",
 						Required:            true,
 					},
+					"tag": schema.StringAttribute{
+						Description:         "The docker image tag you wish to use if you're customizing the version.",
+						MarkdownDescription: "The docker image tag you wish to use if you're customizing the version.",
+						Optional:            true,
+					},
 					"hooks": schema.SetNestedAttribute{
 						Description:         "The hooks to customize execution for this stack.",
 						MarkdownDescription: "The hooks to customize execution for this stack.",
@@ -124,6 +129,95 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 								"after_stage": schema.StringAttribute{
 									Required: true,
 								},
+							},
+						},
+					},
+					"terraform": schema.SingleNestedAttribute{
+						Description:         "The terraform configuration for this stack.",
+						MarkdownDescription: "The terraform configuration for this stack.",
+						Optional:            true,
+						Attributes: map[string]schema.Attribute{
+							"parallelism": schema.Int64Attribute{
+								Description:         "Equivalent to the -parallelism flag in terraform.",
+								MarkdownDescription: "Equivalent to the -parallelism flag in terraform.",
+								Optional:            true,
+							},
+							"refresh": schema.BoolAttribute{
+								Description:         "Equivalent to the -refresh flag in terraform.",
+								MarkdownDescription: "Equivalent to the -refresh flag in terraform.",
+								Optional:            true,
+							},
+							"approve_empty": schema.BoolAttribute{
+								Description:         "Whether to auto-approve a plan if there are no changes, preventing a stack from being blocked.",
+								MarkdownDescription: "Whether to auto-approve a plan if there are no changes, preventing a stack from being blocked.",
+								Optional:            true,
+							},
+						},
+					},
+					"ansible": schema.SingleNestedAttribute{
+						Description:         "The ansible configuration for this stack.",
+						MarkdownDescription: "The ansible configuration for this stack.",
+						Optional:            true,
+						Attributes: map[string]schema.Attribute{
+							"playbook": schema.StringAttribute{
+								Description:         "The playbook to run.",
+								MarkdownDescription: "The playbook to run.",
+								Optional:            true,
+							},
+							"inventory": schema.StringAttribute{
+								Description:         "The ansible inventory file to use. We recommend checking this into git alongside your playbook files.",
+								MarkdownDescription: "The ansible inventory file to use. We recommend checking this into git alongside your playbook files.",
+								Optional:            true,
+							},
+							"additional_args": schema.ListAttribute{
+								Description:         "Additional args for the playbook.",
+								MarkdownDescription: "Additional args for the playbook.",
+								Optional:            true,
+								ElementType:         types.StringType,
+							},
+							"private_key_file": schema.StringAttribute{
+								Description:         "Path to the private key file for SSH authentication.",
+								MarkdownDescription: "Path to the private key file for SSH authentication.",
+								Optional:            true,
+							},
+						},
+					},
+					"ai_approval": schema.SingleNestedAttribute{
+						Description:         "The ai approval configuration for this stack.",
+						MarkdownDescription: "The ai approval configuration for this stack.",
+						Optional:            true,
+						Attributes: map[string]schema.Attribute{
+							"enabled": schema.BoolAttribute{
+								Description:         "Whether ai approval is enabled for this stack.",
+								MarkdownDescription: "Whether ai approval is enabled for this stack.",
+								Required:            true,
+							},
+							"ignore_cancel": schema.BoolAttribute{
+								Description:         "Whether to ignore the cancellation of a stack run by ai, this allows human approval to override.",
+								MarkdownDescription: "Whether to ignore the cancellation of a stack run by ai, this allows human approval to override.",
+								Optional:            true,
+							},
+							"git": schema.SingleNestedAttribute{
+								Description:         "The git reference to use for the ai approval rules.",
+								MarkdownDescription: "The git reference to use for the ai approval rules.",
+								Required:            true,
+								Attributes: map[string]schema.Attribute{
+									"ref": schema.StringAttribute{
+										Description:         "A general git ref, either a branch name or commit sha.",
+										MarkdownDescription: "A general git ref, either a branch name or commit sha.",
+										Required:            true,
+									},
+									"folder": schema.StringAttribute{
+										Description:         "The subdirectory in the git repository to use.",
+										MarkdownDescription: "The subdirectory in the git repository to use.",
+										Required:            true,
+									},
+								},
+							},
+							"file": schema.StringAttribute{
+								Description:         "The rules file to use alongside the git reference.",
+								MarkdownDescription: "The rules file to use alongside the git reference.",
+								Required:            true,
 							},
 						},
 					},
