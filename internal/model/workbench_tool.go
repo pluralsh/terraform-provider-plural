@@ -39,6 +39,13 @@ func (in *WorkbenchTool) Attributes(ctx context.Context) (*gqlclient.WorkbenchTo
 }
 
 func (in *WorkbenchTool) From(response *gqlclient.WorkbenchToolFragment, ctx context.Context, d *diag.Diagnostics) {
+	if in == nil {
+		return
+	}
+	if response == nil {
+		return
+	}
+
 	in.Id = types.StringValue(response.ID)
 	in.Name = types.StringValue(response.Name)
 	in.Tool = types.StringValue(string(response.Tool))
@@ -68,6 +75,9 @@ func (in *WorkbenchToolConfiguration) Attributes(ctx context.Context) *gqlclient
 }
 
 func (in *WorkbenchToolConfiguration) From(configuration *gqlclient.WorkbenchToolFragment_Configuration, ctx context.Context, d *diag.Diagnostics) {
+	if in == nil {
+		return
+	}
 	if configuration == nil {
 		return
 	}
@@ -103,6 +113,9 @@ func (in *WorkbenchToolHTTPConfig) Attributes(ctx context.Context) *gqlclient.Wo
 }
 
 func (in *WorkbenchToolHTTPConfig) From(configuration *gqlclient.WorkbenchToolFragment_Configuration_HTTP, ctx context.Context, d *diag.Diagnostics) {
+	if in == nil {
+		return
+	}
 	if configuration == nil {
 		return
 	}
