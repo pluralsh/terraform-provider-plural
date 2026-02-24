@@ -110,8 +110,13 @@ func (in *Workbench) From(response *gqlclient.WorkbenchFragment, ctx context.Con
 	in.Name = types.StringValue(response.Name)
 	in.Description = types.StringPointerValue(response.Description)
 	in.SystemPrompt = types.StringPointerValue(response.SystemPrompt)
-	in.ProjectID = types.StringValue(response.Project.ID)
-	in.RepositoryID = types.StringValue(response.Repository.ID)
+	in.ProjectID = common.ProjectFrom(response.Project)
+
+	if response.Repository != nil {
+		in.RepositoryID = types.StringValue(response.Repository.ID)
+	} else {
+		in.RepositoryID = types.StringNull()
+	}
 
 	if response.AgentRuntime != nil && response.AgentRuntime.Cluster != nil && response.AgentRuntime.Cluster.Handle != nil {
 		in.AgentRuntime = types.StringValue(fmt.Sprintf("%s/%s", *response.AgentRuntime.Cluster.Handle, response.AgentRuntime.ID))
