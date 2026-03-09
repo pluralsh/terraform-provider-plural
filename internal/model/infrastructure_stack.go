@@ -260,6 +260,7 @@ type InfrastructureStackAnsibleConfig struct {
 	Inventory      types.String `tfsdk:"inventory"`
 	AdditionalArgs types.List   `tfsdk:"additional_args"`
 	PrivateKeyFile types.String `tfsdk:"private_key_file"`
+	ConfigFile     types.String `tfsdk:"config_file"`
 }
 
 type InfrastructureStackAiApprovalConfig struct {
@@ -289,6 +290,7 @@ func (c *InfrastructureStackAnsibleConfig) Attributes(ctx context.Context, d *di
 		Inventory:      c.Inventory.ValueStringPointer(),
 		AdditionalArgs: additionalArgs,
 		PrivateKeyFile: c.PrivateKeyFile.ValueStringPointer(),
+		ConfigFile:     c.ConfigFile.ValueStringPointer(),
 	}
 }
 

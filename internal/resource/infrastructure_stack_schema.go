@@ -180,6 +180,11 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 								MarkdownDescription: "Path to the private key file for SSH authentication.",
 								Optional:            true,
 							},
+							"config_file": schema.StringAttribute{
+								Description:         "Path to the ansible config file to use.",
+								MarkdownDescription: "Path to the ansible config file to use.",
+								Optional:            true,
+							},
 						},
 					},
 					"ai_approval": schema.SingleNestedAttribute{
