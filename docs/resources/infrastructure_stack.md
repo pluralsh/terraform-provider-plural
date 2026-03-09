@@ -83,6 +83,7 @@ Required:
 Optional:
 
 - `additional_args` (List of String) Additional args for the playbook.
+- `config_file` (String) Path to the ansible config file to use.
 - `inventory` (String) The ansible inventory file to use. We recommend checking this into git alongside your playbook files.
 - `playbook` (String) The playbook to run.
 - `private_key_file` (String) Path to the private key file for SSH authentication.
