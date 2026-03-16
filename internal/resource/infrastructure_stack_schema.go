@@ -164,6 +164,11 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 								MarkdownDescription: "The playbook to run.",
 								Optional:            true,
 							},
+							"delete_playbook": schema.StringAttribute{
+								Description:         "The playbook to run when deleting the stack.",
+								MarkdownDescription: "The playbook to run when deleting the stack.",
+								Optional:            true,
+							},
 							"inventory": schema.StringAttribute{
 								Description:         "The ansible inventory file to use. We recommend checking this into git alongside your playbook files.",
 								MarkdownDescription: "The ansible inventory file to use. We recommend checking this into git alongside your playbook files.",

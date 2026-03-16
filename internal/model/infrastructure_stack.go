@@ -257,6 +257,7 @@ type InfrastructureStackTerraformConfig struct {
 
 type InfrastructureStackAnsibleConfig struct {
 	Playbook       types.String `tfsdk:"playbook"`
+	DeletePlaybook types.String `tfsdk:"delete_playbook"`
 	Inventory      types.String `tfsdk:"inventory"`
 	AdditionalArgs types.List   `tfsdk:"additional_args"`
 	PrivateKeyFile types.String `tfsdk:"private_key_file"`
@@ -287,6 +288,7 @@ func (c *InfrastructureStackAnsibleConfig) Attributes(ctx context.Context, d *di
 	}
 	return &gqlclient.AnsibleConfigurationAttributes{
 		Playbook:       c.Playbook.ValueStringPointer(),
+		DeletePlaybook: c.DeletePlaybook.ValueStringPointer(),
 		Inventory:      c.Inventory.ValueStringPointer(),
 		AdditionalArgs: additionalArgs,
 		PrivateKeyFile: c.PrivateKeyFile.ValueStringPointer(),
