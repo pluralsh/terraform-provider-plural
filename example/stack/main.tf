@@ -2,7 +2,7 @@ terraform {
   required_providers {
     plural = {
       source  = "pluralsh/plural"
-      version = "0.0.1"
+      version = "0.2.35"
     }
   }
 }
@@ -13,6 +13,10 @@ provider "plural" {
 
 data "plural_cluster" "cluster" {
   handle = "mgmt"
+}
+
+data "plural_project" "default" {
+  name = "default"
 }
 
 data "plural_git_repository" "repository" {
@@ -30,6 +34,7 @@ resource "plural_infrastructure_stack" "stack-full" {
   type       = "TERRAFORM"
   approval   = true
   detach     = true
+  project_id = data.plural_project.default.id
   cluster_id = data.plural_cluster.cluster.id
   repository = {
     id     = data.plural_git_repository.repository.id

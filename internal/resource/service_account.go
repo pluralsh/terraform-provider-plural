@@ -105,11 +105,11 @@ func (r *ServiceAccountResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	response, err := r.client.GetUser(ctx, data.Email.ValueString())
-	if err != nil {
+	if err != nil && !client.IsNotFound(err) {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get service account, got error: %s", err))
 		return
 	}
-	if response == nil || response.User == nil {
+	if response == nil || response.User == nil || client.IsNotFound(err) {
 		// Resource not found, remove from state
 		resp.State.RemoveResource(ctx)
 		return

@@ -62,6 +62,7 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 				MarkdownDescription: "ID of the project that this stack belongs to.",
 				Computed:            true,
 				Optional:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"cluster_id": schema.StringAttribute{
 				Description:         "The cluster on which the stack will be applied.",

@@ -159,11 +159,11 @@ func (r *CloudConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	response, err := r.client.GetCloudConnection(ctx, data.Id.ValueStringPointer(), data.Name.ValueStringPointer())
-	if err != nil {
+	if err != nil && !client.IsNotFound(err) {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read cloud connection, got error: %s", err))
 		return
 	}
-	if response == nil || response.CloudConnection == nil {
+	if response == nil || response.CloudConnection == nil || client.IsNotFound(err) {
 		// Resource not found, remove from state
 		resp.State.RemoveResource(ctx)
 		return

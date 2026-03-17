@@ -181,11 +181,11 @@ func (r *WorkbenchToolResource) Read(ctx context.Context, req resource.ReadReque
 	}
 
 	response, err := r.client.GetWorkbenchTool(ctx, data.Id.ValueStringPointer(), nil)
-	if err != nil {
+	if err != nil && !client.IsNotFound(err) {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get workbench tool, got error: %s", err))
 		return
 	}
-	if response == nil || response.WorkbenchTool == nil {
+	if response == nil || response.WorkbenchTool == nil || client.IsNotFound(err) {
 		// Resource not found, remove from state
 		resp.State.RemoveResource(ctx)
 		return
