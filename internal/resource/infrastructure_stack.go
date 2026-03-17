@@ -126,7 +126,7 @@ func (r *InfrastructureStackResource) Delete(ctx context.Context, req resource.D
 
 	if data.Detach.ValueBool() {
 		_, err := r.client.DetachStack(ctx, data.Id.ValueString())
-		if err != nil {
+		if err != nil && !client.IsNotFound(err) {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to detach infrastructure stack, got error: %s", err))
 			return
 		}
