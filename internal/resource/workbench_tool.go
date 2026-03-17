@@ -55,8 +55,7 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 			"name": schema.StringAttribute{
 				Description:         "Name of this workbench tool.",
 				MarkdownDescription: "Name of this workbench tool.",
-				Optional:            true,
-				Computed:            true,
+				Required:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"tool": schema.StringAttribute{
