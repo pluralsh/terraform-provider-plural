@@ -1,6 +1,6 @@
 module terraform-provider-plural
 
-go 1.25.6
+go 1.26.1
 
 require (
 	github.com/Yamashou/gqlgenc v0.33.0
@@ -10,16 +10,16 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.19.0
 	github.com/hashicorp/terraform-plugin-log v0.10.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/pluralsh/console/go/client v1.65.4
+	github.com/pluralsh/console/go/client v1.69.0
 	github.com/pluralsh/plural-cli v0.12.40
 	github.com/pluralsh/polly v0.3.8
 	github.com/samber/lo v1.52.0
 	github.com/sirupsen/logrus v1.9.4
 	gopkg.in/yaml.v2 v2.4.0
 	helm.sh/helm/v3 v3.20.0
-	k8s.io/api v0.35.1
-	k8s.io/apimachinery v0.35.1
-	k8s.io/client-go v0.35.1
+	k8s.io/api v0.35.2
+	k8s.io/apimachinery v0.35.2
+	k8s.io/client-go v0.35.2
 	sigs.k8s.io/yaml v1.6.0
 )
 

@@ -164,6 +164,11 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 								MarkdownDescription: "The playbook to run.",
 								Optional:            true,
 							},
+							"delete_playbook": schema.StringAttribute{
+								Description:         "The playbook to run when deleting the stack.",
+								MarkdownDescription: "The playbook to run when deleting the stack.",
+								Optional:            true,
+							},
 							"inventory": schema.StringAttribute{
 								Description:         "The ansible inventory file to use. We recommend checking this into git alongside your playbook files.",
 								MarkdownDescription: "The ansible inventory file to use. We recommend checking this into git alongside your playbook files.",
@@ -178,6 +183,11 @@ func (r *InfrastructureStackResource) schema() schema.Schema {
 							"private_key_file": schema.StringAttribute{
 								Description:         "Path to the private key file for SSH authentication.",
 								MarkdownDescription: "Path to the private key file for SSH authentication.",
+								Optional:            true,
+							},
+							"config_file": schema.StringAttribute{
+								Description:         "Path to the ansible config file to use.",
+								MarkdownDescription: "Path to the ansible config file to use.",
 								Optional:            true,
 							},
 						},
