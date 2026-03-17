@@ -34,7 +34,7 @@ func (in *Workbench) Attributes(client *client.Client, ctx context.Context, d *d
 	}
 
 	return &gqlclient.WorkbenchAttributes{
-		Name:             in.Name.ValueStringPointer(),
+		Name:             in.Name.ValueString(),
 		Description:      in.Description.ValueStringPointer(),
 		SystemPrompt:     in.SystemPrompt.ValueStringPointer(),
 		ProjectID:        in.ProjectID.ValueStringPointer(),
