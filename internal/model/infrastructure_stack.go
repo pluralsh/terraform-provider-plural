@@ -28,8 +28,8 @@ func (is *InfrastructureStack) From(stack *gqlclient.InfrastructureStackFragment
 	is.Name = types.StringValue(stack.Name)
 	is.Type = types.StringValue(string(stack.Type))
 	is.Approval = types.BoolPointerValue(stack.Approval)
-	is.ProjectId = common.ProjectFrom(stack.Project)
 	is.ClusterId = types.StringValue(stack.Cluster.ID)
+	is.ProjectId = common.ProjectFrom(stack.Project)
 }
 
 type InfrastructureStackExtended struct {
@@ -115,7 +115,6 @@ func (is *InfrastructureStackExtended) From(stack *gqlclient.InfrastructureStack
 	is.Environment = infrastructureStackEnvironmentsFrom(stack.Environment, is.Environment, ctx, d)
 	is.Bindings.From(stack.ReadBindings, stack.WriteBindings, ctx, d)
 	is.JobSpec.From(stack.JobSpec, ctx, d)
-	is.ProjectId = common.ProjectFrom(stack.Project)
 }
 
 func infrastructureStackFilesFrom(files []*gqlclient.StackFileFragment, config types.Map, d *diag.Diagnostics) types.Map {
