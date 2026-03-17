@@ -108,11 +108,11 @@ func (r *ServiceContextResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	response, err := r.client.GetServiceContext(ctx, data.Name.ValueString())
-	if err != nil {
+	if err != nil && !client.IsNotFound(err) {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read service context, got error: %s", err))
 		return
 	}
-	if response == nil || response.ServiceContext == nil {
+	if response == nil || response.ServiceContext == nil || client.IsNotFound(err) {
 		// Resource not found, remove from state
 		resp.State.RemoveResource(ctx)
 		return

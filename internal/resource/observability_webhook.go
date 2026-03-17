@@ -122,11 +122,11 @@ func (r *ObservabilityWebhookResource) Read(ctx context.Context, req resource.Re
 	}
 
 	response, err := r.client.GetObservabilityWebhook(ctx, nil, data.Name.ValueStringPointer())
-	if err != nil {
+	if err != nil && !client.IsNotFound(err) {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read observability webhook, got error: %s", err))
 		return
 	}
-	if response == nil || response.ObservabilityWebhook == nil {
+	if response == nil || response.ObservabilityWebhook == nil || client.IsNotFound(err) {
 		// Resource not found, remove from state
 		resp.State.RemoveResource(ctx)
 		return

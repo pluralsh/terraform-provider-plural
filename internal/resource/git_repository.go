@@ -169,11 +169,11 @@ func (r *GitRepositoryResource) Read(ctx context.Context, req resource.ReadReque
 	}
 
 	response, err := r.client.GetGitRepository(ctx, data.Id.ValueStringPointer(), data.Url.ValueStringPointer())
-	if err != nil {
+	if err != nil && !client.IsNotFound(err) {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get GitRepository, got error: %s", err))
 		return
 	}
-	if response == nil || response.GitRepository == nil {
+	if response == nil || response.GitRepository == nil || client.IsNotFound(err) {
 		// Resource not found, remove from state
 		resp.State.RemoveResource(ctx)
 		return

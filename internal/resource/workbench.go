@@ -226,11 +226,11 @@ func (r *WorkbenchResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 
 	response, err := r.client.GetWorkbench(ctx, data.Id.ValueStringPointer(), nil)
-	if err != nil {
+	if err != nil && !client.IsNotFound(err) {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get workbench, got error: %s", err))
 		return
 	}
-	if response == nil || response.Workbench == nil {
+	if response == nil || response.Workbench == nil || client.IsNotFound(err) {
 		// Resource not found, remove from state
 		resp.State.RemoveResource(ctx)
 		return

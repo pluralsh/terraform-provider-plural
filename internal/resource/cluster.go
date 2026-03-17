@@ -103,11 +103,11 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	if !data.Id.IsNull() {
 		result, err := r.client.GetCluster(ctx, data.Id.ValueStringPointer())
-		if err != nil {
+		if err != nil && !client.IsNotFound(err) {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read cluster, got error: %s", err))
 			return
 		}
-		if result == nil || result.Cluster == nil {
+		if result == nil || result.Cluster == nil || client.IsNotFound(err) {
 			// Resource not found, remove from state
 			resp.State.RemoveResource(ctx)
 			return
@@ -115,11 +115,11 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 		data.From(result.Cluster, ctx, &resp.Diagnostics)
 	} else if !data.Handle.IsNull() {
 		result, err := r.client.GetClusterByHandle(ctx, data.Handle.ValueStringPointer())
-		if err != nil {
+		if err != nil && !client.IsNotFound(err) {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read cluster, got error: %s", err))
 			return
 		}
-		if result == nil || result.Cluster == nil {
+		if result == nil || result.Cluster == nil || client.IsNotFound(err) {
 			// Resource not found, remove from state
 			resp.State.RemoveResource(ctx)
 			return

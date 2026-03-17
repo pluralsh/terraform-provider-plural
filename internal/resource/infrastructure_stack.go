@@ -82,11 +82,11 @@ func (r *InfrastructureStackResource) Read(ctx context.Context, req resource.Rea
 	}
 
 	response, err := r.client.GetInfrastructureStack(ctx, data.Id.ValueStringPointer(), nil)
-	if err != nil {
+	if err != nil && !client.IsNotFound(err) {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read infrastructure stack, got error: %s", err))
 		return
 	}
-	if response == nil || response.InfrastructureStack == nil {
+	if response == nil || response.InfrastructureStack == nil || client.IsNotFound(err) {
 		// Resource not found, remove from state
 		resp.State.RemoveResource(ctx)
 		return
