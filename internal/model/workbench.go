@@ -121,6 +121,8 @@ func (in *Workbench) From(response *gqlclient.WorkbenchFragment, ctx context.Con
 
 	if response.AgentRuntime != nil && response.AgentRuntime.Cluster != nil && response.AgentRuntime.Cluster.Handle != nil {
 		in.AgentRuntime = types.StringValue(fmt.Sprintf("%s/%s", *response.AgentRuntime.Cluster.Handle, response.AgentRuntime.Name))
+	} else {
+		in.AgentRuntime = types.StringNull()
 	}
 
 	in.Configuration.From(response.Configuration, ctx, d)
