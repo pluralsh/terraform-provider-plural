@@ -115,6 +115,7 @@ func (is *InfrastructureStackExtended) From(stack *gqlclient.InfrastructureStack
 	is.Environment = infrastructureStackEnvironmentsFrom(stack.Environment, is.Environment, ctx, d)
 	is.Bindings.From(stack.ReadBindings, stack.WriteBindings, ctx, d)
 	is.JobSpec.From(stack.JobSpec, ctx, d)
+	is.ProjectId = common.ProjectFrom(stack.Project)
 }
 
 func infrastructureStackFilesFrom(files []*gqlclient.StackFileFragment, config types.Map, d *diag.Diagnostics) types.Map {
