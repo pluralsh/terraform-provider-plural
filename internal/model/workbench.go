@@ -212,8 +212,14 @@ func (in *WorkbenchCoding) Attributes(ctx context.Context) *gqlclient.WorkbenchC
 	repositories := make([]types.String, len(in.Repositories.Elements()))
 	in.Repositories.ElementsAs(ctx, &repositories, false)
 
+	var mode *gqlclient.AgentRunMode
+	if !in.Mode.IsNull() && !in.Mode.IsUnknown() {
+		m := gqlclient.AgentRunMode(in.Mode.ValueString())
+		mode = &m
+	}
+
 	return &gqlclient.WorkbenchCodingAttributes{
-		Mode:         lo.ToPtr(gqlclient.AgentRunMode(in.Mode.ValueString())),
+		Mode:         mode,
 		Repositories: lo.Map(repositories, func(v types.String, _ int) *string { return lo.ToPtr(v.ValueString()) }),
 	}
 }
