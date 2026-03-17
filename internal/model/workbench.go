@@ -8,6 +8,7 @@ import (
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	gqlclient "github.com/pluralsh/console/go/client"
@@ -130,9 +131,21 @@ func (in *Workbench) From(response *gqlclient.WorkbenchFragment, ctx context.Con
 
 func (in *Workbench) toolsFrom(tools []*gqlclient.WorkbenchToolFragment, config types.Set, ctx context.Context, d *diag.Diagnostics) types.Set {
 	if len(tools) == 0 {
-		// Rewriting config to state to avoid inconsistent result errors.
-		// This could happen, for example, when sending "nil" to API and "[]" is returned as a result.
-		return config
+		// When no tools are returned, preserve a null config to avoid nil-vs-empty diffs,
+		// but otherwise explicitly set an empty set so remote removals are reflected in state.
+		if config.IsNull() {
+			return config
+		}
+
+		elemType := config.ElementType(ctx)
+		emptySet, diags := types.SetValue(elemType, []attr.Value{})
+		if diags.HasError() {
+			d.Append(diags...)
+			// Fall back to the existing config rather than returning a partially invalid value.
+			return config
+		}
+
+		return emptySet
 	}
 
 	toolIDs := lo.Map(tools, func(tool *gqlclient.WorkbenchToolFragment, _ int) *string { return &tool.ID })
