@@ -28,8 +28,8 @@ func (is *InfrastructureStack) From(stack *gqlclient.InfrastructureStackFragment
 	is.Name = types.StringValue(stack.Name)
 	is.Type = types.StringValue(string(stack.Type))
 	is.Approval = types.BoolPointerValue(stack.Approval)
-	is.ClusterId = types.StringValue(stack.Cluster.ID)
 	is.ProjectId = common.ProjectFrom(stack.Project)
+	is.ClusterId = types.StringValue(stack.Cluster.ID)
 }
 
 type InfrastructureStackExtended struct {
