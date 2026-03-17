@@ -52,10 +52,7 @@ func (in *WorkbenchTool) From(response *gqlclient.WorkbenchToolFragment, ctx con
 	in.Categories = common.SetFrom(lo.Map(response.Categories, func(v *gqlclient.WorkbenchToolCategory, _ int) *string {
 		return lo.Ternary(v == nil, nil, lo.ToPtr(string(*v)))
 	}), in.Categories, ctx, d)
-
-	if response.Project != nil {
-		in.ProjectID = types.StringValue(response.Project.ID)
-	}
+	in.ProjectID = common.ProjectFrom(response.Project)
 
 	in.Configuration.From(response.Configuration, ctx, d)
 }
