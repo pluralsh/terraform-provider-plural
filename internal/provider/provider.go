@@ -213,6 +213,8 @@ func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource
 		r.NewCloudConnectionResource,
 		r.NewServiceAccountResource,
 		r.NewServiceWaitResource,
+		r.NewWorkbenchResource,
+		r.NewWorkbenchToolResource,
 	}
 }
 
