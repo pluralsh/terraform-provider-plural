@@ -120,6 +120,8 @@ func (in *WorkbenchToolHTTPConfig) From(configuration *gqlclient.WorkbenchToolFr
 	in.URL = types.StringPointerValue(configuration.URL)
 	if configuration.Method != nil {
 		in.Method = types.StringValue(strings.ToUpper(*configuration.Method))
+	} else {
+		in.Method = types.StringNull()
 	}
 
 	if configuration.Headers != nil {
@@ -131,10 +133,14 @@ func (in *WorkbenchToolHTTPConfig) From(configuration *gqlclient.WorkbenchToolFr
 		}
 
 		in.Headers = common.MapFromWithConfig(headers, in.Headers, ctx, d)
+	} else {
+		in.Headers = types.MapNull(types.StringType)
 	}
 
 	if configuration.Body != nil {
 		in.Body = types.StringPointerValue(configuration.Body)
+	} else {
+		in.Body = types.StringNull()
 	}
 
 	if configuration.InputSchema != nil {
@@ -145,5 +151,7 @@ func (in *WorkbenchToolHTTPConfig) From(configuration *gqlclient.WorkbenchToolFr
 		}
 
 		in.InputSchema = types.StringValue(string(inputSchema))
+	} else {
+		in.InputSchema = types.StringNull()
 	}
 }
