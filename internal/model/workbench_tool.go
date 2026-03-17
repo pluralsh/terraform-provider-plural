@@ -146,7 +146,7 @@ func (in *WorkbenchToolHTTPConfig) From(configuration *gqlclient.WorkbenchToolFr
 	if configuration.InputSchema != nil {
 		inputSchema, err := json.Marshal(configuration.InputSchema)
 		if err != nil {
-			d.AddError("Provider Error", fmt.Sprintf("Cannot marshall input schema, got error: %s", err))
+			d.AddError("Provider Error", fmt.Sprintf("Cannot marshal input schema, got error: %s", err))
 			return
 		}
 
