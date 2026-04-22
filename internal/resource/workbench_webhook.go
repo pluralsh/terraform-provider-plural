@@ -8,11 +8,13 @@ import (
 	"terraform-provider-plural/internal/common"
 	"terraform-provider-plural/internal/model"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 var _ resource.Resource = &WorkbenchWebhookResource{}
@@ -60,11 +62,17 @@ func (r *WorkbenchWebhookResource) Schema(_ context.Context, _ resource.SchemaRe
 				Description:         "Observability webhook ID that sends events to this trigger.",
 				MarkdownDescription: "Observability webhook ID that sends events to this trigger.",
 				Optional:            true,
+				Validators: []validator.String{
+					stringvalidator.AtLeastOneOf(path.MatchRoot("issue_webhook_id")),
+				},
 			},
 			"issue_webhook_id": schema.StringAttribute{
 				Description:         "Issue webhook ID that sends events to this trigger.",
 				MarkdownDescription: "Issue webhook ID that sends events to this trigger.",
 				Optional:            true,
+				Validators: []validator.String{
+					stringvalidator.AtLeastOneOf(path.MatchRoot("webhook_id")),
+				},
 			},
 			"matches": schema.SingleNestedAttribute{
 				Description:         "Webhook payload matching rules.",
