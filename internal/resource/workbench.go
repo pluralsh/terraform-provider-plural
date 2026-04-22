@@ -127,6 +127,23 @@ func (r *WorkbenchResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 							},
 						},
 					},
+					"observability": schema.SingleNestedAttribute{
+						Description:         "Observability capabilities.",
+						MarkdownDescription: "Observability capabilities.",
+						Optional:            true,
+						Attributes: map[string]schema.Attribute{
+							"logs": schema.BoolAttribute{
+								Description:         "Whether to enable logs capability.",
+								MarkdownDescription: "Whether to enable logs capability.",
+								Optional:            true,
+							},
+							"metrics": schema.BoolAttribute{
+								Description:         "Whether to enable metrics capability.",
+								MarkdownDescription: "Whether to enable metrics capability.",
+								Optional:            true,
+							},
+						},
+					},
 				},
 			},
 			"skills": schema.SingleNestedAttribute{
@@ -162,6 +179,26 @@ func (r *WorkbenchResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 						MarkdownDescription: "Files to include.",
 						Optional:            true,
 						ElementType:         types.StringType,
+					},
+				},
+			},
+			"read_bindings": schema.SetNestedAttribute{
+				Optional: true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"group_id": schema.StringAttribute{Optional: true},
+						"user_id":  schema.StringAttribute{Optional: true},
+						"id":       schema.StringAttribute{Optional: true},
+					},
+				},
+			},
+			"write_bindings": schema.SetNestedAttribute{
+				Optional: true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"group_id": schema.StringAttribute{Optional: true},
+						"user_id":  schema.StringAttribute{Optional: true},
+						"id":       schema.StringAttribute{Optional: true},
 					},
 				},
 			},

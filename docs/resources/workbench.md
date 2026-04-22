@@ -22,10 +22,12 @@ Workbench resource.
 - `description` (String) Description of this workbench.
 - `name` (String) Name of this workbench.
 - `project_id` (String) ID of the project that this workbench belongs to.
+- `read_bindings` (Attributes Set) (see [below for nested schema](#nestedatt--read_bindings))
 - `repository_id` (String) The Git repository for this workbench.
 - `skills` (Attributes) Skills for this workbench. (see [below for nested schema](#nestedatt--skills))
 - `system_prompt` (String) System prompt for this workbench.
 - `tool_ids` (Set of String) Tools for this workbench.
+- `write_bindings` (Attributes Set) (see [below for nested schema](#nestedatt--write_bindings))
 
 ### Read-Only
 
@@ -38,6 +40,7 @@ Optional:
 
 - `coding` (Attributes) Coding capabilities. (see [below for nested schema](#nestedatt--configuration--coding))
 - `infrastructure` (Attributes) Infrastructure capabilities. (see [below for nested schema](#nestedatt--configuration--infrastructure))
+- `observability` (Attributes) Observability capabilities. (see [below for nested schema](#nestedatt--configuration--observability))
 
 <a id="nestedatt--configuration--coding"></a>
 ### Nested Schema for `configuration.coding`
@@ -57,6 +60,25 @@ Optional:
 - `services` (Boolean) Whether to enable services capability.
 - `stacks` (Boolean) Whether to enable stacks capability.
 
+
+<a id="nestedatt--configuration--observability"></a>
+### Nested Schema for `configuration.observability`
+
+Optional:
+
+- `logs` (Boolean) Whether to enable logs capability.
+- `metrics` (Boolean) Whether to enable metrics capability.
+
+
+
+<a id="nestedatt--read_bindings"></a>
+### Nested Schema for `read_bindings`
+
+Optional:
+
+- `group_id` (String)
+- `id` (String)
+- `user_id` (String)
 
 
 <a id="nestedatt--skills"></a>
@@ -78,3 +100,14 @@ Required:
 Optional:
 
 - `files` (Set of String) Files to include.
+
+
+
+<a id="nestedatt--write_bindings"></a>
+### Nested Schema for `write_bindings`
+
+Optional:
+
+- `group_id` (String)
+- `id` (String)
+- `user_id` (String)
