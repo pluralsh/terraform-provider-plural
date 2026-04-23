@@ -64,8 +64,7 @@ func (r *WorkbenchWebhookResource) Schema(_ context.Context, _ resource.SchemaRe
 				MarkdownDescription: "Observability webhook ID that sends events to this trigger.",
 				Optional:            true,
 				Validators: []validator.String{
-					stringvalidator.AtLeastOneOf(path.MatchRoot("issue_webhook_id")),
-					stringvalidator.ConflictsWith(path.MatchRoot("issue_webhook_id")),
+					stringvalidator.ExactlyOneOf(path.MatchRoot("issue_webhook_id")),
 				},
 			},
 			"issue_webhook_id": schema.StringAttribute{
@@ -73,8 +72,7 @@ func (r *WorkbenchWebhookResource) Schema(_ context.Context, _ resource.SchemaRe
 				MarkdownDescription: "Issue webhook ID that sends events to this trigger.",
 				Optional:            true,
 				Validators: []validator.String{
-					stringvalidator.AtLeastOneOf(path.MatchRoot("webhook_id")),
-					stringvalidator.ConflictsWith(path.MatchRoot("webhook_id")),
+					stringvalidator.ExactlyOneOf(path.MatchRoot("webhook_id")),
 				},
 			},
 			"matches": schema.SingleNestedAttribute{
