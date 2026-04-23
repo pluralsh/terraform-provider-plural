@@ -43,8 +43,8 @@ func (in *Workbench) Attributes(client *client.Client, ctx context.Context, d *d
 		ProjectID:        in.ProjectID.ValueStringPointer(),
 		RepositoryID:     in.RepositoryID.ValueStringPointer(),
 		AgentRuntimeID:   agentRuntimeID,
-		Configuration:    in.Configuration.Attributes(ctx),
-		Skills:           in.Skills.Attributes(ctx),
+		Configuration:    in.Configuration.Attributes(ctx, d),
+		Skills:           in.Skills.Attributes(ctx, d),
 		ReadBindings:     common.SetToPolicyBindingAttributes(in.ReadBindings, ctx, d),
 		WriteBindings:    common.SetToPolicyBindingAttributes(in.WriteBindings, ctx, d),
 		ToolAssociations: in.toolsAttribute(ctx, d),
@@ -167,14 +167,14 @@ type WorkbenchConfiguration struct {
 	Observability  *WorkbenchObservability  `tfsdk:"observability"`
 }
 
-func (in *WorkbenchConfiguration) Attributes(ctx context.Context) *gqlclient.WorkbenchConfigurationAttributes {
+func (in *WorkbenchConfiguration) Attributes(ctx context.Context, d *diag.Diagnostics) *gqlclient.WorkbenchConfigurationAttributes {
 	if in == nil {
 		return nil
 	}
 
 	return &gqlclient.WorkbenchConfigurationAttributes{
 		Infrastructure: in.Infrastructure.Attributes(),
-		Coding:         in.Coding.Attributes(ctx),
+		Coding:         in.Coding.Attributes(ctx, d),
 		Observability:  in.Observability.Attributes(),
 	}
 }
@@ -228,13 +228,13 @@ type WorkbenchCoding struct {
 	Repositories types.Set    `tfsdk:"repositories"`
 }
 
-func (in *WorkbenchCoding) Attributes(ctx context.Context) *gqlclient.WorkbenchCodingAttributes {
+func (in *WorkbenchCoding) Attributes(ctx context.Context, d *diag.Diagnostics) *gqlclient.WorkbenchCodingAttributes {
 	if in == nil {
 		return nil
 	}
 
 	repositories := make([]types.String, len(in.Repositories.Elements()))
-	in.Repositories.ElementsAs(ctx, &repositories, false)
+	d.Append(in.Repositories.ElementsAs(ctx, &repositories, false)...)
 
 	var mode *gqlclient.AgentRunMode
 	if !in.Mode.IsNull() && !in.Mode.IsUnknown() {
@@ -298,16 +298,16 @@ type WorkbenchSkills struct {
 	Files types.Set        `tfsdk:"files"`
 }
 
-func (in *WorkbenchSkills) Attributes(ctx context.Context) *gqlclient.WorkbenchSkillsAttributes {
+func (in *WorkbenchSkills) Attributes(ctx context.Context, d *diag.Diagnostics) *gqlclient.WorkbenchSkillsAttributes {
 	if in == nil {
 		return nil
 	}
 
 	files := make([]types.String, len(in.Files.Elements()))
-	in.Files.ElementsAs(ctx, &files, false)
+	d.Append(in.Files.ElementsAs(ctx, &files, false)...)
 
 	return &gqlclient.WorkbenchSkillsAttributes{
-		Ref:   in.Ref.Attributes(ctx),
+		Ref:   in.Ref.Attributes(ctx, d),
 		Files: lo.Map(files, func(v types.String, _ int) *string { return v.ValueStringPointer() }),
 	}
 }
@@ -330,13 +330,13 @@ type WorkbenchGitRef struct {
 	Files  types.Set    `tfsdk:"files"`
 }
 
-func (in *WorkbenchGitRef) Attributes(ctx context.Context) *gqlclient.GitRefAttributes {
+func (in *WorkbenchGitRef) Attributes(ctx context.Context, d *diag.Diagnostics) *gqlclient.GitRefAttributes {
 	if in == nil {
 		return nil
 	}
 
 	files := make([]types.String, len(in.Files.Elements()))
-	in.Files.ElementsAs(ctx, &files, false)
+	d.Append(in.Files.ElementsAs(ctx, &files, false)...)
 
 	return &gqlclient.GitRefAttributes{
 		Ref:    in.Ref.ValueString(),
