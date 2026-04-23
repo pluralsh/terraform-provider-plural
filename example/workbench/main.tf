@@ -86,7 +86,7 @@ resource "plural_workbench_tool" "minimal" {
 }
 
 resource "plural_workbench_tool" "cloudwatch" {
-  name                = "cloudwatch-default"
+  name                = "cloudwatch_default"
   tool                = "CLOUDWATCH"
   project_id          = data.plural_project.default.id
   cloud_connection_id = plural_cloud_connection.workbench.id
