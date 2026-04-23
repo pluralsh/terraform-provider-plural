@@ -25,12 +25,12 @@ Workbench resource.
 - `configuration` (Attributes) Configuration for this workbench. (see [below for nested schema](#nestedatt--configuration))
 - `description` (String) Description of this workbench.
 - `project_id` (String) ID of the project that this workbench belongs to.
-- `read_bindings` (Attributes Set) (see [below for nested schema](#nestedatt--read_bindings))
+- `read_bindings` (Attributes Set) Read policy bindings for this workbench. (see [below for nested schema](#nestedatt--read_bindings))
 - `repository_id` (String) The Git repository for this workbench.
 - `skills` (Attributes) Skills for this workbench. (see [below for nested schema](#nestedatt--skills))
 - `system_prompt` (String) System prompt for this workbench.
 - `tool_ids` (Set of String) Tools for this workbench.
-- `write_bindings` (Attributes Set) (see [below for nested schema](#nestedatt--write_bindings))
+- `write_bindings` (Attributes Set) Write policy bindings for this workbench. (see [below for nested schema](#nestedatt--write_bindings))
 
 ### Read-Only
 
@@ -79,9 +79,9 @@ Optional:
 
 Optional:
 
-- `group_id` (String)
-- `id` (String)
-- `user_id` (String)
+- `group_id` (String) ID of the group to bind.
+- `id` (String) ID of the policy binding.
+- `user_id` (String) ID of the user to bind.
 
 
 <a id="nestedatt--skills"></a>
@@ -111,6 +111,6 @@ Optional:
 
 Optional:
 
-- `group_id` (String)
-- `id` (String)
-- `user_id` (String)
+- `group_id` (String) ID of the group to bind.
+- `id` (String) ID of the policy binding.
+- `user_id` (String) ID of the user to bind.
