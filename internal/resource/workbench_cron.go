@@ -123,13 +123,12 @@ func (r *WorkbenchCronResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	response, err := r.client.UpdateWorkbenchCron(ctx, data.Id.ValueString(), data.Attributes())
+	_, err := r.client.UpdateWorkbenchCron(ctx, data.Id.ValueString(), data.Attributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update workbench cron, got error: %s", err))
 		return
 	}
 
-	data.From(response.UpdateWorkbenchCron)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 

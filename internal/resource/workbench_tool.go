@@ -56,7 +56,6 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 				Description:         "Name of this workbench tool.",
 				MarkdownDescription: "Name of this workbench tool.",
 				Required:            true,
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"tool": schema.StringAttribute{
 				Description:         "Workbench tool type.",
@@ -114,6 +113,12 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 								MarkdownDescription: "The HTTP method.",
 								Required:            true,
 								PlanModifiers:       []planmodifier.String{planmod.UppercaseString()},
+								Validators: []validator.String{
+									stringvalidator.OneOfCaseInsensitive(
+										lo.Map(console.AllWorkbenchToolHTTPMethod, func(m console.WorkbenchToolHTTPMethod, _ int) string {
+											return string(m)
+										})...),
+								},
 							},
 							"headers": schema.MapAttribute{
 								Description:         "The request headers.",

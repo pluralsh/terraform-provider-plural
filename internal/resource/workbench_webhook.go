@@ -163,13 +163,12 @@ func (r *WorkbenchWebhookResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	response, err := r.client.UpdateWorkbenchWebhook(ctx, data.Id.ValueString(), data.Attributes())
+	_, err := r.client.UpdateWorkbenchWebhook(ctx, data.Id.ValueString(), data.Attributes())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update workbench webhook, got error: %s", err))
 		return
 	}
 
-	data.From(response.UpdateWorkbenchWebhook)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
