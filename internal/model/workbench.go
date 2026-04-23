@@ -25,6 +25,8 @@ type Workbench struct {
 	AgentRuntime  types.String            `tfsdk:"agent_runtime"`
 	Configuration *WorkbenchConfiguration `tfsdk:"configuration"`
 	Skills        *WorkbenchSkills        `tfsdk:"skills"`
+	ReadBindings  types.Set               `tfsdk:"read_bindings"`
+	WriteBindings types.Set               `tfsdk:"write_bindings"`
 	Tools         types.Set               `tfsdk:"tool_ids"`
 }
 
@@ -41,8 +43,10 @@ func (in *Workbench) Attributes(client *client.Client, ctx context.Context, d *d
 		ProjectID:        in.ProjectID.ValueStringPointer(),
 		RepositoryID:     in.RepositoryID.ValueStringPointer(),
 		AgentRuntimeID:   agentRuntimeID,
-		Configuration:    in.Configuration.Attributes(ctx),
-		Skills:           in.Skills.Attributes(ctx),
+		Configuration:    in.Configuration.Attributes(ctx, d),
+		Skills:           in.Skills.Attributes(ctx, d),
+		ReadBindings:     common.SetToPolicyBindingAttributes(in.ReadBindings, ctx, d),
+		WriteBindings:    common.SetToPolicyBindingAttributes(in.WriteBindings, ctx, d),
 		ToolAssociations: in.toolsAttribute(ctx, d),
 	}, nil
 }
@@ -127,6 +131,8 @@ func (in *Workbench) From(response *gqlclient.WorkbenchFragment, ctx context.Con
 
 	in.Configuration.From(response.Configuration, ctx, d)
 	in.Skills.From(response.Skills, ctx, d)
+	in.ReadBindings = common.BindingsFromReadOnly(response.ReadBindings, in.ReadBindings, ctx, d)
+	in.WriteBindings = common.BindingsFromReadOnly(response.WriteBindings, in.WriteBindings, ctx, d)
 
 	in.Tools = in.toolsFrom(response.Tools, in.Tools, ctx, d)
 }
@@ -158,16 +164,18 @@ func (in *Workbench) toolsFrom(tools []*gqlclient.WorkbenchToolFragment, config 
 type WorkbenchConfiguration struct {
 	Infrastructure *WorkbenchInfrastructure `tfsdk:"infrastructure"`
 	Coding         *WorkbenchCoding         `tfsdk:"coding"`
+	Observability  *WorkbenchObservability  `tfsdk:"observability"`
 }
 
-func (in *WorkbenchConfiguration) Attributes(ctx context.Context) *gqlclient.WorkbenchConfigurationAttributes {
+func (in *WorkbenchConfiguration) Attributes(ctx context.Context, d *diag.Diagnostics) *gqlclient.WorkbenchConfigurationAttributes {
 	if in == nil {
 		return nil
 	}
 
 	return &gqlclient.WorkbenchConfigurationAttributes{
 		Infrastructure: in.Infrastructure.Attributes(),
-		Coding:         in.Coding.Attributes(ctx),
+		Coding:         in.Coding.Attributes(ctx, d),
+		Observability:  in.Observability.Attributes(),
 	}
 }
 
@@ -181,6 +189,7 @@ func (in *WorkbenchConfiguration) From(configuration *gqlclient.WorkbenchFragmen
 
 	in.Coding.From(configuration.Coding, ctx, d)
 	in.Infrastructure.From(configuration.Infrastructure)
+	in.Observability.From(configuration.Observability)
 }
 
 type WorkbenchInfrastructure struct {
@@ -219,13 +228,13 @@ type WorkbenchCoding struct {
 	Repositories types.Set    `tfsdk:"repositories"`
 }
 
-func (in *WorkbenchCoding) Attributes(ctx context.Context) *gqlclient.WorkbenchCodingAttributes {
+func (in *WorkbenchCoding) Attributes(ctx context.Context, d *diag.Diagnostics) *gqlclient.WorkbenchCodingAttributes {
 	if in == nil {
 		return nil
 	}
 
 	repositories := make([]types.String, len(in.Repositories.Elements()))
-	in.Repositories.ElementsAs(ctx, &repositories, false)
+	d.Append(in.Repositories.ElementsAs(ctx, &repositories, false)...)
 
 	var mode *gqlclient.AgentRunMode
 	if !in.Mode.IsNull() && !in.Mode.IsUnknown() {
@@ -256,21 +265,49 @@ func (in *WorkbenchCoding) From(configuration *gqlclient.WorkbenchFragment_Confi
 	in.Repositories = common.SetFrom(configuration.Repositories, in.Repositories, ctx, d)
 }
 
+type WorkbenchObservability struct {
+	Logs    types.Bool `tfsdk:"logs"`
+	Metrics types.Bool `tfsdk:"metrics"`
+}
+
+func (in *WorkbenchObservability) Attributes() *gqlclient.WorkbenchObservabilityAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &gqlclient.WorkbenchObservabilityAttributes{
+		Logs:    in.Logs.ValueBoolPointer(),
+		Metrics: in.Metrics.ValueBoolPointer(),
+	}
+}
+
+func (in *WorkbenchObservability) From(configuration *gqlclient.WorkbenchFragment_Configuration_Observability) {
+	if in == nil {
+		return
+	}
+	if configuration == nil {
+		return
+	}
+
+	in.Logs = types.BoolPointerValue(configuration.Logs)
+	in.Metrics = types.BoolPointerValue(configuration.Metrics)
+}
+
 type WorkbenchSkills struct {
 	Ref   *WorkbenchGitRef `tfsdk:"ref"`
 	Files types.Set        `tfsdk:"files"`
 }
 
-func (in *WorkbenchSkills) Attributes(ctx context.Context) *gqlclient.WorkbenchSkillsAttributes {
+func (in *WorkbenchSkills) Attributes(ctx context.Context, d *diag.Diagnostics) *gqlclient.WorkbenchSkillsAttributes {
 	if in == nil {
 		return nil
 	}
 
 	files := make([]types.String, len(in.Files.Elements()))
-	in.Files.ElementsAs(ctx, &files, false)
+	d.Append(in.Files.ElementsAs(ctx, &files, false)...)
 
 	return &gqlclient.WorkbenchSkillsAttributes{
-		Ref:   in.Ref.Attributes(ctx),
+		Ref:   in.Ref.Attributes(ctx, d),
 		Files: lo.Map(files, func(v types.String, _ int) *string { return v.ValueStringPointer() }),
 	}
 }
@@ -293,13 +330,13 @@ type WorkbenchGitRef struct {
 	Files  types.Set    `tfsdk:"files"`
 }
 
-func (in *WorkbenchGitRef) Attributes(ctx context.Context) *gqlclient.GitRefAttributes {
+func (in *WorkbenchGitRef) Attributes(ctx context.Context, d *diag.Diagnostics) *gqlclient.GitRefAttributes {
 	if in == nil {
 		return nil
 	}
 
 	files := make([]types.String, len(in.Files.Elements()))
-	in.Files.ElementsAs(ctx, &files, false)
+	d.Append(in.Files.ElementsAs(ctx, &files, false)...)
 
 	return &gqlclient.GitRefAttributes{
 		Ref:    in.Ref.ValueString(),

@@ -1,6 +1,6 @@
 module terraform-provider-plural
 
-go 1.26.1
+go 1.26.2
 
 require (
 	github.com/Yamashou/gqlgenc v0.33.0
@@ -10,7 +10,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.19.0
 	github.com/hashicorp/terraform-plugin-log v0.10.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/pluralsh/console/go/client v1.69.0
+	github.com/pluralsh/console/go/client v1.75.0
 	github.com/pluralsh/plural-cli v0.12.40
 	github.com/pluralsh/polly v0.3.8
 	github.com/samber/lo v1.52.0
@@ -400,7 +400,7 @@ require (
 	golang.org/x/tools v0.42.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260217215200-42d3e9bedb6d // indirect
-	google.golang.org/grpc v1.79.1 // indirect
+	google.golang.org/grpc v1.79.3 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
