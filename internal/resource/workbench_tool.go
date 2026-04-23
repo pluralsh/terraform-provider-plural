@@ -10,6 +10,7 @@ import (
 
 	"terraform-provider-plural/internal/client"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -74,6 +75,13 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 				Computed:            true,
 				ElementType:         types.StringType,
 				PlanModifiers:       []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(stringvalidator.OneOf(
+						lo.Map(console.AllWorkbenchToolCategory, func(item console.WorkbenchToolCategory, _ int) string {
+							return string(item)
+						})...),
+					),
+				},
 			},
 			"project_id": schema.StringAttribute{
 				Description:         "ID of the project that this workbench belongs to.",
