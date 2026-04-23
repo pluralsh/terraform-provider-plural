@@ -87,6 +87,9 @@ jobs:
       - uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7 # v5.0.1
         with:
           go-version-file: go.mod
+      - uses: hashicorp/setup-terraform@b9cd54531c595c1de9fb4b1dfd4d5f1b4d9f3ec7 # v3.1.2
+        with:
+          terraform_wrapper: false
       - run: PATH=$PATH:$GOPATH/bin make generate-docs
       - name: Verify Changed files
         run: |
