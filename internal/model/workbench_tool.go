@@ -76,7 +76,7 @@ type WorkbenchToolConfiguration struct {
 	Elastic    *WorkbenchToolElasticConfig    `tfsdk:"elastic"`
 	Prometheus *WorkbenchToolTokenAuthConfig  `tfsdk:"prometheus"`
 	Loki       *WorkbenchToolTokenAuthConfig  `tfsdk:"loki"`
-	Splunk     *WorkbenchToolTokenAuthConfig  `tfsdk:"splunk"`
+	Splunk     *WorkbenchToolSplunkConfig     `tfsdk:"splunk"`
 	Tempo      *WorkbenchToolTokenAuthConfig  `tfsdk:"tempo"`
 	Jaeger     *WorkbenchToolJaegerConfig     `tfsdk:"jaeger"`
 	Datadog    *WorkbenchToolDatadogConfig    `tfsdk:"datadog"`
@@ -97,7 +97,7 @@ func (in *WorkbenchToolConfiguration) Attributes(ctx context.Context) *gqlclient
 		Elastic:    in.Elastic.Attributes(),
 		Prometheus: in.Prometheus.Attributes(),
 		Loki:       in.Loki.lokiAttributes(),
-		Splunk:     in.Splunk.splunkAttributes(),
+		Splunk:     in.Splunk.Attributes(),
 		Tempo:      in.Tempo.tempoAttributes(),
 		Jaeger:     in.Jaeger.Attributes(),
 		Datadog:    in.Datadog.Attributes(),
@@ -121,7 +121,7 @@ func (in *WorkbenchToolConfiguration) From(configuration *gqlclient.WorkbenchToo
 	in.Elastic.From(configuration.Elastic)
 	in.Prometheus.FromPrometheus(configuration.Prometheus)
 	in.Loki.FromLoki(configuration.Loki)
-	in.Splunk.FromSplunk(configuration.Splunk)
+	in.Splunk.From(configuration.Splunk)
 	in.Tempo.FromTempo(configuration.Tempo)
 	in.Jaeger.From(configuration.Jaeger)
 	in.Datadog.From(configuration.Datadog)
@@ -301,7 +301,14 @@ func (in *WorkbenchToolTokenAuthConfig) FromLoki(configuration *gqlclient.Workbe
 	in.TenantID = types.StringPointerValue(configuration.TenantID)
 }
 
-func (in *WorkbenchToolTokenAuthConfig) splunkAttributes() *gqlclient.WorkbenchToolSplunkConnectionAttributes {
+type WorkbenchToolSplunkConfig struct {
+	URL      types.String `tfsdk:"url"`
+	Token    types.String `tfsdk:"token"`
+	Username types.String `tfsdk:"username"`
+	Password types.String `tfsdk:"password"`
+}
+
+func (in *WorkbenchToolSplunkConfig) Attributes() *gqlclient.WorkbenchToolSplunkConnectionAttributes {
 	if in == nil {
 		return nil
 	}
@@ -314,7 +321,7 @@ func (in *WorkbenchToolTokenAuthConfig) splunkAttributes() *gqlclient.WorkbenchT
 	}
 }
 
-func (in *WorkbenchToolTokenAuthConfig) FromSplunk(configuration *gqlclient.WorkbenchToolFragment_Configuration_Splunk) {
+func (in *WorkbenchToolSplunkConfig) From(configuration *gqlclient.WorkbenchToolFragment_Configuration_Splunk) {
 	if in == nil {
 		return
 	}
