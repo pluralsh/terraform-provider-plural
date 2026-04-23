@@ -49,6 +49,18 @@ func (in *WorkbenchWebhook) From(response *gqlclient.WorkbenchWebhookFragment) {
 	in.Name = types.StringPointerValue(response.Name)
 	in.Prompt = types.StringPointerValue(response.Prompt)
 
+	if response.Webhook != nil {
+		in.WebhookID = types.StringValue(response.Webhook.ID)
+	} else {
+		in.WebhookID = types.StringNull()
+	}
+
+	if response.IssueWebhook != nil {
+		in.IssueWebhookID = types.StringValue(response.IssueWebhook.ID)
+	} else {
+		in.IssueWebhookID = types.StringNull()
+	}
+
 	if response.Matches != nil {
 		if in.Matches == nil {
 			in.Matches = &WorkbenchWebhookMatchConfig{}
