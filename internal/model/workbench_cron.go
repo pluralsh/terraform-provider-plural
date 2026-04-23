@@ -27,4 +27,8 @@ func (in *WorkbenchCron) From(response *gqlclient.WorkbenchCronFragment) {
 	in.Id = types.StringValue(response.ID)
 	in.Crontab = types.StringPointerValue(response.Crontab)
 	in.Prompt = types.StringPointerValue(response.Prompt)
+
+	if response.Workbench != nil {
+		in.WorkbenchID = types.StringValue(response.Workbench.ID)
+	}
 }
