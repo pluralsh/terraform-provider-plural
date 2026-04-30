@@ -55,12 +55,7 @@ type AwsCloudConnectionAttributes struct {
 
 func (c *AwsCloudConnectionAttributes) Attributes(ctx context.Context, d *diag.Diagnostics) *console.AWSCloudConnectionAttributes {
 	var regions []*string
-	if !c.Regions.IsNull() {
-		elements := make([]types.String, len(c.Regions.Elements()))
-		d.Append(c.Regions.ElementsAs(ctx, &elements, false)...)
-		if !d.HasError() {
-			regions = algorithms.Map(elements, func(v types.String) *string { return v.ValueStringPointer() })
-		}
+	if !c.Regions.IsNull() && !c.Regions.IsUnknown() {
 	}
 
 	return &console.AWSCloudConnectionAttributes{
