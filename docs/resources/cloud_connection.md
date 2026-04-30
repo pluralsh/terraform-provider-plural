@@ -45,6 +45,7 @@ Required:
 
 - `access_key_id` (String)
 - `region` (String)
+- `regions` (List of String)
 - `secret_access_key` (String)
 
 

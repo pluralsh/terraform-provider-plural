@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/pluralsh/polly/algorithms"
 
 	console "github.com/pluralsh/console/go/client"
 )
@@ -25,13 +26,13 @@ type CloudConnectionConfiguration struct {
 	Azure *AzureCloudConnectionAttributes `tfsdk:"azure"`
 }
 
-func (c *CloudConnectionConfiguration) Attributes() *console.CloudConnectionConfigurationAttributes {
+func (c *CloudConnectionConfiguration) Attributes(ctx context.Context, d *diag.Diagnostics) *console.CloudConnectionConfigurationAttributes {
 	if c == nil {
 		return nil
 	}
 
 	if c.AWS != nil {
-		return &console.CloudConnectionConfigurationAttributes{AWS: c.AWS.Attributes()}
+		return &console.CloudConnectionConfigurationAttributes{AWS: c.AWS.Attributes(ctx, d)}
 	}
 
 	if c.Azure != nil {
@@ -49,13 +50,24 @@ type AwsCloudConnectionAttributes struct {
 	AccessKeyID     types.String `tfsdk:"access_key_id"`
 	SecretAccessKey types.String `tfsdk:"secret_access_key"`
 	Region          types.String `tfsdk:"region"`
+	Regions         types.List   `tfsdk:"regions"`
 }
 
-func (c *AwsCloudConnectionAttributes) Attributes() *console.AWSCloudConnectionAttributes {
+func (c *AwsCloudConnectionAttributes) Attributes(ctx context.Context, d *diag.Diagnostics) *console.AWSCloudConnectionAttributes {
+	var regions []*string
+	if !c.Regions.IsNull() {
+		elements := make([]types.String, len(c.Regions.Elements()))
+		d.Append(c.Regions.ElementsAs(ctx, &elements, false)...)
+		if !d.HasError() {
+			regions = algorithms.Map(elements, func(v types.String) *string { return v.ValueStringPointer() })
+		}
+	}
+
 	return &console.AWSCloudConnectionAttributes{
 		AccessKeyID:     c.AccessKeyID.ValueString(),
 		SecretAccessKey: c.SecretAccessKey.ValueString(),
 		Region:          c.Region.ValueStringPointer(),
+		Regions:         regions,
 	}
 }
 
@@ -91,7 +103,7 @@ func (c *CloudConnection) Attributes(ctx context.Context, d *diag.Diagnostics) c
 	return console.CloudConnectionAttributes{
 		Name:          c.Name.ValueString(),
 		Provider:      console.Provider(c.CloudProvider.ValueString()),
-		Configuration: *c.Configuration.Attributes(),
+		Configuration: *c.Configuration.Attributes(ctx, d),
 		ReadBindings:  common.SetToPolicyBindingAttributes(c.ReadBindings, ctx, d),
 	}
 }

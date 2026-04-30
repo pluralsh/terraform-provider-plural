@@ -97,6 +97,7 @@ func (r *CloudConnectionResource) awsCloudConnectionAttrTypes() map[string]attr.
 		"access_key_id":     types.StringType,
 		"secret_access_key": types.StringType,
 		"region":            types.StringType,
+		"regions":           types.ListType{ElemType: types.StringType},
 	}
 }
 
