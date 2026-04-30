@@ -8,7 +8,6 @@ import (
 	"terraform-provider-plural/internal/common"
 	"terraform-provider-plural/internal/model"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -60,20 +59,20 @@ func (r *CloudConnectionResource) Schema(_ context.Context, _ resource.SchemaReq
 				Required:            true,
 				MarkdownDescription: "Cloud provider configuration block.",
 				Attributes: map[string]schema.Attribute{
-					"aws": schema.ObjectAttribute{
+					"aws": schema.SingleNestedAttribute{
 						Optional:            true,
 						MarkdownDescription: "AWS-specific configuration.",
-						AttributeTypes:      r.awsCloudConnectionAttrTypes(),
+						Attributes:          r.awsCloudConnectionAttrTypes(),
 					},
-					"gcp": schema.ObjectAttribute{
+					"gcp": schema.SingleNestedAttribute{
 						Optional:            true,
 						MarkdownDescription: "GCP-specific configuration.",
-						AttributeTypes:      r.gcpCloudConnectionAttrTypes(),
+						Attributes:          r.gcpCloudConnectionAttrTypes(),
 					},
-					"azure": schema.ObjectAttribute{
+					"azure": schema.SingleNestedAttribute{
 						Optional:            true,
 						MarkdownDescription: "Azure-specific configuration.",
-						AttributeTypes:      r.azureCloudConnectionAttrTypes(),
+						Attributes:          r.azureCloudConnectionAttrTypes(),
 					},
 				},
 			},
@@ -92,28 +91,29 @@ func (r *CloudConnectionResource) Schema(_ context.Context, _ resource.SchemaReq
 	}
 }
 
-func (r *CloudConnectionResource) awsCloudConnectionAttrTypes() map[string]attr.Type {
-	return map[string]attr.Type{
-		"access_key_id":     types.StringType,
-		"secret_access_key": types.StringType,
-		"region":            types.StringType,
-		"regions":           types.ListType{ElemType: types.StringType},
+func (r *CloudConnectionResource) gcpCloudConnectionAttrTypes() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"service_account_key": schema.StringAttribute{Optional: true, Sensitive: true, Description: "The service account key for the GCP account.  This is sensitive and should be stored securely."},
+		"project_id":          schema.StringAttribute{Optional: true, Description: "The project id for the GCP account."},
 	}
 }
 
-func (r *CloudConnectionResource) gcpCloudConnectionAttrTypes() map[string]attr.Type {
-	return map[string]attr.Type{
-		"service_account_key": types.StringType,
-		"project_id":          types.StringType,
+func (r *CloudConnectionResource) awsCloudConnectionAttrTypes() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"access_key_id":     schema.StringAttribute{Optional: true, Description: "The access key id for the AWS account."},
+		"secret_access_key": schema.StringAttribute{Optional: true, Sensitive: true, Description: "The secret access key for the AWS account.  This is sensitive and should be stored securely."},
+		"region":            schema.StringAttribute{Optional: true, Description: "The region this connection can query"},
+		"assume_role_arn":   schema.StringAttribute{Optional: true, Description: "IAM role ARN for the cloud query engine to assume when using this connection.  Useful for cross-account access."},
+		"regions":           schema.ListAttribute{Optional: true, ElementType: types.StringType, Description: "A list of regions this connection can query"},
 	}
 }
 
-func (r *CloudConnectionResource) azureCloudConnectionAttrTypes() map[string]attr.Type {
-	return map[string]attr.Type{
-		"subscription_id": types.StringType,
-		"tenant_id":       types.StringType,
-		"client_id":       types.StringType,
-		"client_secret":   types.StringType,
+func (r *CloudConnectionResource) azureCloudConnectionAttrTypes() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"subscription_id": schema.StringAttribute{Optional: true, Description: "The subscription id for the Azure account."},
+		"tenant_id":       schema.StringAttribute{Optional: true, Description: "The tenant id for the Azure account."},
+		"client_id":       schema.StringAttribute{Optional: true, Description: "The client id for the Azure account."},
+		"client_secret":   schema.StringAttribute{Optional: true, Sensitive: true, Description: "The client secret for the Azure account.  This is sensitive and should be stored securely."},
 	}
 }
 

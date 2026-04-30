@@ -7,9 +7,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/pluralsh/polly/algorithms"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/polly/algorithms"
 )
 
 type CloudConnection struct {
@@ -50,18 +50,23 @@ type AwsCloudConnectionAttributes struct {
 	AccessKeyID     types.String `tfsdk:"access_key_id"`
 	SecretAccessKey types.String `tfsdk:"secret_access_key"`
 	Region          types.String `tfsdk:"region"`
+	AssumeRoleArn   types.String `tfsdk:"assume_role_arn"`
 	Regions         types.List   `tfsdk:"regions"`
 }
 
 func (c *AwsCloudConnectionAttributes) Attributes(ctx context.Context, d *diag.Diagnostics) *console.AWSCloudConnectionAttributes {
 	var regions []*string
 	if !c.Regions.IsNull() && !c.Regions.IsUnknown() {
+		elements := make([]types.String, len(c.Regions.Elements()))
+		d.Append(c.Regions.ElementsAs(ctx, &elements, false)...)
+		regions = algorithms.Map(elements, func(v types.String) *string { return v.ValueStringPointer() })
 	}
 
 	return &console.AWSCloudConnectionAttributes{
 		AccessKeyID:     c.AccessKeyID.ValueString(),
 		SecretAccessKey: c.SecretAccessKey.ValueString(),
 		Region:          c.Region.ValueStringPointer(),
+		AssumeRoleArn:   c.AssumeRoleArn.ValueStringPointer(),
 		Regions:         regions,
 	}
 }

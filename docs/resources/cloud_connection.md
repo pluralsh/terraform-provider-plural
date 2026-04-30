@@ -34,39 +34,40 @@ A cloud connection resource for connecting cloud provider accounts.
 
 Optional:
 
-- `aws` (Object) AWS-specific configuration. (see [below for nested schema](#nestedatt--configuration--aws))
-- `azure` (Object) Azure-specific configuration. (see [below for nested schema](#nestedatt--configuration--azure))
-- `gcp` (Object) GCP-specific configuration. (see [below for nested schema](#nestedatt--configuration--gcp))
+- `aws` (Attributes) AWS-specific configuration. (see [below for nested schema](#nestedatt--configuration--aws))
+- `azure` (Attributes) Azure-specific configuration. (see [below for nested schema](#nestedatt--configuration--azure))
+- `gcp` (Attributes) GCP-specific configuration. (see [below for nested schema](#nestedatt--configuration--gcp))
 
 <a id="nestedatt--configuration--aws"></a>
 ### Nested Schema for `configuration.aws`
 
-Required:
+Optional:
 
-- `access_key_id` (String)
-- `region` (String)
-- `regions` (List of String)
-- `secret_access_key` (String)
+- `access_key_id` (String) The access key id for the AWS account.
+- `assume_role_arn` (String) IAM role ARN for the cloud query engine to assume when using this connection.  Useful for cross-account access.
+- `region` (String) The region this connection can query
+- `regions` (List of String) A list of regions this connection can query
+- `secret_access_key` (String, Sensitive) The secret access key for the AWS account.  This is sensitive and should be stored securely.
 
 
 <a id="nestedatt--configuration--azure"></a>
 ### Nested Schema for `configuration.azure`
 
-Required:
+Optional:
 
-- `client_id` (String)
-- `client_secret` (String)
-- `subscription_id` (String)
-- `tenant_id` (String)
+- `client_id` (String) The client id for the Azure account.
+- `client_secret` (String, Sensitive) The client secret for the Azure account.  This is sensitive and should be stored securely.
+- `subscription_id` (String) The subscription id for the Azure account.
+- `tenant_id` (String) The tenant id for the Azure account.
 
 
 <a id="nestedatt--configuration--gcp"></a>
 ### Nested Schema for `configuration.gcp`
 
-Required:
+Optional:
 
-- `project_id` (String)
-- `service_account_key` (String)
+- `project_id` (String) The project id for the GCP account.
+- `service_account_key` (String, Sensitive) The service account key for the GCP account.  This is sensitive and should be stored securely.
 
 
 
