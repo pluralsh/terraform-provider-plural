@@ -49,7 +49,7 @@ func (r *ServiceContextResource) Schema(_ context.Context, _ resource.SchemaRequ
 				Required:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
-"project_id": schema.StringAttribute{
+			"project_id": schema.StringAttribute{
 				Description:         "ID of the project that this service context belongs to.",
 				MarkdownDescription: "ID of the project that this service context belongs to.",
 				Optional:            true,
