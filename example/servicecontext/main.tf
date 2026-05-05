@@ -11,8 +11,13 @@ provider "plural" {
   use_cli = true
 }
 
+data "plural_project" "default" {
+  name = "default"
+}
+
 resource "plural_service_context" "service_context" {
-  name           = "service-context-test"
+  name       = "service-context-test"
+  project_id = data.plural_project.default.id
   configuration = jsonencode({
     "env" = "prod"
     "test" = "some-value"

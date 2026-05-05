@@ -38,6 +38,11 @@ func (d *serviceContextDataSource) Schema(_ context.Context, _ datasource.Schema
 				MarkdownDescription: "Human-readable name of this service context.",
 				Required:            true,
 			},
+			"project_id": schema.StringAttribute{
+				Description:         "ID of the project that this service context belongs to.",
+				MarkdownDescription: "ID of the project that this service context belongs to.",
+				Computed:            true,
+			},
 			"configuration": schema.StringAttribute{
 				Description:         "Configuration in JSON format. Use 'jsondecode' method to decode data.",
 				MarkdownDescription: "Configuration in JSON format. Use `jsondecode` method to decode data.",

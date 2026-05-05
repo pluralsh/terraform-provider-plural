@@ -22,6 +22,7 @@ Service context provides a reusable bundle of configuration. It enables sharing 
 ### Optional
 
 - `configuration` (String) Configuration in JSON format. Use `jsonencode` and `jsondecode` methods to encode and decode data.
+- `project_id` (String) ID of the project that this service context belongs to.
 - `secrets` (Map of String, Sensitive)
 
 ### Read-Only
