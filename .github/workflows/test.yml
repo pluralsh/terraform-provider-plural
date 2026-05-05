@@ -108,5 +108,5 @@ jobs:
           check-latest: true
       - uses: golangci/golangci-lint-action@v9
         with:
-          version: latest
+          version: v2.12.1
           args: --timeout=10m
