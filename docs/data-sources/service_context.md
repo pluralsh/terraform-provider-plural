@@ -23,3 +23,4 @@ A representation of a service context that can be reused during service deployme
 
 - `configuration` (String) Configuration in JSON format. Use `jsondecode` method to decode data.
 - `id` (String) Internal identifier of this service context.
+- `project_id` (String) ID of the project that this service context belongs to.

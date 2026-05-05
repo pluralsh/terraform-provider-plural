@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"terraform-provider-plural/internal/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -14,6 +15,7 @@ import (
 type ServiceContext struct {
 	Id            types.String `tfsdk:"id"`
 	Name          types.String `tfsdk:"name"`
+	ProjectId     types.String `tfsdk:"project_id"`
 	Configuration types.String `tfsdk:"configuration"`
 }
 
@@ -25,6 +27,7 @@ func (sc *ServiceContext) From(response *console.ServiceContextFragment, ctx con
 	}
 
 	sc.Id = types.StringValue(response.ID)
+	sc.ProjectId = common.ProjectFrom(response.Project)
 	sc.Configuration = types.StringValue(string(configuration))
 }
 
@@ -49,6 +52,7 @@ func (sc *ServiceContextExtended) Attributes(ctx context.Context, d *diag.Diagno
 
 	return console.ServiceContextAttributes{
 		Configuration: sc.Configuration.ValueStringPointer(),
+		ProjectID:     sc.ProjectId.ValueStringPointer(),
 		Secrets:       configAttributes,
 	}
 }
