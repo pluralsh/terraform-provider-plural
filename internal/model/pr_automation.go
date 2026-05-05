@@ -16,7 +16,7 @@ type PRAutomation struct {
 func (pra *PRAutomation) From(response *gqlclient.PrAutomationFragment) {
 	pra.Id = types.StringValue(response.ID)
 	pra.Name = types.StringValue(response.Name)
-	pra.Message = types.StringValue(response.Message)
+	pra.Message = types.StringPointerValue(response.Message)
 	pra.Identifier = types.StringPointerValue(response.Identifier)
-	pra.Title = types.StringValue(response.Title)
+	pra.Title = types.StringPointerValue(response.Title)
 }

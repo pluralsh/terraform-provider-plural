@@ -23,7 +23,9 @@ Workbench tool resource.
 ### Optional
 
 - `categories` (Set of String) Categories of this workbench tool.
+- `cloud_connection_id` (String) ID of the cloud connection referenced by this workbench tool.
 - `configuration` (Attributes) Configuration of this workbench tool. (see [below for nested schema](#nestedatt--configuration))
+- `mcp_server_id` (String) ID of the MCP server referenced by this workbench tool.
 - `project_id` (String) ID of the project that this workbench belongs to.
 
 ### Read-Only
@@ -35,7 +37,90 @@ Workbench tool resource.
 
 Optional:
 
+- `atlassian` (Attributes) Atlassian/Jira connection configuration. (see [below for nested schema](#nestedatt--configuration--atlassian))
+- `azure` (Attributes) Azure Monitor connection configuration. (see [below for nested schema](#nestedatt--configuration--azure))
+- `cloudwatch` (Attributes) CloudWatch connection configuration. (see [below for nested schema](#nestedatt--configuration--cloudwatch))
+- `datadog` (Attributes) Datadog connection configuration. (see [below for nested schema](#nestedatt--configuration--datadog))
+- `dynatrace` (Attributes) Dynatrace connection configuration. (see [below for nested schema](#nestedatt--configuration--dynatrace))
+- `elastic` (Attributes) Elasticsearch connection configuration. (see [below for nested schema](#nestedatt--configuration--elastic))
 - `http` (Attributes) HTTP configuration of this workbench tool. (see [below for nested schema](#nestedatt--configuration--http))
+- `jaeger` (Attributes) Jaeger connection configuration. (see [below for nested schema](#nestedatt--configuration--jaeger))
+- `linear` (Attributes) Linear connection configuration. (see [below for nested schema](#nestedatt--configuration--linear))
+- `loki` (Attributes) Loki connection configuration. (see [below for nested schema](#nestedatt--configuration--loki))
+- `prometheus` (Attributes) Prometheus connection configuration. (see [below for nested schema](#nestedatt--configuration--prometheus))
+- `splunk` (Attributes) Splunk connection configuration. (see [below for nested schema](#nestedatt--configuration--splunk))
+- `tempo` (Attributes) Tempo connection configuration. (see [below for nested schema](#nestedatt--configuration--tempo))
+
+<a id="nestedatt--configuration--atlassian"></a>
+### Nested Schema for `configuration.atlassian`
+
+Optional:
+
+- `api_token` (String, Sensitive)
+- `email` (String)
+- `service_account` (String, Sensitive)
+
+
+<a id="nestedatt--configuration--azure"></a>
+### Nested Schema for `configuration.azure`
+
+Required:
+
+- `client_id` (String)
+- `client_secret` (String, Sensitive)
+- `subscription_id` (String)
+- `tenant_id` (String)
+
+
+<a id="nestedatt--configuration--cloudwatch"></a>
+### Nested Schema for `configuration.cloudwatch`
+
+Required:
+
+- `region` (String)
+
+Optional:
+
+- `access_key_id` (String, Sensitive)
+- `external_id` (String, Sensitive)
+- `log_group_names` (Set of String)
+- `role_arn` (String)
+- `role_session_name` (String)
+- `secret_access_key` (String, Sensitive)
+
+
+<a id="nestedatt--configuration--datadog"></a>
+### Nested Schema for `configuration.datadog`
+
+Optional:
+
+- `api_key` (String, Sensitive)
+- `app_key` (String, Sensitive)
+- `site` (String)
+
+
+<a id="nestedatt--configuration--dynatrace"></a>
+### Nested Schema for `configuration.dynatrace`
+
+Required:
+
+- `platform_token` (String, Sensitive)
+- `url` (String)
+
+
+<a id="nestedatt--configuration--elastic"></a>
+### Nested Schema for `configuration.elastic`
+
+Required:
+
+- `index` (String)
+- `url` (String)
+- `username` (String)
+
+Optional:
+
+- `password` (String, Sensitive)
+
 
 <a id="nestedatt--configuration--http"></a>
 ### Nested Schema for `configuration.http`
@@ -50,3 +135,84 @@ Optional:
 
 - `body` (String) The request body.
 - `headers` (Map of String) The request headers.
+
+
+<a id="nestedatt--configuration--jaeger"></a>
+### Nested Schema for `configuration.jaeger`
+
+Required:
+
+- `url` (String)
+
+Optional:
+
+- `password` (String, Sensitive)
+- `token` (String, Sensitive)
+- `username` (String)
+
+
+<a id="nestedatt--configuration--linear"></a>
+### Nested Schema for `configuration.linear`
+
+Optional:
+
+- `access_token` (String, Sensitive)
+
+
+<a id="nestedatt--configuration--loki"></a>
+### Nested Schema for `configuration.loki`
+
+Required:
+
+- `url` (String)
+
+Optional:
+
+- `password` (String, Sensitive)
+- `tenant_id` (String)
+- `token` (String, Sensitive)
+- `username` (String)
+
+
+<a id="nestedatt--configuration--prometheus"></a>
+### Nested Schema for `configuration.prometheus`
+
+Required:
+
+- `url` (String)
+
+Optional:
+
+- `password` (String, Sensitive)
+- `tenant_id` (String)
+- `token` (String, Sensitive)
+- `username` (String)
+
+
+<a id="nestedatt--configuration--splunk"></a>
+### Nested Schema for `configuration.splunk`
+
+Required:
+
+- `url` (String)
+
+Optional:
+
+- `password` (String, Sensitive)
+- `token` (String, Sensitive)
+- `username` (String)
+
+
+<a id="nestedatt--configuration--tempo"></a>
+### Nested Schema for `configuration.tempo`
+
+Required:
+
+- `url` (String)
+
+Optional:
+
+- `password` (String, Sensitive)
+- `tenant_id` (String)
+- `token` (String, Sensitive)
+- `username` (String)

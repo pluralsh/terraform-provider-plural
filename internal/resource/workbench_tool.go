@@ -10,6 +10,7 @@ import (
 
 	"terraform-provider-plural/internal/client"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -56,7 +57,6 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 				Description:         "Name of this workbench tool.",
 				MarkdownDescription: "Name of this workbench tool.",
 				Required:            true,
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"tool": schema.StringAttribute{
 				Description:         "Workbench tool type.",
@@ -75,6 +75,13 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 				Computed:            true,
 				ElementType:         types.StringType,
 				PlanModifiers:       []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(stringvalidator.OneOf(
+						lo.Map(console.AllWorkbenchToolCategory, func(item console.WorkbenchToolCategory, _ int) string {
+							return string(item)
+						})...),
+					),
+				},
 			},
 			"project_id": schema.StringAttribute{
 				Description:         "ID of the project that this workbench belongs to.",
@@ -82,6 +89,16 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 				Optional:            true,
 				Computed:            true,
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+			},
+			"mcp_server_id": schema.StringAttribute{
+				Description:         "ID of the MCP server referenced by this workbench tool.",
+				MarkdownDescription: "ID of the MCP server referenced by this workbench tool.",
+				Optional:            true,
+			},
+			"cloud_connection_id": schema.StringAttribute{
+				Description:         "ID of the cloud connection referenced by this workbench tool.",
+				MarkdownDescription: "ID of the cloud connection referenced by this workbench tool.",
+				Optional:            true,
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Description:         "Configuration of this workbench tool.",
@@ -104,6 +121,12 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 								MarkdownDescription: "The HTTP method.",
 								Required:            true,
 								PlanModifiers:       []planmodifier.String{planmod.UppercaseString()},
+								Validators: []validator.String{
+									stringvalidator.OneOfCaseInsensitive(
+										lo.Map(console.AllWorkbenchToolHTTPMethod, func(m console.WorkbenchToolHTTPMethod, _ int) string {
+											return string(m)
+										})...),
+								},
 							},
 							"headers": schema.MapAttribute{
 								Description:         "The request headers.",
@@ -121,6 +144,137 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 								MarkdownDescription: "The JSON schema for the tool input.",
 								Required:            true,
 							},
+						},
+					},
+					"elastic": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Elasticsearch connection configuration.",
+						MarkdownDescription: "Elasticsearch connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"url":      schema.StringAttribute{Required: true},
+							"username": schema.StringAttribute{Required: true},
+							"password": schema.StringAttribute{Optional: true, Sensitive: true},
+							"index":    schema.StringAttribute{Required: true},
+						},
+					},
+					"prometheus": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Prometheus connection configuration.",
+						MarkdownDescription: "Prometheus connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"url":       schema.StringAttribute{Required: true},
+							"token":     schema.StringAttribute{Optional: true, Sensitive: true},
+							"username":  schema.StringAttribute{Optional: true},
+							"password":  schema.StringAttribute{Optional: true, Sensitive: true},
+							"tenant_id": schema.StringAttribute{Optional: true},
+						},
+					},
+					"loki": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Loki connection configuration.",
+						MarkdownDescription: "Loki connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"url":       schema.StringAttribute{Required: true},
+							"token":     schema.StringAttribute{Optional: true, Sensitive: true},
+							"username":  schema.StringAttribute{Optional: true},
+							"password":  schema.StringAttribute{Optional: true, Sensitive: true},
+							"tenant_id": schema.StringAttribute{Optional: true},
+						},
+					},
+					"splunk": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Splunk connection configuration.",
+						MarkdownDescription: "Splunk connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"url":      schema.StringAttribute{Required: true},
+							"token":    schema.StringAttribute{Optional: true, Sensitive: true},
+							"username": schema.StringAttribute{Optional: true},
+							"password": schema.StringAttribute{Optional: true, Sensitive: true},
+						},
+					},
+					"tempo": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Tempo connection configuration.",
+						MarkdownDescription: "Tempo connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"url":       schema.StringAttribute{Required: true},
+							"token":     schema.StringAttribute{Optional: true, Sensitive: true},
+							"username":  schema.StringAttribute{Optional: true},
+							"password":  schema.StringAttribute{Optional: true, Sensitive: true},
+							"tenant_id": schema.StringAttribute{Optional: true},
+						},
+					},
+					"jaeger": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Jaeger connection configuration.",
+						MarkdownDescription: "Jaeger connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"url":      schema.StringAttribute{Required: true},
+							"token":    schema.StringAttribute{Optional: true, Sensitive: true},
+							"username": schema.StringAttribute{Optional: true},
+							"password": schema.StringAttribute{Optional: true, Sensitive: true},
+						},
+					},
+					"datadog": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Datadog connection configuration.",
+						MarkdownDescription: "Datadog connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"site":    schema.StringAttribute{Optional: true},
+							"api_key": schema.StringAttribute{Optional: true, Sensitive: true},
+							"app_key": schema.StringAttribute{Optional: true, Sensitive: true},
+						},
+					},
+					"dynatrace": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Dynatrace connection configuration.",
+						MarkdownDescription: "Dynatrace connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"url":            schema.StringAttribute{Required: true},
+							"platform_token": schema.StringAttribute{Required: true, Sensitive: true},
+						},
+					},
+					"cloudwatch": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "CloudWatch connection configuration.",
+						MarkdownDescription: "CloudWatch connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"region":            schema.StringAttribute{Required: true},
+							"log_group_names":   schema.SetAttribute{Optional: true, ElementType: types.StringType},
+							"access_key_id":     schema.StringAttribute{Optional: true, Sensitive: true},
+							"secret_access_key": schema.StringAttribute{Optional: true, Sensitive: true},
+							"role_arn":          schema.StringAttribute{Optional: true},
+							"external_id":       schema.StringAttribute{Optional: true, Sensitive: true},
+							"role_session_name": schema.StringAttribute{Optional: true},
+						},
+					},
+					"azure": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Azure Monitor connection configuration.",
+						MarkdownDescription: "Azure Monitor connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"subscription_id": schema.StringAttribute{Required: true},
+							"tenant_id":       schema.StringAttribute{Required: true},
+							"client_id":       schema.StringAttribute{Required: true},
+							"client_secret":   schema.StringAttribute{Required: true, Sensitive: true},
+						},
+					},
+					"linear": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Linear connection configuration.",
+						MarkdownDescription: "Linear connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"access_token": schema.StringAttribute{Optional: true, Sensitive: true},
+						},
+					},
+					"atlassian": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Atlassian/Jira connection configuration.",
+						MarkdownDescription: "Atlassian/Jira connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"service_account": schema.StringAttribute{Optional: true, Sensitive: true},
+							"api_token":       schema.StringAttribute{Optional: true, Sensitive: true},
+							"email":           schema.StringAttribute{Optional: true},
 						},
 					},
 				},

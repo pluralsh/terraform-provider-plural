@@ -3,6 +3,7 @@ package resource
 import (
 	"context"
 	"fmt"
+	"regexp"
 
 	"terraform-provider-plural/internal/common"
 	"terraform-provider-plural/internal/model"
@@ -50,9 +51,7 @@ func (r *WorkbenchResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 			"name": schema.StringAttribute{
 				Description:         "Name of this workbench.",
 				MarkdownDescription: "Name of this workbench.",
-				Optional:            true,
-				Computed:            true,
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+				Required:            true,
 			},
 			"description": schema.StringAttribute{
 				Description:         "Description of this workbench.",
@@ -80,6 +79,12 @@ func (r *WorkbenchResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				Description:         "The runtime for the agent to use in the '<cluster-handle>/<agent-runtime>' format.",
 				MarkdownDescription: "The runtime for the agent to use in the `<cluster-handle>/<agent-runtime>` format.",
 				Optional:            true,
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[^/]+/[^/]+$`),
+						"must be in '<cluster-handle>/<agent-runtime>' format",
+					),
+				},
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Description:         "Configuration for this workbench.",
@@ -127,6 +132,23 @@ func (r *WorkbenchResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 							},
 						},
 					},
+					"observability": schema.SingleNestedAttribute{
+						Description:         "Observability capabilities.",
+						MarkdownDescription: "Observability capabilities.",
+						Optional:            true,
+						Attributes: map[string]schema.Attribute{
+							"logs": schema.BoolAttribute{
+								Description:         "Whether to enable logs capability.",
+								MarkdownDescription: "Whether to enable logs capability.",
+								Optional:            true,
+							},
+							"metrics": schema.BoolAttribute{
+								Description:         "Whether to enable metrics capability.",
+								MarkdownDescription: "Whether to enable metrics capability.",
+								Optional:            true,
+							},
+						},
+					},
 				},
 			},
 			"skills": schema.SingleNestedAttribute{
@@ -162,6 +184,54 @@ func (r *WorkbenchResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 						MarkdownDescription: "Files to include.",
 						Optional:            true,
 						ElementType:         types.StringType,
+					},
+				},
+			},
+			"read_bindings": schema.SetNestedAttribute{
+				Description:         "Read policy bindings for this workbench.",
+				MarkdownDescription: "Read policy bindings for this workbench.",
+				Optional:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"group_id": schema.StringAttribute{
+							Description:         "ID of the group to bind.",
+							MarkdownDescription: "ID of the group to bind.",
+							Optional:            true,
+						},
+						"user_id": schema.StringAttribute{
+							Description:         "ID of the user to bind.",
+							MarkdownDescription: "ID of the user to bind.",
+							Optional:            true,
+						},
+						"id": schema.StringAttribute{
+							Description:         "ID of the policy binding.",
+							MarkdownDescription: "ID of the policy binding.",
+							Optional:            true,
+						},
+					},
+				},
+			},
+			"write_bindings": schema.SetNestedAttribute{
+				Description:         "Write policy bindings for this workbench.",
+				MarkdownDescription: "Write policy bindings for this workbench.",
+				Optional:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"group_id": schema.StringAttribute{
+							Description:         "ID of the group to bind.",
+							MarkdownDescription: "ID of the group to bind.",
+							Optional:            true,
+						},
+						"user_id": schema.StringAttribute{
+							Description:         "ID of the user to bind.",
+							MarkdownDescription: "ID of the user to bind.",
+							Optional:            true,
+						},
+						"id": schema.StringAttribute{
+							Description:         "ID of the policy binding.",
+							MarkdownDescription: "ID of the policy binding.",
+							Optional:            true,
+						},
 					},
 				},
 			},
