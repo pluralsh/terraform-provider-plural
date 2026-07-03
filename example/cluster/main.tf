@@ -16,8 +16,8 @@ provider "plural" {
   }
 }
 
-data "plural_project" "test" {
-  name = "test"
+data "plural_project" "default" {
+  name = "default"
 }
 
 resource "plural_cluster" "test" {
@@ -25,7 +25,7 @@ resource "plural_cluster" "test" {
   handle     = "test"
   protect    = false
   detach     = true
-  project_id = data.plural_project.test.id
+  project_id = data.plural_project.default.id
 
   tags = {
     "managed-by"    = "terraform-provider-plural"
