@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     plural = {
-      source = "pluralsh/plural"
+      source  = "pluralsh/plural"
       version = "0.2.30"
     }
   }
@@ -20,12 +20,22 @@ data "plural_project" "test" {
 }
 
 resource "plural_cluster" "test" {
-  name = "test-cluster"
-  handle = "test"
-  protect = false
-  detach = true
+  name       = "test-cluster"
+  handle     = "test"
+  protect    = false
+  detach     = true
   project_id = data.plural_project.test.id
+
   tags = {
-    "managed-by" = "terraform-provider-plural"
+    "managed-by"    = "terraform-provider-plural"
+    "update-marker" = "initial"
   }
+}
+
+output "cluster_id" {
+  value = plural_cluster.test.id
+}
+
+output "agent_deployed" {
+  value = plural_cluster.test.agent_deployed
 }
