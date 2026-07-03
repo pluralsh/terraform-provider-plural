@@ -10,7 +10,8 @@ terraform {
 provider "plural" {
   use_cli = true
   kubeconfig = {
-    # It can be sourced from environment variables instead, i.e.: export PLURAL_KUBE_CONFIG_PATH=$KUBECONFIG
+    # Can be sourced from environment variables instead:
+    # export PLURAL_KUBE_CONFIG_PATH=$KUBECONFIG
     config_path = pathexpand("~/.kube/config")
   }
 }
