@@ -23,13 +23,14 @@ data "plural_project" "default" {
 resource "plural_cluster" "test" {
   name       = "test-cluster"
   handle     = "test"
-  protect    = false
+  protect    = true
   detach     = true
   project_id = data.plural_project.default.id
+  metadata   = jsonencode({ "test-key" = "metadata-update" })
 
   tags = {
     "managed-by"    = "terraform-provider-plural"
-    "update-marker" = "initial"
+    "update-marker" = "updated-2"
   }
 }
 
