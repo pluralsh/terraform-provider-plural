@@ -271,5 +271,5 @@ func (oh *OperatorHandler) values() (map[string]any, error) {
 		"secrets":    map[string]string{"deployToken": oh.deployToken},
 		"consoleUrl": console.NormalizeExtUrl(oh.consoleURL),
 		"clusterId":  oh.clusterId,
-	}, oh.additionalValues, settingsValues), nil
+	}, settingsValues, oh.additionalValues), nil
 }
