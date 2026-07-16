@@ -3,7 +3,6 @@ package resource
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -18,20 +17,25 @@ func (in ensureAgentPlanModifier) MarkdownDescription(_ context.Context) string 
 	return "Forces resource update when agent is not deployed"
 }
 
-func (in ensureAgentPlanModifier) PlanModifyBool(ctx context.Context, req planmodifier.BoolRequest, resp *planmodifier.BoolResponse) {
+func (in ensureAgentPlanModifier) PlanModifyBool(_ context.Context, req planmodifier.BoolRequest, resp *planmodifier.BoolResponse) {
 	if req.State.Raw.IsNull() {
 		return
 	}
 
-	var agentDeployed types.Bool
-	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("agent_deployed"), &agentDeployed)...)
-	if resp.Diagnostics.HasError() {
+	if req.StateValue.IsUnknown() || req.StateValue.IsNull() {
 		return
 	}
 
 	// If the agent is not deployed, force update by setting the field to unknown.
-	if !agentDeployed.IsNull() && !agentDeployed.ValueBool() {
+	if !req.StateValue.ValueBool() {
 		resp.PlanValue = types.BoolUnknown()
+		return
+	}
+
+	// Terraform plans computed values as unknown on update. Keep the existing
+	// true value when the agent is already deployed.
+	if req.PlanValue.IsUnknown() {
+		resp.PlanValue = req.StateValue
 	}
 }
 

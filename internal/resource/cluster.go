@@ -149,6 +149,15 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
+	// The plan may leave agent_deployed unknown even when state is true; use
+	// state so the value written back after apply is always known.
+	if data.AgentDeployed.IsNull() || data.AgentDeployed.IsUnknown() {
+		data.AgentDeployed = state.AgentDeployed
+	}
+	if data.AgentDeployed.IsNull() || data.AgentDeployed.IsUnknown() {
+		data.AgentDeployed = types.BoolValue(false)
+	}
+
 	kubeconfigChanged := data.HasKubeconfig() && !data.GetKubeconfig().Unchanged(state.GetKubeconfig())
 	reinstallable := !data.AgentDeployed.ValueBool() || !data.HelmRepoUrl.Equal(state.HelmRepoUrl) || kubeconfigChanged
 	if reinstallable && (r.kubeClient != nil || data.HasKubeconfig()) {

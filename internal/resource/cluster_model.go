@@ -86,6 +86,10 @@ func (c *cluster) From(cl *console.ClusterFragment, _ context.Context, d *diag.D
 	if cl.Project != nil && cl.Project.ID != "" {
 		c.ProjectId = types.StringValue(cl.Project.ID)
 	}
+
+	if c.AgentDeployed.IsNull() || c.AgentDeployed.IsUnknown() {
+		c.AgentDeployed = types.BoolValue(false)
+	}
 }
 
 func (c *cluster) FromCreate(cc *console.CreateCluster, _ context.Context, d *diag.Diagnostics) {
