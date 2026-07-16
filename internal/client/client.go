@@ -35,12 +35,12 @@ func (c *Client) CreateServiceDeployment(ctx context.Context, id, handle *string
 }
 
 func (c *Client) GetDeploymentSettings(ctx context.Context) (*gqlclient.GetDeploymentSettings, error) {
-	res, err := c.ConsoleClient.GetDeploymentSettings(ctx)
+	res, err := c.GetDeploymentSettings(ctx)
 	if err == nil && res != nil && res.DeploymentSettings != nil {
 		return res, nil
 	}
 
-	minimal, minimalErr := c.ConsoleClient.GetDeploymentSettingsMinimal(ctx)
+	minimal, minimalErr := c.GetDeploymentSettingsMinimal(ctx)
 	if minimalErr != nil {
 		if err != nil {
 			return nil, err
