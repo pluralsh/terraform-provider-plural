@@ -34,6 +34,36 @@ func (c *Client) CreateServiceDeployment(ctx context.Context, id, handle *string
 	return res.CreateServiceDeployment, err
 }
 
+func (c *Client) GetDeploymentSettings(ctx context.Context) (*gqlclient.GetDeploymentSettings, error) {
+	res, err := c.ConsoleClient.GetDeploymentSettings(ctx)
+	if err == nil && res != nil && res.DeploymentSettings != nil {
+		return res, nil
+	}
+
+	minimal, minimalErr := c.ConsoleClient.GetDeploymentSettingsMinimal(ctx)
+	if minimalErr != nil {
+		if err != nil {
+			return nil, err
+		}
+		return nil, minimalErr
+	}
+
+	return &gqlclient.GetDeploymentSettings{
+		DeploymentSettings: toDeploymentSettingsFragment(minimal.DeploymentSettings),
+	}, nil
+}
+
+func toDeploymentSettingsFragment(minimal *gqlclient.DeploymentSettingsMinimalFragment) *gqlclient.DeploymentSettingsFragment {
+	if minimal == nil {
+		return nil
+	}
+
+	return &gqlclient.DeploymentSettingsFragment{
+		AgentHelmValues: minimal.AgentHelmValues,
+		AgentVsn:        minimal.AgentVsn,
+	}
+}
+
 func NewClient(client gqlclient.ConsoleClient) *Client {
 	return &Client{
 		ConsoleClient: client,

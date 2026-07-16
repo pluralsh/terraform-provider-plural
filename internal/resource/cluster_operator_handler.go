@@ -91,6 +91,11 @@ func NewOperatorHandler(ctx context.Context, client *client.Client, kubeClient *
 	if err != nil {
 		return nil, err
 	}
+	deploymentSettings := lo.Ternary(settings != nil, settings.DeploymentSettings, nil)
+	cluster, err := fetchClusterForAgentHelmValues(ctx, client, deploymentSettings, clusterId)
+	if err != nil {
+		return nil, err
+	}
 
 	clientSet, err := kubeClient.ToClientSet()
 	if err != nil {
@@ -108,7 +113,8 @@ func NewOperatorHandler(ctx context.Context, client *client.Client, kubeClient *
 		ctx:               ctx,
 		consoleURL:        consoleUrl,
 		deployToken:       token,
-		settings:          settings.DeploymentSettings,
+		settings:          deploymentSettings,
+		cluster:           cluster,
 		clientSet:         clientSet,
 		vendoredChartPath: chartPath,
 		additionalValues:  additionalValues,
@@ -127,6 +133,7 @@ type OperatorHandler struct {
 	consoleURL  string
 	deployToken string
 	settings    *gqlclient.DeploymentSettingsFragment
+	cluster     *gqlclient.ClusterFragment
 	clientSet   *kubernetes.Clientset
 	clusterId   string
 
@@ -260,11 +267,9 @@ func (oh *OperatorHandler) install() error {
 }
 
 func (oh *OperatorHandler) values() (map[string]any, error) {
-	settingsValues := map[string]any{}
-	if oh.settings != nil && oh.settings.AgentHelmValues != nil {
-		if err := yaml.Unmarshal([]byte(*oh.settings.AgentHelmValues), &settingsValues); err != nil {
-			return nil, err
-		}
+	settingsValues, err := resolveAgentHelmValues(oh.settings, oh.cluster)
+	if err != nil {
+		return nil, err
 	}
 
 	return algorithms.Merge(map[string]any{
@@ -272,4 +277,23 @@ func (oh *OperatorHandler) values() (map[string]any, error) {
 		"consoleUrl": console.NormalizeExtUrl(oh.consoleURL),
 		"clusterId":  oh.clusterId,
 	}, settingsValues, oh.additionalValues), nil
+}
+
+func fetchClusterForAgentHelmValues(ctx context.Context, client *client.Client, settings *gqlclient.DeploymentSettingsFragment, clusterID string) (*gqlclient.ClusterFragment, error) {
+	if settings == nil || !lo.FromPtr(settings.AgentHelmValuesTemplateable) {
+		return nil, nil
+	}
+	if clusterID == "" {
+		return nil, fmt.Errorf("cluster id is required to render agent helm values")
+	}
+
+	resp, err := client.GetCluster(ctx, lo.ToPtr(clusterID))
+	if err != nil {
+		return nil, fmt.Errorf("fetching cluster for agent helm values templating: %w", err)
+	}
+	if resp == nil || resp.Cluster == nil {
+		return nil, fmt.Errorf("fetching cluster for agent helm values templating: cluster not found")
+	}
+
+	return resp.Cluster, nil
 }

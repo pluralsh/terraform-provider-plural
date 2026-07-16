@@ -63,8 +63,8 @@ func (c *AwsCloudConnectionAttributes) Attributes(ctx context.Context, d *diag.D
 	}
 
 	return &console.AWSCloudConnectionAttributes{
-		AccessKeyID:     c.AccessKeyID.ValueString(),
-		SecretAccessKey: c.SecretAccessKey.ValueString(),
+		AccessKeyID:     c.AccessKeyID.ValueStringPointer(),
+		SecretAccessKey: c.SecretAccessKey.ValueStringPointer(),
 		Region:          c.Region.ValueStringPointer(),
 		AssumeRoleArn:   c.AssumeRoleArn.ValueStringPointer(),
 		Regions:         regions,
