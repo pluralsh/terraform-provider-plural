@@ -2,7 +2,7 @@ terraform {
   required_providers {
     plural = {
       source  = "pluralsh/plural"
-      version = "0.2.35"
+      version = "0.2.37"
     }
   }
 }
@@ -239,8 +239,8 @@ resource "plural_workbench_tool" "sentry" {
   project_id = data.plural_project.default.id
   configuration = {
     sentry = {
-      url           = "https://sentry.io"
-      access_token  = "replace-with-access-token"
+      url          = "https://sentry.io"
+      access_token = "replace-with-access-token"
     }
   }
 }
