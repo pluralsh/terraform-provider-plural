@@ -147,7 +147,7 @@ func (r *ServiceContextResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 	if response == nil || response.ServiceContext == nil {
-		resp.Diagnostics.AddError("Client Error", "Unable to read updated service context, got no error")
+		resp.Diagnostics.AddError("Client Error", "Unable to read updated service context, received empty response")
 		return
 	}
 
