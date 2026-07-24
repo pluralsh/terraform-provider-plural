@@ -354,17 +354,19 @@ resource "plural_workbench_tool" "opensearch" {
   project_id = data.plural_project.default.id
   configuration = {
     opensearch = {
-      host       = "https://search-example.us-east-1.es.amazonaws.com"
-      index      = "logs-*"
-      aws_region = "us-east-1"
+      host             = "https://search-example.us-east-1.es.amazonaws.com"
+      index            = "logs-*"
+      aws_region       = "us-east-1"
+      use_pod_identity = true
     }
   }
 }
 
 resource "plural_workbench_tool" "lambda" {
-  name       = "lambda"
-  tool       = "LAMBDA"
-  project_id = data.plural_project.default.id
+  name                = "lambda"
+  tool                = "LAMBDA"
+  project_id          = data.plural_project.default.id
+  cloud_connection_id = plural_cloud_connection.workbench.id
   configuration = {
     lambda = {
       lambda_arn  = "arn:aws:lambda:us-east-1:123456789012:function:example"
@@ -380,25 +382,39 @@ resource "plural_workbench_tool" "lambda" {
 }
 
 resource "plural_workbench_tool" "cloud_run" {
-  name       = "cloud_run"
-  tool       = "CLOUD_RUN"
-  project_id = data.plural_project.default.id
+  name                = "cloud_run"
+  tool                = "CLOUD_RUN"
+  project_id          = data.plural_project.default.id
+  cloud_connection_id = plural_cloud_connection.workbench.id
   configuration = {
     cloud_run = {
       identifier  = "projects/example/locations/us-central1/services/example"
       description = "Invoke the example Cloud Run service."
+      input_schema = jsonencode({
+        type = "object"
+        properties = {
+          payload = { type = "string" }
+        }
+      })
     }
   }
 }
 
 resource "plural_workbench_tool" "azure_function" {
-  name       = "azure_function"
-  tool       = "AZURE_FUNCTION"
-  project_id = data.plural_project.default.id
+  name                = "azure_function"
+  tool                = "AZURE_FUNCTION"
+  project_id          = data.plural_project.default.id
+  cloud_connection_id = plural_cloud_connection.workbench.id
   configuration = {
     azure_function = {
       identifier  = "example-function"
       description = "Invoke the example Azure Function."
+      input_schema = jsonencode({
+        type = "object"
+        properties = {
+          payload = { type = "string" }
+        }
+      })
     }
   }
 }

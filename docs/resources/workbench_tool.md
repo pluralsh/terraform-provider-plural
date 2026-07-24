@@ -41,10 +41,10 @@ Optional:
 - `atlassian` (Attributes) Atlassian/Jira connection configuration. (see [below for nested schema](#nestedatt--configuration--atlassian))
 - `azure` (Attributes) Azure Monitor connection configuration. (see [below for nested schema](#nestedatt--configuration--azure))
 - `azure_devops` (Attributes) Azure DevOps connection configuration. (see [below for nested schema](#nestedatt--configuration--azure_devops))
-- `azure_function` (Attributes) Azure Function / Cloud Function configuration. (see [below for nested schema](#nestedatt--configuration--azure_function))
+- `azure_function` (Attributes) Azure Function / Cloud Function configuration. Requires `cloud_connection_id`. (see [below for nested schema](#nestedatt--configuration--azure_function))
 - `bitbucket` (Attributes) Bitbucket Cloud connection configuration. (see [below for nested schema](#nestedatt--configuration--bitbucket))
 - `bitbucket_datacenter` (Attributes) Bitbucket Data Center connection configuration. (see [below for nested schema](#nestedatt--configuration--bitbucket_datacenter))
-- `cloud_run` (Attributes) Google Cloud Run service configuration. (see [below for nested schema](#nestedatt--configuration--cloud_run))
+- `cloud_run` (Attributes) Google Cloud Run service configuration. Requires `cloud_connection_id`. (see [below for nested schema](#nestedatt--configuration--cloud_run))
 - `cloudwatch` (Attributes) CloudWatch connection configuration. (see [below for nested schema](#nestedatt--configuration--cloudwatch))
 - `datadog` (Attributes) Datadog connection configuration. (see [below for nested schema](#nestedatt--configuration--datadog))
 - `docker` (Attributes) Docker/OCI registry connection configuration. (see [below for nested schema](#nestedatt--configuration--docker))
@@ -55,7 +55,7 @@ Optional:
 - `gitlab` (Attributes) GitLab connection configuration. (see [below for nested schema](#nestedatt--configuration--gitlab))
 - `http` (Attributes) HTTP configuration of this workbench tool. (see [below for nested schema](#nestedatt--configuration--http))
 - `jaeger` (Attributes) Jaeger connection configuration. (see [below for nested schema](#nestedatt--configuration--jaeger))
-- `lambda` (Attributes) AWS Lambda function configuration. (see [below for nested schema](#nestedatt--configuration--lambda))
+- `lambda` (Attributes) AWS Lambda function configuration. Requires `cloud_connection_id`. (see [below for nested schema](#nestedatt--configuration--lambda))
 - `linear` (Attributes) Linear connection configuration. (see [below for nested schema](#nestedatt--configuration--linear))
 - `loki` (Attributes) Loki connection configuration. (see [below for nested schema](#nestedatt--configuration--loki))
 - `opensearch` (Attributes) AWS OpenSearch connection configuration. (see [below for nested schema](#nestedatt--configuration--opensearch))
@@ -108,9 +108,6 @@ Required:
 
 - `description` (String)
 - `identifier` (String)
-
-Optional:
-
 - `input_schema` (String)
 
 
@@ -142,9 +139,6 @@ Required:
 
 - `description` (String)
 - `identifier` (String)
-
-Optional:
-
 - `input_schema` (String)
 
 
@@ -345,11 +339,8 @@ Optional:
 Required:
 
 - `description` (String)
-- `lambda_arn` (String)
-
-Optional:
-
 - `input_schema` (String)
+- `lambda_arn` (String)
 
 
 <a id="nestedatt--configuration--linear"></a>
