@@ -100,6 +100,11 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 				MarkdownDescription: "ID of the cloud connection referenced by this workbench tool.",
 				Optional:            true,
 			},
+			"scm_connection_id": schema.StringAttribute{
+				Description:         "ID of the SCM connection referenced by this workbench tool.",
+				MarkdownDescription: "ID of the SCM connection referenced by this workbench tool.",
+				Optional:            true,
+			},
 			"configuration": schema.SingleNestedAttribute{
 				Description:         "Configuration of this workbench tool.",
 				MarkdownDescription: "Configuration of this workbench tool.",
@@ -127,6 +132,11 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 											return string(m)
 										})...),
 								},
+							},
+							"function": schema.BoolAttribute{
+								Description:         "When true, exposes this HTTP tool as a workbench action.",
+								MarkdownDescription: "When true, exposes this HTTP tool as a workbench action.",
+								Optional:            true,
 							},
 							"headers": schema.MapAttribute{
 								Description:         "The request headers.",
@@ -157,16 +167,34 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 							"index":    schema.StringAttribute{Required: true},
 						},
 					},
+					"opensearch": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "AWS OpenSearch connection configuration.",
+						MarkdownDescription: "AWS OpenSearch connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"host":                  schema.StringAttribute{Required: true},
+							"index":                 schema.StringAttribute{Required: true},
+							"aws_access_key_id":     schema.StringAttribute{Optional: true, Sensitive: true},
+							"aws_secret_access_key": schema.StringAttribute{Optional: true, Sensitive: true},
+							"aws_region":            schema.StringAttribute{Optional: true},
+							"assume_role_arn":       schema.StringAttribute{Optional: true},
+							"use_pod_identity":      schema.BoolAttribute{Optional: true},
+						},
+					},
 					"prometheus": schema.SingleNestedAttribute{
 						Optional:            true,
 						Description:         "Prometheus connection configuration.",
 						MarkdownDescription: "Prometheus connection configuration.",
 						Attributes: map[string]schema.Attribute{
-							"url":       schema.StringAttribute{Required: true},
-							"token":     schema.StringAttribute{Optional: true, Sensitive: true},
-							"username":  schema.StringAttribute{Optional: true},
-							"password":  schema.StringAttribute{Optional: true, Sensitive: true},
-							"tenant_id": schema.StringAttribute{Optional: true},
+							"url":                   schema.StringAttribute{Required: true},
+							"token":                 schema.StringAttribute{Optional: true, Sensitive: true},
+							"username":              schema.StringAttribute{Optional: true},
+							"password":              schema.StringAttribute{Optional: true, Sensitive: true},
+							"tenant_id":             schema.StringAttribute{Optional: true},
+							"aws_sigv4":             schema.BoolAttribute{Optional: true},
+							"aws_access_key_id":     schema.StringAttribute{Optional: true, Sensitive: true},
+							"aws_secret_access_key": schema.StringAttribute{Optional: true, Sensitive: true},
+							"aws_region":            schema.StringAttribute{Optional: true},
 						},
 					},
 					"loki": schema.SingleNestedAttribute{
@@ -257,6 +285,16 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 							"tenant_id":       schema.StringAttribute{Required: true},
 							"client_id":       schema.StringAttribute{Required: true},
 							"client_secret":   schema.StringAttribute{Required: true, Sensitive: true},
+							"prometheus_url":  schema.StringAttribute{Optional: true},
+						},
+					},
+					"sentry": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Sentry connection configuration.",
+						MarkdownDescription: "Sentry connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"url":          schema.StringAttribute{Optional: true},
+							"access_token": schema.StringAttribute{Optional: true, Sensitive: true},
 						},
 					},
 					"linear": schema.SingleNestedAttribute{
@@ -267,6 +305,32 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 							"access_token": schema.StringAttribute{Optional: true, Sensitive: true},
 						},
 					},
+					"slack": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Slack connection configuration.",
+						MarkdownDescription: "Slack connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"bot_token": schema.StringAttribute{Optional: true, Sensitive: true},
+						},
+					},
+					"pagerduty": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "PagerDuty connection configuration.",
+						MarkdownDescription: "PagerDuty connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"api_token": schema.StringAttribute{Optional: true, Sensitive: true},
+						},
+					},
+					"teams": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Microsoft Teams connection configuration.",
+						MarkdownDescription: "Microsoft Teams connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"client_id":     schema.StringAttribute{Required: true},
+							"client_secret": schema.StringAttribute{Required: true, Sensitive: true},
+							"tenant_id":     schema.StringAttribute{Required: true},
+						},
+					},
 					"atlassian": schema.SingleNestedAttribute{
 						Optional:            true,
 						Description:         "Atlassian/Jira connection configuration.",
@@ -275,6 +339,157 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 							"service_account": schema.StringAttribute{Optional: true, Sensitive: true},
 							"api_token":       schema.StringAttribute{Optional: true, Sensitive: true},
 							"email":           schema.StringAttribute{Optional: true},
+						},
+					},
+					"exa": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Exa connection configuration.",
+						MarkdownDescription: "Exa connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"api_key": schema.StringAttribute{Optional: true, Sensitive: true},
+						},
+					},
+					"github": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "GitHub connection configuration.",
+						MarkdownDescription: "GitHub connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"url":             schema.StringAttribute{Optional: true},
+							"access_token":    schema.StringAttribute{Optional: true, Sensitive: true},
+							"toolset":         schema.StringAttribute{Optional: true},
+							"app_id":          schema.StringAttribute{Optional: true},
+							"installation_id": schema.StringAttribute{Optional: true},
+							"private_key":     schema.StringAttribute{Optional: true, Sensitive: true},
+						},
+					},
+					"gitlab": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "GitLab connection configuration.",
+						MarkdownDescription: "GitLab connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"url":   schema.StringAttribute{Optional: true},
+							"token": schema.StringAttribute{Optional: true, Sensitive: true},
+						},
+					},
+					"bitbucket": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Bitbucket Cloud connection configuration.",
+						MarkdownDescription: "Bitbucket Cloud connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"url":   schema.StringAttribute{Optional: true},
+							"token": schema.StringAttribute{Optional: true, Sensitive: true},
+						},
+					},
+					"bitbucket_datacenter": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Bitbucket Data Center connection configuration.",
+						MarkdownDescription: "Bitbucket Data Center connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"url":   schema.StringAttribute{Required: true},
+							"token": schema.StringAttribute{Optional: true, Sensitive: true},
+						},
+					},
+					"azure_devops": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Azure DevOps connection configuration.",
+						MarkdownDescription: "Azure DevOps connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"url":   schema.StringAttribute{Optional: true},
+							"token": schema.StringAttribute{Optional: true, Sensitive: true},
+						},
+					},
+					"lambda": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "AWS Lambda function configuration.",
+						MarkdownDescription: "AWS Lambda function configuration.",
+						Attributes: map[string]schema.Attribute{
+							"lambda_arn":   schema.StringAttribute{Required: true},
+							"description":  schema.StringAttribute{Required: true},
+							"input_schema": schema.StringAttribute{Optional: true},
+						},
+					},
+					"cloud_run": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Google Cloud Run service configuration.",
+						MarkdownDescription: "Google Cloud Run service configuration.",
+						Attributes: map[string]schema.Attribute{
+							"identifier":   schema.StringAttribute{Required: true},
+							"description":  schema.StringAttribute{Required: true},
+							"input_schema": schema.StringAttribute{Optional: true},
+						},
+					},
+					"azure_function": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Azure Function / Cloud Function configuration.",
+						MarkdownDescription: "Azure Function / Cloud Function configuration.",
+						Attributes: map[string]schema.Attribute{
+							"identifier":   schema.StringAttribute{Required: true},
+							"description":  schema.StringAttribute{Required: true},
+							"input_schema": schema.StringAttribute{Optional: true},
+						},
+					},
+					"docker": schema.SingleNestedAttribute{
+						Optional:            true,
+						Description:         "Docker/OCI registry connection configuration.",
+						MarkdownDescription: "Docker/OCI registry connection configuration.",
+						Attributes: map[string]schema.Attribute{
+							"url": schema.StringAttribute{Optional: true},
+							"provider": schema.StringAttribute{
+								Optional: true,
+								Validators: []validator.String{stringvalidator.OneOf(
+									lo.Map(console.AllHelmAuthProvider, func(item console.HelmAuthProvider, _ int) string {
+										return string(item)
+									})...),
+								},
+							},
+							"auth": schema.SingleNestedAttribute{
+								Optional: true,
+								Attributes: map[string]schema.Attribute{
+									"proxy": schema.SingleNestedAttribute{
+										Optional: true,
+										Attributes: map[string]schema.Attribute{
+											"url":     schema.StringAttribute{Required: true},
+											"noproxy": schema.StringAttribute{Optional: true},
+										},
+									},
+									"basic": schema.SingleNestedAttribute{
+										Optional: true,
+										Attributes: map[string]schema.Attribute{
+											"username": schema.StringAttribute{Required: true},
+											"password": schema.StringAttribute{Required: true, Sensitive: true},
+										},
+									},
+									"bearer": schema.SingleNestedAttribute{
+										Optional: true,
+										Attributes: map[string]schema.Attribute{
+											"token": schema.StringAttribute{Required: true, Sensitive: true},
+										},
+									},
+									"aws": schema.SingleNestedAttribute{
+										Optional: true,
+										Attributes: map[string]schema.Attribute{
+											"access_key":        schema.StringAttribute{Optional: true, Sensitive: true},
+											"secret_access_key": schema.StringAttribute{Optional: true, Sensitive: true},
+											"assume_role_arn":   schema.StringAttribute{Optional: true},
+										},
+									},
+									"azure": schema.SingleNestedAttribute{
+										Optional: true,
+										Attributes: map[string]schema.Attribute{
+											"client_id":       schema.StringAttribute{Optional: true},
+											"client_secret":   schema.StringAttribute{Optional: true, Sensitive: true},
+											"tenant_id":       schema.StringAttribute{Optional: true},
+											"subscription_id": schema.StringAttribute{Optional: true},
+										},
+									},
+									"gcp": schema.SingleNestedAttribute{
+										Optional: true,
+										Attributes: map[string]schema.Attribute{
+											"application_credentials": schema.StringAttribute{Optional: true, Sensitive: true},
+										},
+									},
+								},
+							},
 						},
 					},
 				},

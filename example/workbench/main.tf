@@ -237,6 +237,188 @@ resource "plural_workbench_tool" "sentry" {
   name       = "sentry"
   tool       = "SENTRY"
   project_id = data.plural_project.default.id
+  configuration = {
+    sentry = {
+      url           = "https://sentry.io"
+      access_token  = "replace-with-access-token"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "exa" {
+  name       = "exa"
+  tool       = "EXA"
+  project_id = data.plural_project.default.id
+  configuration = {
+    exa = {
+      api_key = "replace-with-api-key"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "github" {
+  name       = "github"
+  tool       = "GITHUB"
+  project_id = data.plural_project.default.id
+  configuration = {
+    github = {
+      access_token = "replace-with-access-token"
+      toolset      = "default"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "slack" {
+  name       = "slack"
+  tool       = "SLACK"
+  project_id = data.plural_project.default.id
+  configuration = {
+    slack = {
+      bot_token = "replace-with-bot-token"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "teams" {
+  name       = "teams"
+  tool       = "TEAMS"
+  project_id = data.plural_project.default.id
+  configuration = {
+    teams = {
+      client_id     = "replace-with-client-id"
+      client_secret = "replace-with-client-secret"
+      tenant_id     = "replace-with-tenant-id"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "gitlab" {
+  name       = "gitlab"
+  tool       = "GITLAB"
+  project_id = data.plural_project.default.id
+  configuration = {
+    gitlab = {
+      token = "replace-with-token"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "bitbucket" {
+  name       = "bitbucket"
+  tool       = "BITBUCKET"
+  project_id = data.plural_project.default.id
+  configuration = {
+    bitbucket = {
+      token = "replace-with-token"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "bitbucket_datacenter" {
+  name       = "bitbucket_datacenter"
+  tool       = "BITBUCKET_DATACENTER"
+  project_id = data.plural_project.default.id
+  configuration = {
+    bitbucket_datacenter = {
+      url   = "https://bitbucket.example.com"
+      token = "replace-with-token"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "azure_devops" {
+  name       = "azure_devops"
+  tool       = "AZURE_DEVOPS"
+  project_id = data.plural_project.default.id
+  configuration = {
+    azure_devops = {
+      token = "replace-with-token"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "pagerduty" {
+  name       = "pagerduty"
+  tool       = "PAGERDUTY"
+  project_id = data.plural_project.default.id
+  configuration = {
+    pagerduty = {
+      api_token = "replace-with-api-token"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "opensearch" {
+  name       = "opensearch"
+  tool       = "OPENSEARCH"
+  project_id = data.plural_project.default.id
+  configuration = {
+    opensearch = {
+      host       = "https://search-example.us-east-1.es.amazonaws.com"
+      index      = "logs-*"
+      aws_region = "us-east-1"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "lambda" {
+  name       = "lambda"
+  tool       = "LAMBDA"
+  project_id = data.plural_project.default.id
+  configuration = {
+    lambda = {
+      lambda_arn  = "arn:aws:lambda:us-east-1:123456789012:function:example"
+      description = "Invoke the example Lambda function."
+      input_schema = jsonencode({
+        type = "object"
+        properties = {
+          payload = { type = "string" }
+        }
+      })
+    }
+  }
+}
+
+resource "plural_workbench_tool" "cloud_run" {
+  name       = "cloud_run"
+  tool       = "CLOUD_RUN"
+  project_id = data.plural_project.default.id
+  configuration = {
+    cloud_run = {
+      identifier  = "projects/example/locations/us-central1/services/example"
+      description = "Invoke the example Cloud Run service."
+    }
+  }
+}
+
+resource "plural_workbench_tool" "azure_function" {
+  name       = "azure_function"
+  tool       = "AZURE_FUNCTION"
+  project_id = data.plural_project.default.id
+  configuration = {
+    azure_function = {
+      identifier  = "example-function"
+      description = "Invoke the example Azure Function."
+    }
+  }
+}
+
+resource "plural_workbench_tool" "docker" {
+  name       = "docker"
+  tool       = "DOCKER"
+  project_id = data.plural_project.default.id
+  configuration = {
+    docker = {
+      url      = "https://registry-1.docker.io"
+      provider = "BASIC"
+      auth = {
+        basic = {
+          username = "replace-with-username"
+          password = "replace-with-password"
+        }
+      }
+    }
+  }
 }
 
 resource "plural_workbench_tool" "mcp" {
@@ -296,6 +478,20 @@ resource "plural_workbench" "full" {
     plural_workbench_tool.linear.id,
     plural_workbench_tool.atlassian.id,
     plural_workbench_tool.sentry.id,
+    plural_workbench_tool.exa.id,
+    plural_workbench_tool.github.id,
+    plural_workbench_tool.slack.id,
+    plural_workbench_tool.teams.id,
+    plural_workbench_tool.gitlab.id,
+    plural_workbench_tool.bitbucket.id,
+    plural_workbench_tool.bitbucket_datacenter.id,
+    plural_workbench_tool.azure_devops.id,
+    plural_workbench_tool.pagerduty.id,
+    plural_workbench_tool.opensearch.id,
+    plural_workbench_tool.lambda.id,
+    plural_workbench_tool.cloud_run.id,
+    plural_workbench_tool.azure_function.id,
+    plural_workbench_tool.docker.id,
     plural_workbench_tool.mcp.id,
     plural_workbench_tool.cloud.id,
   ]
