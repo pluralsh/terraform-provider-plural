@@ -76,9 +76,7 @@ func (in *WorkbenchTool) From(response *gqlclient.WorkbenchToolFragment, ctx con
 	}
 
 	if response.Configuration != nil {
-		if in.Configuration == nil {
-			in.Configuration = &WorkbenchToolConfiguration{}
-		}
+		ensure(&in.Configuration)
 		in.Configuration.From(response.Configuration, ctx, d)
 	}
 }
@@ -160,171 +158,115 @@ func (in *WorkbenchToolConfiguration) From(configuration *gqlclient.WorkbenchToo
 	}
 
 	if configuration.HTTP != nil {
-		if in.HTTP == nil {
-			in.HTTP = &WorkbenchToolHTTPConfig{}
-		}
+		ensure(&in.HTTP)
 		in.HTTP.From(configuration.HTTP, ctx, d)
 	}
 	if configuration.Elastic != nil {
-		if in.Elastic == nil {
-			in.Elastic = &WorkbenchToolElasticConfig{}
-		}
+		ensure(&in.Elastic)
 		in.Elastic.From(configuration.Elastic)
 	}
 	if configuration.Opensearch != nil {
-		if in.Opensearch == nil {
-			in.Opensearch = &WorkbenchToolOpensearchConfig{}
-		}
+		ensure(&in.Opensearch)
 		in.Opensearch.From(configuration.Opensearch)
 	}
 	if configuration.Prometheus != nil {
-		if in.Prometheus == nil {
-			in.Prometheus = &WorkbenchToolPrometheusConfig{}
-		}
+		ensure(&in.Prometheus)
 		in.Prometheus.From(configuration.Prometheus)
 	}
 	if configuration.Loki != nil {
-		if in.Loki == nil {
-			in.Loki = &WorkbenchToolTokenAuthConfig{}
-		}
+		ensure(&in.Loki)
 		in.Loki.FromLoki(configuration.Loki)
 	}
 	if configuration.Splunk != nil {
-		if in.Splunk == nil {
-			in.Splunk = &WorkbenchToolSplunkConfig{}
-		}
+		ensure(&in.Splunk)
 		in.Splunk.From(configuration.Splunk)
 	}
 	if configuration.Tempo != nil {
-		if in.Tempo == nil {
-			in.Tempo = &WorkbenchToolTokenAuthConfig{}
-		}
+		ensure(&in.Tempo)
 		in.Tempo.FromTempo(configuration.Tempo)
 	}
 	if configuration.Jaeger != nil {
-		if in.Jaeger == nil {
-			in.Jaeger = &WorkbenchToolJaegerConfig{}
-		}
+		ensure(&in.Jaeger)
 		in.Jaeger.From(configuration.Jaeger)
 	}
 	if configuration.Datadog != nil {
-		if in.Datadog == nil {
-			in.Datadog = &WorkbenchToolDatadogConfig{}
-		}
+		ensure(&in.Datadog)
 		in.Datadog.From(configuration.Datadog)
 	}
 	if configuration.Dynatrace != nil {
-		if in.Dynatrace == nil {
-			in.Dynatrace = &WorkbenchToolDynatraceConfig{}
-		}
+		ensure(&in.Dynatrace)
 		in.Dynatrace.From(configuration.Dynatrace)
 	}
 	if configuration.Cloudwatch != nil {
-		if in.Cloudwatch == nil {
-			in.Cloudwatch = &WorkbenchToolCloudwatchConfig{}
-		}
+		ensure(&in.Cloudwatch)
 		in.Cloudwatch.From(configuration.Cloudwatch, ctx, d)
 	}
 	if configuration.Azure != nil {
-		if in.Azure == nil {
-			in.Azure = &WorkbenchToolAzureConfig{}
-		}
+		ensure(&in.Azure)
 		in.Azure.From(configuration.Azure)
 	}
 	if configuration.Sentry != nil {
-		if in.Sentry == nil {
-			in.Sentry = &WorkbenchToolSentryConfig{}
-		}
+		ensure(&in.Sentry)
 		in.Sentry.From(configuration.Sentry)
 	}
 	if configuration.Linear != nil {
-		if in.Linear == nil {
-			in.Linear = &WorkbenchToolLinearConfig{}
-		}
+		ensure(&in.Linear)
 		in.Linear.From(configuration.Linear)
 	}
 	if configuration.Slack != nil {
-		if in.Slack == nil {
-			in.Slack = &WorkbenchToolSlackConfig{}
-		}
+		ensure(&in.Slack)
 		in.Slack.From(configuration.Slack)
 	}
 	if configuration.Pagerduty != nil {
-		if in.Pagerduty == nil {
-			in.Pagerduty = &WorkbenchToolPagerdutyConfig{}
-		}
+		ensure(&in.Pagerduty)
 		in.Pagerduty.From(configuration.Pagerduty)
 	}
 	if configuration.Teams != nil {
-		if in.Teams == nil {
-			in.Teams = &WorkbenchToolTeamsConfig{}
-		}
+		ensure(&in.Teams)
 		in.Teams.From(configuration.Teams)
 	}
 	if configuration.Atlassian != nil {
-		if in.Atlassian == nil {
-			in.Atlassian = &WorkbenchToolAtlassianConfig{}
-		}
+		ensure(&in.Atlassian)
 		in.Atlassian.From(configuration.Atlassian)
 	}
 	if configuration.Exa != nil {
-		if in.Exa == nil {
-			in.Exa = &WorkbenchToolExaConfig{}
-		}
+		ensure(&in.Exa)
 		in.Exa.From(configuration.Exa)
 	}
 	if configuration.Github != nil {
-		if in.Github == nil {
-			in.Github = &WorkbenchToolGithubConfig{}
-		}
+		ensure(&in.Github)
 		in.Github.From(configuration.Github)
 	}
 	if configuration.Gitlab != nil {
-		if in.Gitlab == nil {
-			in.Gitlab = &WorkbenchToolGitlabConfig{}
-		}
+		ensure(&in.Gitlab)
 		in.Gitlab.From(configuration.Gitlab)
 	}
 	if configuration.Bitbucket != nil {
-		if in.Bitbucket == nil {
-			in.Bitbucket = &WorkbenchToolBitbucketConfig{}
-		}
+		ensure(&in.Bitbucket)
 		in.Bitbucket.From(configuration.Bitbucket)
 	}
 	if configuration.BitbucketDatacenter != nil {
-		if in.BitbucketDatacenter == nil {
-			in.BitbucketDatacenter = &WorkbenchToolBitbucketDatacenterConfig{}
-		}
+		ensure(&in.BitbucketDatacenter)
 		in.BitbucketDatacenter.From(configuration.BitbucketDatacenter)
 	}
 	if configuration.AzureDevops != nil {
-		if in.AzureDevops == nil {
-			in.AzureDevops = &WorkbenchToolAzureDevopsConfig{}
-		}
+		ensure(&in.AzureDevops)
 		in.AzureDevops.From(configuration.AzureDevops)
 	}
 	if configuration.Lambda != nil {
-		if in.Lambda == nil {
-			in.Lambda = &WorkbenchToolLambdaConfig{}
-		}
+		ensure(&in.Lambda)
 		in.Lambda.From(configuration.Lambda, d)
 	}
 	if configuration.CloudRun != nil {
-		if in.CloudRun == nil {
-			in.CloudRun = &WorkbenchToolCloudRunConfig{}
-		}
+		ensure(&in.CloudRun)
 		in.CloudRun.From(configuration.CloudRun, d)
 	}
 	if configuration.AzureFunction != nil {
-		if in.AzureFunction == nil {
-			in.AzureFunction = &WorkbenchToolAzureFunctionConfig{}
-		}
+		ensure(&in.AzureFunction)
 		in.AzureFunction.From(configuration.AzureFunction, d)
 	}
 	if configuration.Docker != nil {
-		if in.Docker == nil {
-			in.Docker = &WorkbenchToolDockerConfig{}
-		}
+		ensure(&in.Docker)
 		in.Docker.From(configuration.Docker)
 	}
 }
@@ -366,7 +308,7 @@ func (in *WorkbenchToolHTTPConfig) From(configuration *gqlclient.WorkbenchToolFr
 		return
 	}
 
-	in.URL = types.StringPointerValue(configuration.URL)
+	in.URL = stringFromAPI(configuration.URL, in.URL)
 	if configuration.Method != nil {
 		in.Method = types.StringValue(strings.ToUpper(*configuration.Method))
 	} else {
@@ -477,15 +419,12 @@ func (in *WorkbenchToolPrometheusConfig) From(configuration *gqlclient.Workbench
 		return
 	}
 
-	in.URL = types.StringPointerValue(configuration.URL)
-	in.Username = types.StringPointerValue(configuration.Username)
-	in.TenantID = types.StringPointerValue(configuration.TenantID)
+	in.URL = stringFromAPI(configuration.URL, in.URL)
+	in.Username = stringFromAPI(configuration.Username, in.Username)
+	in.TenantID = stringFromAPI(configuration.TenantID, in.TenantID)
 	in.AWSSigv4 = types.BoolPointerValue(configuration.AWSSigv4)
-	if configuration.AWSAccessKeyID != nil {
-		in.AWSAccessKeyID = types.StringValue(*configuration.AWSAccessKeyID)
-	}
-	in.AWSRegion = types.StringPointerValue(configuration.AWSRegion)
-	// Token, Password, AWSSecretAccessKey are never returned; keep configured values.
+	in.AWSRegion = stringFromAPI(configuration.AWSRegion, in.AWSRegion)
+	// Token, Password, AWSAccessKeyID, AWSSecretAccessKey are never returned; keep configured values.
 }
 
 type WorkbenchToolTokenAuthConfig struct {
@@ -518,9 +457,9 @@ func (in *WorkbenchToolTokenAuthConfig) FromLoki(configuration *gqlclient.Workbe
 		return
 	}
 
-	in.URL = types.StringPointerValue(configuration.URL)
-	in.Username = types.StringPointerValue(configuration.Username)
-	in.TenantID = types.StringPointerValue(configuration.TenantID)
+	in.URL = stringFromAPI(configuration.URL, in.URL)
+	in.Username = stringFromAPI(configuration.Username, in.Username)
+	in.TenantID = stringFromAPI(configuration.TenantID, in.TenantID)
 }
 
 type WorkbenchToolSplunkConfig struct {
@@ -551,8 +490,8 @@ func (in *WorkbenchToolSplunkConfig) From(configuration *gqlclient.WorkbenchTool
 		return
 	}
 
-	in.URL = types.StringPointerValue(configuration.URL)
-	in.Username = types.StringPointerValue(configuration.Username)
+	in.URL = stringFromAPI(configuration.URL, in.URL)
+	in.Username = stringFromAPI(configuration.Username, in.Username)
 }
 
 func (in *WorkbenchToolTokenAuthConfig) tempoAttributes() *gqlclient.WorkbenchToolTempoConnectionAttributes {
@@ -577,9 +516,9 @@ func (in *WorkbenchToolTokenAuthConfig) FromTempo(configuration *gqlclient.Workb
 		return
 	}
 
-	in.URL = types.StringPointerValue(configuration.URL)
-	in.Username = types.StringPointerValue(configuration.Username)
-	in.TenantID = types.StringPointerValue(configuration.TenantID)
+	in.URL = stringFromAPI(configuration.URL, in.URL)
+	in.Username = stringFromAPI(configuration.Username, in.Username)
+	in.TenantID = stringFromAPI(configuration.TenantID, in.TenantID)
 }
 
 type WorkbenchToolJaegerConfig struct {
@@ -610,8 +549,8 @@ func (in *WorkbenchToolJaegerConfig) From(configuration *gqlclient.WorkbenchTool
 		return
 	}
 
-	in.URL = types.StringPointerValue(configuration.URL)
-	in.Username = types.StringPointerValue(configuration.Username)
+	in.URL = stringFromAPI(configuration.URL, in.URL)
+	in.Username = stringFromAPI(configuration.Username, in.Username)
 }
 
 type WorkbenchToolDatadogConfig struct {
@@ -640,7 +579,7 @@ func (in *WorkbenchToolDatadogConfig) From(configuration *gqlclient.WorkbenchToo
 		return
 	}
 
-	in.Site = types.StringPointerValue(configuration.Site)
+	in.Site = stringFromAPI(configuration.Site, in.Site)
 }
 
 type WorkbenchToolDynatraceConfig struct {
@@ -667,7 +606,7 @@ func (in *WorkbenchToolDynatraceConfig) From(configuration *gqlclient.WorkbenchT
 		return
 	}
 
-	in.URL = types.StringPointerValue(configuration.URL)
+	in.URL = stringFromAPI(configuration.URL, in.URL)
 }
 
 type WorkbenchToolCloudwatchConfig struct {
@@ -715,10 +654,10 @@ func (in *WorkbenchToolCloudwatchConfig) From(configuration *gqlclient.Workbench
 		return
 	}
 
-	in.Region = types.StringPointerValue(configuration.Region)
+	in.Region = stringFromAPI(configuration.Region, in.Region)
 	in.LogGroupNames = common.SetFrom(configuration.LogGroupNames, in.LogGroupNames, ctx, d)
-	in.RoleArn = types.StringPointerValue(configuration.RoleArn)
-	in.RoleSessionName = types.StringPointerValue(configuration.RoleSessionName)
+	in.RoleArn = stringFromAPI(configuration.RoleArn, in.RoleArn)
+	in.RoleSessionName = stringFromAPI(configuration.RoleSessionName, in.RoleSessionName)
 }
 
 type WorkbenchToolAzureConfig struct {
@@ -751,10 +690,10 @@ func (in *WorkbenchToolAzureConfig) From(configuration *gqlclient.WorkbenchToolF
 		return
 	}
 
-	in.SubscriptionID = types.StringPointerValue(configuration.SubscriptionID)
-	in.TenantID = types.StringPointerValue(configuration.TenantID)
-	in.ClientID = types.StringPointerValue(configuration.ClientID)
-	in.PrometheusURL = types.StringPointerValue(configuration.PrometheusURL)
+	in.SubscriptionID = stringFromAPI(configuration.SubscriptionID, in.SubscriptionID)
+	in.TenantID = stringFromAPI(configuration.TenantID, in.TenantID)
+	in.ClientID = stringFromAPI(configuration.ClientID, in.ClientID)
+	in.PrometheusURL = stringFromAPI(configuration.PrometheusURL, in.PrometheusURL)
 }
 
 type WorkbenchToolLinearConfig struct {
@@ -801,7 +740,7 @@ func (in *WorkbenchToolAtlassianConfig) From(configuration *gqlclient.WorkbenchT
 		return
 	}
 
-	in.Email = types.StringPointerValue(configuration.Email)
+	in.Email = stringFromAPI(configuration.Email, in.Email)
 }
 
 type WorkbenchToolOpensearchConfig struct {
@@ -840,13 +779,10 @@ func (in *WorkbenchToolOpensearchConfig) From(configuration *gqlclient.Workbench
 
 	in.Host = types.StringValue(configuration.Host)
 	in.Index = types.StringValue(configuration.Index)
-	if configuration.AWSAccessKeyID != nil {
-		in.AWSAccessKeyID = types.StringValue(*configuration.AWSAccessKeyID)
-	}
-	in.AWSRegion = types.StringPointerValue(configuration.AWSRegion)
-	in.AssumeRoleArn = types.StringPointerValue(configuration.AssumeRoleArn)
+	in.AWSRegion = stringFromAPI(configuration.AWSRegion, in.AWSRegion)
+	in.AssumeRoleArn = stringFromAPI(configuration.AssumeRoleArn, in.AssumeRoleArn)
 	in.UsePodIdentity = types.BoolPointerValue(configuration.UsePodIdentity)
-	// AWSSecretAccessKey is never returned; keep configured value.
+	// AWSAccessKeyID and AWSSecretAccessKey are never returned; keep configured values.
 }
 
 type WorkbenchToolSentryConfig struct {
@@ -873,7 +809,7 @@ func (in *WorkbenchToolSentryConfig) From(configuration *gqlclient.WorkbenchTool
 		return
 	}
 
-	in.URL = types.StringPointerValue(configuration.URL)
+	in.URL = stringFromAPI(configuration.URL, in.URL)
 	// AccessToken is never returned; keep configured value.
 }
 
@@ -939,8 +875,8 @@ func (in *WorkbenchToolTeamsConfig) From(configuration *gqlclient.WorkbenchToolF
 		return
 	}
 
-	in.ClientID = types.StringPointerValue(configuration.ClientID)
-	in.TenantID = types.StringPointerValue(configuration.TenantID)
+	in.ClientID = stringFromAPI(configuration.ClientID, in.ClientID)
+	in.TenantID = stringFromAPI(configuration.TenantID, in.TenantID)
 	// ClientSecret is never returned; keep configured value.
 }
 
@@ -994,13 +930,10 @@ func (in *WorkbenchToolGithubConfig) From(configuration *gqlclient.WorkbenchTool
 		return
 	}
 
-	// API returns URL as a non-pointer string; keep Terraform null when unset.
-	if configuration.URL != "" {
-		in.URL = types.StringValue(configuration.URL)
-	}
-	in.Toolset = types.StringPointerValue(configuration.Toolset)
-	in.AppID = types.StringPointerValue(configuration.AppID)
-	in.InstallationID = types.StringPointerValue(configuration.InstallationID)
+	in.URL = stringFromAPI(lo.EmptyableToPtr(configuration.URL), in.URL)
+	in.Toolset = stringFromAPI(configuration.Toolset, in.Toolset)
+	in.AppID = stringFromAPI(configuration.AppID, in.AppID)
+	in.InstallationID = stringFromAPI(configuration.InstallationID, in.InstallationID)
 	// AccessToken and PrivateKey are never returned; keep configured values.
 }
 
@@ -1028,7 +961,7 @@ func (in *WorkbenchToolGitlabConfig) From(configuration *gqlclient.WorkbenchTool
 		return
 	}
 
-	in.URL = types.StringPointerValue(configuration.URL)
+	in.URL = stringFromAPI(configuration.URL, in.URL)
 	// Token is never returned; keep configured value.
 }
 
@@ -1056,7 +989,7 @@ func (in *WorkbenchToolBitbucketConfig) From(configuration *gqlclient.WorkbenchT
 		return
 	}
 
-	in.URL = types.StringPointerValue(configuration.URL)
+	in.URL = stringFromAPI(configuration.URL, in.URL)
 	// Token is never returned; keep configured value.
 }
 
@@ -1084,7 +1017,7 @@ func (in *WorkbenchToolBitbucketDatacenterConfig) From(configuration *gqlclient.
 		return
 	}
 
-	in.URL = types.StringPointerValue(configuration.URL)
+	in.URL = stringFromAPI(configuration.URL, in.URL)
 	// Token is never returned; keep configured value.
 }
 
@@ -1112,7 +1045,7 @@ func (in *WorkbenchToolAzureDevopsConfig) From(configuration *gqlclient.Workbenc
 		return
 	}
 
-	in.URL = types.StringPointerValue(configuration.URL)
+	in.URL = stringFromAPI(configuration.URL, in.URL)
 	// Token is never returned; keep configured value.
 }
 
@@ -1302,27 +1235,27 @@ func (in *WorkbenchToolDockerAuth) Attributes() *gqlclient.HelmAuthAttributes {
 		return nil
 	}
 
+	if lo.EveryBy([]any{in.Proxy, in.Basic, in.Bearer, in.AWS, in.Azure, in.GCP}, lo.IsNil) {
+		return nil
+	}
+
 	attrs := &gqlclient.HelmAuthAttributes{}
-	configured := false
 	if in.Proxy != nil {
 		attrs.Proxy = &gqlclient.HTTPProxyAttributes{
 			URL:     in.Proxy.URL.ValueString(),
 			Noproxy: in.Proxy.Noproxy.ValueStringPointer(),
 		}
-		configured = true
 	}
 	if in.Basic != nil {
 		attrs.Basic = &gqlclient.HelmBasicAuthAttributes{
 			Username: in.Basic.Username.ValueString(),
 			Password: in.Basic.Password.ValueString(),
 		}
-		configured = true
 	}
 	if in.Bearer != nil {
 		attrs.Bearer = &gqlclient.HelmBearerAuthAttributes{
 			Token: in.Bearer.Token.ValueString(),
 		}
-		configured = true
 	}
 	if in.AWS != nil {
 		attrs.AWS = &gqlclient.HelmAWSAuthAttributes{
@@ -1330,7 +1263,6 @@ func (in *WorkbenchToolDockerAuth) Attributes() *gqlclient.HelmAuthAttributes {
 			SecretAccessKey: in.AWS.SecretAccessKey.ValueStringPointer(),
 			AssumeRoleArn:   in.AWS.AssumeRoleArn.ValueStringPointer(),
 		}
-		configured = true
 	}
 	if in.Azure != nil {
 		attrs.Azure = &gqlclient.HelmAzureAuthAttributes{
@@ -1339,16 +1271,11 @@ func (in *WorkbenchToolDockerAuth) Attributes() *gqlclient.HelmAuthAttributes {
 			TenantID:       in.Azure.TenantID.ValueStringPointer(),
 			SubscriptionID: in.Azure.SubscriptionID.ValueStringPointer(),
 		}
-		configured = true
 	}
 	if in.GCP != nil {
 		attrs.GCP = &gqlclient.HelmGCPAuthAttributes{
 			ApplicationCredentials: in.GCP.ApplicationCredentials.ValueStringPointer(),
 		}
-		configured = true
-	}
-	if !configured {
-		return nil
 	}
 	return attrs
 }
@@ -1361,22 +1288,28 @@ func (in *WorkbenchToolDockerConfig) From(configuration *gqlclient.WorkbenchTool
 		return
 	}
 
-	if configuration.URL != nil {
-		in.URL = types.StringPointerValue(configuration.URL)
-	}
+	in.URL = stringFromAPI(configuration.URL, in.URL)
 	if configuration.Provider != nil {
 		in.Provider = types.StringValue(string(*configuration.Provider))
 	}
-	// Proxy is returned at the docker connection level; credentials stay under auth and are never exposed.
-	// Ignore empty proxy objects so we don't mutate auth blocks that hold write-only secrets.
-	if configuration.Proxy != nil && configuration.Proxy.URL != "" {
-		if in.Auth == nil {
-			in.Auth = &WorkbenchToolDockerAuth{}
-		}
-		in.Auth.Proxy = &WorkbenchToolHTTPProxyConfig{
-			URL:     types.StringValue(configuration.Proxy.URL),
-			Noproxy: types.StringPointerValue(configuration.Proxy.Noproxy),
-		}
+	// Proxy is returned at the docker connection level; credentials stay under auth.
+	// Only refresh proxy when it was already configured so we don't reshape auth
+	// objects that hold write-only secrets.
+	if configuration.Proxy != nil && in.Auth != nil && in.Auth.Proxy != nil && !lo.IsEmpty(configuration.Proxy.URL) {
+		in.Auth.Proxy.URL = types.StringValue(configuration.Proxy.URL)
+		in.Auth.Proxy.Noproxy = stringFromAPI(configuration.Proxy.Noproxy, in.Auth.Proxy.Noproxy)
 	}
 	// Auth credentials are never returned; keep configured values.
+}
+
+// stringFromAPI keeps the planned/state value when the API omits or returns an empty string.
+func stringFromAPI(api *string, current types.String) types.String {
+	return lo.Ternary(lo.IsEmpty(lo.FromPtr(api)), current, types.StringValue(lo.FromPtr(api)))
+}
+
+// ensure allocates dst when nil so From can populate imported/nested config blocks.
+func ensure[T any](dst **T) {
+	if *dst == nil {
+		*dst = new(T)
+	}
 }
