@@ -22,7 +22,6 @@ type WorkbenchTool struct {
 	ProjectID         types.String                `tfsdk:"project_id"`
 	McpServerID       types.String                `tfsdk:"mcp_server_id"`
 	CloudConnectionID types.String                `tfsdk:"cloud_connection_id"`
-	ScmConnectionID   types.String                `tfsdk:"scm_connection_id"`
 	Configuration     *WorkbenchToolConfiguration `tfsdk:"configuration"`
 }
 
@@ -39,7 +38,6 @@ func (in *WorkbenchTool) Attributes(ctx context.Context) (*gqlclient.WorkbenchTo
 		ProjectID:         in.ProjectID.ValueStringPointer(),
 		McpServerID:       in.McpServerID.ValueStringPointer(),
 		CloudConnectionID: in.CloudConnectionID.ValueStringPointer(),
-		ScmConnectionID:   in.ScmConnectionID.ValueStringPointer(),
 		Configuration:     in.Configuration.Attributes(ctx),
 	}, nil
 }
@@ -69,44 +67,24 @@ func (in *WorkbenchTool) From(response *gqlclient.WorkbenchToolFragment, ctx con
 	} else {
 		in.CloudConnectionID = types.StringNull()
 	}
-	if response.ScmConnection != nil {
-		in.ScmConnectionID = types.StringValue(response.ScmConnection.ID)
-	} else {
-		in.ScmConnectionID = types.StringNull()
-	}
 
 	in.Configuration.From(response.Configuration, ctx, d)
 }
 
 type WorkbenchToolConfiguration struct {
-	HTTP                *WorkbenchToolHTTPConfig                `tfsdk:"http"`
-	Elastic             *WorkbenchToolElasticConfig             `tfsdk:"elastic"`
-	Opensearch          *WorkbenchToolOpensearchConfig          `tfsdk:"opensearch"`
-	Prometheus          *WorkbenchToolPrometheusConfig          `tfsdk:"prometheus"`
-	Loki                *WorkbenchToolTokenAuthConfig           `tfsdk:"loki"`
-	Splunk              *WorkbenchToolSplunkConfig              `tfsdk:"splunk"`
-	Tempo               *WorkbenchToolTokenAuthConfig           `tfsdk:"tempo"`
-	Jaeger              *WorkbenchToolJaegerConfig              `tfsdk:"jaeger"`
-	Datadog             *WorkbenchToolDatadogConfig             `tfsdk:"datadog"`
-	Dynatrace           *WorkbenchToolDynatraceConfig           `tfsdk:"dynatrace"`
-	Cloudwatch          *WorkbenchToolCloudwatchConfig          `tfsdk:"cloudwatch"`
-	Azure               *WorkbenchToolAzureConfig               `tfsdk:"azure"`
-	Sentry              *WorkbenchToolSentryConfig              `tfsdk:"sentry"`
-	Linear              *WorkbenchToolLinearConfig              `tfsdk:"linear"`
-	Slack               *WorkbenchToolSlackConfig               `tfsdk:"slack"`
-	Pagerduty           *WorkbenchToolPagerdutyConfig           `tfsdk:"pagerduty"`
-	Teams               *WorkbenchToolTeamsConfig               `tfsdk:"teams"`
-	Atlassian           *WorkbenchToolAtlassianConfig           `tfsdk:"atlassian"`
-	Exa                 *WorkbenchToolExaConfig                 `tfsdk:"exa"`
-	Github              *WorkbenchToolGithubConfig              `tfsdk:"github"`
-	Gitlab              *WorkbenchToolGitlabConfig              `tfsdk:"gitlab"`
-	Bitbucket           *WorkbenchToolBitbucketConfig           `tfsdk:"bitbucket"`
-	BitbucketDatacenter *WorkbenchToolBitbucketDatacenterConfig `tfsdk:"bitbucket_datacenter"`
-	AzureDevops         *WorkbenchToolAzureDevopsConfig         `tfsdk:"azure_devops"`
-	Lambda              *WorkbenchToolLambdaConfig              `tfsdk:"lambda"`
-	CloudRun            *WorkbenchToolCloudRunConfig            `tfsdk:"cloud_run"`
-	AzureFunction       *WorkbenchToolAzureFunctionConfig       `tfsdk:"azure_function"`
-	Docker              *WorkbenchToolDockerConfig              `tfsdk:"docker"`
+	HTTP       *WorkbenchToolHTTPConfig       `tfsdk:"http"`
+	Elastic    *WorkbenchToolElasticConfig    `tfsdk:"elastic"`
+	Prometheus *WorkbenchToolTokenAuthConfig  `tfsdk:"prometheus"`
+	Loki       *WorkbenchToolTokenAuthConfig  `tfsdk:"loki"`
+	Splunk     *WorkbenchToolSplunkConfig     `tfsdk:"splunk"`
+	Tempo      *WorkbenchToolTokenAuthConfig  `tfsdk:"tempo"`
+	Jaeger     *WorkbenchToolJaegerConfig     `tfsdk:"jaeger"`
+	Datadog    *WorkbenchToolDatadogConfig    `tfsdk:"datadog"`
+	Dynatrace  *WorkbenchToolDynatraceConfig  `tfsdk:"dynatrace"`
+	Cloudwatch *WorkbenchToolCloudwatchConfig `tfsdk:"cloudwatch"`
+	Azure      *WorkbenchToolAzureConfig      `tfsdk:"azure"`
+	Linear     *WorkbenchToolLinearConfig     `tfsdk:"linear"`
+	Atlassian  *WorkbenchToolAtlassianConfig  `tfsdk:"atlassian"`
 }
 
 func (in *WorkbenchToolConfiguration) Attributes(ctx context.Context) *gqlclient.WorkbenchToolConfigurationAttributes {
@@ -115,34 +93,19 @@ func (in *WorkbenchToolConfiguration) Attributes(ctx context.Context) *gqlclient
 	}
 
 	return &gqlclient.WorkbenchToolConfigurationAttributes{
-		HTTP:                in.HTTP.Attributes(ctx),
-		Elastic:             in.Elastic.Attributes(),
-		Opensearch:          in.Opensearch.Attributes(),
-		Prometheus:          in.Prometheus.Attributes(),
-		Loki:                in.Loki.Attributes(),
-		Splunk:              in.Splunk.Attributes(),
-		Tempo:               in.Tempo.tempoAttributes(),
-		Jaeger:              in.Jaeger.Attributes(),
-		Datadog:             in.Datadog.Attributes(),
-		Dynatrace:           in.Dynatrace.Attributes(),
-		Cloudwatch:          in.Cloudwatch.Attributes(ctx),
-		Azure:               in.Azure.Attributes(),
-		Sentry:              in.Sentry.Attributes(),
-		Linear:              in.Linear.Attributes(),
-		Slack:               in.Slack.Attributes(),
-		Pagerduty:           in.Pagerduty.Attributes(),
-		Teams:               in.Teams.Attributes(),
-		Atlassian:           in.Atlassian.Attributes(),
-		Exa:                 in.Exa.Attributes(),
-		Github:              in.Github.Attributes(),
-		Gitlab:              in.Gitlab.Attributes(),
-		Bitbucket:           in.Bitbucket.Attributes(),
-		BitbucketDatacenter: in.BitbucketDatacenter.Attributes(),
-		AzureDevops:         in.AzureDevops.Attributes(),
-		Lambda:              in.Lambda.Attributes(),
-		CloudRun:            in.CloudRun.Attributes(),
-		AzureFunction:       in.AzureFunction.Attributes(),
-		Docker:              in.Docker.Attributes(),
+		HTTP:       in.HTTP.Attributes(ctx),
+		Elastic:    in.Elastic.Attributes(),
+		Prometheus: in.Prometheus.Attributes(),
+		Loki:       in.Loki.lokiAttributes(),
+		Splunk:     in.Splunk.Attributes(),
+		Tempo:      in.Tempo.tempoAttributes(),
+		Jaeger:     in.Jaeger.Attributes(),
+		Datadog:    in.Datadog.Attributes(),
+		Dynatrace:  in.Dynatrace.Attributes(),
+		Cloudwatch: in.Cloudwatch.Attributes(ctx),
+		Azure:      in.Azure.Attributes(),
+		Linear:     in.Linear.Attributes(),
+		Atlassian:  in.Atlassian.Attributes(),
 	}
 }
 
@@ -156,8 +119,7 @@ func (in *WorkbenchToolConfiguration) From(configuration *gqlclient.WorkbenchToo
 
 	in.HTTP.From(configuration.HTTP, ctx, d)
 	in.Elastic.From(configuration.Elastic)
-	in.Opensearch.From(configuration.Opensearch)
-	in.Prometheus.From(configuration.Prometheus)
+	in.Prometheus.FromPrometheus(configuration.Prometheus)
 	in.Loki.FromLoki(configuration.Loki)
 	in.Splunk.From(configuration.Splunk)
 	in.Tempo.FromTempo(configuration.Tempo)
@@ -166,28 +128,13 @@ func (in *WorkbenchToolConfiguration) From(configuration *gqlclient.WorkbenchToo
 	in.Dynatrace.From(configuration.Dynatrace)
 	in.Cloudwatch.From(configuration.Cloudwatch, ctx, d)
 	in.Azure.From(configuration.Azure)
-	in.Sentry.From(configuration.Sentry)
 	in.Linear.From(configuration.Linear)
-	in.Slack.From(configuration.Slack)
-	in.Pagerduty.From(configuration.Pagerduty)
-	in.Teams.From(configuration.Teams)
 	in.Atlassian.From(configuration.Atlassian)
-	in.Exa.From(configuration.Exa)
-	in.Github.From(configuration.Github)
-	in.Gitlab.From(configuration.Gitlab)
-	in.Bitbucket.From(configuration.Bitbucket)
-	in.BitbucketDatacenter.From(configuration.BitbucketDatacenter)
-	in.AzureDevops.From(configuration.AzureDevops)
-	in.Lambda.From(configuration.Lambda, d)
-	in.CloudRun.From(configuration.CloudRun, d)
-	in.AzureFunction.From(configuration.AzureFunction, d)
-	in.Docker.From(configuration.Docker)
 }
 
 type WorkbenchToolHTTPConfig struct {
 	URL         types.String `tfsdk:"url"`
 	Method      types.String `tfsdk:"method"`
-	Function    types.Bool   `tfsdk:"function"`
 	Headers     types.Map    `tfsdk:"headers"`
 	Body        types.String `tfsdk:"body"`
 	InputSchema types.String `tfsdk:"input_schema"`
@@ -202,9 +149,8 @@ func (in *WorkbenchToolHTTPConfig) Attributes(ctx context.Context) *gqlclient.Wo
 	in.Headers.ElementsAs(ctx, &headers, false)
 
 	return &gqlclient.WorkbenchToolHTTPConfigurationAttributes{
-		URL:      in.URL.ValueString(),
-		Method:   gqlclient.WorkbenchToolHTTPMethod(strings.ToUpper(in.Method.ValueString())),
-		Function: in.Function.ValueBoolPointer(),
+		URL:    in.URL.ValueString(),
+		Method: gqlclient.WorkbenchToolHTTPMethod(strings.ToUpper(in.Method.ValueString())),
 		Headers: lo.MapToSlice(headers, func(k string, v types.String) *gqlclient.WorkbenchToolHTTPHeaderAttributes {
 			return &gqlclient.WorkbenchToolHTTPHeaderAttributes{Name: &k, Value: v.ValueStringPointer()}
 		}),
@@ -227,7 +173,6 @@ func (in *WorkbenchToolHTTPConfig) From(configuration *gqlclient.WorkbenchToolFr
 	} else {
 		in.Method = types.StringNull()
 	}
-	in.Function = types.BoolPointerValue(configuration.Function)
 
 	if configuration.Headers != nil {
 		headers := make(map[string]any, len(configuration.Headers))
@@ -294,37 +239,29 @@ func (in *WorkbenchToolElasticConfig) From(configuration *gqlclient.WorkbenchToo
 	in.Index = types.StringValue(configuration.Index)
 }
 
-type WorkbenchToolPrometheusConfig struct {
-	URL                types.String `tfsdk:"url"`
-	Token              types.String `tfsdk:"token"`
-	Username           types.String `tfsdk:"username"`
-	Password           types.String `tfsdk:"password"`
-	TenantID           types.String `tfsdk:"tenant_id"`
-	AWSSigv4           types.Bool   `tfsdk:"aws_sigv4"`
-	AWSAccessKeyID     types.String `tfsdk:"aws_access_key_id"`
-	AWSSecretAccessKey types.String `tfsdk:"aws_secret_access_key"`
-	AWSRegion          types.String `tfsdk:"aws_region"`
+type WorkbenchToolTokenAuthConfig struct {
+	URL      types.String `tfsdk:"url"`
+	Token    types.String `tfsdk:"token"`
+	Username types.String `tfsdk:"username"`
+	Password types.String `tfsdk:"password"`
+	TenantID types.String `tfsdk:"tenant_id"`
 }
 
-func (in *WorkbenchToolPrometheusConfig) Attributes() *gqlclient.WorkbenchToolPrometheusConnectionAttributes {
+func (in *WorkbenchToolTokenAuthConfig) Attributes() *gqlclient.WorkbenchToolPrometheusConnectionAttributes {
 	if in == nil {
 		return nil
 	}
 
 	return &gqlclient.WorkbenchToolPrometheusConnectionAttributes{
-		URL:                in.URL.ValueString(),
-		Token:              in.Token.ValueStringPointer(),
-		Username:           in.Username.ValueStringPointer(),
-		Password:           in.Password.ValueStringPointer(),
-		TenantID:           in.TenantID.ValueStringPointer(),
-		AWSSigv4:           in.AWSSigv4.ValueBoolPointer(),
-		AWSAccessKeyID:     in.AWSAccessKeyID.ValueStringPointer(),
-		AWSSecretAccessKey: in.AWSSecretAccessKey.ValueStringPointer(),
-		AWSRegion:          in.AWSRegion.ValueStringPointer(),
+		URL:      in.URL.ValueString(),
+		Token:    in.Token.ValueStringPointer(),
+		Username: in.Username.ValueStringPointer(),
+		Password: in.Password.ValueStringPointer(),
+		TenantID: in.TenantID.ValueStringPointer(),
 	}
 }
 
-func (in *WorkbenchToolPrometheusConfig) From(configuration *gqlclient.WorkbenchToolFragment_Configuration_Prometheus) {
+func (in *WorkbenchToolTokenAuthConfig) FromPrometheus(configuration *gqlclient.WorkbenchToolFragment_Configuration_Prometheus) {
 	if in == nil {
 		return
 	}
@@ -335,21 +272,9 @@ func (in *WorkbenchToolPrometheusConfig) From(configuration *gqlclient.Workbench
 	in.URL = types.StringPointerValue(configuration.URL)
 	in.Username = types.StringPointerValue(configuration.Username)
 	in.TenantID = types.StringPointerValue(configuration.TenantID)
-	in.AWSSigv4 = types.BoolPointerValue(configuration.AWSSigv4)
-	in.AWSAccessKeyID = types.StringPointerValue(configuration.AWSAccessKeyID)
-	in.AWSRegion = types.StringPointerValue(configuration.AWSRegion)
-	// Token, Password, AWSSecretAccessKey are never returned; keep configured values.
 }
 
-type WorkbenchToolTokenAuthConfig struct {
-	URL      types.String `tfsdk:"url"`
-	Token    types.String `tfsdk:"token"`
-	Username types.String `tfsdk:"username"`
-	Password types.String `tfsdk:"password"`
-	TenantID types.String `tfsdk:"tenant_id"`
-}
-
-func (in *WorkbenchToolTokenAuthConfig) Attributes() *gqlclient.WorkbenchToolLokiConnectionAttributes {
+func (in *WorkbenchToolTokenAuthConfig) lokiAttributes() *gqlclient.WorkbenchToolLokiConnectionAttributes {
 	if in == nil {
 		return nil
 	}
@@ -579,7 +504,6 @@ type WorkbenchToolAzureConfig struct {
 	TenantID       types.String `tfsdk:"tenant_id"`
 	ClientID       types.String `tfsdk:"client_id"`
 	ClientSecret   types.String `tfsdk:"client_secret"`
-	PrometheusURL  types.String `tfsdk:"prometheus_url"`
 }
 
 func (in *WorkbenchToolAzureConfig) Attributes() *gqlclient.WorkbenchToolAzureConnectionAttributes {
@@ -592,7 +516,6 @@ func (in *WorkbenchToolAzureConfig) Attributes() *gqlclient.WorkbenchToolAzureCo
 		TenantID:       in.TenantID.ValueString(),
 		ClientID:       in.ClientID.ValueString(),
 		ClientSecret:   in.ClientSecret.ValueString(),
-		PrometheusURL:  in.PrometheusURL.ValueStringPointer(),
 	}
 }
 
@@ -607,7 +530,6 @@ func (in *WorkbenchToolAzureConfig) From(configuration *gqlclient.WorkbenchToolF
 	in.SubscriptionID = types.StringPointerValue(configuration.SubscriptionID)
 	in.TenantID = types.StringPointerValue(configuration.TenantID)
 	in.ClientID = types.StringPointerValue(configuration.ClientID)
-	in.PrometheusURL = types.StringPointerValue(configuration.PrometheusURL)
 }
 
 type WorkbenchToolLinearConfig struct {
@@ -655,564 +577,4 @@ func (in *WorkbenchToolAtlassianConfig) From(configuration *gqlclient.WorkbenchT
 	}
 
 	in.Email = types.StringPointerValue(configuration.Email)
-}
-
-type WorkbenchToolOpensearchConfig struct {
-	Host               types.String `tfsdk:"host"`
-	Index              types.String `tfsdk:"index"`
-	AWSAccessKeyID     types.String `tfsdk:"aws_access_key_id"`
-	AWSSecretAccessKey types.String `tfsdk:"aws_secret_access_key"`
-	AWSRegion          types.String `tfsdk:"aws_region"`
-	AssumeRoleArn      types.String `tfsdk:"assume_role_arn"`
-	UsePodIdentity     types.Bool   `tfsdk:"use_pod_identity"`
-}
-
-func (in *WorkbenchToolOpensearchConfig) Attributes() *gqlclient.WorkbenchToolOpensearchConnectionAttributes {
-	if in == nil {
-		return nil
-	}
-
-	return &gqlclient.WorkbenchToolOpensearchConnectionAttributes{
-		Host:               in.Host.ValueString(),
-		Index:              in.Index.ValueString(),
-		AWSAccessKeyID:     in.AWSAccessKeyID.ValueStringPointer(),
-		AWSSecretAccessKey: in.AWSSecretAccessKey.ValueStringPointer(),
-		AWSRegion:          in.AWSRegion.ValueStringPointer(),
-		AssumeRoleArn:      in.AssumeRoleArn.ValueStringPointer(),
-		UsePodIdentity:     in.UsePodIdentity.ValueBoolPointer(),
-	}
-}
-
-func (in *WorkbenchToolOpensearchConfig) From(configuration *gqlclient.WorkbenchToolFragment_Configuration_Opensearch) {
-	if in == nil {
-		return
-	}
-	if configuration == nil {
-		return
-	}
-
-	in.Host = types.StringValue(configuration.Host)
-	in.Index = types.StringValue(configuration.Index)
-	in.AWSAccessKeyID = types.StringPointerValue(configuration.AWSAccessKeyID)
-	in.AWSRegion = types.StringPointerValue(configuration.AWSRegion)
-	in.AssumeRoleArn = types.StringPointerValue(configuration.AssumeRoleArn)
-	in.UsePodIdentity = types.BoolPointerValue(configuration.UsePodIdentity)
-	// AWSSecretAccessKey is never returned; keep configured value.
-}
-
-type WorkbenchToolSentryConfig struct {
-	URL         types.String `tfsdk:"url"`
-	AccessToken types.String `tfsdk:"access_token"`
-}
-
-func (in *WorkbenchToolSentryConfig) Attributes() *gqlclient.WorkbenchToolSentryConnectionAttributes {
-	if in == nil {
-		return nil
-	}
-
-	return &gqlclient.WorkbenchToolSentryConnectionAttributes{
-		URL:         in.URL.ValueStringPointer(),
-		AccessToken: in.AccessToken.ValueStringPointer(),
-	}
-}
-
-func (in *WorkbenchToolSentryConfig) From(configuration *gqlclient.WorkbenchToolFragment_Configuration_Sentry) {
-	if in == nil {
-		return
-	}
-	if configuration == nil {
-		return
-	}
-
-	in.URL = types.StringPointerValue(configuration.URL)
-	// AccessToken is never returned; keep configured value.
-}
-
-type WorkbenchToolSlackConfig struct {
-	BotToken types.String `tfsdk:"bot_token"`
-}
-
-func (in *WorkbenchToolSlackConfig) Attributes() *gqlclient.WorkbenchToolSlackConnectionAttributes {
-	if in == nil {
-		return nil
-	}
-
-	return &gqlclient.WorkbenchToolSlackConnectionAttributes{
-		BotToken: in.BotToken.ValueStringPointer(),
-	}
-}
-
-func (in *WorkbenchToolSlackConfig) From(_ *gqlclient.WorkbenchToolFragment_Configuration_Slack) {
-	// Slack fragment only exposes URL (no credentials); keep configured token value.
-}
-
-type WorkbenchToolPagerdutyConfig struct {
-	APIToken types.String `tfsdk:"api_token"`
-}
-
-func (in *WorkbenchToolPagerdutyConfig) Attributes() *gqlclient.WorkbenchToolPagerdutyConnectionAttributes {
-	if in == nil {
-		return nil
-	}
-
-	return &gqlclient.WorkbenchToolPagerdutyConnectionAttributes{
-		APIToken: in.APIToken.ValueStringPointer(),
-	}
-}
-
-func (in *WorkbenchToolPagerdutyConfig) From(_ *gqlclient.WorkbenchToolFragment_Configuration_Pagerduty) {
-	// PagerDuty fragment only exposes URL (no credentials); keep configured token value.
-}
-
-type WorkbenchToolTeamsConfig struct {
-	ClientID     types.String `tfsdk:"client_id"`
-	ClientSecret types.String `tfsdk:"client_secret"`
-	TenantID     types.String `tfsdk:"tenant_id"`
-}
-
-func (in *WorkbenchToolTeamsConfig) Attributes() *gqlclient.WorkbenchToolTeamsConnectionAttributes {
-	if in == nil {
-		return nil
-	}
-
-	return &gqlclient.WorkbenchToolTeamsConnectionAttributes{
-		ClientID:     in.ClientID.ValueString(),
-		ClientSecret: in.ClientSecret.ValueString(),
-		TenantID:     in.TenantID.ValueString(),
-	}
-}
-
-func (in *WorkbenchToolTeamsConfig) From(configuration *gqlclient.WorkbenchToolFragment_Configuration_Teams) {
-	if in == nil {
-		return
-	}
-	if configuration == nil {
-		return
-	}
-
-	in.ClientID = types.StringPointerValue(configuration.ClientID)
-	in.TenantID = types.StringPointerValue(configuration.TenantID)
-	// ClientSecret is never returned; keep configured value.
-}
-
-type WorkbenchToolExaConfig struct {
-	APIKey types.String `tfsdk:"api_key"`
-}
-
-func (in *WorkbenchToolExaConfig) Attributes() *gqlclient.WorkbenchToolExaConnectionAttributes {
-	if in == nil {
-		return nil
-	}
-
-	return &gqlclient.WorkbenchToolExaConnectionAttributes{
-		APIKey: in.APIKey.ValueStringPointer(),
-	}
-}
-
-func (in *WorkbenchToolExaConfig) From(_ *gqlclient.WorkbenchToolFragment_Configuration_Exa) {
-	// Exa fragment only exposes URL (no credentials); keep configured API key.
-}
-
-type WorkbenchToolGithubConfig struct {
-	URL            types.String `tfsdk:"url"`
-	AccessToken    types.String `tfsdk:"access_token"`
-	Toolset        types.String `tfsdk:"toolset"`
-	AppID          types.String `tfsdk:"app_id"`
-	InstallationID types.String `tfsdk:"installation_id"`
-	PrivateKey     types.String `tfsdk:"private_key"`
-}
-
-func (in *WorkbenchToolGithubConfig) Attributes() *gqlclient.WorkbenchToolGithubConnectionAttributes {
-	if in == nil {
-		return nil
-	}
-
-	return &gqlclient.WorkbenchToolGithubConnectionAttributes{
-		URL:            in.URL.ValueStringPointer(),
-		AccessToken:    in.AccessToken.ValueStringPointer(),
-		Toolset:        in.Toolset.ValueStringPointer(),
-		AppID:          in.AppID.ValueStringPointer(),
-		InstallationID: in.InstallationID.ValueStringPointer(),
-		PrivateKey:     in.PrivateKey.ValueStringPointer(),
-	}
-}
-
-func (in *WorkbenchToolGithubConfig) From(configuration *gqlclient.WorkbenchToolFragment_Configuration_Github) {
-	if in == nil {
-		return
-	}
-	if configuration == nil {
-		return
-	}
-
-	in.URL = types.StringValue(configuration.URL)
-	in.Toolset = types.StringPointerValue(configuration.Toolset)
-	in.AppID = types.StringPointerValue(configuration.AppID)
-	in.InstallationID = types.StringPointerValue(configuration.InstallationID)
-	// AccessToken and PrivateKey are never returned; keep configured values.
-}
-
-type WorkbenchToolGitlabConfig struct {
-	URL   types.String `tfsdk:"url"`
-	Token types.String `tfsdk:"token"`
-}
-
-func (in *WorkbenchToolGitlabConfig) Attributes() *gqlclient.WorkbenchToolGitlabConnectionAttributes {
-	if in == nil {
-		return nil
-	}
-
-	return &gqlclient.WorkbenchToolGitlabConnectionAttributes{
-		URL:   in.URL.ValueStringPointer(),
-		Token: in.Token.ValueStringPointer(),
-	}
-}
-
-func (in *WorkbenchToolGitlabConfig) From(configuration *gqlclient.WorkbenchToolFragment_Configuration_Gitlab) {
-	if in == nil {
-		return
-	}
-	if configuration == nil {
-		return
-	}
-
-	in.URL = types.StringPointerValue(configuration.URL)
-	// Token is never returned; keep configured value.
-}
-
-type WorkbenchToolBitbucketConfig struct {
-	URL   types.String `tfsdk:"url"`
-	Token types.String `tfsdk:"token"`
-}
-
-func (in *WorkbenchToolBitbucketConfig) Attributes() *gqlclient.WorkbenchToolBitbucketConnectionAttributes {
-	if in == nil {
-		return nil
-	}
-
-	return &gqlclient.WorkbenchToolBitbucketConnectionAttributes{
-		URL:   in.URL.ValueStringPointer(),
-		Token: in.Token.ValueStringPointer(),
-	}
-}
-
-func (in *WorkbenchToolBitbucketConfig) From(configuration *gqlclient.WorkbenchToolFragment_Configuration_Bitbucket) {
-	if in == nil {
-		return
-	}
-	if configuration == nil {
-		return
-	}
-
-	in.URL = types.StringPointerValue(configuration.URL)
-	// Token is never returned; keep configured value.
-}
-
-type WorkbenchToolBitbucketDatacenterConfig struct {
-	URL   types.String `tfsdk:"url"`
-	Token types.String `tfsdk:"token"`
-}
-
-func (in *WorkbenchToolBitbucketDatacenterConfig) Attributes() *gqlclient.WorkbenchToolBitbucketDatacenterConnectionAttributes {
-	if in == nil {
-		return nil
-	}
-
-	return &gqlclient.WorkbenchToolBitbucketDatacenterConnectionAttributes{
-		URL:   in.URL.ValueString(),
-		Token: in.Token.ValueStringPointer(),
-	}
-}
-
-func (in *WorkbenchToolBitbucketDatacenterConfig) From(configuration *gqlclient.WorkbenchToolFragment_Configuration_BitbucketDatacenter) {
-	if in == nil {
-		return
-	}
-	if configuration == nil {
-		return
-	}
-
-	in.URL = types.StringPointerValue(configuration.URL)
-	// Token is never returned; keep configured value.
-}
-
-type WorkbenchToolAzureDevopsConfig struct {
-	URL   types.String `tfsdk:"url"`
-	Token types.String `tfsdk:"token"`
-}
-
-func (in *WorkbenchToolAzureDevopsConfig) Attributes() *gqlclient.WorkbenchToolAzureDevopsConnectionAttributes {
-	if in == nil {
-		return nil
-	}
-
-	return &gqlclient.WorkbenchToolAzureDevopsConnectionAttributes{
-		URL:   in.URL.ValueStringPointer(),
-		Token: in.Token.ValueStringPointer(),
-	}
-}
-
-func (in *WorkbenchToolAzureDevopsConfig) From(configuration *gqlclient.WorkbenchToolFragment_Configuration_AzureDevops) {
-	if in == nil {
-		return
-	}
-	if configuration == nil {
-		return
-	}
-
-	in.URL = types.StringPointerValue(configuration.URL)
-	// Token is never returned; keep configured value.
-}
-
-type WorkbenchToolLambdaConfig struct {
-	LambdaArn   types.String `tfsdk:"lambda_arn"`
-	Description types.String `tfsdk:"description"`
-	InputSchema types.String `tfsdk:"input_schema"`
-}
-
-func (in *WorkbenchToolLambdaConfig) Attributes() *gqlclient.WorkbenchToolLambdaConnectionAttributes {
-	if in == nil {
-		return nil
-	}
-
-	return &gqlclient.WorkbenchToolLambdaConnectionAttributes{
-		LambdaArn:   in.LambdaArn.ValueString(),
-		Description: in.Description.ValueString(),
-		InputSchema: in.InputSchema.ValueStringPointer(),
-	}
-}
-
-func (in *WorkbenchToolLambdaConfig) From(configuration *gqlclient.WorkbenchToolFragment_Configuration_Lambda, d *diag.Diagnostics) {
-	if in == nil {
-		return
-	}
-	if configuration == nil {
-		return
-	}
-
-	in.LambdaArn = types.StringPointerValue(configuration.LambdaArn)
-	in.Description = types.StringPointerValue(configuration.Description)
-	if configuration.InputSchema != nil {
-		inputSchema, err := json.Marshal(configuration.InputSchema)
-		if err != nil {
-			d.AddError("Provider Error", fmt.Sprintf("Cannot marshal lambda input schema, got error: %s", err))
-			return
-		}
-		in.InputSchema = types.StringValue(string(inputSchema))
-	} else {
-		in.InputSchema = types.StringNull()
-	}
-}
-
-type WorkbenchToolCloudRunConfig struct {
-	Identifier  types.String `tfsdk:"identifier"`
-	Description types.String `tfsdk:"description"`
-	InputSchema types.String `tfsdk:"input_schema"`
-}
-
-func (in *WorkbenchToolCloudRunConfig) Attributes() *gqlclient.WorkbenchToolCloudRunConnectionAttributes {
-	if in == nil {
-		return nil
-	}
-
-	return &gqlclient.WorkbenchToolCloudRunConnectionAttributes{
-		Identifier:  in.Identifier.ValueString(),
-		Description: in.Description.ValueString(),
-		InputSchema: in.InputSchema.ValueStringPointer(),
-	}
-}
-
-func (in *WorkbenchToolCloudRunConfig) From(configuration *gqlclient.WorkbenchToolFragment_Configuration_CloudRun, d *diag.Diagnostics) {
-	if in == nil {
-		return
-	}
-	if configuration == nil {
-		return
-	}
-
-	in.Identifier = types.StringPointerValue(configuration.Identifier)
-	in.Description = types.StringPointerValue(configuration.Description)
-	if configuration.InputSchema != nil {
-		inputSchema, err := json.Marshal(configuration.InputSchema)
-		if err != nil {
-			d.AddError("Provider Error", fmt.Sprintf("Cannot marshal cloud_run input schema, got error: %s", err))
-			return
-		}
-		in.InputSchema = types.StringValue(string(inputSchema))
-	} else {
-		in.InputSchema = types.StringNull()
-	}
-}
-
-type WorkbenchToolAzureFunctionConfig struct {
-	Identifier  types.String `tfsdk:"identifier"`
-	Description types.String `tfsdk:"description"`
-	InputSchema types.String `tfsdk:"input_schema"`
-}
-
-func (in *WorkbenchToolAzureFunctionConfig) Attributes() *gqlclient.WorkbenchToolAzureFunctionConnectionAttributes {
-	if in == nil {
-		return nil
-	}
-
-	return &gqlclient.WorkbenchToolAzureFunctionConnectionAttributes{
-		Identifier:  in.Identifier.ValueString(),
-		Description: in.Description.ValueString(),
-		InputSchema: in.InputSchema.ValueStringPointer(),
-	}
-}
-
-func (in *WorkbenchToolAzureFunctionConfig) From(configuration *gqlclient.WorkbenchToolFragment_Configuration_AzureFunction, d *diag.Diagnostics) {
-	if in == nil {
-		return
-	}
-	if configuration == nil {
-		return
-	}
-
-	in.Identifier = types.StringPointerValue(configuration.Identifier)
-	in.Description = types.StringPointerValue(configuration.Description)
-	if configuration.InputSchema != nil {
-		inputSchema, err := json.Marshal(configuration.InputSchema)
-		if err != nil {
-			d.AddError("Provider Error", fmt.Sprintf("Cannot marshal azure_function input schema, got error: %s", err))
-			return
-		}
-		in.InputSchema = types.StringValue(string(inputSchema))
-	} else {
-		in.InputSchema = types.StringNull()
-	}
-}
-
-type WorkbenchToolDockerConfig struct {
-	URL      types.String             `tfsdk:"url"`
-	Provider types.String             `tfsdk:"provider"`
-	Auth     *WorkbenchToolDockerAuth `tfsdk:"auth"`
-}
-
-type WorkbenchToolDockerAuth struct {
-	Proxy  *WorkbenchToolHTTPProxyConfig  `tfsdk:"proxy"`
-	Basic  *WorkbenchToolDockerBasicAuth  `tfsdk:"basic"`
-	Bearer *WorkbenchToolDockerBearerAuth `tfsdk:"bearer"`
-	AWS    *WorkbenchToolDockerAWSAuth    `tfsdk:"aws"`
-	Azure  *WorkbenchToolDockerAzureAuth  `tfsdk:"azure"`
-	GCP    *WorkbenchToolDockerGCPAuth    `tfsdk:"gcp"`
-}
-
-type WorkbenchToolHTTPProxyConfig struct {
-	URL     types.String `tfsdk:"url"`
-	Noproxy types.String `tfsdk:"noproxy"`
-}
-
-type WorkbenchToolDockerBasicAuth struct {
-	Username types.String `tfsdk:"username"`
-	Password types.String `tfsdk:"password"`
-}
-
-type WorkbenchToolDockerBearerAuth struct {
-	Token types.String `tfsdk:"token"`
-}
-
-type WorkbenchToolDockerAWSAuth struct {
-	AccessKey       types.String `tfsdk:"access_key"`
-	SecretAccessKey types.String `tfsdk:"secret_access_key"`
-	AssumeRoleArn   types.String `tfsdk:"assume_role_arn"`
-}
-
-type WorkbenchToolDockerAzureAuth struct {
-	ClientID       types.String `tfsdk:"client_id"`
-	ClientSecret   types.String `tfsdk:"client_secret"`
-	TenantID       types.String `tfsdk:"tenant_id"`
-	SubscriptionID types.String `tfsdk:"subscription_id"`
-}
-
-type WorkbenchToolDockerGCPAuth struct {
-	ApplicationCredentials types.String `tfsdk:"application_credentials"`
-}
-
-func (in *WorkbenchToolDockerConfig) Attributes() *gqlclient.WorkbenchToolDockerConnectionAttributes {
-	if in == nil {
-		return nil
-	}
-
-	attrs := &gqlclient.WorkbenchToolDockerConnectionAttributes{
-		URL: in.URL.ValueStringPointer(),
-	}
-	if !in.Provider.IsNull() && !in.Provider.IsUnknown() {
-		attrs.Provider = lo.ToPtr(gqlclient.HelmAuthProvider(in.Provider.ValueString()))
-	}
-	attrs.Auth = in.Auth.Attributes()
-	return attrs
-}
-
-func (in *WorkbenchToolDockerAuth) Attributes() *gqlclient.HelmAuthAttributes {
-	if in == nil {
-		return nil
-	}
-
-	attrs := &gqlclient.HelmAuthAttributes{}
-	if in.Proxy != nil {
-		attrs.Proxy = &gqlclient.HTTPProxyAttributes{
-			URL:     in.Proxy.URL.ValueString(),
-			Noproxy: in.Proxy.Noproxy.ValueStringPointer(),
-		}
-	}
-	if in.Basic != nil {
-		attrs.Basic = &gqlclient.HelmBasicAuthAttributes{
-			Username: in.Basic.Username.ValueString(),
-			Password: in.Basic.Password.ValueString(),
-		}
-	}
-	if in.Bearer != nil {
-		attrs.Bearer = &gqlclient.HelmBearerAuthAttributes{
-			Token: in.Bearer.Token.ValueString(),
-		}
-	}
-	if in.AWS != nil {
-		attrs.AWS = &gqlclient.HelmAWSAuthAttributes{
-			AccessKey:       in.AWS.AccessKey.ValueStringPointer(),
-			SecretAccessKey: in.AWS.SecretAccessKey.ValueStringPointer(),
-			AssumeRoleArn:   in.AWS.AssumeRoleArn.ValueStringPointer(),
-		}
-	}
-	if in.Azure != nil {
-		attrs.Azure = &gqlclient.HelmAzureAuthAttributes{
-			ClientID:       in.Azure.ClientID.ValueStringPointer(),
-			ClientSecret:   in.Azure.ClientSecret.ValueStringPointer(),
-			TenantID:       in.Azure.TenantID.ValueStringPointer(),
-			SubscriptionID: in.Azure.SubscriptionID.ValueStringPointer(),
-		}
-	}
-	if in.GCP != nil {
-		attrs.GCP = &gqlclient.HelmGCPAuthAttributes{
-			ApplicationCredentials: in.GCP.ApplicationCredentials.ValueStringPointer(),
-		}
-	}
-	return attrs
-}
-
-func (in *WorkbenchToolDockerConfig) From(configuration *gqlclient.WorkbenchToolFragment_Configuration_Docker) {
-	if in == nil {
-		return
-	}
-	if configuration == nil {
-		return
-	}
-
-	in.URL = types.StringPointerValue(configuration.URL)
-	if configuration.Provider != nil {
-		in.Provider = types.StringValue(string(*configuration.Provider))
-	} else {
-		in.Provider = types.StringNull()
-	}
-	if configuration.Proxy != nil {
-		if in.Auth == nil {
-			in.Auth = &WorkbenchToolDockerAuth{}
-		}
-		in.Auth.Proxy = &WorkbenchToolHTTPProxyConfig{
-			URL:     types.StringValue(configuration.Proxy.URL),
-			Noproxy: types.StringPointerValue(configuration.Proxy.Noproxy),
-		}
-	}
-	// Auth credentials are never returned; keep configured values.
 }
