@@ -13,7 +13,7 @@ provider "plural" {
 
 locals {
   # Avoid collisions with leftover tools from partial applies.
-  name_prefix = "tf_example_"
+  name_prefix = "tf_"
 }
 
 data "plural_project" "default" {

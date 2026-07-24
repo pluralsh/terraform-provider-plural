@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
@@ -145,6 +146,7 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 								MarkdownDescription: "When true, exposes this HTTP tool as a workbench action.",
 								Optional:            true,
 								Computed:            true,
+								PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 							},
 							"headers": schema.MapAttribute{
 								Description:         "The request headers.",
@@ -186,7 +188,11 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 							"aws_secret_access_key": schema.StringAttribute{Optional: true, Sensitive: true},
 							"aws_region":            schema.StringAttribute{Optional: true},
 							"assume_role_arn":       schema.StringAttribute{Optional: true},
-							"use_pod_identity":      schema.BoolAttribute{Optional: true, Computed: true},
+							"use_pod_identity": schema.BoolAttribute{
+								Optional:      true,
+								Computed:      true,
+								PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
+							},
 						},
 					},
 					"prometheus": schema.SingleNestedAttribute{
@@ -194,12 +200,16 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 						Description:         "Prometheus connection configuration.",
 						MarkdownDescription: "Prometheus connection configuration.",
 						Attributes: map[string]schema.Attribute{
-							"url":                   schema.StringAttribute{Required: true},
-							"token":                 schema.StringAttribute{Optional: true, Sensitive: true},
-							"username":              schema.StringAttribute{Optional: true},
-							"password":              schema.StringAttribute{Optional: true, Sensitive: true},
-							"tenant_id":             schema.StringAttribute{Optional: true},
-							"aws_sigv4":             schema.BoolAttribute{Optional: true, Computed: true},
+							"url":       schema.StringAttribute{Required: true},
+							"token":     schema.StringAttribute{Optional: true, Sensitive: true},
+							"username":  schema.StringAttribute{Optional: true},
+							"password":  schema.StringAttribute{Optional: true, Sensitive: true},
+							"tenant_id": schema.StringAttribute{Optional: true},
+							"aws_sigv4": schema.BoolAttribute{
+								Optional:      true,
+								Computed:      true,
+								PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
+							},
 							"aws_access_key_id":     schema.StringAttribute{Optional: true, Sensitive: true},
 							"aws_secret_access_key": schema.StringAttribute{Optional: true, Sensitive: true},
 							"aws_region":            schema.StringAttribute{Optional: true},
