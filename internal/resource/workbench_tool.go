@@ -547,7 +547,7 @@ func (r *WorkbenchToolResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	data.From(response.CreateWorkbenchTool, ctx, &resp.Diagnostics)
+	data.FromCreate(response.CreateWorkbenchTool, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 

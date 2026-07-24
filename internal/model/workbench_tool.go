@@ -81,6 +81,25 @@ func (in *WorkbenchTool) From(response *gqlclient.WorkbenchToolFragment, ctx con
 	}
 }
 
+// FromCreate maps server-managed fields while preserving the exact planned
+// configuration. Create responses can normalize optional values and omit
+// write-only secrets, neither of which may replace known plan values.
+func (in *WorkbenchTool) FromCreate(response *gqlclient.WorkbenchToolFragment, ctx context.Context, d *diag.Diagnostics) {
+	if in == nil || response == nil {
+		return
+	}
+
+	planned := in.Configuration
+	in.Configuration = nil
+	in.From(response, ctx, d)
+	server := in.Configuration
+	in.Configuration = planned
+
+	if planned != nil {
+		planned.computedFrom(server)
+	}
+}
+
 type WorkbenchToolConfiguration struct {
 	HTTP                *WorkbenchToolHTTPConfig                `tfsdk:"http"`
 	Elastic             *WorkbenchToolElasticConfig             `tfsdk:"elastic"`
@@ -110,6 +129,21 @@ type WorkbenchToolConfiguration struct {
 	CloudRun            *WorkbenchToolCloudRunConfig            `tfsdk:"cloud_run"`
 	AzureFunction       *WorkbenchToolAzureFunctionConfig       `tfsdk:"azure_function"`
 	Docker              *WorkbenchToolDockerConfig              `tfsdk:"docker"`
+}
+
+func (in *WorkbenchToolConfiguration) computedFrom(server *WorkbenchToolConfiguration) {
+	if in == nil || server == nil {
+		return
+	}
+	if in.HTTP != nil && server.HTTP != nil {
+		in.HTTP.Function = server.HTTP.Function
+	}
+	if in.Prometheus != nil && server.Prometheus != nil {
+		in.Prometheus.AWSSigv4 = server.Prometheus.AWSSigv4
+	}
+	if in.Opensearch != nil && server.Opensearch != nil {
+		in.Opensearch.UsePodIdentity = server.Opensearch.UsePodIdentity
+	}
 }
 
 func (in *WorkbenchToolConfiguration) Attributes(ctx context.Context) *gqlclient.WorkbenchToolConfigurationAttributes {
