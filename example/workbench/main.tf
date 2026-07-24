@@ -11,6 +11,11 @@ provider "plural" {
   use_cli = true
 }
 
+locals {
+  # Avoid collisions with leftover tools from partial applies.
+  name_prefix = "tf-example-"
+}
+
 data "plural_project" "default" {
   name = "default"
 }
@@ -20,7 +25,7 @@ data "plural_git_repository" "hello" {
 }
 
 resource "plural_cloud_connection" "workbench" {
-  name           = "workbench-aws"
+  name           = "${local.name_prefix}workbench-aws"
   cloud_provider = "AWS"
   configuration = {
     aws = {
@@ -32,12 +37,12 @@ resource "plural_cloud_connection" "workbench" {
 }
 
 resource "plural_observability_webhook" "workbench" {
-  name = "workbench-observability"
+  name = "${local.name_prefix}workbench-observability"
   type = "NEWRELIC"
 }
 
 resource "plural_workbench_tool" "echo" {
-  name       = "echo"
+  name       = "${local.name_prefix}echo"
   tool       = "HTTP"
   project_id = data.plural_project.default.id
   configuration = {
@@ -60,7 +65,7 @@ resource "plural_workbench_tool" "echo" {
 }
 
 resource "plural_workbench_tool" "status" {
-  name       = "status"
+  name       = "${local.name_prefix}status"
   tool       = "HTTP"
   project_id = data.plural_project.default.id
   configuration = {
@@ -81,7 +86,7 @@ resource "plural_workbench_tool" "status" {
 }
 
 resource "plural_workbench_tool" "elastic" {
-  name       = "elastic"
+  name       = "${local.name_prefix}elastic"
   tool       = "ELASTIC"
   project_id = data.plural_project.default.id
   configuration = {
@@ -95,7 +100,7 @@ resource "plural_workbench_tool" "elastic" {
 }
 
 resource "plural_workbench_tool" "datadog" {
-  name       = "datadog"
+  name       = "${local.name_prefix}datadog"
   tool       = "DATADOG"
   project_id = data.plural_project.default.id
   configuration = {
@@ -108,7 +113,7 @@ resource "plural_workbench_tool" "datadog" {
 }
 
 resource "plural_workbench_tool" "prometheus" {
-  name       = "prometheus"
+  name       = "${local.name_prefix}prometheus"
   tool       = "PROMETHEUS"
   project_id = data.plural_project.default.id
   configuration = {
@@ -121,7 +126,7 @@ resource "plural_workbench_tool" "prometheus" {
 }
 
 resource "plural_workbench_tool" "loki" {
-  name       = "loki"
+  name       = "${local.name_prefix}loki"
   tool       = "LOKI"
   project_id = data.plural_project.default.id
   configuration = {
@@ -134,7 +139,7 @@ resource "plural_workbench_tool" "loki" {
 }
 
 resource "plural_workbench_tool" "tempo" {
-  name       = "tempo"
+  name       = "${local.name_prefix}tempo"
   tool       = "TEMPO"
   project_id = data.plural_project.default.id
   configuration = {
@@ -147,7 +152,7 @@ resource "plural_workbench_tool" "tempo" {
 }
 
 resource "plural_workbench_tool" "jaeger" {
-  name       = "jaeger"
+  name       = "${local.name_prefix}jaeger"
   tool       = "JAEGER"
   project_id = data.plural_project.default.id
   configuration = {
@@ -160,7 +165,7 @@ resource "plural_workbench_tool" "jaeger" {
 }
 
 resource "plural_workbench_tool" "splunk" {
-  name       = "splunk"
+  name       = "${local.name_prefix}splunk"
   tool       = "SPLUNK"
   project_id = data.plural_project.default.id
   configuration = {
@@ -172,7 +177,7 @@ resource "plural_workbench_tool" "splunk" {
 }
 
 resource "plural_workbench_tool" "dynatrace" {
-  name       = "dynatrace"
+  name       = "${local.name_prefix}dynatrace"
   tool       = "DYNATRACE"
   project_id = data.plural_project.default.id
   configuration = {
@@ -184,7 +189,7 @@ resource "plural_workbench_tool" "dynatrace" {
 }
 
 resource "plural_workbench_tool" "cloudwatch" {
-  name                = "cloudwatch_default"
+  name                = "${local.name_prefix}cloudwatch_default"
   tool                = "CLOUDWATCH"
   project_id          = data.plural_project.default.id
   cloud_connection_id = plural_cloud_connection.workbench.id
@@ -197,7 +202,7 @@ resource "plural_workbench_tool" "cloudwatch" {
 }
 
 resource "plural_workbench_tool" "azure" {
-  name       = "azure"
+  name       = "${local.name_prefix}azure"
   tool       = "AZURE"
   project_id = data.plural_project.default.id
   configuration = {
@@ -211,7 +216,7 @@ resource "plural_workbench_tool" "azure" {
 }
 
 resource "plural_workbench_tool" "linear" {
-  name       = "linear"
+  name       = "${local.name_prefix}linear"
   tool       = "LINEAR"
   project_id = data.plural_project.default.id
   configuration = {
@@ -222,7 +227,7 @@ resource "plural_workbench_tool" "linear" {
 }
 
 resource "plural_workbench_tool" "atlassian" {
-  name       = "atlassian"
+  name       = "${local.name_prefix}atlassian"
   tool       = "ATLASSIAN"
   project_id = data.plural_project.default.id
   configuration = {
@@ -234,7 +239,7 @@ resource "plural_workbench_tool" "atlassian" {
 }
 
 resource "plural_workbench_tool" "sentry" {
-  name       = "sentry"
+  name       = "${local.name_prefix}sentry"
   tool       = "SENTRY"
   project_id = data.plural_project.default.id
   configuration = {
@@ -246,7 +251,7 @@ resource "plural_workbench_tool" "sentry" {
 }
 
 resource "plural_workbench_tool" "exa" {
-  name       = "exa"
+  name       = "${local.name_prefix}exa"
   tool       = "EXA"
   project_id = data.plural_project.default.id
   configuration = {
@@ -257,7 +262,7 @@ resource "plural_workbench_tool" "exa" {
 }
 
 resource "plural_workbench_tool" "github" {
-  name       = "github"
+  name       = "${local.name_prefix}github"
   tool       = "GITHUB"
   project_id = data.plural_project.default.id
   configuration = {
@@ -269,7 +274,7 @@ resource "plural_workbench_tool" "github" {
 }
 
 resource "plural_workbench_tool" "slack" {
-  name       = "slack"
+  name       = "${local.name_prefix}slack"
   tool       = "SLACK"
   project_id = data.plural_project.default.id
   configuration = {
@@ -280,7 +285,7 @@ resource "plural_workbench_tool" "slack" {
 }
 
 resource "plural_workbench_tool" "teams" {
-  name       = "teams"
+  name       = "${local.name_prefix}teams"
   tool       = "TEAMS"
   project_id = data.plural_project.default.id
   configuration = {
@@ -293,7 +298,7 @@ resource "plural_workbench_tool" "teams" {
 }
 
 resource "plural_workbench_tool" "gitlab" {
-  name       = "gitlab"
+  name       = "${local.name_prefix}gitlab"
   tool       = "GITLAB"
   project_id = data.plural_project.default.id
   configuration = {
@@ -304,7 +309,7 @@ resource "plural_workbench_tool" "gitlab" {
 }
 
 resource "plural_workbench_tool" "bitbucket" {
-  name       = "bitbucket"
+  name       = "${local.name_prefix}bitbucket"
   tool       = "BITBUCKET"
   project_id = data.plural_project.default.id
   configuration = {
@@ -315,7 +320,7 @@ resource "plural_workbench_tool" "bitbucket" {
 }
 
 resource "plural_workbench_tool" "bitbucket_datacenter" {
-  name       = "bitbucket_datacenter"
+  name       = "${local.name_prefix}bitbucket_datacenter"
   tool       = "BITBUCKET_DATACENTER"
   project_id = data.plural_project.default.id
   configuration = {
@@ -327,7 +332,7 @@ resource "plural_workbench_tool" "bitbucket_datacenter" {
 }
 
 resource "plural_workbench_tool" "azure_devops" {
-  name       = "azure_devops"
+  name       = "${local.name_prefix}azure_devops"
   tool       = "AZURE_DEVOPS"
   project_id = data.plural_project.default.id
   configuration = {
@@ -338,7 +343,7 @@ resource "plural_workbench_tool" "azure_devops" {
 }
 
 resource "plural_workbench_tool" "pagerduty" {
-  name       = "pagerduty"
+  name       = "${local.name_prefix}pagerduty"
   tool       = "PAGERDUTY"
   project_id = data.plural_project.default.id
   configuration = {
@@ -349,7 +354,7 @@ resource "plural_workbench_tool" "pagerduty" {
 }
 
 resource "plural_workbench_tool" "opensearch" {
-  name       = "opensearch"
+  name       = "${local.name_prefix}opensearch"
   tool       = "OPENSEARCH"
   project_id = data.plural_project.default.id
   configuration = {
@@ -363,7 +368,7 @@ resource "plural_workbench_tool" "opensearch" {
 }
 
 resource "plural_workbench_tool" "lambda" {
-  name                = "lambda"
+  name                = "${local.name_prefix}lambda"
   tool                = "LAMBDA"
   project_id          = data.plural_project.default.id
   cloud_connection_id = plural_cloud_connection.workbench.id
@@ -382,7 +387,7 @@ resource "plural_workbench_tool" "lambda" {
 }
 
 resource "plural_workbench_tool" "cloud_run" {
-  name                = "cloud_run"
+  name                = "${local.name_prefix}cloud_run"
   tool                = "CLOUD_RUN"
   project_id          = data.plural_project.default.id
   cloud_connection_id = plural_cloud_connection.workbench.id
@@ -401,7 +406,7 @@ resource "plural_workbench_tool" "cloud_run" {
 }
 
 resource "plural_workbench_tool" "azure_function" {
-  name                = "azure_function"
+  name                = "${local.name_prefix}azure_function"
   tool                = "AZURE_FUNCTION"
   project_id          = data.plural_project.default.id
   cloud_connection_id = plural_cloud_connection.workbench.id
@@ -420,7 +425,7 @@ resource "plural_workbench_tool" "azure_function" {
 }
 
 resource "plural_workbench_tool" "docker" {
-  name       = "docker"
+  name       = "${local.name_prefix}docker"
   tool       = "DOCKER"
   project_id = data.plural_project.default.id
   configuration = {
@@ -438,26 +443,26 @@ resource "plural_workbench_tool" "docker" {
 }
 
 resource "plural_workbench_tool" "mcp" {
-  name          = "mcp"
+  name          = "${local.name_prefix}mcp"
   tool          = "MCP"
   project_id    = data.plural_project.default.id
   mcp_server_id = "294e2211-e379-40f8-88a4-086f00cd0a31"
 }
 
 resource "plural_workbench_tool" "cloud" {
-  name                = "cloud"
+  name                = "${local.name_prefix}cloud"
   tool                = "CLOUD"
   project_id          = data.plural_project.default.id
   cloud_connection_id = plural_cloud_connection.workbench.id
 }
 
 resource "plural_workbench_tool" "minimal" {
-  name = "minimal"
+  name = "${local.name_prefix}minimal"
   tool = "HTTP"
 }
 
 resource "plural_workbench" "full" {
-  name          = "full"
+  name          = "${local.name_prefix}full"
   description   = "Sample workbench with all tool types."
   system_prompt = "You are a helpful assistant."
   project_id    = data.plural_project.default.id
@@ -514,12 +519,12 @@ resource "plural_workbench" "full" {
 }
 
 resource "plural_workbench" "minimal" {
-  name = "minimal"
+  name = "${local.name_prefix}minimal"
 }
 
 resource "plural_workbench_webhook" "alerts" {
   workbench_id = plural_workbench.full.id
-  name         = "alerts"
+  name         = "${local.name_prefix}alerts"
   webhook_id   = plural_observability_webhook.workbench.id
   prompt       = "Investigate this alert and summarize root cause."
 
