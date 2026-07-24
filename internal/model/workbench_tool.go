@@ -184,13 +184,16 @@ func (in *WorkbenchToolConfiguration) Attributes(ctx context.Context) *gqlclient
 }
 
 func (in *WorkbenchToolConfiguration) From(configuration *gqlclient.WorkbenchToolFragment_Configuration, ctx context.Context, d *diag.Diagnostics) {
-	if in == nil {
-		return
-	}
-	if configuration == nil {
+	if in == nil || configuration == nil {
 		return
 	}
 
+	in.fromObservability(configuration, ctx, d)
+	in.fromIntegrations(configuration)
+	in.fromCloud(configuration, d)
+}
+
+func (in *WorkbenchToolConfiguration) fromObservability(configuration *gqlclient.WorkbenchToolFragment_Configuration, ctx context.Context, d *diag.Diagnostics) {
 	if configuration.HTTP != nil {
 		ensure(&in.HTTP)
 		in.HTTP.From(configuration.HTTP, ctx, d)
@@ -243,6 +246,9 @@ func (in *WorkbenchToolConfiguration) From(configuration *gqlclient.WorkbenchToo
 		ensure(&in.Sentry)
 		in.Sentry.From(configuration.Sentry)
 	}
+}
+
+func (in *WorkbenchToolConfiguration) fromIntegrations(configuration *gqlclient.WorkbenchToolFragment_Configuration) {
 	if configuration.Linear != nil {
 		ensure(&in.Linear)
 		in.Linear.From(configuration.Linear)
@@ -287,6 +293,13 @@ func (in *WorkbenchToolConfiguration) From(configuration *gqlclient.WorkbenchToo
 		ensure(&in.AzureDevops)
 		in.AzureDevops.From(configuration.AzureDevops)
 	}
+	if configuration.Docker != nil {
+		ensure(&in.Docker)
+		in.Docker.From(configuration.Docker)
+	}
+}
+
+func (in *WorkbenchToolConfiguration) fromCloud(configuration *gqlclient.WorkbenchToolFragment_Configuration, d *diag.Diagnostics) {
 	if configuration.Lambda != nil {
 		ensure(&in.Lambda)
 		in.Lambda.From(configuration.Lambda, d)
@@ -298,10 +311,6 @@ func (in *WorkbenchToolConfiguration) From(configuration *gqlclient.WorkbenchToo
 	if configuration.AzureFunction != nil {
 		ensure(&in.AzureFunction)
 		in.AzureFunction.From(configuration.AzureFunction, d)
-	}
-	if configuration.Docker != nil {
-		ensure(&in.Docker)
-		in.Docker.From(configuration.Docker)
 	}
 }
 
