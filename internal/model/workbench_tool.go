@@ -75,7 +75,12 @@ func (in *WorkbenchTool) From(response *gqlclient.WorkbenchToolFragment, ctx con
 		in.ScmConnectionID = types.StringNull()
 	}
 
-	in.Configuration.From(response.Configuration, ctx, d)
+	if response.Configuration != nil {
+		if in.Configuration == nil {
+			in.Configuration = &WorkbenchToolConfiguration{}
+		}
+		in.Configuration.From(response.Configuration, ctx, d)
+	}
 }
 
 type WorkbenchToolConfiguration struct {
@@ -154,34 +159,174 @@ func (in *WorkbenchToolConfiguration) From(configuration *gqlclient.WorkbenchToo
 		return
 	}
 
-	in.HTTP.From(configuration.HTTP, ctx, d)
-	in.Elastic.From(configuration.Elastic)
-	in.Opensearch.From(configuration.Opensearch)
-	in.Prometheus.From(configuration.Prometheus)
-	in.Loki.FromLoki(configuration.Loki)
-	in.Splunk.From(configuration.Splunk)
-	in.Tempo.FromTempo(configuration.Tempo)
-	in.Jaeger.From(configuration.Jaeger)
-	in.Datadog.From(configuration.Datadog)
-	in.Dynatrace.From(configuration.Dynatrace)
-	in.Cloudwatch.From(configuration.Cloudwatch, ctx, d)
-	in.Azure.From(configuration.Azure)
-	in.Sentry.From(configuration.Sentry)
-	in.Linear.From(configuration.Linear)
-	in.Slack.From(configuration.Slack)
-	in.Pagerduty.From(configuration.Pagerduty)
-	in.Teams.From(configuration.Teams)
-	in.Atlassian.From(configuration.Atlassian)
-	in.Exa.From(configuration.Exa)
-	in.Github.From(configuration.Github)
-	in.Gitlab.From(configuration.Gitlab)
-	in.Bitbucket.From(configuration.Bitbucket)
-	in.BitbucketDatacenter.From(configuration.BitbucketDatacenter)
-	in.AzureDevops.From(configuration.AzureDevops)
-	in.Lambda.From(configuration.Lambda, d)
-	in.CloudRun.From(configuration.CloudRun, d)
-	in.AzureFunction.From(configuration.AzureFunction, d)
-	in.Docker.From(configuration.Docker)
+	if configuration.HTTP != nil {
+		if in.HTTP == nil {
+			in.HTTP = &WorkbenchToolHTTPConfig{}
+		}
+		in.HTTP.From(configuration.HTTP, ctx, d)
+	}
+	if configuration.Elastic != nil {
+		if in.Elastic == nil {
+			in.Elastic = &WorkbenchToolElasticConfig{}
+		}
+		in.Elastic.From(configuration.Elastic)
+	}
+	if configuration.Opensearch != nil {
+		if in.Opensearch == nil {
+			in.Opensearch = &WorkbenchToolOpensearchConfig{}
+		}
+		in.Opensearch.From(configuration.Opensearch)
+	}
+	if configuration.Prometheus != nil {
+		if in.Prometheus == nil {
+			in.Prometheus = &WorkbenchToolPrometheusConfig{}
+		}
+		in.Prometheus.From(configuration.Prometheus)
+	}
+	if configuration.Loki != nil {
+		if in.Loki == nil {
+			in.Loki = &WorkbenchToolTokenAuthConfig{}
+		}
+		in.Loki.FromLoki(configuration.Loki)
+	}
+	if configuration.Splunk != nil {
+		if in.Splunk == nil {
+			in.Splunk = &WorkbenchToolSplunkConfig{}
+		}
+		in.Splunk.From(configuration.Splunk)
+	}
+	if configuration.Tempo != nil {
+		if in.Tempo == nil {
+			in.Tempo = &WorkbenchToolTokenAuthConfig{}
+		}
+		in.Tempo.FromTempo(configuration.Tempo)
+	}
+	if configuration.Jaeger != nil {
+		if in.Jaeger == nil {
+			in.Jaeger = &WorkbenchToolJaegerConfig{}
+		}
+		in.Jaeger.From(configuration.Jaeger)
+	}
+	if configuration.Datadog != nil {
+		if in.Datadog == nil {
+			in.Datadog = &WorkbenchToolDatadogConfig{}
+		}
+		in.Datadog.From(configuration.Datadog)
+	}
+	if configuration.Dynatrace != nil {
+		if in.Dynatrace == nil {
+			in.Dynatrace = &WorkbenchToolDynatraceConfig{}
+		}
+		in.Dynatrace.From(configuration.Dynatrace)
+	}
+	if configuration.Cloudwatch != nil {
+		if in.Cloudwatch == nil {
+			in.Cloudwatch = &WorkbenchToolCloudwatchConfig{}
+		}
+		in.Cloudwatch.From(configuration.Cloudwatch, ctx, d)
+	}
+	if configuration.Azure != nil {
+		if in.Azure == nil {
+			in.Azure = &WorkbenchToolAzureConfig{}
+		}
+		in.Azure.From(configuration.Azure)
+	}
+	if configuration.Sentry != nil {
+		if in.Sentry == nil {
+			in.Sentry = &WorkbenchToolSentryConfig{}
+		}
+		in.Sentry.From(configuration.Sentry)
+	}
+	if configuration.Linear != nil {
+		if in.Linear == nil {
+			in.Linear = &WorkbenchToolLinearConfig{}
+		}
+		in.Linear.From(configuration.Linear)
+	}
+	if configuration.Slack != nil {
+		if in.Slack == nil {
+			in.Slack = &WorkbenchToolSlackConfig{}
+		}
+		in.Slack.From(configuration.Slack)
+	}
+	if configuration.Pagerduty != nil {
+		if in.Pagerduty == nil {
+			in.Pagerduty = &WorkbenchToolPagerdutyConfig{}
+		}
+		in.Pagerduty.From(configuration.Pagerduty)
+	}
+	if configuration.Teams != nil {
+		if in.Teams == nil {
+			in.Teams = &WorkbenchToolTeamsConfig{}
+		}
+		in.Teams.From(configuration.Teams)
+	}
+	if configuration.Atlassian != nil {
+		if in.Atlassian == nil {
+			in.Atlassian = &WorkbenchToolAtlassianConfig{}
+		}
+		in.Atlassian.From(configuration.Atlassian)
+	}
+	if configuration.Exa != nil {
+		if in.Exa == nil {
+			in.Exa = &WorkbenchToolExaConfig{}
+		}
+		in.Exa.From(configuration.Exa)
+	}
+	if configuration.Github != nil {
+		if in.Github == nil {
+			in.Github = &WorkbenchToolGithubConfig{}
+		}
+		in.Github.From(configuration.Github)
+	}
+	if configuration.Gitlab != nil {
+		if in.Gitlab == nil {
+			in.Gitlab = &WorkbenchToolGitlabConfig{}
+		}
+		in.Gitlab.From(configuration.Gitlab)
+	}
+	if configuration.Bitbucket != nil {
+		if in.Bitbucket == nil {
+			in.Bitbucket = &WorkbenchToolBitbucketConfig{}
+		}
+		in.Bitbucket.From(configuration.Bitbucket)
+	}
+	if configuration.BitbucketDatacenter != nil {
+		if in.BitbucketDatacenter == nil {
+			in.BitbucketDatacenter = &WorkbenchToolBitbucketDatacenterConfig{}
+		}
+		in.BitbucketDatacenter.From(configuration.BitbucketDatacenter)
+	}
+	if configuration.AzureDevops != nil {
+		if in.AzureDevops == nil {
+			in.AzureDevops = &WorkbenchToolAzureDevopsConfig{}
+		}
+		in.AzureDevops.From(configuration.AzureDevops)
+	}
+	if configuration.Lambda != nil {
+		if in.Lambda == nil {
+			in.Lambda = &WorkbenchToolLambdaConfig{}
+		}
+		in.Lambda.From(configuration.Lambda, d)
+	}
+	if configuration.CloudRun != nil {
+		if in.CloudRun == nil {
+			in.CloudRun = &WorkbenchToolCloudRunConfig{}
+		}
+		in.CloudRun.From(configuration.CloudRun, d)
+	}
+	if configuration.AzureFunction != nil {
+		if in.AzureFunction == nil {
+			in.AzureFunction = &WorkbenchToolAzureFunctionConfig{}
+		}
+		in.AzureFunction.From(configuration.AzureFunction, d)
+	}
+	if configuration.Docker != nil {
+		if in.Docker == nil {
+			in.Docker = &WorkbenchToolDockerConfig{}
+		}
+		in.Docker.From(configuration.Docker)
+	}
 }
 
 type WorkbenchToolHTTPConfig struct {
@@ -336,7 +481,9 @@ func (in *WorkbenchToolPrometheusConfig) From(configuration *gqlclient.Workbench
 	in.Username = types.StringPointerValue(configuration.Username)
 	in.TenantID = types.StringPointerValue(configuration.TenantID)
 	in.AWSSigv4 = types.BoolPointerValue(configuration.AWSSigv4)
-	in.AWSAccessKeyID = types.StringPointerValue(configuration.AWSAccessKeyID)
+	if configuration.AWSAccessKeyID != nil {
+		in.AWSAccessKeyID = types.StringValue(*configuration.AWSAccessKeyID)
+	}
 	in.AWSRegion = types.StringPointerValue(configuration.AWSRegion)
 	// Token, Password, AWSSecretAccessKey are never returned; keep configured values.
 }
@@ -693,7 +840,9 @@ func (in *WorkbenchToolOpensearchConfig) From(configuration *gqlclient.Workbench
 
 	in.Host = types.StringValue(configuration.Host)
 	in.Index = types.StringValue(configuration.Index)
-	in.AWSAccessKeyID = types.StringPointerValue(configuration.AWSAccessKeyID)
+	if configuration.AWSAccessKeyID != nil {
+		in.AWSAccessKeyID = types.StringValue(*configuration.AWSAccessKeyID)
+	}
 	in.AWSRegion = types.StringPointerValue(configuration.AWSRegion)
 	in.AssumeRoleArn = types.StringPointerValue(configuration.AssumeRoleArn)
 	in.UsePodIdentity = types.BoolPointerValue(configuration.UsePodIdentity)
