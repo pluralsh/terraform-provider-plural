@@ -17,7 +17,7 @@ Workbench tool resource.
 
 ### Required
 
-- `name` (String) Name of this workbench tool.
+- `name` (String) Name of this workbench tool. Must be valid for OpenAI-style tool calls: only `a-z`, `0-9`, `.`, and `_` are allowed.
 - `tool` (String) Workbench tool type.
 
 ### Optional

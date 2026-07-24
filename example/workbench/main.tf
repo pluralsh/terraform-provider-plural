@@ -13,7 +13,7 @@ provider "plural" {
 
 locals {
   # Avoid collisions with leftover tools from partial applies.
-  name_prefix = "tf-example-"
+  name_prefix = "tf_example_"
 }
 
 data "plural_project" "default" {
@@ -25,7 +25,7 @@ data "plural_git_repository" "hello" {
 }
 
 resource "plural_cloud_connection" "workbench" {
-  name           = "${local.name_prefix}workbench-aws"
+  name           = "${local.name_prefix}workbench_aws"
   cloud_provider = "AWS"
   configuration = {
     aws = {
@@ -37,7 +37,7 @@ resource "plural_cloud_connection" "workbench" {
 }
 
 resource "plural_observability_webhook" "workbench" {
-  name = "${local.name_prefix}workbench-observability"
+  name = "${local.name_prefix}workbench_observability"
   type = "NEWRELIC"
 }
 

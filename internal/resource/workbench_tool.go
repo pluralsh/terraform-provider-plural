@@ -3,6 +3,7 @@ package resource
 import (
 	"context"
 	"fmt"
+	"regexp"
 
 	"terraform-provider-plural/internal/common"
 	"terraform-provider-plural/internal/model"
@@ -54,9 +55,15 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"name": schema.StringAttribute{
-				Description:         "Name of this workbench tool.",
-				MarkdownDescription: "Name of this workbench tool.",
+				Description:         "Name of this workbench tool. Must be valid for OpenAI-style tool calls: only a-z, 0-9, '.', and '_' are allowed.",
+				MarkdownDescription: "Name of this workbench tool. Must be valid for OpenAI-style tool calls: only `a-z`, `0-9`, `.`, and `_` are allowed.",
 				Required:            true,
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[a-z0-9._]+$`),
+						"must be a valid name for OpenAI or equivalent tool calls (only a-z, 0-9, '.', and '_' are allowed)",
+					),
+				},
 			},
 			"tool": schema.StringAttribute{
 				Description:         "Workbench tool type.",
