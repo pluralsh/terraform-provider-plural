@@ -1151,22 +1151,26 @@ func (in *WorkbenchToolDockerAuth) Attributes() *gqlclient.HelmAuthAttributes {
 	}
 
 	attrs := &gqlclient.HelmAuthAttributes{}
+	configured := false
 	if in.Proxy != nil {
 		attrs.Proxy = &gqlclient.HTTPProxyAttributes{
 			URL:     in.Proxy.URL.ValueString(),
 			Noproxy: in.Proxy.Noproxy.ValueStringPointer(),
 		}
+		configured = true
 	}
 	if in.Basic != nil {
 		attrs.Basic = &gqlclient.HelmBasicAuthAttributes{
 			Username: in.Basic.Username.ValueString(),
 			Password: in.Basic.Password.ValueString(),
 		}
+		configured = true
 	}
 	if in.Bearer != nil {
 		attrs.Bearer = &gqlclient.HelmBearerAuthAttributes{
 			Token: in.Bearer.Token.ValueString(),
 		}
+		configured = true
 	}
 	if in.AWS != nil {
 		attrs.AWS = &gqlclient.HelmAWSAuthAttributes{
@@ -1174,6 +1178,7 @@ func (in *WorkbenchToolDockerAuth) Attributes() *gqlclient.HelmAuthAttributes {
 			SecretAccessKey: in.AWS.SecretAccessKey.ValueStringPointer(),
 			AssumeRoleArn:   in.AWS.AssumeRoleArn.ValueStringPointer(),
 		}
+		configured = true
 	}
 	if in.Azure != nil {
 		attrs.Azure = &gqlclient.HelmAzureAuthAttributes{
@@ -1182,11 +1187,16 @@ func (in *WorkbenchToolDockerAuth) Attributes() *gqlclient.HelmAuthAttributes {
 			TenantID:       in.Azure.TenantID.ValueStringPointer(),
 			SubscriptionID: in.Azure.SubscriptionID.ValueStringPointer(),
 		}
+		configured = true
 	}
 	if in.GCP != nil {
 		attrs.GCP = &gqlclient.HelmGCPAuthAttributes{
 			ApplicationCredentials: in.GCP.ApplicationCredentials.ValueStringPointer(),
 		}
+		configured = true
+	}
+	if !configured {
+		return nil
 	}
 	return attrs
 }
@@ -1199,12 +1209,13 @@ func (in *WorkbenchToolDockerConfig) From(configuration *gqlclient.WorkbenchTool
 		return
 	}
 
-	in.URL = types.StringPointerValue(configuration.URL)
+	if configuration.URL != nil {
+		in.URL = types.StringPointerValue(configuration.URL)
+	}
 	if configuration.Provider != nil {
 		in.Provider = types.StringValue(string(*configuration.Provider))
-	} else {
-		in.Provider = types.StringNull()
 	}
+	// Proxy is returned at the docker connection level; credentials stay under auth and are never exposed.
 	if configuration.Proxy != nil {
 		if in.Auth == nil {
 			in.Auth = &WorkbenchToolDockerAuth{}
