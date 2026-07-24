@@ -994,7 +994,10 @@ func (in *WorkbenchToolGithubConfig) From(configuration *gqlclient.WorkbenchTool
 		return
 	}
 
-	in.URL = types.StringValue(configuration.URL)
+	// API returns URL as a non-pointer string; keep Terraform null when unset.
+	if configuration.URL != "" {
+		in.URL = types.StringValue(configuration.URL)
+	}
 	in.Toolset = types.StringPointerValue(configuration.Toolset)
 	in.AppID = types.StringPointerValue(configuration.AppID)
 	in.InstallationID = types.StringPointerValue(configuration.InstallationID)
@@ -1365,7 +1368,8 @@ func (in *WorkbenchToolDockerConfig) From(configuration *gqlclient.WorkbenchTool
 		in.Provider = types.StringValue(string(*configuration.Provider))
 	}
 	// Proxy is returned at the docker connection level; credentials stay under auth and are never exposed.
-	if configuration.Proxy != nil {
+	// Ignore empty proxy objects so we don't mutate auth blocks that hold write-only secrets.
+	if configuration.Proxy != nil && configuration.Proxy.URL != "" {
 		if in.Auth == nil {
 			in.Auth = &WorkbenchToolDockerAuth{}
 		}
