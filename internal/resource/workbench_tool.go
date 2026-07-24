@@ -137,6 +137,7 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 								Description:         "When true, exposes this HTTP tool as a workbench action.",
 								MarkdownDescription: "When true, exposes this HTTP tool as a workbench action.",
 								Optional:            true,
+								Computed:            true,
 							},
 							"headers": schema.MapAttribute{
 								Description:         "The request headers.",
@@ -178,7 +179,7 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 							"aws_secret_access_key": schema.StringAttribute{Optional: true, Sensitive: true},
 							"aws_region":            schema.StringAttribute{Optional: true},
 							"assume_role_arn":       schema.StringAttribute{Optional: true},
-							"use_pod_identity":      schema.BoolAttribute{Optional: true},
+							"use_pod_identity":      schema.BoolAttribute{Optional: true, Computed: true},
 						},
 					},
 					"prometheus": schema.SingleNestedAttribute{
@@ -191,7 +192,7 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 							"username":              schema.StringAttribute{Optional: true},
 							"password":              schema.StringAttribute{Optional: true, Sensitive: true},
 							"tenant_id":             schema.StringAttribute{Optional: true},
-							"aws_sigv4":             schema.BoolAttribute{Optional: true},
+							"aws_sigv4":             schema.BoolAttribute{Optional: true, Computed: true},
 							"aws_access_key_id":     schema.StringAttribute{Optional: true, Sensitive: true},
 							"aws_secret_access_key": schema.StringAttribute{Optional: true, Sensitive: true},
 							"aws_region":            schema.StringAttribute{Optional: true},
@@ -400,32 +401,32 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 					},
 					"lambda": schema.SingleNestedAttribute{
 						Optional:            true,
-						Description:         "AWS Lambda function configuration.",
-						MarkdownDescription: "AWS Lambda function configuration.",
+						Description:         "AWS Lambda function configuration. Requires cloud_connection_id.",
+						MarkdownDescription: "AWS Lambda function configuration. Requires `cloud_connection_id`.",
 						Attributes: map[string]schema.Attribute{
 							"lambda_arn":   schema.StringAttribute{Required: true},
 							"description":  schema.StringAttribute{Required: true},
-							"input_schema": schema.StringAttribute{Optional: true},
+							"input_schema": schema.StringAttribute{Required: true},
 						},
 					},
 					"cloud_run": schema.SingleNestedAttribute{
 						Optional:            true,
-						Description:         "Google Cloud Run service configuration.",
-						MarkdownDescription: "Google Cloud Run service configuration.",
+						Description:         "Google Cloud Run service configuration. Requires cloud_connection_id.",
+						MarkdownDescription: "Google Cloud Run service configuration. Requires `cloud_connection_id`.",
 						Attributes: map[string]schema.Attribute{
 							"identifier":   schema.StringAttribute{Required: true},
 							"description":  schema.StringAttribute{Required: true},
-							"input_schema": schema.StringAttribute{Optional: true},
+							"input_schema": schema.StringAttribute{Required: true},
 						},
 					},
 					"azure_function": schema.SingleNestedAttribute{
 						Optional:            true,
-						Description:         "Azure Function / Cloud Function configuration.",
-						MarkdownDescription: "Azure Function / Cloud Function configuration.",
+						Description:         "Azure Function / Cloud Function configuration. Requires cloud_connection_id.",
+						MarkdownDescription: "Azure Function / Cloud Function configuration. Requires `cloud_connection_id`.",
 						Attributes: map[string]schema.Attribute{
 							"identifier":   schema.StringAttribute{Required: true},
 							"description":  schema.StringAttribute{Required: true},
-							"input_schema": schema.StringAttribute{Optional: true},
+							"input_schema": schema.StringAttribute{Required: true},
 						},
 					},
 					"docker": schema.SingleNestedAttribute{
@@ -443,7 +444,8 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 								},
 							},
 							"auth": schema.SingleNestedAttribute{
-								Optional: true,
+								Optional:      true,
+								PlanModifiers: []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 								Attributes: map[string]schema.Attribute{
 									"proxy": schema.SingleNestedAttribute{
 										Optional: true,
