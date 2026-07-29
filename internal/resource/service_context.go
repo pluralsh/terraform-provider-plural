@@ -135,23 +135,18 @@ func (r *ServiceContextResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	_, err := r.client.SaveServiceContext(ctx, data.Name.ValueString(), data.Attributes(ctx, &resp.Diagnostics))
+	response, err := r.client.SaveServiceContext(ctx, data.Name.ValueString(), data.Attributes(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update service context, got error: %s", err))
 		return
 	}
 
-	response, err := r.client.GetServiceContext(ctx, data.Name.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read updated service context, got error: %s", err))
-		return
-	}
-	if response == nil || response.ServiceContext == nil {
-		resp.Diagnostics.AddError("Client Error", "Unable to read updated service context, received empty response")
+	if response == nil || response.SaveServiceContext == nil {
+		resp.Diagnostics.AddError("Client Error", "Unable to read updated service context, got no error")
 		return
 	}
 
-	data.From(response.ServiceContext, ctx, &resp.Diagnostics)
+	data.From(response.SaveServiceContext, ctx, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
