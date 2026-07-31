@@ -2,13 +2,18 @@ terraform {
   required_providers {
     plural = {
       source  = "pluralsh/plural"
-      version = "0.2.35"
+      version = "0.2.37"
     }
   }
 }
 
 provider "plural" {
   use_cli = true
+}
+
+locals {
+  # Avoid collisions with leftover tools from partial applies.
+  name_prefix = "tf_"
 }
 
 data "plural_project" "default" {
@@ -20,7 +25,7 @@ data "plural_git_repository" "hello" {
 }
 
 resource "plural_cloud_connection" "workbench" {
-  name           = "workbench-aws"
+  name           = "${local.name_prefix}workbench_aws"
   cloud_provider = "AWS"
   configuration = {
     aws = {
@@ -32,12 +37,12 @@ resource "plural_cloud_connection" "workbench" {
 }
 
 resource "plural_observability_webhook" "workbench" {
-  name = "workbench-observability"
+  name = "${local.name_prefix}workbench_observability"
   type = "NEWRELIC"
 }
 
 resource "plural_workbench_tool" "echo" {
-  name       = "echo"
+  name       = "${local.name_prefix}echo"
   tool       = "HTTP"
   project_id = data.plural_project.default.id
   configuration = {
@@ -60,7 +65,7 @@ resource "plural_workbench_tool" "echo" {
 }
 
 resource "plural_workbench_tool" "status" {
-  name       = "status"
+  name       = "${local.name_prefix}status"
   tool       = "HTTP"
   project_id = data.plural_project.default.id
   configuration = {
@@ -81,7 +86,7 @@ resource "plural_workbench_tool" "status" {
 }
 
 resource "plural_workbench_tool" "elastic" {
-  name       = "elastic"
+  name       = "${local.name_prefix}elastic"
   tool       = "ELASTIC"
   project_id = data.plural_project.default.id
   configuration = {
@@ -95,7 +100,7 @@ resource "plural_workbench_tool" "elastic" {
 }
 
 resource "plural_workbench_tool" "datadog" {
-  name       = "datadog"
+  name       = "${local.name_prefix}datadog"
   tool       = "DATADOG"
   project_id = data.plural_project.default.id
   configuration = {
@@ -108,7 +113,7 @@ resource "plural_workbench_tool" "datadog" {
 }
 
 resource "plural_workbench_tool" "prometheus" {
-  name       = "prometheus"
+  name       = "${local.name_prefix}prometheus"
   tool       = "PROMETHEUS"
   project_id = data.plural_project.default.id
   configuration = {
@@ -121,7 +126,7 @@ resource "plural_workbench_tool" "prometheus" {
 }
 
 resource "plural_workbench_tool" "loki" {
-  name       = "loki"
+  name       = "${local.name_prefix}loki"
   tool       = "LOKI"
   project_id = data.plural_project.default.id
   configuration = {
@@ -134,7 +139,7 @@ resource "plural_workbench_tool" "loki" {
 }
 
 resource "plural_workbench_tool" "tempo" {
-  name       = "tempo"
+  name       = "${local.name_prefix}tempo"
   tool       = "TEMPO"
   project_id = data.plural_project.default.id
   configuration = {
@@ -147,7 +152,7 @@ resource "plural_workbench_tool" "tempo" {
 }
 
 resource "plural_workbench_tool" "jaeger" {
-  name       = "jaeger"
+  name       = "${local.name_prefix}jaeger"
   tool       = "JAEGER"
   project_id = data.plural_project.default.id
   configuration = {
@@ -160,7 +165,7 @@ resource "plural_workbench_tool" "jaeger" {
 }
 
 resource "plural_workbench_tool" "splunk" {
-  name       = "splunk"
+  name       = "${local.name_prefix}splunk"
   tool       = "SPLUNK"
   project_id = data.plural_project.default.id
   configuration = {
@@ -172,7 +177,7 @@ resource "plural_workbench_tool" "splunk" {
 }
 
 resource "plural_workbench_tool" "dynatrace" {
-  name       = "dynatrace"
+  name       = "${local.name_prefix}dynatrace"
   tool       = "DYNATRACE"
   project_id = data.plural_project.default.id
   configuration = {
@@ -184,7 +189,7 @@ resource "plural_workbench_tool" "dynatrace" {
 }
 
 resource "plural_workbench_tool" "cloudwatch" {
-  name                = "cloudwatch_default"
+  name                = "${local.name_prefix}cloudwatch_default"
   tool                = "CLOUDWATCH"
   project_id          = data.plural_project.default.id
   cloud_connection_id = plural_cloud_connection.workbench.id
@@ -197,7 +202,7 @@ resource "plural_workbench_tool" "cloudwatch" {
 }
 
 resource "plural_workbench_tool" "azure" {
-  name       = "azure"
+  name       = "${local.name_prefix}azure"
   tool       = "AZURE"
   project_id = data.plural_project.default.id
   configuration = {
@@ -211,7 +216,7 @@ resource "plural_workbench_tool" "azure" {
 }
 
 resource "plural_workbench_tool" "linear" {
-  name       = "linear"
+  name       = "${local.name_prefix}linear"
   tool       = "LINEAR"
   project_id = data.plural_project.default.id
   configuration = {
@@ -222,7 +227,7 @@ resource "plural_workbench_tool" "linear" {
 }
 
 resource "plural_workbench_tool" "atlassian" {
-  name       = "atlassian"
+  name       = "${local.name_prefix}atlassian"
   tool       = "ATLASSIAN"
   project_id = data.plural_project.default.id
   configuration = {
@@ -234,32 +239,230 @@ resource "plural_workbench_tool" "atlassian" {
 }
 
 resource "plural_workbench_tool" "sentry" {
-  name       = "sentry"
+  name       = "${local.name_prefix}sentry"
   tool       = "SENTRY"
   project_id = data.plural_project.default.id
+  configuration = {
+    sentry = {
+      url          = "https://sentry.io"
+      access_token = "replace-with-access-token"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "exa" {
+  name       = "${local.name_prefix}exa"
+  tool       = "EXA"
+  project_id = data.plural_project.default.id
+  configuration = {
+    exa = {
+      api_key = "replace-with-api-key"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "github" {
+  name       = "${local.name_prefix}github"
+  tool       = "GITHUB"
+  project_id = data.plural_project.default.id
+  configuration = {
+    github = {
+      access_token = "replace-with-access-token"
+      toolset      = "default"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "slack" {
+  name       = "${local.name_prefix}slack"
+  tool       = "SLACK"
+  project_id = data.plural_project.default.id
+  configuration = {
+    slack = {
+      bot_token = "replace-with-bot-token"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "teams" {
+  name       = "${local.name_prefix}teams"
+  tool       = "TEAMS"
+  project_id = data.plural_project.default.id
+  configuration = {
+    teams = {
+      client_id     = "replace-with-client-id"
+      client_secret = "replace-with-client-secret"
+      tenant_id     = "replace-with-tenant-id"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "gitlab" {
+  name       = "${local.name_prefix}gitlab"
+  tool       = "GITLAB"
+  project_id = data.plural_project.default.id
+  configuration = {
+    gitlab = {
+      token = "replace-with-token"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "bitbucket" {
+  name       = "${local.name_prefix}bitbucket"
+  tool       = "BITBUCKET"
+  project_id = data.plural_project.default.id
+  configuration = {
+    bitbucket = {
+      token = "replace-with-token"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "bitbucket_datacenter" {
+  name       = "${local.name_prefix}bitbucket_datacenter"
+  tool       = "BITBUCKET_DATACENTER"
+  project_id = data.plural_project.default.id
+  configuration = {
+    bitbucket_datacenter = {
+      url   = "https://bitbucket.example.com"
+      token = "replace-with-token"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "azure_devops" {
+  name       = "${local.name_prefix}azure_devops"
+  tool       = "AZURE_DEVOPS"
+  project_id = data.plural_project.default.id
+  configuration = {
+    azure_devops = {
+      token = "replace-with-token"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "pagerduty" {
+  name       = "${local.name_prefix}pagerduty"
+  tool       = "PAGERDUTY"
+  project_id = data.plural_project.default.id
+  configuration = {
+    pagerduty = {
+      api_token = "replace-with-api-token"
+    }
+  }
+}
+
+resource "plural_workbench_tool" "opensearch" {
+  name       = "${local.name_prefix}opensearch"
+  tool       = "OPENSEARCH"
+  project_id = data.plural_project.default.id
+  configuration = {
+    opensearch = {
+      host             = "https://search-example.us-east-1.es.amazonaws.com"
+      index            = "logs-*"
+      aws_region       = "us-east-1"
+      use_pod_identity = true
+    }
+  }
+}
+
+resource "plural_workbench_tool" "lambda" {
+  name                = "${local.name_prefix}lambda"
+  tool                = "LAMBDA"
+  project_id          = data.plural_project.default.id
+  cloud_connection_id = plural_cloud_connection.workbench.id
+  configuration = {
+    lambda = {
+      lambda_arn  = "arn:aws:lambda:us-east-1:123456789012:function:example"
+      description = "Invoke the example Lambda function."
+      input_schema = jsonencode({
+        type = "object"
+        properties = {
+          payload = { type = "string" }
+        }
+      })
+    }
+  }
+}
+
+resource "plural_workbench_tool" "cloud_run" {
+  name                = "${local.name_prefix}cloud_run"
+  tool                = "CLOUD_RUN"
+  project_id          = data.plural_project.default.id
+  cloud_connection_id = plural_cloud_connection.workbench.id
+  configuration = {
+    cloud_run = {
+      identifier  = "projects/example/locations/us-central1/services/example"
+      description = "Invoke the example Cloud Run service."
+      input_schema = jsonencode({
+        type = "object"
+        properties = {
+          payload = { type = "string" }
+        }
+      })
+    }
+  }
+}
+
+resource "plural_workbench_tool" "azure_function" {
+  name                = "${local.name_prefix}azure_function"
+  tool                = "AZURE_FUNCTION"
+  project_id          = data.plural_project.default.id
+  cloud_connection_id = plural_cloud_connection.workbench.id
+  configuration = {
+    azure_function = {
+      identifier  = "example-function"
+      description = "Invoke the example Azure Function."
+      input_schema = jsonencode({
+        type = "object"
+        properties = {
+          payload = { type = "string" }
+        }
+      })
+    }
+  }
+}
+
+resource "plural_workbench_tool" "docker" {
+  name       = "${local.name_prefix}docker"
+  tool       = "DOCKER"
+  project_id = data.plural_project.default.id
+  configuration = {
+    docker = {
+      url      = "https://registry-1.docker.io"
+      provider = "BASIC"
+      auth = {
+        basic = {
+          username = "replace-with-username"
+          password = "replace-with-password"
+        }
+      }
+    }
+  }
 }
 
 resource "plural_workbench_tool" "mcp" {
-  name          = "mcp"
+  name          = "${local.name_prefix}mcp"
   tool          = "MCP"
   project_id    = data.plural_project.default.id
   mcp_server_id = "294e2211-e379-40f8-88a4-086f00cd0a31"
 }
 
 resource "plural_workbench_tool" "cloud" {
-  name                = "cloud"
+  name                = "${local.name_prefix}cloud"
   tool                = "CLOUD"
   project_id          = data.plural_project.default.id
   cloud_connection_id = plural_cloud_connection.workbench.id
 }
 
 resource "plural_workbench_tool" "minimal" {
-  name = "minimal"
+  name = "${local.name_prefix}minimal"
   tool = "HTTP"
 }
 
 resource "plural_workbench" "full" {
-  name          = "full"
+  name          = "${local.name_prefix}full"
   description   = "Sample workbench with all tool types."
   system_prompt = "You are a helpful assistant."
   project_id    = data.plural_project.default.id
@@ -296,18 +499,32 @@ resource "plural_workbench" "full" {
     plural_workbench_tool.linear.id,
     plural_workbench_tool.atlassian.id,
     plural_workbench_tool.sentry.id,
+    plural_workbench_tool.exa.id,
+    plural_workbench_tool.github.id,
+    plural_workbench_tool.slack.id,
+    plural_workbench_tool.teams.id,
+    plural_workbench_tool.gitlab.id,
+    plural_workbench_tool.bitbucket.id,
+    plural_workbench_tool.bitbucket_datacenter.id,
+    plural_workbench_tool.azure_devops.id,
+    plural_workbench_tool.pagerduty.id,
+    plural_workbench_tool.opensearch.id,
+    plural_workbench_tool.lambda.id,
+    plural_workbench_tool.cloud_run.id,
+    plural_workbench_tool.azure_function.id,
+    plural_workbench_tool.docker.id,
     plural_workbench_tool.mcp.id,
     plural_workbench_tool.cloud.id,
   ]
 }
 
 resource "plural_workbench" "minimal" {
-  name = "minimal"
+  name = "${local.name_prefix}minimal"
 }
 
 resource "plural_workbench_webhook" "alerts" {
   workbench_id = plural_workbench.full.id
-  name         = "alerts"
+  name         = "${local.name_prefix}alerts"
   webhook_id   = plural_observability_webhook.workbench.id
   prompt       = "Investigate this alert and summarize root cause."
 

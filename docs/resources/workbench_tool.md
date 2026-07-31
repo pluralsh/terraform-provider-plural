@@ -17,7 +17,7 @@ Workbench tool resource.
 
 ### Required
 
-- `name` (String) Name of this workbench tool.
+- `name` (String) Name of this workbench tool. Must be valid for OpenAI-style tool calls: only `a-z`, `0-9`, `.`, and `_` are allowed.
 - `tool` (String) Workbench tool type.
 
 ### Optional
@@ -27,6 +27,7 @@ Workbench tool resource.
 - `configuration` (Attributes) Configuration of this workbench tool. (see [below for nested schema](#nestedatt--configuration))
 - `mcp_server_id` (String) ID of the MCP server referenced by this workbench tool.
 - `project_id` (String) ID of the project that this workbench belongs to.
+- `scm_connection_id` (String) ID of the SCM connection referenced by this workbench tool.
 
 ### Read-Only
 
@@ -39,16 +40,31 @@ Optional:
 
 - `atlassian` (Attributes) Atlassian/Jira connection configuration. (see [below for nested schema](#nestedatt--configuration--atlassian))
 - `azure` (Attributes) Azure Monitor connection configuration. (see [below for nested schema](#nestedatt--configuration--azure))
+- `azure_devops` (Attributes) Azure DevOps connection configuration. (see [below for nested schema](#nestedatt--configuration--azure_devops))
+- `azure_function` (Attributes) Azure Function / Cloud Function configuration. Requires `cloud_connection_id`. (see [below for nested schema](#nestedatt--configuration--azure_function))
+- `bitbucket` (Attributes) Bitbucket Cloud connection configuration. (see [below for nested schema](#nestedatt--configuration--bitbucket))
+- `bitbucket_datacenter` (Attributes) Bitbucket Data Center connection configuration. (see [below for nested schema](#nestedatt--configuration--bitbucket_datacenter))
+- `cloud_run` (Attributes) Google Cloud Run service configuration. Requires `cloud_connection_id`. (see [below for nested schema](#nestedatt--configuration--cloud_run))
 - `cloudwatch` (Attributes) CloudWatch connection configuration. (see [below for nested schema](#nestedatt--configuration--cloudwatch))
 - `datadog` (Attributes) Datadog connection configuration. (see [below for nested schema](#nestedatt--configuration--datadog))
+- `docker` (Attributes) Docker/OCI registry connection configuration. (see [below for nested schema](#nestedatt--configuration--docker))
 - `dynatrace` (Attributes) Dynatrace connection configuration. (see [below for nested schema](#nestedatt--configuration--dynatrace))
 - `elastic` (Attributes) Elasticsearch connection configuration. (see [below for nested schema](#nestedatt--configuration--elastic))
+- `exa` (Attributes) Exa connection configuration. (see [below for nested schema](#nestedatt--configuration--exa))
+- `github` (Attributes) GitHub connection configuration. (see [below for nested schema](#nestedatt--configuration--github))
+- `gitlab` (Attributes) GitLab connection configuration. (see [below for nested schema](#nestedatt--configuration--gitlab))
 - `http` (Attributes) HTTP configuration of this workbench tool. (see [below for nested schema](#nestedatt--configuration--http))
 - `jaeger` (Attributes) Jaeger connection configuration. (see [below for nested schema](#nestedatt--configuration--jaeger))
+- `lambda` (Attributes) AWS Lambda function configuration. Requires `cloud_connection_id`. (see [below for nested schema](#nestedatt--configuration--lambda))
 - `linear` (Attributes) Linear connection configuration. (see [below for nested schema](#nestedatt--configuration--linear))
 - `loki` (Attributes) Loki connection configuration. (see [below for nested schema](#nestedatt--configuration--loki))
+- `opensearch` (Attributes) AWS OpenSearch connection configuration. (see [below for nested schema](#nestedatt--configuration--opensearch))
+- `pagerduty` (Attributes) PagerDuty connection configuration. (see [below for nested schema](#nestedatt--configuration--pagerduty))
 - `prometheus` (Attributes) Prometheus connection configuration. (see [below for nested schema](#nestedatt--configuration--prometheus))
+- `sentry` (Attributes) Sentry connection configuration. (see [below for nested schema](#nestedatt--configuration--sentry))
+- `slack` (Attributes) Slack connection configuration. (see [below for nested schema](#nestedatt--configuration--slack))
 - `splunk` (Attributes) Splunk connection configuration. (see [below for nested schema](#nestedatt--configuration--splunk))
+- `teams` (Attributes) Microsoft Teams connection configuration. (see [below for nested schema](#nestedatt--configuration--teams))
 - `tempo` (Attributes) Tempo connection configuration. (see [below for nested schema](#nestedatt--configuration--tempo))
 
 <a id="nestedatt--configuration--atlassian"></a>
@@ -70,6 +86,60 @@ Required:
 - `client_secret` (String, Sensitive)
 - `subscription_id` (String)
 - `tenant_id` (String)
+
+Optional:
+
+- `prometheus_url` (String)
+
+
+<a id="nestedatt--configuration--azure_devops"></a>
+### Nested Schema for `configuration.azure_devops`
+
+Optional:
+
+- `token` (String, Sensitive)
+- `url` (String)
+
+
+<a id="nestedatt--configuration--azure_function"></a>
+### Nested Schema for `configuration.azure_function`
+
+Required:
+
+- `description` (String)
+- `identifier` (String)
+- `input_schema` (String)
+
+
+<a id="nestedatt--configuration--bitbucket"></a>
+### Nested Schema for `configuration.bitbucket`
+
+Optional:
+
+- `token` (String, Sensitive)
+- `url` (String)
+
+
+<a id="nestedatt--configuration--bitbucket_datacenter"></a>
+### Nested Schema for `configuration.bitbucket_datacenter`
+
+Required:
+
+- `url` (String)
+
+Optional:
+
+- `token` (String, Sensitive)
+
+
+<a id="nestedatt--configuration--cloud_run"></a>
+### Nested Schema for `configuration.cloud_run`
+
+Required:
+
+- `description` (String)
+- `identifier` (String)
+- `input_schema` (String)
 
 
 <a id="nestedatt--configuration--cloudwatch"></a>
@@ -99,6 +169,87 @@ Optional:
 - `site` (String)
 
 
+<a id="nestedatt--configuration--docker"></a>
+### Nested Schema for `configuration.docker`
+
+Optional:
+
+- `auth` (Attributes) (see [below for nested schema](#nestedatt--configuration--docker--auth))
+- `provider` (String)
+- `url` (String)
+
+<a id="nestedatt--configuration--docker--auth"></a>
+### Nested Schema for `configuration.docker.auth`
+
+Optional:
+
+- `aws` (Attributes) (see [below for nested schema](#nestedatt--configuration--docker--auth--aws))
+- `azure` (Attributes) (see [below for nested schema](#nestedatt--configuration--docker--auth--azure))
+- `basic` (Attributes) (see [below for nested schema](#nestedatt--configuration--docker--auth--basic))
+- `bearer` (Attributes) (see [below for nested schema](#nestedatt--configuration--docker--auth--bearer))
+- `gcp` (Attributes) (see [below for nested schema](#nestedatt--configuration--docker--auth--gcp))
+- `proxy` (Attributes) (see [below for nested schema](#nestedatt--configuration--docker--auth--proxy))
+
+<a id="nestedatt--configuration--docker--auth--aws"></a>
+### Nested Schema for `configuration.docker.auth.aws`
+
+Optional:
+
+- `access_key` (String, Sensitive)
+- `assume_role_arn` (String)
+- `secret_access_key` (String, Sensitive)
+
+
+<a id="nestedatt--configuration--docker--auth--azure"></a>
+### Nested Schema for `configuration.docker.auth.azure`
+
+Optional:
+
+- `client_id` (String)
+- `client_secret` (String, Sensitive)
+- `subscription_id` (String)
+- `tenant_id` (String)
+
+
+<a id="nestedatt--configuration--docker--auth--basic"></a>
+### Nested Schema for `configuration.docker.auth.basic`
+
+Required:
+
+- `password` (String, Sensitive)
+- `username` (String)
+
+
+<a id="nestedatt--configuration--docker--auth--bearer"></a>
+### Nested Schema for `configuration.docker.auth.bearer`
+
+Required:
+
+- `token` (String, Sensitive)
+
+
+<a id="nestedatt--configuration--docker--auth--gcp"></a>
+### Nested Schema for `configuration.docker.auth.gcp`
+
+Optional:
+
+- `application_credentials` (String, Sensitive)
+
+
+<a id="nestedatt--configuration--docker--auth--proxy"></a>
+### Nested Schema for `configuration.docker.auth.proxy`
+
+Required:
+
+- `url` (String)
+
+Optional:
+
+- `noproxy` (String)
+
+
+
+
 <a id="nestedatt--configuration--dynatrace"></a>
 ### Nested Schema for `configuration.dynatrace`
 
@@ -122,6 +273,36 @@ Optional:
 - `password` (String, Sensitive)
 
 
+<a id="nestedatt--configuration--exa"></a>
+### Nested Schema for `configuration.exa`
+
+Optional:
+
+- `api_key` (String, Sensitive)
+
+
+<a id="nestedatt--configuration--github"></a>
+### Nested Schema for `configuration.github`
+
+Optional:
+
+- `access_token` (String, Sensitive)
+- `app_id` (String)
+- `installation_id` (String)
+- `private_key` (String, Sensitive)
+- `toolset` (String)
+- `url` (String)
+
+
+<a id="nestedatt--configuration--gitlab"></a>
+### Nested Schema for `configuration.gitlab`
+
+Optional:
+
+- `token` (String, Sensitive)
+- `url` (String)
+
+
 <a id="nestedatt--configuration--http"></a>
 ### Nested Schema for `configuration.http`
 
@@ -134,6 +315,7 @@ Required:
 Optional:
 
 - `body` (String) The request body.
+- `function` (Boolean) When true, exposes this HTTP tool as a workbench action.
 - `headers` (Map of String) The request headers.
 
 
@@ -149,6 +331,16 @@ Optional:
 - `password` (String, Sensitive)
 - `token` (String, Sensitive)
 - `username` (String)
+
+
+<a id="nestedatt--configuration--lambda"></a>
+### Nested Schema for `configuration.lambda`
+
+Required:
+
+- `description` (String)
+- `input_schema` (String)
+- `lambda_arn` (String)
 
 
 <a id="nestedatt--configuration--linear"></a>
@@ -174,6 +366,31 @@ Optional:
 - `username` (String)
 
 
+<a id="nestedatt--configuration--opensearch"></a>
+### Nested Schema for `configuration.opensearch`
+
+Required:
+
+- `host` (String)
+- `index` (String)
+
+Optional:
+
+- `assume_role_arn` (String)
+- `aws_access_key_id` (String, Sensitive)
+- `aws_region` (String)
+- `aws_secret_access_key` (String, Sensitive)
+- `use_pod_identity` (Boolean)
+
+
+<a id="nestedatt--configuration--pagerduty"></a>
+### Nested Schema for `configuration.pagerduty`
+
+Optional:
+
+- `api_token` (String, Sensitive)
+
+
 <a id="nestedatt--configuration--prometheus"></a>
 ### Nested Schema for `configuration.prometheus`
 
@@ -183,10 +400,31 @@ Required:
 
 Optional:
 
+- `aws_access_key_id` (String, Sensitive)
+- `aws_region` (String)
+- `aws_secret_access_key` (String, Sensitive)
+- `aws_sigv4` (Boolean)
 - `password` (String, Sensitive)
 - `tenant_id` (String)
 - `token` (String, Sensitive)
 - `username` (String)
+
+
+<a id="nestedatt--configuration--sentry"></a>
+### Nested Schema for `configuration.sentry`
+
+Optional:
+
+- `access_token` (String, Sensitive)
+- `url` (String)
+
+
+<a id="nestedatt--configuration--slack"></a>
+### Nested Schema for `configuration.slack`
+
+Optional:
+
+- `bot_token` (String, Sensitive)
 
 
 <a id="nestedatt--configuration--splunk"></a>
@@ -201,6 +439,16 @@ Optional:
 - `password` (String, Sensitive)
 - `token` (String, Sensitive)
 - `username` (String)
+
+
+<a id="nestedatt--configuration--teams"></a>
+### Nested Schema for `configuration.teams`
+
+Required:
+
+- `client_id` (String)
+- `client_secret` (String, Sensitive)
+- `tenant_id` (String)
 
 
 <a id="nestedatt--configuration--tempo"></a>
