@@ -200,6 +200,8 @@ func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource
 		r.NewInfrastructureStackResource,
 		r.NewCustomStackRunResource,
 		r.NewRbacResource,
+		r.NewPolicyResource,
+		r.NewBindingPolicyResource,
 		r.NewGlobalServiceResource,
 		r.NewGroupMemberResource,
 		r.NewGroupResource,
@@ -232,6 +234,8 @@ func (p *PluralProvider) DataSources(_ context.Context) []func() datasource.Data
 		ds.NewInfrastructureStackDataSource,
 		ds.NewServiceContextDataSource,
 		ds.NewCloudConnectionDataSource,
+		ds.NewPolicyDataSource,
+		ds.NewBindingPolicyDataSource,
 	}
 }
 
