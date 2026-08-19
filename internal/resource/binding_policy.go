@@ -94,10 +94,12 @@ func (r *BindingPolicyResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	response, err := r.client.CreateBindingPolicy(ctx, data.Attributes(ctx, &resp.Diagnostics))
+	attributes := data.Attributes(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	response, err := r.client.CreateBindingPolicy(ctx, attributes)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create binding policy, got error: %s", err))
 		return
@@ -139,10 +141,12 @@ func (r *BindingPolicyResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	response, err := r.client.UpdateBindingPolicy(ctx, data.Id.ValueString(), data.UpdateAttributes(ctx, &resp.Diagnostics))
+	attributes := data.UpdateAttributes(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	response, err := r.client.UpdateBindingPolicy(ctx, data.Id.ValueString(), attributes)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update binding policy, got error: %s", err))
 		return

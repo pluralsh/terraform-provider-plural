@@ -98,3 +98,23 @@ func TestBindingPolicyAttributesAndFrom(t *testing.T) {
 func stringPointer(value string) *string {
 	return &value
 }
+
+func TestBindingPolicyAttributesReportInvalidRegexes(t *testing.T) {
+	bindingPolicy := BindingPolicy{
+		PolicyId:     types.StringValue("policy-1"),
+		BindPolicyId: types.StringValue("policy-2"),
+		Type:         types.StringValue("WORKBENCH"),
+		Matches: &BindingPolicyMatches{
+			Workbench: &WorkbenchPolicyMatches{Regexes: types.ListUnknown(types.StringType)},
+		},
+	}
+	diagnostics := diag.Diagnostics{}
+
+	attributes := bindingPolicy.Attributes(context.Background(), &diagnostics)
+	if !diagnostics.HasError() {
+		t.Fatal("expected diagnostics when regexes are unknown")
+	}
+	if attributes.Matches != nil {
+		t.Fatalf("expected no matches attributes after conversion failure, got %#v", attributes.Matches)
+	}
+}
