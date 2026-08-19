@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	gqlclient "github.com/pluralsh/console/go/client"
+	"github.com/samber/lo"
 )
 
 func TestPolicyAttributesAndFrom(t *testing.T) {
@@ -30,13 +31,13 @@ func TestPolicyAttributesAndFrom(t *testing.T) {
 		t.Fatalf("expected project ID to map to attributes, got %q", got)
 	}
 
-	policy.From(&gqlclient.Policy{
+	policy.From(&gqlclient.PolicyFragment{
 		ID:          "policy-1",
 		Name:        "allow-workbench",
 		Type:        gqlclient.PolicyTypeWorkbench,
-		Description: stringPointer("Allows supported workbench actions."),
+		Description: lo.ToPtr("Allows supported workbench actions."),
 		Policy:      "package policy\ndefault allow := true",
-		Project:     &gqlclient.Project{ID: "project-1"},
+		Project:     &gqlclient.TinyProjectFragment{ID: "project-1"},
 	})
 
 	if got := policy.Id.ValueString(); got != "policy-1" {
@@ -74,14 +75,14 @@ func TestBindingPolicyAttributesAndFrom(t *testing.T) {
 		t.Fatalf("expected workbench regex to map, got %q", got)
 	}
 
-	bindingPolicy.From(&gqlclient.BindingPolicy{
+	bindingPolicy.From(&gqlclient.BindingPolicyFragment{
 		ID:         "binding-1",
 		Type:       gqlclient.BindingPolicyTypeWorkbench,
 		Interval:   "30m",
-		Policy:     &gqlclient.Policy{ID: "policy-1"},
-		BindPolicy: &gqlclient.Policy{ID: "policy-2"},
-		Matches: &gqlclient.BindingPolicyMatches{
-			Workbench: &gqlclient.WorkbenchPolicyMatches{Regexes: []*string{stringPointer("^dev-.*$")}},
+		Policy:     &gqlclient.TinyPolicyFragment{ID: "policy-1"},
+		BindPolicy: &gqlclient.TinyPolicyFragment{ID: "policy-2"},
+		Matches: &gqlclient.BindingPolicyFragment_Matches{
+			Workbench: &gqlclient.BindingPolicyFragment_Matches_Workbench{Regexes: []*string{lo.ToPtr("^dev-.*$")}},
 		},
 	}, ctx, &diagnostics)
 	if diagnostics.HasError() {
@@ -93,10 +94,6 @@ func TestBindingPolicyAttributesAndFrom(t *testing.T) {
 	if got := bindingPolicy.Matches.Workbench.Regexes.Elements()[0].(types.String).ValueString(); got != "^dev-.*$" {
 		t.Fatalf("expected regex from response, got %q", got)
 	}
-}
-
-func stringPointer(value string) *string {
-	return &value
 }
 
 func TestBindingPolicyAttributesReportInvalidRegexes(t *testing.T) {

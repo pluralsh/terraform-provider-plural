@@ -24,7 +24,7 @@ func (p *Policy) Attributes() gqlclient.PolicyAttributes {
 	}
 }
 
-func (p *Policy) From(response *gqlclient.Policy) {
+func (p *Policy) From(response *gqlclient.PolicyFragment) {
 	p.Id = types.StringValue(response.ID)
 	p.Name = types.StringValue(response.Name)
 	p.Type = types.StringValue(string(response.Type))

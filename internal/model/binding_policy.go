@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	gqlclient "github.com/pluralsh/console/go/client"
+	"github.com/samber/lo"
 )
 
 type BindingPolicy struct {
@@ -45,7 +46,7 @@ func (p *BindingPolicy) UpdateAttributes(ctx context.Context, d *diag.Diagnostic
 	}
 }
 
-func (p *BindingPolicy) From(response *gqlclient.BindingPolicy, ctx context.Context, d *diag.Diagnostics) {
+func (p *BindingPolicy) From(response *gqlclient.BindingPolicyFragment, ctx context.Context, d *diag.Diagnostics) {
 	p.Id = types.StringValue(response.ID)
 	p.Type = types.StringValue(string(response.Type))
 	p.Interval = types.StringValue(response.Interval)
@@ -66,11 +67,11 @@ func (p *BindingPolicy) matchesAttributes(ctx context.Context, d *diag.Diagnosti
 	}
 
 	return &gqlclient.BindingPolicyMatchesAttributes{
-		Workbench: &gqlclient.WorkbenchPolicyMatchesAttributes{Regexes: stringPointers(regexes)},
+		Workbench: &gqlclient.WorkbenchPolicyMatchesAttributes{Regexes: lo.ToSlicePtr(regexes)},
 	}
 }
 
-func bindingPolicyMatchesFrom(response *gqlclient.BindingPolicyMatches, ctx context.Context, d *diag.Diagnostics) *BindingPolicyMatches {
+func bindingPolicyMatchesFrom(response *gqlclient.BindingPolicyFragment_Matches, ctx context.Context, d *diag.Diagnostics) *BindingPolicyMatches {
 	if response == nil || response.Workbench == nil {
 		return nil
 	}
@@ -83,20 +84,10 @@ func bindingPolicyMatchesFrom(response *gqlclient.BindingPolicyMatches, ctx cont
 	}
 }
 
-func policyIDFrom(policy *gqlclient.Policy) types.String {
+func policyIDFrom(policy *gqlclient.TinyPolicyFragment) types.String {
 	if policy == nil {
 		return types.StringNull()
 	}
 
 	return types.StringValue(policy.ID)
-}
-
-func stringPointers(values []string) []*string {
-	pointers := make([]*string, len(values))
-	for i := range values {
-		value := values[i]
-		pointers[i] = &value
-	}
-
-	return pointers
 }
