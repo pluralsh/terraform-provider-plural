@@ -12,26 +12,10 @@ import (
 	"github.com/samber/lo"
 )
 
-func TestDashboardAttributesAndFrom(t *testing.T) {
+func TestDashboardAttributes(t *testing.T) {
 	ctx := context.Background()
 	d := diag.Diagnostics{}
-	dashboard := Dashboard{
-		WorkbenchID: types.StringValue("workbench-1"),
-		Name:        types.StringValue("overview"),
-		Description: types.StringNull(),
-		Graphs: []*DashboardGraph{{
-			Identifier: types.StringValue("errors"),
-			Type:       types.StringValue("TIMESERIES"),
-			Options:    types.StringValue(`{"stacked":true}`),
-			Layout:     DashboardGraphLayout{X: types.Int64Value(0), Y: types.Int64Value(0), W: types.Int64Value(6), H: types.Int64Value(4)},
-			Datasource: &DashboardDatasource{Type: types.StringValue("METRICS"), Tool: types.StringValue("prometheus"), Input: types.StringNull()},
-		}},
-		Inputs: []*DashboardInput{{
-			Name:    types.StringValue("namespace"),
-			Type:    types.StringValue("SELECT"),
-			Options: types.ListValueMust(types.StringType, []attr.Value{types.StringValue("prod"), types.StringValue("dev")}),
-		}},
-	}
+	dashboard := newTestDashboard()
 
 	attributes := dashboard.Attributes(ctx, &d)
 	if d.HasError() {
@@ -63,6 +47,12 @@ func TestDashboardAttributesAndFrom(t *testing.T) {
 	if inputs, ok := sent["inputs"].([]any); !ok || len(inputs) != 0 {
 		t.Fatalf("expected removed inputs to be sent as an empty list, got %v", sent["inputs"])
 	}
+}
+
+func TestDashboardFrom(t *testing.T) {
+	ctx := context.Background()
+	d := diag.Diagnostics{}
+	dashboard := newTestDashboard()
 
 	dashboard.Inputs = []*DashboardInput{{
 		Name:       types.StringValue("namespace"),
@@ -141,5 +131,25 @@ func TestDashboardAttributesAndFrom(t *testing.T) {
 	unset.From(&gqlclient.WorkbenchDashboardFragment{ID: "dashboard-2", Name: "empty"}, ctx, &d)
 	if unset.Graphs != nil || unset.Inputs != nil {
 		t.Fatalf("expected unset graphs and inputs to stay unset")
+	}
+}
+
+func newTestDashboard() Dashboard {
+	return Dashboard{
+		WorkbenchID: types.StringValue("workbench-1"),
+		Name:        types.StringValue("overview"),
+		Description: types.StringNull(),
+		Graphs: []*DashboardGraph{{
+			Identifier: types.StringValue("errors"),
+			Type:       types.StringValue("TIMESERIES"),
+			Options:    types.StringValue(`{"stacked":true}`),
+			Layout:     DashboardGraphLayout{X: types.Int64Value(0), Y: types.Int64Value(0), W: types.Int64Value(6), H: types.Int64Value(4)},
+			Datasource: &DashboardDatasource{Type: types.StringValue("METRICS"), Tool: types.StringValue("prometheus"), Input: types.StringNull()},
+		}},
+		Inputs: []*DashboardInput{{
+			Name:    types.StringValue("namespace"),
+			Type:    types.StringValue("SELECT"),
+			Options: types.ListValueMust(types.StringType, []attr.Value{types.StringValue("prod"), types.StringValue("dev")}),
+		}},
 	}
 }

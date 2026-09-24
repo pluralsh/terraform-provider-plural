@@ -12,36 +12,10 @@ import (
 	"github.com/samber/lo"
 )
 
-func TestMonitorAttributesAndFrom(t *testing.T) {
+func TestMonitorAttributes(t *testing.T) {
 	ctx := context.Background()
 	d := diag.Diagnostics{}
-	monitor := Monitor{
-		Name:           types.StringValue("error-rate"),
-		ServiceID:      types.StringValue("service-1"),
-		WorkbenchID:    types.StringValue("workbench-1"),
-		Prompt:         types.StringValue("Investigate the error rate."),
-		Severity:       types.StringValue("HIGH"),
-		Type:           types.StringValue("LOG"),
-		EvaluationCron: types.StringValue("*/5 * * * *"),
-		Modes: &WorkbenchJobModes{
-			Plan:   types.BoolValue(true),
-			Model:  &WorkbenchJobModel{Provider: types.StringValue("ANTHROPIC"), Model: types.StringValue("claude")},
-			Budget: &WorkbenchJobBudget{Cost: types.Float64Value(12.5), Tokens: types.Int64Null()},
-			Kubernetes: &WorkbenchJobKubernetesModes{
-				ExcludeNamespaces: types.SetValueMust(types.StringType, []attr.Value{types.StringValue("kube-system")}),
-				RequireNamespaces: types.SetNull(types.StringType),
-			},
-		},
-		Query: MonitorQuery{
-			Log: &MonitorLogQuery{
-				Query:      types.StringValue("level:error"),
-				BucketSize: types.StringValue("5m"),
-				Operator:   types.StringValue("AND"),
-				Facets:     []*MonitorFacet{{Key: types.StringValue("namespace"), Value: types.StringValue("prod")}},
-			},
-		},
-		Threshold: MonitorThreshold{Aggregate: types.StringValue("MAX"), Value: types.Float64Value(0.95)},
-	}
+	monitor := newTestMonitor()
 
 	attributes := monitor.Attributes(ctx, &d)
 	if d.HasError() {
@@ -81,6 +55,12 @@ func TestMonitorAttributesAndFrom(t *testing.T) {
 	if value, ok := sent["description"]; !ok || value != nil {
 		t.Fatalf("expected unset description to be sent as null, got %v", sent["description"])
 	}
+}
+
+func TestMonitorFrom(t *testing.T) {
+	ctx := context.Background()
+	d := diag.Diagnostics{}
+	monitor := newTestMonitor()
 
 	monitor.From(&gqlclient.MonitorFragment{
 		ID:             "monitor-1",
@@ -127,6 +107,36 @@ func TestMonitorAttributesAndFrom(t *testing.T) {
 	monitor.From(&gqlclient.MonitorFragment{ID: "monitor-1", Name: "error-rate"}, ctx, &d)
 	if monitor.Modes != nil {
 		t.Fatalf("expected modes to be cleared when not returned")
+	}
+}
+
+func newTestMonitor() Monitor {
+	return Monitor{
+		Name:           types.StringValue("error-rate"),
+		ServiceID:      types.StringValue("service-1"),
+		WorkbenchID:    types.StringValue("workbench-1"),
+		Prompt:         types.StringValue("Investigate the error rate."),
+		Severity:       types.StringValue("HIGH"),
+		Type:           types.StringValue("LOG"),
+		EvaluationCron: types.StringValue("*/5 * * * *"),
+		Modes: &WorkbenchJobModes{
+			Plan:   types.BoolValue(true),
+			Model:  &WorkbenchJobModel{Provider: types.StringValue("ANTHROPIC"), Model: types.StringValue("claude")},
+			Budget: &WorkbenchJobBudget{Cost: types.Float64Value(12.5), Tokens: types.Int64Null()},
+			Kubernetes: &WorkbenchJobKubernetesModes{
+				ExcludeNamespaces: types.SetValueMust(types.StringType, []attr.Value{types.StringValue("kube-system")}),
+				RequireNamespaces: types.SetNull(types.StringType),
+			},
+		},
+		Query: MonitorQuery{
+			Log: &MonitorLogQuery{
+				Query:      types.StringValue("level:error"),
+				BucketSize: types.StringValue("5m"),
+				Operator:   types.StringValue("AND"),
+				Facets:     []*MonitorFacet{{Key: types.StringValue("namespace"), Value: types.StringValue("prod")}},
+			},
+		},
+		Threshold: MonitorThreshold{Aggregate: types.StringValue("MAX"), Value: types.Float64Value(0.95)},
 	}
 }
 

@@ -539,3 +539,148 @@ resource "plural_workbench_cron" "daily_check" {
   crontab      = "0 9 * * 1-5"
   prompt       = "Run a morning health check and summarize notable issues."
 }
+
+variable "service_id" {
+  description = "ID of the service deployment that the monitors watch."
+  type        = string
+}
+
+resource "plural_monitor" "error_logs" {
+  name            = "${local.name_prefix}error_logs"
+  service_id      = var.service_id
+  description     = "Fires when the service logs too many errors."
+  alert_template  = "Monitor {{ monitor.name }} fired for service {{ monitor.service.name }} on cluster {{ monitor.service.cluster.handle }}"
+  severity        = "HIGH"
+  type            = "LOG"
+  evaluation_cron = "*/5 * * * *"
+
+  query = {
+    log = {
+      query       = "error"
+      bucket_size = "5m"
+      duration    = "1h"
+      facets = [
+        { key = "namespace", value = "default" },
+      ]
+    }
+  }
+
+  threshold = {
+    aggregate = "MAX"
+    value     = 10
+  }
+}
+
+resource "plural_monitor" "latency" {
+  name            = "${local.name_prefix}latency"
+  service_id      = var.service_id
+  workbench_id    = plural_workbench.full.id
+  prompt          = "Investigate the increased latency and summarize the root cause."
+  severity        = "CRITICAL"
+  type            = "METRICS"
+  evaluation_cron = "*/10 * * * *"
+
+  query = {
+    metrics = {
+      tool     = plural_workbench_tool.prometheus.name
+      query    = "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))"
+      step     = "1m"
+      duration = "30m"
+    }
+  }
+
+  threshold = {
+    aggregate = "AVG"
+    value     = 0.5
+  }
+
+  modes = {
+    plan = true
+    budget = {
+      cost   = 5
+      tokens = 200000
+    }
+    kubernetes = {
+      update             = true
+      exclude_namespaces = ["kube-system"]
+    }
+  }
+}
+
+resource "plural_dashboard" "overview" {
+  workbench_id = plural_workbench.full.id
+  name         = "${local.name_prefix}console_overview"
+  description  = "Resource usage of the console on the mgmt cluster."
+
+  # Inputs are referenced in graph markdown and datasource inputs as ${name},
+  # which has to be escaped as $${name} in Terraform strings.
+  inputs = [
+    {
+      name        = "namespace"
+      label       = "Namespace"
+      description = "Namespace the console is running in."
+      type        = "TEXT"
+      default     = "plrl-console"
+      required    = true
+    },
+    {
+      name        = "pod"
+      label       = "Pod"
+      description = "Filter graphs by console pod."
+      type        = "SELECT"
+      default     = ".*"
+      datasource = {
+        type = "LABELS"
+        tool = "plrl_metric_label_search"
+        input = jsonencode({
+          metric = "container_cpu_usage_seconds_total"
+          label  = "pod"
+          query  = "console"
+        })
+      }
+    },
+  ]
+
+  graphs = [
+    {
+      identifier = "overview"
+      title      = "Overview"
+      type       = "SECTION"
+      options    = jsonencode({ collapsed = false })
+      layout     = { x = 0, y = 0, w = 12, h = 1 }
+    },
+    {
+      identifier = "notes"
+      title      = "About"
+      type       = "MARKDOWN"
+      section_id = "overview"
+      markdown   = "CPU and memory usage of the console pods in the `$${namespace}` namespace."
+      layout     = { x = 0, y = 1, w = 4, h = 4 }
+    },
+    {
+      identifier  = "cpu"
+      title       = "CPU usage"
+      description = "CPU cores used by console pods."
+      type        = "TIMESERIES"
+      section_id  = "overview"
+      layout      = { x = 4, y = 1, w = 8, h = 4 }
+      datasource = {
+        type  = "METRICS"
+        tool  = "plrl_metrics"
+        input = jsonencode({ query = "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"$${namespace}\", pod=~\"$${pod}\", container!=\"\"}[5m]))" })
+      }
+    },
+    {
+      identifier  = "memory"
+      title       = "Memory usage"
+      description = "Working set memory of console pods."
+      type        = "TIMESERIES"
+      layout      = { x = 0, y = 5, w = 12, h = 4 }
+      datasource = {
+        type  = "METRICS"
+        tool  = "plrl_metrics"
+        input = jsonencode({ query = "sum by (pod) (container_memory_working_set_bytes{namespace=\"$${namespace}\", pod=~\"$${pod}\", container!=\"\"})" })
+      }
+    },
+  ]
+}

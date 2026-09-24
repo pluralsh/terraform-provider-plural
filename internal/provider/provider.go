@@ -219,6 +219,8 @@ func (p *PluralProvider) Resources(_ context.Context) []func() resource.Resource
 		r.NewWorkbenchToolResource,
 		r.NewWorkbenchCronResource,
 		r.NewWorkbenchWebhookResource,
+		r.NewMonitorResource,
+		r.NewDashboardResource,
 	}
 }
 
