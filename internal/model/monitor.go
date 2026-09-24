@@ -21,8 +21,8 @@ type Monitor struct {
 	Severity       types.String       `tfsdk:"severity"`
 	Type           types.String       `tfsdk:"type"`
 	EvaluationCron types.String       `tfsdk:"evaluation_cron"`
-	Query          MonitorQuery       `tfsdk:"query"`
-	Threshold      MonitorThreshold   `tfsdk:"threshold"`
+	Query          *MonitorQuery      `tfsdk:"query"`
+	Threshold      *MonitorThreshold  `tfsdk:"threshold"`
 }
 
 func (in *Monitor) Attributes(ctx context.Context, d *diag.Diagnostics) gqlclient.MonitorAttributes {
@@ -55,6 +55,8 @@ func (in *Monitor) From(response *gqlclient.MonitorFragment, ctx context.Context
 	in.Severity = types.StringValue(string(response.Severity))
 	in.Type = types.StringValue(string(response.Type))
 	in.EvaluationCron = types.StringValue(response.EvaluationCron)
+	ensure(&in.Query)
+	ensure(&in.Threshold)
 	in.Query.From(&response.Query)
 	in.Threshold.From(&response.Threshold)
 

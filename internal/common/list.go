@@ -9,9 +9,12 @@ import (
 
 func ListFrom(values []*string, config types.List, ctx context.Context, d *diag.Diagnostics) types.List {
 	if len(values) == 0 {
-		// Rewriting config to state to avoid inconsistent result errors.
-		// This could happen, for example, when sending "nil" to API and "[]" is returned as a result.
-		return config
+		// Preserve null only when already unset; populated state must reflect remote removals.
+		// Typed null, as config can be an untyped zero value, e.g. on import.
+		if config.IsNull() {
+			return types.ListNull(types.StringType)
+		}
+		return types.ListValueMust(types.StringType, nil)
 	}
 
 	listValue, diags := types.ListValueFrom(ctx, types.StringType, values)

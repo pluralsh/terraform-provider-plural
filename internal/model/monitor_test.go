@@ -128,7 +128,7 @@ func newTestMonitor() Monitor {
 				RequireNamespaces: types.SetNull(types.StringType),
 			},
 		},
-		Query: MonitorQuery{
+		Query: &MonitorQuery{
 			Log: &MonitorLogQuery{
 				Query:      types.StringValue("level:error"),
 				BucketSize: types.StringValue("5m"),
@@ -136,7 +136,7 @@ func newTestMonitor() Monitor {
 				Facets:     []*MonitorFacet{{Key: types.StringValue("namespace"), Value: types.StringValue("prod")}},
 			},
 		},
-		Threshold: MonitorThreshold{Aggregate: types.StringValue("MAX"), Value: types.Float64Value(0.95)},
+		Threshold: &MonitorThreshold{Aggregate: types.StringValue("MAX"), Value: types.Float64Value(0.95)},
 	}
 }
 
@@ -151,5 +151,25 @@ func TestMonitorLogFacetsFrom(t *testing.T) {
 	query.From(&gqlclient.MonitorQueryFragment_Log{Query: "level:error", BucketSize: "5m"})
 	if query.Facets == nil || len(query.Facets) != 0 {
 		t.Fatalf("expected facets removed in Console to be cleared, got %v", query.Facets)
+	}
+}
+
+func TestMonitorFromClearedNamespaceRestrictions(t *testing.T) {
+	monitor := newTestMonitor()
+	monitor.Modes.Kubernetes.RequireNamespaces = types.SetValueMust(types.StringType, []attr.Value{types.StringValue("prod")})
+	d := diag.Diagnostics{}
+	monitor.From(&gqlclient.MonitorFragment{Modes: &gqlclient.WorkbenchJobModesFragment{
+		Kubernetes: &gqlclient.WorkbenchJobModesFragment_Kubernetes{
+			ExcludeNamespaces: []*string{},
+			RequireNamespaces: []*string{},
+		},
+	}}, context.Background(), &d)
+	if d.HasError() {
+		t.Fatal(d)
+	}
+	for _, namespaces := range []types.Set{monitor.Modes.Kubernetes.ExcludeNamespaces, monitor.Modes.Kubernetes.RequireNamespaces} {
+		if namespaces.IsNull() || namespaces.IsUnknown() || len(namespaces.Elements()) != 0 {
+			t.Fatalf("expected removed namespace restrictions to be cleared, got %v", namespaces)
+		}
 	}
 }

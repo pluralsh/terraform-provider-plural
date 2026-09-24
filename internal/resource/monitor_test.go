@@ -4,15 +4,71 @@ import (
 	"context"
 	"testing"
 
+	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/model"
 
+	"github.com/gqlgo/gqlgenc/clientv2"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	gqlclient "github.com/pluralsh/console/go/client"
 )
+
+type monitorImportClient struct {
+	gqlclient.ConsoleClient
+	id string
+}
+
+func (c *monitorImportClient) GetMonitor(_ context.Context, id string, _ ...clientv2.RequestInterceptor) (*gqlclient.GetMonitor, error) {
+	c.id = id
+	return &gqlclient.GetMonitor{Monitor: &gqlclient.MonitorFragment{
+		ID:             id,
+		Name:           "imported",
+		Type:           gqlclient.MonitorTypeMetrics,
+		Severity:       gqlclient.AlertSeverityHigh,
+		EvaluationCron: "*/5 * * * *",
+		Service:        &gqlclient.MonitorFragment_Service{ID: "service-1"},
+		Query:          gqlclient.MonitorQueryFragment{Metrics: &gqlclient.MonitorQueryFragment_Metrics{Query: "up"}},
+		Threshold:      gqlclient.MonitorFragment_Threshold{Aggregate: gqlclient.MonitorAggregateMax, Value: 1},
+	}}, nil
+}
+
+func TestMonitorResourceImport(t *testing.T) {
+	ctx := context.Background()
+	api := &monitorImportClient{}
+	r := &MonitorResource{client: client.NewClient(api)}
+	s := resource.SchemaResponse{}
+	r.Schema(ctx, resource.SchemaRequest{}, &s)
+	imported := resource.ImportStateResponse{State: tfsdk.State{
+		Schema: s.Schema,
+		Raw:    tftypes.NewValue(s.Schema.Type().TerraformType(ctx), nil),
+	}}
+	r.ImportState(ctx, resource.ImportStateRequest{ID: "monitor-1"}, &imported)
+	if imported.Diagnostics.HasError() {
+		t.Fatal(imported.Diagnostics)
+	}
+	refreshed := resource.ReadResponse{State: imported.State}
+	r.Read(ctx, resource.ReadRequest{State: imported.State}, &refreshed)
+	if refreshed.Diagnostics.HasError() {
+		t.Fatal(refreshed.Diagnostics)
+	}
+	var monitor model.Monitor
+	if d := refreshed.State.Get(ctx, &monitor); d.HasError() {
+		t.Fatal(d)
+	}
+	if api.id != "monitor-1" || monitor.Id.ValueString() != "monitor-1" || monitor.ServiceID.ValueString() != "service-1" {
+		t.Fatalf("expected imported monitor to be fetched and stored, got %+v", monitor)
+	}
+	if monitor.Query == nil || monitor.Query.Metrics == nil || monitor.Query.Metrics.Query.ValueString() != "up" {
+		t.Fatalf("expected imported query to be populated, got %+v", monitor.Query)
+	}
+	if monitor.Threshold == nil || monitor.Threshold.Value.ValueFloat64() != 1 {
+		t.Fatalf("expected imported threshold to be populated, got %+v", monitor.Threshold)
+	}
+}
 
 func TestMonitorResourceSchemaMatchesModel(t *testing.T) {
 	monitor := &model.Monitor{
@@ -41,7 +97,7 @@ func TestMonitorResourceSchemaMatchesModel(t *testing.T) {
 				RequireNamespaces: types.SetNull(types.StringType),
 			},
 		},
-		Query: model.MonitorQuery{
+		Query: &model.MonitorQuery{
 			Log: &model.MonitorLogQuery{
 				Tool:       types.StringNull(),
 				Query:      types.StringValue("level:error"),
@@ -52,7 +108,7 @@ func TestMonitorResourceSchemaMatchesModel(t *testing.T) {
 				Options:    &model.MonitorLogOptions{Azure: &model.MonitorLogAzureOptions{ResourceID: types.StringValue("resource-1")}},
 			},
 		},
-		Threshold: model.MonitorThreshold{Aggregate: types.StringValue("MAX"), Value: types.Float64Value(0.95)},
+		Threshold: &model.MonitorThreshold{Aggregate: types.StringValue("MAX"), Value: types.Float64Value(0.95)},
 	}
 
 	assertSchemaMatchesModel(t, NewMonitorResource(), monitor, new(model.Monitor))
@@ -70,7 +126,7 @@ func TestMonitorResourceSchemaMatchesModel(t *testing.T) {
 		}},
 	}
 	monitor.Type = types.StringValue("METRICS")
-	monitor.Query = model.MonitorQuery{Metrics: metrics}
+	monitor.Query = &model.MonitorQuery{Metrics: metrics}
 	monitor.Modes = nil
 	assertSchemaMatchesModel(t, NewMonitorResource(), monitor, new(model.Monitor))
 }

@@ -9,9 +9,12 @@ import (
 
 func SetFrom(values []*string, config types.Set, ctx context.Context, d *diag.Diagnostics) types.Set {
 	if len(values) == 0 {
-		// Rewriting config to state to avoid inconsistent result errors.
-		// This could happen, for example, when sending "nil" to API and "[]" is returned as a result.
-		return config
+		// Preserve null only when already unset; populated state must reflect remote removals.
+		// Typed null, as config can be an untyped zero value, e.g. on import.
+		if config.IsNull() {
+			return types.SetNull(types.StringType)
+		}
+		return types.SetValueMust(types.StringType, nil)
 	}
 
 	setValue, diags := types.SetValueFrom(ctx, types.StringType, values)

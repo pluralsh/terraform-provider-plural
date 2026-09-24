@@ -153,3 +153,18 @@ func newTestDashboard() Dashboard {
 		}},
 	}
 }
+
+func TestDashboardFromClearedInputOptions(t *testing.T) {
+	dashboard := newTestDashboard()
+	d := diag.Diagnostics{}
+	dashboard.From(&gqlclient.WorkbenchDashboardFragment{
+		Inputs: []*gqlclient.WorkbenchDashboardInputFragment{{Name: "namespace", Options: []*string{}}},
+	}, context.Background(), &d)
+	if d.HasError() {
+		t.Fatal(d)
+	}
+	options := dashboard.Inputs[0].Options
+	if options.IsNull() || options.IsUnknown() || len(options.Elements()) != 0 {
+		t.Fatalf("expected removed dashboard input options to be cleared, got %v", options)
+	}
+}
