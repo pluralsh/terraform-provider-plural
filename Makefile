@@ -46,12 +46,12 @@ install-go: ## installs terraform plugin binary locally
 ##@ Codegen
 
 .PHONY: generate-docs
-generate-docs: install-tools ## generate docs
-	tfplugindocs generate
+generate-docs: ## generate docs
+	go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate
 
 .PHONY: validate-docs
-validate-docs: install-tools ## validate generated docs
-	tfplugindocs validate
+validate-docs: ## validate generated docs
+	go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs validate
 
 ##@ Tests
 
