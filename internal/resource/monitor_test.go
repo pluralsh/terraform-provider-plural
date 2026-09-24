@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
@@ -95,5 +96,31 @@ func assertSchemaMatchesModel[T any](t *testing.T, r resource.Resource, in *T, o
 	}
 	if diagnostics := state.Get(ctx, out); diagnostics.HasError() {
 		t.Fatalf("unable to get model from state: %v", diagnostics)
+	}
+}
+
+func TestMonitorIntervalValidators(t *testing.T) {
+	cases := map[string]bool{
+		"30s":   true,
+		"10m":   true,
+		"1h":    true,
+		"1d":    true,
+		"1h30m": true,
+		"":      false,
+		"5":     false,
+		"5x":    false,
+		"hour":  false,
+	}
+
+	for value, valid := range cases {
+		t.Run(value, func(t *testing.T) {
+			response := &validator.StringResponse{}
+			for _, v := range intervalValidators() {
+				v.ValidateString(context.Background(), validator.StringRequest{ConfigValue: types.StringValue(value)}, response)
+			}
+			if got := !response.Diagnostics.HasError(); got != valid {
+				t.Fatalf("expected %q to be valid=%t, got diagnostics: %v", value, valid, response.Diagnostics)
+			}
+		})
 	}
 }

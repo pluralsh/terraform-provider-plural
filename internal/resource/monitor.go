@@ -3,6 +3,7 @@ package resource
 import (
 	"context"
 	"fmt"
+	"regexp"
 
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
@@ -67,7 +68,7 @@ func (r *MonitorResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Description:         "Prompt used when the monitor starts a workbench investigation.",
 				MarkdownDescription: "Prompt used when the monitor starts a workbench investigation.",
 				Optional:            true,
-				Validators:          []validator.String{stringvalidator.LengthAtLeast(1)},
+				Validators:          []validator.String{stringvalidator.LengthBetween(1, 2048)},
 			},
 			"modes": workbenchJobModesSchema("Mode-specific options for workbench jobs started by this monitor."),
 			"description": schema.StringAttribute{
@@ -123,17 +124,19 @@ func (r *MonitorResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 								Description:         "Log query string passed to the underlying log provider.",
 								MarkdownDescription: "Log query string passed to the underlying log provider.",
 								Required:            true,
+								Validators:          []validator.String{stringvalidator.LengthAtLeast(1)},
 							},
 							"bucket_size": schema.StringAttribute{
 								Description:         "Time bucket size used when aggregating log results, e.g. 5m.",
 								MarkdownDescription: "Time bucket size used when aggregating log results, e.g. `5m`.",
 								Required:            true,
+								Validators:          intervalValidators(),
 							},
 							"duration": schema.StringAttribute{
 								Description:         "Lookback duration for the log query, e.g. 1h.",
 								MarkdownDescription: "Lookback duration for the log query, e.g. `1h`.",
 								Optional:            true,
-								Validators:          []validator.String{stringvalidator.LengthAtLeast(1)},
+								Validators:          intervalValidators(),
 							},
 							"operator": schema.StringAttribute{
 								Description:         withAllowedValues("Operator used when combining multiple log queries. Defaults to OR.", enumValues(gqlclient.AllMonitorOperator), false),
@@ -153,11 +156,13 @@ func (r *MonitorResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 											Description:         "Facet key, e.g. a Kubernetes namespace or pod label name.",
 											MarkdownDescription: "Facet key, e.g. a Kubernetes namespace or pod label name.",
 											Required:            true,
+											Validators:          []validator.String{stringvalidator.LengthAtLeast(1)},
 										},
 										"value": schema.StringAttribute{
 											Description:         "Facet value to match for the given key.",
 											MarkdownDescription: "Facet value to match for the given key.",
 											Required:            true,
+											Validators:          []validator.String{stringvalidator.LengthAtLeast(1)},
 										},
 									},
 								},
@@ -176,6 +181,7 @@ func (r *MonitorResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 												Description:         "Azure resource ID to query logs for.",
 												MarkdownDescription: "Azure resource ID to query logs for.",
 												Optional:            true,
+												Validators:          []validator.String{stringvalidator.LengthAtLeast(1)},
 											},
 										},
 									},
@@ -198,18 +204,19 @@ func (r *MonitorResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 								Description:         "Metrics query string passed to the underlying metrics provider.",
 								MarkdownDescription: "Metrics query string passed to the underlying metrics provider.",
 								Required:            true,
+								Validators:          []validator.String{stringvalidator.LengthAtLeast(1)},
 							},
 							"step": schema.StringAttribute{
 								Description:         "Metrics query step, e.g. 5m.",
 								MarkdownDescription: "Metrics query step, e.g. `5m`.",
 								Optional:            true,
-								Validators:          []validator.String{stringvalidator.LengthAtLeast(1)},
+								Validators:          intervalValidators(),
 							},
 							"duration": schema.StringAttribute{
 								Description:         "Lookback duration for the metrics query, e.g. 1h.",
 								MarkdownDescription: "Lookback duration for the metrics query, e.g. `1h`.",
 								Optional:            true,
-								Validators:          []validator.String{stringvalidator.LengthAtLeast(1)},
+								Validators:          intervalValidators(),
 							},
 							"options": schema.SingleNestedAttribute{
 								Description:         "Provider-specific metrics query options.",
@@ -263,6 +270,19 @@ func azureMetricsOptionAttribute(description string) schema.StringAttribute {
 		Description:         description,
 		MarkdownDescription: description,
 		Optional:            true,
+		Validators:          []validator.String{stringvalidator.LengthAtLeast(1)},
+	}
+}
+
+// intervalRegexp mirrors the Console API validation of interval strings. It is intentionally
+// not anchored, same as in the API, so that no value accepted by the API is rejected here.
+var intervalRegexp = regexp.MustCompile(`\d+[dmhs]`)
+
+// intervalValidators validates interval strings, e.g. 1h, 10m or 30s, the same way as the Console API.
+func intervalValidators() []validator.String {
+	return []validator.String{
+		stringvalidator.LengthAtLeast(1),
+		stringvalidator.RegexMatches(intervalRegexp, "must be a valid interval string, e.g. 1h, 10m or 30s"),
 	}
 }
 
