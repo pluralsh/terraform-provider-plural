@@ -548,31 +548,34 @@ variable "service_id" {
 resource "plural_monitor" "error_logs" {
   name            = "${local.name_prefix}error_logs"
   service_id      = var.service_id
-  description     = "Fires when the service logs too many errors."
-  alert_template  = "Monitor {{ monitor.name }} fired for service {{ monitor.service.name }} on cluster {{ monitor.service.cluster.handle }}"
-  severity        = "HIGH"
+  description     = "Fires when the service logs too many errors or fatal messages."
+  severity        = "MEDIUM"
   type            = "LOG"
-  evaluation_cron = "*/5 * * * *"
+  evaluation_cron = "*/15 * * * *"
 
   query = {
     log = {
-      query       = "error"
-      bucket_size = "5m"
-      duration    = "1h"
+      query       = "error OR fatal"
+      bucket_size = "10m"
+      duration    = "2h"
+      operator    = "OR"
       facets = [
-        { key = "namespace", value = "default" },
+        { key = "namespace", value = "production" },
+        { key = "container", value = "app" },
       ]
     }
   }
 
   threshold = {
     aggregate = "MAX"
-    value     = 10
+    value     = 20
   }
 
   modes = {
     kubernetes = {
-      update = true
+      update             = false
+      exec               = true
+      require_namespaces = ["default", "monitoring"]
     }
   }
 }
@@ -581,35 +584,32 @@ resource "plural_monitor" "latency" {
   name            = "${local.name_prefix}latency"
   service_id      = var.service_id
   workbench_id    = plural_workbench.full.id
-  prompt          = "Investigate the increased latency and summarize the root cause."
-  severity        = "CRITICAL"
+  prompt          = "Investigate the p99 latency spike and propose a fix."
+  severity        = "HIGH"
   type            = "METRICS"
   evaluation_cron = "*/10 * * * *"
 
   query = {
     metrics = {
       tool     = plural_workbench_tool.prometheus.name
-      query    = "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))"
-      step     = "1m"
-      duration = "30m"
+      query    = "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))"
+      duration = "1h"
     }
   }
 
   threshold = {
-    aggregate = "AVG"
-    value     = 0.5
+    aggregate = "MAX"
+    value     = 1
   }
 
   modes = {
-    plan = true
     budget = {
-      cost   = 5
+      cost   = 10
       tokens = 200000
     }
     kubernetes = {
       update             = true
-      exclude_namespaces = ["kube-system"]
-      require_namespaces = ["default"]
+      exclude_namespaces = ["kube-system", "kube-public"]
     }
   }
 }
@@ -617,7 +617,7 @@ resource "plural_monitor" "latency" {
 resource "plural_dashboard" "overview" {
   workbench_id = plural_workbench.full.id
   name         = "${local.name_prefix}console_overview"
-  description  = "Resource usage of the console on the mgmt cluster."
+  description  = "CPU, memory and restarts of the console on the mgmt cluster."
 
   # Inputs are referenced in graph markdown and datasource inputs as ${name},
   # which has to be escaped as $${name} in Terraform strings.
@@ -628,7 +628,14 @@ resource "plural_dashboard" "overview" {
       description = "Namespace the console is running in."
       type        = "TEXT"
       default     = "plrl-console"
-      required    = true
+    },
+    {
+      name        = "window"
+      label       = "Rate window"
+      description = "Window used to calculate CPU usage rate."
+      type        = "SELECT"
+      default     = "15m"
+      options     = ["5m", "15m", "1h"]
     },
     {
       name        = "pod"
@@ -646,14 +653,6 @@ resource "plural_dashboard" "overview" {
         })
       }
     },
-    {
-      name        = "window"
-      label       = "Rate window"
-      description = "Window used to calculate CPU usage rate."
-      type        = "SELECT"
-      default     = "5m"
-      options     = ["1m", "5m", "15m"]
-    },
   ]
 
   graphs = [
@@ -661,16 +660,8 @@ resource "plural_dashboard" "overview" {
       identifier = "overview"
       title      = "Overview"
       type       = "SECTION"
-      options    = jsonencode({ collapsed = false })
+      options    = jsonencode({ collapsed = true })
       layout     = { x = 0, y = 0, w = 12, h = 1 }
-    },
-    {
-      identifier = "notes"
-      title      = "About"
-      type       = "MARKDOWN"
-      section_id = "overview"
-      markdown   = "CPU and memory usage of the console pods in the `$${namespace}` namespace."
-      layout     = { x = 0, y = 1, w = 4, h = 4 }
     },
     {
       identifier  = "cpu"
@@ -678,7 +669,7 @@ resource "plural_dashboard" "overview" {
       description = "CPU cores used by console pods."
       type        = "TIMESERIES"
       section_id  = "overview"
-      layout      = { x = 4, y = 1, w = 8, h = 4 }
+      layout      = { x = 0, y = 1, w = 12, h = 4 }
       datasource = {
         type  = "METRICS"
         tool  = "plrl_metrics"
@@ -690,11 +681,24 @@ resource "plural_dashboard" "overview" {
       title       = "Memory usage"
       description = "Working set memory of console pods."
       type        = "TIMESERIES"
-      layout      = { x = 0, y = 5, w = 12, h = 4 }
+      section_id  = "overview"
+      layout      = { x = 0, y = 5, w = 8, h = 4 }
       datasource = {
         type  = "METRICS"
         tool  = "plrl_metrics"
         input = jsonencode({ query = "sum by (pod) (container_memory_working_set_bytes{namespace=\"$${namespace}\", pod=~\"$${pod}\", container!=\"\"})" })
+      }
+    },
+    {
+      identifier  = "restarts"
+      title       = "Restarts"
+      description = "Container restarts of console pods in the selected window."
+      type        = "STAT"
+      layout      = { x = 8, y = 5, w = 4, h = 4 }
+      datasource = {
+        type  = "METRICS"
+        tool  = "plrl_metrics"
+        input = jsonencode({ query = "sum(increase(kube_pod_container_status_restarts_total{namespace=\"$${namespace}\", pod=~\"$${pod}\"}[$${window}]))" })
       }
     },
   ]
