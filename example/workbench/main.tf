@@ -569,6 +569,12 @@ resource "plural_monitor" "error_logs" {
     aggregate = "MAX"
     value     = 10
   }
+
+  modes = {
+    kubernetes = {
+      update = true
+    }
+  }
 }
 
 resource "plural_monitor" "latency" {
@@ -603,6 +609,7 @@ resource "plural_monitor" "latency" {
     kubernetes = {
       update             = true
       exclude_namespaces = ["kube-system"]
+      require_namespaces = ["default"]
     }
   }
 }
@@ -639,6 +646,14 @@ resource "plural_dashboard" "overview" {
         })
       }
     },
+    {
+      name        = "window"
+      label       = "Rate window"
+      description = "Window used to calculate CPU usage rate."
+      type        = "SELECT"
+      default     = "5m"
+      options     = ["1m", "5m", "15m"]
+    },
   ]
 
   graphs = [
@@ -667,7 +682,7 @@ resource "plural_dashboard" "overview" {
       datasource = {
         type  = "METRICS"
         tool  = "plrl_metrics"
-        input = jsonencode({ query = "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"$${namespace}\", pod=~\"$${pod}\", container!=\"\"}[5m]))" })
+        input = jsonencode({ query = "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"$${namespace}\", pod=~\"$${pod}\", container!=\"\"}[$${window}]))" })
       }
     },
     {
