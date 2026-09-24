@@ -443,8 +443,8 @@ func (isjs *InfrastructureStackJobSpec) AnnotationsAttributes(ctx context.Contex
 	return common.AttributesJson(elements, d)
 }
 
-func (isjs *InfrastructureStackJobSpec) ContainersAttributes(ctx context.Context, d *diag.Diagnostics) []*gqlclient.ContainerAttributes {
-	if isjs.Containers.IsNull() {
+func (isjs *InfrastructureStackJobSpec) ContainersAttributes(ctx context.Context, d *diag.Diagnostics) *[]*gqlclient.ContainerAttributes {
+	if isjs.Containers.IsNull() || isjs.Containers.IsUnknown() {
 		return nil
 	}
 
@@ -456,7 +456,7 @@ func (isjs *InfrastructureStackJobSpec) ContainersAttributes(ctx context.Context
 		result = append(result, container.Attributes(ctx, d))
 	}
 
-	return result
+	return &result
 }
 
 func (isjs *InfrastructureStackJobSpec) From(spec *gqlclient.JobSpecFragment, ctx context.Context, d *diag.Diagnostics) {
