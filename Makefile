@@ -1,10 +1,5 @@
-ifndef GOPATH
-$(error $$GOPATH environment variable not set)
-endif
-
-ifeq (,$(findstring $(GOPATH)/bin,$(PATH)))
-$(error $$GOPATH/bin directory is not in your $$PATH)
-endif
+GOPATH ?= $(shell go env GOPATH)
+export PATH := $(GOPATH)/bin:$(PATH)
 
 ##@ General
 
