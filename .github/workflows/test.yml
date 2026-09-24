@@ -33,7 +33,6 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
-          check-latest: true
       - run: make test
   verify-docs:
     name: Verify docs
@@ -61,7 +60,6 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
-          check-latest: true
       - uses: golangci/golangci-lint-action@v9
         with:
           version: v2.13.2
