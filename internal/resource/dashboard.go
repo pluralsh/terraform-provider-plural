@@ -8,6 +8,7 @@ import (
 	"terraform-provider-plural/internal/common"
 	"terraform-provider-plural/internal/model"
 
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -15,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -38,9 +40,7 @@ func (r *DashboardResource) Metadata(_ context.Context, req resource.MetadataReq
 
 func (r *DashboardResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Workbench dashboard resource. A dashboard arranges graphs, backed by workbench observability tools, " +
-			"on a grid. Graph `options` and datasource `input` are not returned by the Console API, so changes to them " +
-			"made outside of Terraform are not detected, and they are not set on import.",
+		MarkdownDescription: "Workbench dashboard resource. A dashboard arranges graphs, backed by workbench observability tools, on a grid.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description:         "Internal identifier of this dashboard.",
@@ -112,6 +112,7 @@ func (r *DashboardResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 							Description:         "JSON-encoded visualization-specific display options, e.g. jsonencode({ collapsed = true }) for sections.",
 							MarkdownDescription: "JSON-encoded visualization-specific display options, e.g. `jsonencode({ collapsed = true })` for sections.",
 							Optional:            true,
+							CustomType:          jsontypes.NormalizedType{},
 						},
 						"layout": schema.SingleNestedAttribute{
 							Description:         "Grid position and size of the graph.",
@@ -216,6 +217,9 @@ func dashboardDatasourceSchema(description string) schema.SingleNestedAttribute 
 				Description:         "JSON-encoded input passed to the tool, e.g. jsonencode({ query = \"up\" }). Defaults to an empty object.",
 				MarkdownDescription: "JSON-encoded input passed to the tool, e.g. `jsonencode({ query = \"up\" })`. Defaults to an empty object.",
 				Optional:            true,
+				Computed:            true,
+				CustomType:          jsontypes.NormalizedType{},
+				Default:             stringdefault.StaticString("{}"),
 			},
 		},
 	}

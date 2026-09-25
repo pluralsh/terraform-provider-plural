@@ -7,11 +7,12 @@ require (
 	github.com/gqlgo/gqlgenc v0.38.2
 	github.com/hashicorp/terraform-plugin-docs v0.25.0
 	github.com/hashicorp/terraform-plugin-framework v1.19.0
+	github.com/hashicorp/terraform-plugin-framework-jsontypes v0.2.0
 	github.com/hashicorp/terraform-plugin-framework-validators v0.19.0
 	github.com/hashicorp/terraform-plugin-go v0.31.0
 	github.com/hashicorp/terraform-plugin-log v0.11.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/pluralsh/console/go/client v1.81.1
+	github.com/pluralsh/console/go/client v1.81.2-0.20260925112502-6c02cf1e7b9b
 	github.com/pluralsh/plural-cli v0.12.65
 	github.com/pluralsh/polly v0.3.8
 	github.com/samber/lo v1.53.0

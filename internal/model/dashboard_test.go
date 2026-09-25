@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -58,7 +59,7 @@ func TestDashboardFrom(t *testing.T) {
 		Name:       types.StringValue("namespace"),
 		Type:       types.StringValue("SELECT"),
 		Options:    types.ListNull(types.StringType),
-		Datasource: &DashboardDatasource{Type: types.StringValue("LABELS"), Tool: types.StringValue("prometheus"), Input: types.StringValue(`{"label":"namespace"}`)},
+		Datasource: &DashboardDatasource{Type: types.StringValue("LABELS"), Tool: types.StringValue("prometheus"), Input: jsontypes.NewNormalizedValue(`{"label":"namespace"}`)},
 	}}
 	dashboard.From(&gqlclient.WorkbenchDashboardFragment{
 		ID:          "dashboard-1",
@@ -69,8 +70,9 @@ func TestDashboardFrom(t *testing.T) {
 				Identifier: "errors",
 				Title:      lo.ToPtr("Errors"),
 				Type:       gqlclient.DashboardGraphTypeTimeseries,
+				Options:    map[string]any{"stacked": false, "legend": map[string]any{"position": "bottom"}},
 				Layout:     gqlclient.WorkbenchDashboardGraphFragment_Layout{X: 0, Y: 0, W: 12, H: 4},
-				Datasource: &gqlclient.WorkbenchDashboardDatasourceFragment{Type: gqlclient.DashboardDatasourceTypeMetrics, Tool: "prometheus"},
+				Datasource: &gqlclient.WorkbenchDashboardDatasourceFragment{Type: gqlclient.DashboardDatasourceTypeMetrics, Tool: "prometheus", Input: map[string]any{"query": "up"}},
 			},
 			{
 				Identifier: "notes",
@@ -83,7 +85,7 @@ func TestDashboardFrom(t *testing.T) {
 			Name:       "namespace",
 			Type:       gqlclient.DashboardInputTypeSelect,
 			Options:    []*string{},
-			Datasource: &gqlclient.WorkbenchDashboardDatasourceFragment{Type: gqlclient.DashboardDatasourceTypeLabels, Tool: "prometheus"},
+			Datasource: &gqlclient.WorkbenchDashboardDatasourceFragment{Type: gqlclient.DashboardDatasourceTypeLabels, Tool: "prometheus", Input: map[string]any{"metric": "kube_pod_info"}},
 		}},
 		Workbench: &gqlclient.WorkbenchDashboardFragment_Workbench{ID: "workbench-1"},
 	}, ctx, &d)
@@ -105,22 +107,19 @@ func TestDashboardFrom(t *testing.T) {
 	if errors.Title.ValueString() != "Errors" || errors.Layout.W.ValueInt64() != 12 {
 		t.Fatalf("expected graph fields from response, got %+v", errors)
 	}
-	if errors.Options.ValueString() != `{"stacked":true}` || !errors.Datasource.Input.IsNull() {
-		t.Fatalf("expected options and datasource input not returned by the API to be kept, got %q and %q", errors.Options, errors.Datasource.Input)
-	}
+	expectJSON(t, "graph options", errors.Options, `{ "legend": { "position": "bottom" }, "stacked": false }`)
+	expectJSON(t, "graph datasource input", errors.Datasource.Input, `{"query": "up"}`)
 
 	notes := dashboard.Graphs[1]
 	if notes.Markdown.ValueString() != "# Notes" || !notes.Options.IsNull() || notes.Datasource != nil {
-		t.Fatalf("expected graph added in Console to be mapped without kept values, got %+v", notes)
+		t.Fatalf("expected graph without options and datasource to be mapped, got %+v", notes)
 	}
 
 	input := dashboard.Inputs[0]
 	if !input.Options.IsNull() {
 		t.Fatalf("expected empty input options to stay unset, got %v", input.Options)
 	}
-	if input.Datasource.Input.ValueString() != `{"label":"namespace"}` {
-		t.Fatalf("expected input datasource input not returned by the API to be kept, got %q", input.Datasource.Input)
-	}
+	expectJSON(t, "input datasource input", input.Datasource.Input, `{"metric":"kube_pod_info"}`)
 
 	dashboard.From(&gqlclient.WorkbenchDashboardFragment{ID: "dashboard-1", Name: "overview"}, ctx, &d)
 	if dashboard.Graphs == nil || len(dashboard.Graphs) != 0 || len(dashboard.Inputs) != 0 {
@@ -142,9 +141,9 @@ func newTestDashboard() Dashboard {
 		Graphs: []*DashboardGraph{{
 			Identifier: types.StringValue("errors"),
 			Type:       types.StringValue("TIMESERIES"),
-			Options:    types.StringValue(`{"stacked":true}`),
+			Options:    jsontypes.NewNormalizedValue(`{"stacked":true}`),
 			Layout:     DashboardGraphLayout{X: types.Int64Value(0), Y: types.Int64Value(0), W: types.Int64Value(6), H: types.Int64Value(4)},
-			Datasource: &DashboardDatasource{Type: types.StringValue("METRICS"), Tool: types.StringValue("prometheus"), Input: types.StringNull()},
+			Datasource: &DashboardDatasource{Type: types.StringValue("METRICS"), Tool: types.StringValue("prometheus"), Input: jsontypes.NewNormalizedNull()},
 		}},
 		Inputs: []*DashboardInput{{
 			Name:    types.StringValue("namespace"),
@@ -166,5 +165,23 @@ func TestDashboardFromClearedInputOptions(t *testing.T) {
 	options := dashboard.Inputs[0].Options
 	if options.IsNull() || options.IsUnknown() || len(options.Elements()) != 0 {
 		t.Fatalf("expected removed dashboard input options to be cleared, got %v", options)
+	}
+}
+
+// expectJSON checks that a value read from the API is semantically equal to the configured JSON,
+// which may use different formatting or key order, so that it is not reported as a change.
+func expectJSON(t *testing.T, name string, actual jsontypes.Normalized, configured string) {
+	t.Helper()
+
+	if actual.IsNull() || actual.IsUnknown() {
+		t.Fatalf("expected %s to be set, got %v", name, actual)
+	}
+
+	equal, d := actual.StringSemanticEquals(context.Background(), jsontypes.NewNormalizedValue(configured))
+	if d.HasError() {
+		t.Fatalf("unexpected diagnostics comparing %s: %v", name, d)
+	}
+	if !equal {
+		t.Fatalf("expected %s %s to be semantically equal to %s", name, actual.ValueString(), configured)
 	}
 }

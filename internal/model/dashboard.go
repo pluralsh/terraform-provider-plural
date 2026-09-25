@@ -2,9 +2,12 @@ package model
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"terraform-provider-plural/internal/common"
 
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	gqlclient "github.com/pluralsh/console/go/client"
@@ -30,9 +33,7 @@ func (in *Dashboard) Attributes(ctx context.Context, d *diag.Diagnostics) gqlcli
 	}
 }
 
-// From maps the dashboard returned by the Console API. The API does not return graph options
-// and datasource inputs, so they are kept from the current state, matching graphs by identifier
-// and inputs by name.
+// From maps the dashboard returned by the Console API.
 func (in *Dashboard) From(response *gqlclient.WorkbenchDashboardFragment, ctx context.Context, d *diag.Diagnostics) {
 	if in == nil || response == nil {
 		return
@@ -48,22 +49,19 @@ func (in *Dashboard) From(response *gqlclient.WorkbenchDashboardFragment, ctx co
 
 	// Console returns empty lists for unset graphs and inputs, keep them unset to avoid nil-vs-empty diffs.
 	if len(response.Graphs) > 0 || in.Graphs != nil {
-		current := lo.KeyBy(in.Graphs, func(g *DashboardGraph) string { return g.Identifier.ValueString() })
 		in.Graphs = lo.FilterMap(response.Graphs, func(g *gqlclient.WorkbenchDashboardGraphFragment, _ int) (*DashboardGraph, bool) {
 			if g == nil {
 				return nil, false
 			}
 
-			graph := current[g.Identifier]
-			if graph == nil {
-				graph = &DashboardGraph{Options: types.StringNull()}
-			}
-			graph.From(g)
+			graph := new(DashboardGraph)
+			graph.From(g, d)
 			return graph, true
 		})
 	}
 
 	if len(response.Inputs) > 0 || in.Inputs != nil {
+		// Inputs are matched by name to compare their options with the current ones, see common.ListFrom.
 		current := lo.KeyBy(in.Inputs, func(i *DashboardInput) string { return i.Name.ValueString() })
 		in.Inputs = lo.FilterMap(response.Inputs, func(i *gqlclient.WorkbenchDashboardInputFragment, _ int) (*DashboardInput, bool) {
 			if i == nil {
@@ -87,7 +85,7 @@ type DashboardGraph struct {
 	Type        types.String         `tfsdk:"type"`
 	SectionID   types.String         `tfsdk:"section_id"`
 	Markdown    types.String         `tfsdk:"markdown"`
-	Options     types.String         `tfsdk:"options"`
+	Options     jsontypes.Normalized `tfsdk:"options"`
 	Layout      DashboardGraphLayout `tfsdk:"layout"`
 	Datasource  *DashboardDatasource `tfsdk:"datasource"`
 }
@@ -111,21 +109,21 @@ func (in *DashboardGraph) Attributes() *gqlclient.DashboardGraphAttributes {
 	}
 }
 
-// From maps the graph returned by the Console API, keeping options and datasource input as they are not returned.
-func (in *DashboardGraph) From(response *gqlclient.WorkbenchDashboardGraphFragment) {
+func (in *DashboardGraph) From(response *gqlclient.WorkbenchDashboardGraphFragment, d *diag.Diagnostics) {
 	in.Identifier = types.StringValue(response.Identifier)
 	in.Title = types.StringPointerValue(response.Title)
 	in.Description = types.StringPointerValue(response.Description)
 	in.Type = types.StringValue(string(response.Type))
 	in.SectionID = types.StringPointerValue(response.SectionID)
 	in.Markdown = types.StringPointerValue(response.Markdown)
+	in.Options = jsonFrom(response.Options, d)
 	in.Layout = DashboardGraphLayout{
 		X: types.Int64Value(response.Layout.X),
 		Y: types.Int64Value(response.Layout.Y),
 		W: types.Int64Value(response.Layout.W),
 		H: types.Int64Value(response.Layout.H),
 	}
-	in.Datasource = in.Datasource.from(response.Datasource)
+	in.Datasource = dashboardDatasourceFrom(response.Datasource, d)
 }
 
 type DashboardGraphLayout struct {
@@ -136,9 +134,9 @@ type DashboardGraphLayout struct {
 }
 
 type DashboardDatasource struct {
-	Type  types.String `tfsdk:"type"`
-	Tool  types.String `tfsdk:"tool"`
-	Input types.String `tfsdk:"input"`
+	Type  types.String         `tfsdk:"type"`
+	Tool  types.String         `tfsdk:"tool"`
+	Input jsontypes.Normalized `tfsdk:"input"`
 }
 
 func (in *DashboardDatasource) Attributes() *gqlclient.DashboardDatasourceAttributes {
@@ -158,22 +156,32 @@ func (in *DashboardDatasource) Attributes() *gqlclient.DashboardDatasourceAttrib
 	}
 }
 
-// from maps the datasource returned by the Console API, keeping the input as it is not returned.
-func (in *DashboardDatasource) from(response *gqlclient.WorkbenchDashboardDatasourceFragment) *DashboardDatasource {
+func dashboardDatasourceFrom(response *gqlclient.WorkbenchDashboardDatasourceFragment, d *diag.Diagnostics) *DashboardDatasource {
 	if response == nil {
 		return nil
-	}
-
-	input := types.StringNull()
-	if in != nil {
-		input = in.Input
 	}
 
 	return &DashboardDatasource{
 		Type:  types.StringValue(string(response.Type)),
 		Tool:  types.StringValue(response.Tool),
-		Input: input,
+		Input: jsonFrom(response.Input, d),
 	}
+}
+
+// jsonFrom encodes a JSON object returned by the Console API. The value is normalized,
+// so differences in formatting or key order from the configured value are not reported as changes.
+func jsonFrom(value map[string]any, d *diag.Diagnostics) jsontypes.Normalized {
+	if value == nil {
+		return jsontypes.NewNormalizedNull()
+	}
+
+	encoded, err := json.Marshal(value)
+	if err != nil {
+		d.AddError("Provider Error", fmt.Sprintf("Cannot marshal JSON returned by the API, got error: %s", err))
+		return jsontypes.NewNormalizedNull()
+	}
+
+	return jsontypes.NewNormalizedValue(string(encoded))
 }
 
 type DashboardInput struct {
@@ -208,5 +216,5 @@ func (in *DashboardInput) From(response *gqlclient.WorkbenchDashboardInputFragme
 	in.Default = types.StringPointerValue(response.Default)
 	in.Options = common.ListFrom(response.Options, in.Options, ctx, d)
 	in.Required = types.BoolPointerValue(response.Required)
-	in.Datasource = in.Datasource.from(response.Datasource)
+	in.Datasource = dashboardDatasourceFrom(response.Datasource, d)
 }

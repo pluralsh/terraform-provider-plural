@@ -3,12 +3,12 @@
 page_title: "plural_dashboard Resource - terraform-provider-plural"
 subcategory: ""
 description: |-
-  Workbench dashboard resource. A dashboard arranges graphs, backed by workbench observability tools, on a grid. Graph options and datasource input are not returned by the Console API, so changes to them made outside of Terraform are not detected, and they are not set on import.
+  Workbench dashboard resource. A dashboard arranges graphs, backed by workbench observability tools, on a grid.
 ---
 
 # plural_dashboard (Resource)
 
-Workbench dashboard resource. A dashboard arranges graphs, backed by workbench observability tools, on a grid. Graph `options` and datasource `input` are not returned by the Console API, so changes to them made outside of Terraform are not detected, and they are not set on import.
+Workbench dashboard resource. A dashboard arranges graphs, backed by workbench observability tools, on a grid.
 
 
 
