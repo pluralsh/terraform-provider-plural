@@ -238,6 +238,7 @@ func (p *PluralProvider) DataSources(_ context.Context) []func() datasource.Data
 		ds.NewCloudConnectionDataSource,
 		ds.NewPolicyDataSource,
 		ds.NewBindingPolicyDataSource,
+		ds.NewServiceDeploymentDataSource,
 	}
 }
 

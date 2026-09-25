@@ -540,15 +540,15 @@ resource "plural_workbench_cron" "daily_check" {
   prompt       = "Run a morning health check and summarize notable issues."
 }
 
-variable "service_id" {
-  description = "ID of the service deployment that the monitors watch."
-  type        = string
+data "plural_service_deployment" "console" {
+  cluster = "mgmt"
+  name    = "console"
 }
 
 resource "plural_monitor" "error_logs" {
   name            = "${local.name_prefix}error_logs"
-  service_id      = var.service_id
-  description     = "Fires when the service logs too many errors or fatal messages."
+  service_id      = data.plural_service_deployment.console.id
+  description     = "Fires when the console logs too many errors or fatal messages."
   severity        = "MEDIUM"
   type            = "LOG"
   evaluation_cron = "*/15 * * * *"
@@ -560,8 +560,7 @@ resource "plural_monitor" "error_logs" {
       duration    = "2h"
       operator    = "OR"
       facets = [
-        { key = "namespace", value = "production" },
-        { key = "container", value = "app" },
+        { key = "namespace", value = "plrl-console" },
       ]
     }
   }
@@ -572,26 +571,27 @@ resource "plural_monitor" "error_logs" {
   }
 }
 
-resource "plural_monitor" "latency" {
-  name            = "${local.name_prefix}latency"
-  service_id      = var.service_id
+resource "plural_monitor" "cpu_usage" {
+  name            = "${local.name_prefix}cpu_usage"
+  service_id      = data.plural_service_deployment.console.id
   workbench_id    = plural_workbench.full.id
-  prompt          = "Investigate the p99 latency spike and propose a fix."
+  description     = "Fires when the console uses more than 2 CPU cores on average."
+  prompt          = "Investigate the high console CPU usage and suggest a fix."
   severity        = "HIGH"
   type            = "METRICS"
   evaluation_cron = "*/10 * * * *"
 
   query = {
     metrics = {
-      tool     = plural_workbench_tool.prometheus.name
-      query    = "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))"
+      query    = "sum(rate(container_cpu_usage_seconds_total{namespace=\"plrl-console\", container!=\"\"}[5m]))"
+      step     = "1m"
       duration = "1h"
     }
   }
 
   threshold = {
-    aggregate = "MAX"
-    value     = 1
+    aggregate = "AVG"
+    value     = 2
   }
 
   modes = {
