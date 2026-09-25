@@ -570,14 +570,6 @@ resource "plural_monitor" "error_logs" {
     aggregate = "MAX"
     value     = 20
   }
-
-  modes = {
-    kubernetes = {
-      update             = false
-      exec               = true
-      require_namespaces = ["default", "monitoring"]
-    }
-  }
 }
 
 resource "plural_monitor" "latency" {

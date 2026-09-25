@@ -29,8 +29,8 @@ Monitor resource. A monitor periodically evaluates a log or metrics query of a s
 
 - `alert_template` (String) Template used when rendering alert messages for this monitor.
 - `description` (String) Description of what this monitor is checking.
-- `modes` (Attributes) Mode-specific options for workbench jobs started by this monitor. (see [below for nested schema](#nestedatt--modes))
-- `prompt` (String) Prompt used when the monitor starts a workbench investigation.
+- `modes` (Attributes) Mode-specific options for workbench jobs started by this monitor. Requires `workbench_id`, as jobs are only started for monitors attached to a workbench. (see [below for nested schema](#nestedatt--modes))
+- `prompt` (String) Prompt used when the monitor starts a workbench investigation. Requires `workbench_id`.
 - `workbench_id` (String) ID of the workbench this monitor is attached to. When set, the monitor can start a workbench investigation when it fires. It is required if the query uses a named workbench tool.
 
 ### Read-Only

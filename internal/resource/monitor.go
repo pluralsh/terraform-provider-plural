@@ -65,12 +65,15 @@ func (r *MonitorResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Optional:            true,
 			},
 			"prompt": schema.StringAttribute{
-				Description:         "Prompt used when the monitor starts a workbench investigation.",
-				MarkdownDescription: "Prompt used when the monitor starts a workbench investigation.",
+				Description:         "Prompt used when the monitor starts a workbench investigation. Requires workbench_id.",
+				MarkdownDescription: "Prompt used when the monitor starts a workbench investigation. Requires `workbench_id`.",
 				Optional:            true,
-				Validators:          []validator.String{stringvalidator.LengthBetween(1, 2048)},
+				Validators: []validator.String{
+					stringvalidator.LengthBetween(1, 2048),
+					stringvalidator.AlsoRequires(path.MatchRoot("workbench_id")),
+				},
 			},
-			"modes": workbenchJobModesSchema("Mode-specific options for workbench jobs started by this monitor."),
+			"modes": monitorModesSchema(),
 			"description": schema.StringAttribute{
 				Description:         "Description of what this monitor is checking.",
 				MarkdownDescription: "Description of what this monitor is checking.",
@@ -263,6 +266,16 @@ func (r *MonitorResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			},
 		},
 	}
+}
+
+// monitorModesSchema returns the job modes schema of a monitor. Monitors only start workbench jobs when they are
+// attached to a workbench, so modes without workbench_id would have no effect and are rejected.
+func monitorModesSchema() schema.SingleNestedAttribute {
+	modes := workbenchJobModesSchema("")
+	modes.Description = "Mode-specific options for workbench jobs started by this monitor. Requires workbench_id, as jobs are only started for monitors attached to a workbench."
+	modes.MarkdownDescription = "Mode-specific options for workbench jobs started by this monitor. Requires `workbench_id`, as jobs are only started for monitors attached to a workbench."
+	modes.Validators = []validator.Object{objectvalidator.AlsoRequires(path.MatchRoot("workbench_id"))}
+	return modes
 }
 
 func azureMetricsOptionAttribute(description string) schema.StringAttribute {
