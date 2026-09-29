@@ -76,6 +76,13 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 					})...),
 				},
 			},
+			"approval": schema.BoolAttribute{
+				Description:         "Whether invoking this tool requires human approval. Defaults to false for new tools. If not set, existing tools keep their current value.",
+				MarkdownDescription: "Whether invoking this tool requires human approval. Defaults to `false` for new tools. If not set, existing tools keep their current value.",
+				Optional:            true,
+				Computed:            true,
+				PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
+			},
 			"categories": schema.SetAttribute{
 				Description:         "Categories of this workbench tool.",
 				MarkdownDescription: "Categories of this workbench tool.",
