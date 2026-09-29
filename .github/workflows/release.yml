@@ -13,30 +13,28 @@ jobs:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
         with:
           go-version-file: 'go.mod'
           cache: true
-      - shell: bash
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         if: matrix.os == 'ubuntu-latest'
         with:
           path: dist/linux
-          key: linux-${{ env.sha_short }}${{ env.flags }}
-      - uses: actions/cache@v5
+          key: linux-${{ github.sha }}
+      - uses: actions/cache@v6
         if: matrix.os == 'macos-latest'
         with:
           path: dist/darwin
-          key: darwin-${{ env.sha_short }}${{ env.flags }}
-      - uses: actions/cache@v5
+          key: darwin-${{ github.sha }}
+      - uses: actions/cache@v6
         if: matrix.os == 'windows-latest'
         with:
           path: dist/windows
-          key: windows-${{ env.sha_short }}${{ env.flags }}
+          key: windows-${{ github.sha }}
           enableCrossOsArchive: true
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
@@ -44,7 +42,7 @@ jobs:
         with:
           gpg_private_key: ${{ secrets.PLURAL_GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.PLURAL_GPG_KEY_PASSWORD }}
-      - uses: goreleaser/goreleaser-action@e24998b8b67b290c2fa8b7c14fcfa7de2c5c9b8c # v7.1.0
+      - uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
           distribution: goreleaser-pro
           version: '~> v2'
@@ -56,34 +54,27 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    env:
-      DOCKER_CLI_EXPERIMENTAL: "enabled"
     needs: prepare
     steps:
-      - uses: jlumbroso/free-disk-space@v1.3.1
-        with:
-          tool-cache: false
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
         with:
           go-version-file: 'go.mod'
           cache: true
-      - shell: bash
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: dist/linux
-          key: linux-${{ env.sha_short }}${{ env.flags }}
-      - uses: actions/cache@v5
+          key: linux-${{ github.sha }}
+      - uses: actions/cache@v6
         with:
           path: dist/darwin
-          key: darwin-${{ env.sha_short }}${{ env.flags }}
-      - uses: actions/cache@v5
+          key: darwin-${{ github.sha }}
+      - uses: actions/cache@v6
         with:
           path: dist/windows
-          key: windows-${{ env.sha_short }}${{ env.flags }}
+          key: windows-${{ github.sha }}
           enableCrossOsArchive: true
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
@@ -91,8 +82,7 @@ jobs:
         with:
           gpg_private_key: ${{ secrets.PLURAL_GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.PLURAL_GPG_KEY_PASSWORD }}
-      - uses: goreleaser/goreleaser-action@e24998b8b67b290c2fa8b7c14fcfa7de2c5c9b8c # v7.1.0
-        if: steps.cache.outputs.cache-hit != 'true' # do not run if cache hit
+      - uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
           distribution: goreleaser-pro
           version: '~> v2'
