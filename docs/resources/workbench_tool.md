@@ -22,6 +22,7 @@ Workbench tool resource.
 
 ### Optional
 
+- `approval` (Boolean) Whether invoking this tool requires human approval. Defaults to `false` for new tools. If not set, existing tools keep their current value.
 - `categories` (Set of String) Categories of this workbench tool.
 - `cloud_connection_id` (String) ID of the cloud connection referenced by this workbench tool.
 - `configuration` (Attributes) Configuration of this workbench tool. (see [below for nested schema](#nestedatt--configuration))

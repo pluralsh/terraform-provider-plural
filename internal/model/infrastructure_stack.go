@@ -443,8 +443,10 @@ func (isjs *InfrastructureStackJobSpec) AnnotationsAttributes(ctx context.Contex
 	return common.AttributesJson(elements, d)
 }
 
+// ContainersAttributes returns nil when containers are unset and a pointer to a possibly
+// empty list otherwise, as an explicit empty list clears the configured containers.
 func (isjs *InfrastructureStackJobSpec) ContainersAttributes(ctx context.Context, d *diag.Diagnostics) *[]*gqlclient.ContainerAttributes {
-	if isjs.Containers.IsNull() || isjs.Containers.IsUnknown() {
+	if isjs.Containers.IsNull() {
 		return nil
 	}
 

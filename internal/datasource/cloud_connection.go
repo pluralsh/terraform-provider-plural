@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 func NewCloudConnectionDataSource() datasource.DataSource {
@@ -48,19 +47,7 @@ func (d *cloudConnectionDataSource) Schema(_ context.Context, _ datasource.Schem
 			"cloud_provider": schema.StringAttribute{
 				Description:         "The cloud provider of this cloud connection.",
 				MarkdownDescription: "The cloud provider of this cloud connection.",
-				Required:            true,
-				Validators:          []validator.String{stringvalidator.OneOf("AWS", "GCP", "AZURE")},
-			},
-			"configuration": schema.SingleNestedAttribute{
-				Description:         "Cloud provider configuration",
-				MarkdownDescription: "Cloud provider configuration",
-				Required:            true,
-			},
-			"read_bindings": schema.SetAttribute{
-				Description:         "The read bindings for this cloud connection.",
-				MarkdownDescription: "The read bindings for this cloud connection.",
-				Optional:            true,
-				ElementType:         types.ObjectType{AttrTypes: common.PolicyBindingAttrTypes},
+				Computed:            true,
 			},
 		},
 	}
@@ -84,7 +71,7 @@ func (d *cloudConnectionDataSource) Configure(_ context.Context, req datasource.
 }
 
 func (d *cloudConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	data := new(model.CloudConnection)
+	data := new(model.CloudConnectionDataSource)
 	resp.Diagnostics.Append(req.Config.Get(ctx, data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -104,6 +91,6 @@ func (d *cloudConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 		return
 	}
 
-	data.From(response.CloudConnection, ctx, &resp.Diagnostics)
+	data.From(response.CloudConnection)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }

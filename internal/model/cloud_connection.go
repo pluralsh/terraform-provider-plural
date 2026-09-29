@@ -113,3 +113,17 @@ func (c *CloudConnection) From(cc *console.CloudConnectionFragment, ctx context.
 	c.Name = types.StringValue(cc.Name)
 	c.CloudProvider = types.StringValue(string(cc.Provider))
 }
+
+// CloudConnectionDataSource is the data source view of a cloud connection. It has no
+// configuration, as the API never returns cloud credentials.
+type CloudConnectionDataSource struct {
+	Id            types.String `tfsdk:"id"`
+	Name          types.String `tfsdk:"name"`
+	CloudProvider types.String `tfsdk:"cloud_provider"`
+}
+
+func (c *CloudConnectionDataSource) From(cc *console.CloudConnectionFragment) {
+	c.Id = types.StringValue(cc.ID)
+	c.Name = types.StringValue(cc.Name)
+	c.CloudProvider = types.StringValue(string(cc.Provider))
+}
