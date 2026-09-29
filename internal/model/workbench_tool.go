@@ -18,6 +18,7 @@ type WorkbenchTool struct {
 	Id                types.String                `tfsdk:"id"`
 	Name              types.String                `tfsdk:"name"`
 	Tool              types.String                `tfsdk:"tool"`
+	Approval          types.Bool                  `tfsdk:"approval"`
 	Categories        types.Set                   `tfsdk:"categories"`
 	ProjectID         types.String                `tfsdk:"project_id"`
 	McpServerID       types.String                `tfsdk:"mcp_server_id"`
@@ -31,8 +32,9 @@ func (in *WorkbenchTool) Attributes(ctx context.Context) (*gqlclient.WorkbenchTo
 	in.Categories.ElementsAs(ctx, &categories, false)
 
 	return &gqlclient.WorkbenchToolAttributes{
-		Name: in.Name.ValueString(),
-		Tool: gqlclient.WorkbenchToolType(in.Tool.ValueString()),
+		Name:     in.Name.ValueString(),
+		Tool:     gqlclient.WorkbenchToolType(in.Tool.ValueString()),
+		Approval: in.Approval.ValueBoolPointer(),
 		Categories: lo.Map(categories, func(v types.String, _ int) *gqlclient.WorkbenchToolCategory {
 			return lo.ToPtr(gqlclient.WorkbenchToolCategory(v.ValueString()))
 		}),
@@ -55,6 +57,7 @@ func (in *WorkbenchTool) From(response *gqlclient.WorkbenchToolFragment, ctx con
 	in.Id = types.StringValue(response.ID)
 	in.Name = types.StringValue(response.Name)
 	in.Tool = types.StringValue(string(response.Tool))
+	in.Approval = types.BoolValue(lo.FromPtr(response.Approval))
 	in.Categories = common.SetFrom(lo.Map(response.Categories, func(v *gqlclient.WorkbenchToolCategory, _ int) *string {
 		return lo.Ternary(v == nil, nil, lo.ToPtr(string(*v)))
 	}), in.Categories, ctx, d)

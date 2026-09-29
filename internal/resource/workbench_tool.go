@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -75,6 +76,13 @@ func (r *WorkbenchToolResource) Schema(_ context.Context, _ resource.SchemaReque
 						return string(item)
 					})...),
 				},
+			},
+			"approval": schema.BoolAttribute{
+				Description:         "Whether invoking this tool requires human approval.",
+				MarkdownDescription: "Whether invoking this tool requires human approval.",
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
 			},
 			"categories": schema.SetAttribute{
 				Description:         "Categories of this workbench tool.",
