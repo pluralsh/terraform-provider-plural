@@ -106,7 +106,13 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+      # The version comes from go.mod, as for `make lint`, and is built with the Go version
+      # from go.mod: prebuilt binaries can be built with an older Go and refuse to lint.
+      - name: Read golangci-lint version
+        id: golangci-lint
+        run: echo "version=$(go list -m -f '{{.Version}}' github.com/golangci/golangci-lint/v2)" >> "$GITHUB_OUTPUT"
       - uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.13.2
+          version: ${{ steps.golangci-lint.outputs.version }}
+          install-mode: goinstall
           args: --timeout=10m
