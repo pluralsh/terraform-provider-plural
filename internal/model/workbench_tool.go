@@ -34,7 +34,7 @@ func (in *WorkbenchTool) Attributes(ctx context.Context) (*gqlclient.WorkbenchTo
 	return &gqlclient.WorkbenchToolAttributes{
 		Name:     in.Name.ValueString(),
 		Tool:     gqlclient.WorkbenchToolType(in.Tool.ValueString()),
-		Approval: in.Approval.ValueBoolPointer(),
+		Approval: in.ApprovalAttribute(),
 		Categories: lo.Map(categories, func(v types.String, _ int) *gqlclient.WorkbenchToolCategory {
 			return lo.ToPtr(gqlclient.WorkbenchToolCategory(v.ValueString()))
 		}),
@@ -44,6 +44,16 @@ func (in *WorkbenchTool) Attributes(ctx context.Context) (*gqlclient.WorkbenchTo
 		ScmConnectionID:   in.ScmConnectionID.ValueStringPointer(),
 		Configuration:     in.Configuration.Attributes(ctx),
 	}, nil
+}
+
+// ApprovalAttribute returns nil unless approval is known, so the API keeps the tool's
+// current setting instead of having it reset when the configuration doesn't set it.
+func (in *WorkbenchTool) ApprovalAttribute() *bool {
+	if in.Approval.IsNull() || in.Approval.IsUnknown() {
+		return nil
+	}
+
+	return in.Approval.ValueBoolPointer()
 }
 
 func (in *WorkbenchTool) From(response *gqlclient.WorkbenchToolFragment, ctx context.Context, d *diag.Diagnostics) {
