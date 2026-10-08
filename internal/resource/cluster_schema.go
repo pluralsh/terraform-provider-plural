@@ -78,7 +78,7 @@ func (r *clusterResource) schema() schema.Schema {
 				MarkdownDescription: "Additional Helm values you'd like to use in deployment agent Helm installs. This is useful for BYOK clusters that need to use custom images or other constructs.",
 				Optional:            true,
 			},
-			"kubeconfig": common.KubeconfigResourceSchema(),
+			"kubeconfig": common.KubeconfigResourceSchema(true),
 			"protect": schema.BoolAttribute{
 				Description:         "If set to \"true\" then this cluster cannot be deleted.",
 				MarkdownDescription: "If set to `true` then this cluster cannot be deleted.",

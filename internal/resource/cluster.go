@@ -2,6 +2,7 @@ package resource
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -68,6 +70,7 @@ func (r *clusterResource) Configure(_ context.Context, req resource.ConfigureReq
 func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data cluster
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("kubeconfig"), &data.Kubeconfig)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -91,6 +94,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		}
 	}
 
+	resp.Diagnostics.Append(setKubeconfigHost(ctx, resp.Private, data.GetKubeconfig())...)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -134,6 +138,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 	var data, state cluster
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("kubeconfig"), &data.Kubeconfig)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -158,7 +163,12 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		data.AgentDeployed = types.BoolValue(false)
 	}
 
-	kubeconfigChanged := data.HasKubeconfig() && !data.GetKubeconfig().Unchanged(state.GetKubeconfig())
+	kubeconfigChanged, diags := kubeconfigHostChanged(ctx, req.Private, data.GetKubeconfig())
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	reinstallable := !data.AgentDeployed.ValueBool() || !data.HelmRepoUrl.Equal(state.HelmRepoUrl) || kubeconfigChanged
 	if reinstallable && (r.kubeClient != nil || data.HasKubeconfig()) {
 		clusterWithToken, err := r.client.GetClusterWithToken(ctx, data.Id.ValueStringPointer(), nil)
@@ -176,7 +186,58 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		data.AgentDeployed = types.BoolValue(true)
 	}
 
+	resp.Diagnostics.Append(setKubeconfigHost(ctx, resp.Private, data.GetKubeconfig())...)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+// kubeconfigHostPrivateKey is the private state key used to track the kubeconfig host. Kubeconfig is write-only,
+// so it is not available in the state, and it is required to detect kubeconfig changes that require agent reinstall.
+const kubeconfigHostPrivateKey = "kubeconfig_host"
+
+type privateStateGetter interface {
+	GetKey(ctx context.Context, key string) ([]byte, diag.Diagnostics)
+}
+
+type privateStateSetter interface {
+	SetKey(ctx context.Context, key string, value []byte) diag.Diagnostics
+}
+
+// kubeconfigHostChanged checks if the kubeconfig host has changed compared to the one tracked in the private state.
+// If the host was not tracked yet, i.e. state was created by older provider version, it is treated as unchanged.
+func kubeconfigHostChanged(ctx context.Context, private privateStateGetter, kubeconfig *common.Kubeconfig) (bool, diag.Diagnostics) {
+	if kubeconfig == nil {
+		return false, nil
+	}
+
+	value, diags := private.GetKey(ctx, kubeconfigHostPrivateKey)
+	if diags.HasError() || value == nil {
+		return false, diags
+	}
+
+	var host *string
+	if err := json.Unmarshal(value, &host); err != nil {
+		diags.AddError("Provider Error", fmt.Sprintf("Cannot unmarshal kubeconfig host from private state, got error: %s", err))
+		return false, diags
+	}
+
+	return host == nil || *host != kubeconfig.Host.ValueString(), diags
+}
+
+// setKubeconfigHost stores the kubeconfig host in the private state. If kubeconfig is not set, JSON null is stored.
+func setKubeconfigHost(ctx context.Context, private privateStateSetter, kubeconfig *common.Kubeconfig) diag.Diagnostics {
+	var host *string
+	if kubeconfig != nil {
+		host = lo.ToPtr(kubeconfig.Host.ValueString())
+	}
+
+	value, err := json.Marshal(host)
+	if err != nil {
+		var diags diag.Diagnostics
+		diags.AddError("Provider Error", fmt.Sprintf("Cannot marshal kubeconfig host to private state, got error: %s", err))
+		return diags
+	}
+
+	return private.SetKey(ctx, kubeconfigHostPrivateKey, value)
 }
 
 func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -276,7 +337,7 @@ func (r *clusterResource) UpgradeState(_ context.Context) map[int64]resource.Sta
 					"helm_values": schema.StringAttribute{
 						Optional: true,
 					},
-					"kubeconfig": common.KubeconfigResourceSchema(),
+					"kubeconfig": common.KubeconfigResourceSchema(false),
 					"protect": schema.BoolAttribute{
 						Optional: true,
 						Computed: true,
