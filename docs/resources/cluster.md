@@ -20,12 +20,14 @@ Cluster represents a Kubernetes cluster managed by the Plural Console for contin
 
 ### Optional
 
+> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
+
 - `bindings` (Attributes) Read and write policies of this cluster. (see [below for nested schema](#nestedatt--bindings))
 - `detach` (Boolean) Determines behavior during resource destruction, if true it will detach resource instead of deleting it.
 - `handle` (String) A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.
 - `helm_repo_url` (String) Helm repository URL you'd like to use in deployment agent Helm install.
 - `helm_values` (String) Additional Helm values you'd like to use in deployment agent Helm installs. This is useful for BYOK clusters that need to use custom images or other constructs.
-- `kubeconfig` (Attributes, Deprecated) (see [below for nested schema](#nestedatt--kubeconfig))
+- `kubeconfig` (Attributes, Deprecated, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Kubeconfig for cluster access. It is write-only, so it is not stored in the state and requires Terraform 1.11 or later. Changing it alone will not trigger an update. (see [below for nested schema](#nestedatt--kubeconfig))
 - `metadata` (String) Arbitrary JSON metadata to store user-specific state of this cluster (e.g. IAM roles for add-ons). Use `jsonencode` and `jsondecode` methods to encode and decode data.
 - `project_id` (String) ID of the project that this cluster belongs to.
 - `protect` (Boolean) If set to `true` then this cluster cannot be deleted.
@@ -71,34 +73,34 @@ Optional:
 
 Optional:
 
-- `client_certificate` (String) The path to a client cert file for TLS.
-- `client_key` (String, Sensitive) The path to a client key file for TLS.
-- `cluster_ca_certificate` (String) The path to a cert file for the certificate authority.
-- `config_context` (String) kubeconfig context to use.
-- `config_context_auth_info` (String)
-- `config_context_cluster` (String)
-- `config_path` (String) Path to the kubeconfig file.
-- `exec` (Attributes List) Specifies a command to provide client credentials (see [below for nested schema](#nestedatt--kubeconfig--exec))
-- `host` (String) The complete address of the Kubernetes cluster, using scheme://hostname:port format.
-- `insecure` (Boolean) Skips the validity check for the server's certificate. This will make your HTTPS connections insecure.
-- `password` (String, Sensitive) The password for basic authentication to the Kubernetes cluster.
-- `proxy_url` (String) The URL to the proxy to be used for all requests made by this client.
-- `tls_server_name` (String) TLS server name is used to check server certificate. If it is empty, the hostname used to contact the server is used.
-- `token` (String, Sensitive) Token is the bearer token for authentication to the Kubernetes cluster.
-- `username` (String) The username for basic authentication to the Kubernetes cluster.
+- `client_certificate` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The path to a client cert file for TLS.
+- `client_key` (String, Sensitive, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The path to a client key file for TLS.
+- `cluster_ca_certificate` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The path to a cert file for the certificate authority.
+- `config_context` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) kubeconfig context to use.
+- `config_context_auth_info` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments))
+- `config_context_cluster` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments))
+- `config_path` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Path to the kubeconfig file.
+- `exec` (Attributes List, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Specifies a command to provide client credentials (see [below for nested schema](#nestedatt--kubeconfig--exec))
+- `host` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The complete address of the Kubernetes cluster, using scheme://hostname:port format.
+- `insecure` (Boolean, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Skips the validity check for the server's certificate. This will make your HTTPS connections insecure.
+- `password` (String, Sensitive, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password for basic authentication to the Kubernetes cluster.
+- `proxy_url` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The URL to the proxy to be used for all requests made by this client.
+- `tls_server_name` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) TLS server name is used to check server certificate. If it is empty, the hostname used to contact the server is used.
+- `token` (String, Sensitive, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Token is the bearer token for authentication to the Kubernetes cluster.
+- `username` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The username for basic authentication to the Kubernetes cluster.
 
 <a id="nestedatt--kubeconfig--exec"></a>
 ### Nested Schema for `kubeconfig.exec`
 
 Required:
 
-- `api_version` (String) Preferred input version.
-- `command` (String) Command to execute.
+- `api_version` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Preferred input version.
+- `command` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Command to execute.
 
 Optional:
 
-- `args` (List of String) Arguments to pass to the command when executing it.
-- `env` (Map of String) Defines environment variables to expose to the process.
+- `args` (List of String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Arguments to pass to the command when executing it.
+- `env` (Map of String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Defines environment variables to expose to the process.
 
 ## Import
 

@@ -29,18 +29,6 @@ type Kubeconfig struct {
 	Exec                  *KubeconfigExec `tfsdk:"exec"`
 }
 
-func (k *Kubeconfig) Unchanged(other *Kubeconfig) bool {
-	if k == nil {
-		return other == nil
-	}
-
-	if other == nil {
-		return false
-	}
-
-	return k.Host == other.Host
-}
-
 func (k *Kubeconfig) FromEnvVars() {
 	if k == nil {
 		return
@@ -225,82 +213,104 @@ func KubeconfigProviderSchema() providerschema.SingleNestedAttribute {
 	}
 }
 
-func KubeconfigResourceSchema() schema.SingleNestedAttribute {
+// KubeconfigResourceSchema returns the deprecated resource-level kubeconfig schema. When writeOnly is true,
+// all attributes are write-only, so their values never become part of the plan or state. This prevents
+// "inconsistent final plan" errors when they are sourced from upstream resources whose values only change
+// during apply (e.g. cluster credentials refreshed by the cloud provider).
+func KubeconfigResourceSchema(writeOnly bool) schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
-		DeprecationMessage: "kubeconfig configuration has been moved to the provider.",
-		Optional:           true,
+		Description:         "Kubeconfig for cluster access. It is write-only, so it is not stored in the state and requires Terraform 1.11 or later. Changing it alone will not trigger an update.",
+		MarkdownDescription: "Kubeconfig for cluster access. It is write-only, so it is not stored in the state and requires Terraform 1.11 or later. Changing it alone will not trigger an update.",
+		DeprecationMessage:  "kubeconfig configuration has been moved to the provider.",
+		Optional:            true,
+		WriteOnly:           writeOnly,
 		Attributes: map[string]schema.Attribute{
 			"host": schema.StringAttribute{
 				Optional:            true,
+				WriteOnly:           writeOnly,
 				Description:         "The complete address of the Kubernetes cluster, using scheme://hostname:port format.",
 				MarkdownDescription: "The complete address of the Kubernetes cluster, using scheme://hostname:port format.",
 			},
 			"username": schema.StringAttribute{
 				Optional:            true,
+				WriteOnly:           writeOnly,
 				Description:         "The username for basic authentication to the Kubernetes cluster.",
 				MarkdownDescription: "The username for basic authentication to the Kubernetes cluster.",
 			},
 			"password": schema.StringAttribute{
 				Optional:            true,
+				WriteOnly:           writeOnly,
 				Sensitive:           true,
 				Description:         "The password for basic authentication to the Kubernetes cluster.",
 				MarkdownDescription: "The password for basic authentication to the Kubernetes cluster.",
 			},
 			"insecure": schema.BoolAttribute{
 				Optional:            true,
+				WriteOnly:           writeOnly,
 				Description:         "Skips the validity check for the server's certificate. This will make your HTTPS connections insecure.",
 				MarkdownDescription: "Skips the validity check for the server's certificate. This will make your HTTPS connections insecure.",
 			},
 			"tls_server_name": schema.StringAttribute{
 				Optional:            true,
+				WriteOnly:           writeOnly,
 				Description:         "TLS server name is used to check server certificate. If it is empty, the hostname used to contact the server is used.",
 				MarkdownDescription: "TLS server name is used to check server certificate. If it is empty, the hostname used to contact the server is used.",
 			},
 			"client_certificate": schema.StringAttribute{
 				Optional:            true,
+				WriteOnly:           writeOnly,
 				Description:         "The path to a client cert file for TLS.",
 				MarkdownDescription: "The path to a client cert file for TLS.",
 			},
 			"client_key": schema.StringAttribute{
 				Optional:            true,
+				WriteOnly:           writeOnly,
 				Sensitive:           true,
 				Description:         "The path to a client key file for TLS.",
 				MarkdownDescription: "The path to a client key file for TLS.",
 			},
 			"cluster_ca_certificate": schema.StringAttribute{
 				Optional:            true,
+				WriteOnly:           writeOnly,
 				Description:         "The path to a cert file for the certificate authority.",
 				MarkdownDescription: "The path to a cert file for the certificate authority.",
 			},
 			"config_path": schema.StringAttribute{
 				Optional:            true,
+				WriteOnly:           writeOnly,
 				Description:         "Path to the kubeconfig file.",
 				MarkdownDescription: "Path to the kubeconfig file.",
 			},
 			"config_context": schema.StringAttribute{
 				Optional:            true,
+				WriteOnly:           writeOnly,
 				Description:         "kubeconfig context to use.",
 				MarkdownDescription: "kubeconfig context to use.",
 			},
 			"config_context_auth_info": schema.StringAttribute{
-				Optional: true,
+				Optional:  true,
+				WriteOnly: writeOnly,
 			},
 			"config_context_cluster": schema.StringAttribute{
-				Optional: true,
+				Optional:  true,
+				WriteOnly: writeOnly,
 			},
 			"token": schema.StringAttribute{
 				Optional:            true,
+				WriteOnly:           writeOnly,
 				Sensitive:           true,
 				Description:         "Token is the bearer token for authentication to the Kubernetes cluster.",
 				MarkdownDescription: "Token is the bearer token for authentication to the Kubernetes cluster.",
 			},
 			"proxy_url": schema.StringAttribute{
 				Optional:            true,
+				WriteOnly:           writeOnly,
 				Description:         "The URL to the proxy to be used for all requests made by this client.",
 				MarkdownDescription: "The URL to the proxy to be used for all requests made by this client.",
 			},
 			"exec": schema.ListNestedAttribute{
 				Optional:            true,
+				WriteOnly:           writeOnly,
 				MarkdownDescription: "Specifies a command to provide client credentials",
 				Validators:          []validator.List{listvalidator.SizeAtMost(1)},
 				NestedObject: schema.NestedAttributeObject{
@@ -309,23 +319,27 @@ func KubeconfigResourceSchema() schema.SingleNestedAttribute {
 							Description:         "Command to execute.",
 							MarkdownDescription: "Command to execute.",
 							Required:            true,
+							WriteOnly:           writeOnly,
 						},
 						"args": schema.ListAttribute{
 							Description:         "Arguments to pass to the command when executing it.",
 							MarkdownDescription: "Arguments to pass to the command when executing it.",
 							Optional:            true,
+							WriteOnly:           writeOnly,
 							ElementType:         types.StringType,
 						},
 						"env": schema.MapAttribute{
 							Description:         "Defines environment variables to expose to the process.",
 							MarkdownDescription: "Defines environment variables to expose to the process.",
 							Optional:            true,
+							WriteOnly:           writeOnly,
 							ElementType:         types.StringType,
 						},
 						"api_version": schema.StringAttribute{
 							Description:         "Preferred input version.",
 							MarkdownDescription: "Preferred input version.",
 							Required:            true,
+							WriteOnly:           writeOnly,
 						},
 					},
 				},

@@ -19,7 +19,7 @@ func (r *clusterResource) schema() schema.Schema {
 	return schema.Schema{
 		Description:         "Cluster represents a Kubernetes cluster managed by the Plural Console for continuous deployment. Clusters serve as deployment targets for services and can be either management clusters (hosting the Plural Console and operators) or workload clusters (running application workloads). The Console tracks cluster health, versions, and coordinates service deployments across the fleet.",
 		MarkdownDescription: "Cluster represents a Kubernetes cluster managed by the Plural Console for continuous deployment. Clusters serve as deployment targets for services and can be either management clusters (hosting the Plural Console and operators) or workload clusters (running application workloads). The Console tracks cluster health, versions, and coordinates service deployments across the fleet.",
-		Version:             1,
+		Version:             2,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description:         "Internal identifier of this cluster.",
@@ -50,6 +50,8 @@ func (r *clusterResource) schema() schema.Schema {
 				Description:         "ID of the project that this cluster belongs to.",
 				MarkdownDescription: "ID of the project that this cluster belongs to.",
 				Optional:            true,
+				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"detach": schema.BoolAttribute{
 				Description:         "Determines behavior during resource destruction, if true it will detach resource instead of deleting it.",
@@ -78,7 +80,7 @@ func (r *clusterResource) schema() schema.Schema {
 				MarkdownDescription: "Additional Helm values you'd like to use in deployment agent Helm installs. This is useful for BYOK clusters that need to use custom images or other constructs.",
 				Optional:            true,
 			},
-			"kubeconfig": common.KubeconfigResourceSchema(),
+			"kubeconfig": common.KubeconfigResourceSchema(true),
 			"protect": schema.BoolAttribute{
 				Description:         "If set to \"true\" then this cluster cannot be deleted.",
 				MarkdownDescription: "If set to `true` then this cluster cannot be deleted.",
