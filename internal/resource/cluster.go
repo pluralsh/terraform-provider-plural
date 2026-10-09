@@ -203,15 +203,21 @@ type privateStateSetter interface {
 }
 
 // kubeconfigHostChanged checks if the kubeconfig host has changed compared to the one tracked in the private state.
-// If the host was not tracked yet, i.e. state was created by older provider version, it is treated as unchanged.
+// If the host was not tracked yet, i.e. state was upgraded from older provider version, it is treated as changed.
+// State upgrades cannot write private state, so the previous host is lost, and it is not possible to tell if it has
+// changed. Reinstalling the agent is idempotent, while skipping it could leave a new cluster without the agent.
 func kubeconfigHostChanged(ctx context.Context, private privateStateGetter, kubeconfig *common.Kubeconfig) (bool, diag.Diagnostics) {
 	if kubeconfig == nil {
 		return false, nil
 	}
 
 	value, diags := private.GetKey(ctx, kubeconfigHostPrivateKey)
-	if diags.HasError() || value == nil {
+	if diags.HasError() {
 		return false, diags
+	}
+
+	if value == nil {
+		return true, diags
 	}
 
 	var host *string

@@ -168,7 +168,8 @@ func TestKubeconfigHostChanged(t *testing.T) {
 		kubeconfig *common.Kubeconfig
 		expected   bool
 	}{
-		{name: "untracked host is unchanged", track: false, kubeconfig: kubeconfig("a"), expected: false},
+		{name: "untracked host is changed", track: false, kubeconfig: kubeconfig("a"), expected: true},
+		{name: "untracked host without kubeconfig is unchanged", track: false, kubeconfig: nil, expected: false},
 		{name: "missing kubeconfig is unchanged", track: true, stored: kubeconfig("a"), kubeconfig: nil, expected: false},
 		{name: "same host is unchanged", track: true, stored: kubeconfig("a"), kubeconfig: kubeconfig("a"), expected: false},
 		{name: "different host is changed", track: true, stored: kubeconfig("a"), kubeconfig: kubeconfig("b"), expected: true},
