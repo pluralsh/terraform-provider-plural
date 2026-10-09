@@ -292,8 +292,28 @@ func (r *clusterResource) ImportState(ctx context.Context, req resource.ImportSt
 }
 
 func (r *clusterResource) UpgradeState(_ context.Context) map[int64]resource.StateUpgrader {
+	// Version 1 schema is the same as the current one, except kubeconfig was not write-only.
+	priorSchemaV1 := r.schema()
+	priorSchemaV1.Version = 1
+	priorSchemaV1.Attributes["kubeconfig"] = common.KubeconfigResourceSchema(false)
+
 	return map[int64]resource.StateUpgrader{
-		// State upgrade from 0 to 1
+		// State upgrade from 1 to 2. Kubeconfig became write-only, so it has to be removed from the state.
+		// It cannot be done in the same schema version, as the framework passes such state through as is.
+		1: {
+			PriorSchema: &priorSchemaV1,
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data cluster
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+
+				data.Kubeconfig = nil
+				resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
+			},
+		},
+		// State upgrade from 0 to 2
 		0: {
 			PriorSchema: &schema.Schema{
 				Version: 0,
@@ -405,6 +425,7 @@ func (r *clusterResource) UpgradeState(_ context.Context) map[int64]resource.Sta
 					return
 				}
 
+				// Kubeconfig is write-only now, so it is not copied to the upgraded state.
 				upgradedStateData := cluster{
 					Id:            priorStateData.Id,
 					InsertedAt:    priorStateData.InsertedAt,
@@ -418,7 +439,6 @@ func (r *clusterResource) UpgradeState(_ context.Context) map[int64]resource.Sta
 					Bindings:      priorStateData.Bindings,
 					HelmRepoUrl:   priorStateData.HelmRepoUrl,
 					HelmValues:    priorStateData.HelmValues,
-					Kubeconfig:    priorStateData.Kubeconfig,
 					AgentDeployed: types.BoolValue(true),
 				}
 

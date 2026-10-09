@@ -46,10 +46,16 @@ func (c *cluster) TagsAttribute(ctx context.Context, d *diag.Diagnostics) []*con
 }
 
 func (c *cluster) Attributes(ctx context.Context, d *diag.Diagnostics) console.ClusterAttributes {
+	// Project ID is unknown during creation if it is not set in the config, as it is computed by the API.
+	var projectId *string
+	if !c.ProjectId.IsUnknown() {
+		projectId = c.ProjectId.ValueStringPointer()
+	}
+
 	return console.ClusterAttributes{
 		Name:          c.Name.ValueString(),
 		Handle:        c.Handle.ValueStringPointer(),
-		ProjectID:     c.ProjectId.ValueStringPointer(),
+		ProjectID:     projectId,
 		Protect:       c.Protect.ValueBoolPointer(),
 		ReadBindings:  c.Bindings.ReadAttributes(ctx, d),
 		WriteBindings: c.Bindings.WriteAttributes(ctx, d),
@@ -97,6 +103,7 @@ func (c *cluster) FromCreate(cc *console.CreateCluster, _ context.Context, d *di
 	c.InsertedAt = types.StringPointerValue(cc.CreateCluster.InsertedAt)
 	c.Name = types.StringValue(cc.CreateCluster.Name)
 	c.Handle = types.StringPointerValue(cc.CreateCluster.Handle)
+	c.ProjectId = common.ProjectFrom(cc.CreateCluster.Project)
 	c.Protect = types.BoolPointerValue(cc.CreateCluster.Protect)
 	c.Tags = common.TagsFrom(cc.CreateCluster.Tags, c.Tags, d)
 	c.AgentDeployed = types.BoolValue(false)
