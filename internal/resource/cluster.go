@@ -2,7 +2,6 @@ package resource
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -10,7 +9,6 @@ import (
 	"terraform-provider-plural/internal/client"
 	"terraform-provider-plural/internal/common"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -28,6 +26,7 @@ import (
 var _ resource.Resource = &clusterResource{}
 var _ resource.ResourceWithImportState = &clusterResource{}
 var _ resource.ResourceWithUpgradeState = &clusterResource{}
+var _ resource.ResourceWithValidateConfig = &clusterResource{}
 
 func NewClusterResource() resource.Resource {
 	return &clusterResource{}
@@ -46,6 +45,16 @@ func (r *clusterResource) Metadata(_ context.Context, req resource.MetadataReque
 
 func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = r.schema()
+}
+
+// ValidateConfig rejects the removed kubeconfig, so users get a hint where to move it instead of a generic error.
+func (r *clusterResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var kubeconfig types.Object
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("kubeconfig"), &kubeconfig)...)
+	if !kubeconfig.IsNull() {
+		resp.Diagnostics.AddAttributeError(path.Root("kubeconfig"), "Kubeconfig Has Been Moved to the Provider",
+			"Set kubeconfig in the provider \"plural\" block instead of plural_cluster. Use provider aliases for multiple clusters.")
+	}
 }
 
 func (r *clusterResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -70,7 +79,6 @@ func (r *clusterResource) Configure(_ context.Context, req resource.ConfigureReq
 func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data cluster
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("kubeconfig"), &data.Kubeconfig)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -82,8 +90,8 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 	data.FromCreate(result, ctx, &resp.Diagnostics)
 
-	if r.kubeClient != nil || data.HasKubeconfig() {
-		err = InstallOrUpgradeAgent(ctx, r.client, data.GetKubeconfig(), r.kubeClient, data.HelmRepoUrl.ValueString(),
+	if r.kubeClient != nil {
+		err = InstallOrUpgradeAgent(ctx, r.client, r.kubeClient, data.HelmRepoUrl.ValueString(),
 			data.HelmValues.ValueStringPointer(), r.consoleUrl, lo.FromPtr(result.CreateCluster.DeployToken),
 			result.CreateCluster.ID, &resp.Diagnostics)
 		if err != nil {
@@ -94,7 +102,6 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		}
 	}
 
-	resp.Diagnostics.Append(setKubeconfigHost(ctx, resp.Private, data.GetKubeconfig())...)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -138,7 +145,6 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 	var data, state cluster
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("kubeconfig"), &data.Kubeconfig)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -163,21 +169,15 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		data.AgentDeployed = types.BoolValue(false)
 	}
 
-	kubeconfigChanged, diags := kubeconfigHostChanged(ctx, req.Private, data.GetKubeconfig())
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	reinstallable := !data.AgentDeployed.ValueBool() || !data.HelmRepoUrl.Equal(state.HelmRepoUrl) || kubeconfigChanged
-	if reinstallable && (r.kubeClient != nil || data.HasKubeconfig()) {
+	reinstallable := !data.AgentDeployed.ValueBool() || !data.HelmRepoUrl.Equal(state.HelmRepoUrl)
+	if reinstallable && r.kubeClient != nil {
 		clusterWithToken, err := r.client.GetClusterWithToken(ctx, data.Id.ValueStringPointer(), nil)
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to fetch cluster deploy token, got error: %s", err))
 			return
 		}
 
-		if err = InstallOrUpgradeAgent(ctx, r.client, data.GetKubeconfig(), r.kubeClient, data.HelmRepoUrl.ValueString(),
+		if err = InstallOrUpgradeAgent(ctx, r.client, r.kubeClient, data.HelmRepoUrl.ValueString(),
 			data.HelmValues.ValueStringPointer(), r.consoleUrl, lo.FromPtr(clusterWithToken.Cluster.DeployToken), result.UpdateCluster.ID, &resp.Diagnostics); err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to install operator, got error: %s", err))
 			return
@@ -186,64 +186,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		data.AgentDeployed = types.BoolValue(true)
 	}
 
-	resp.Diagnostics.Append(setKubeconfigHost(ctx, resp.Private, data.GetKubeconfig())...)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-}
-
-// kubeconfigHostPrivateKey is the private state key used to track the kubeconfig host. Kubeconfig is write-only,
-// so it is not available in the state, and it is required to detect kubeconfig changes that require agent reinstall.
-const kubeconfigHostPrivateKey = "kubeconfig_host"
-
-type privateStateGetter interface {
-	GetKey(ctx context.Context, key string) ([]byte, diag.Diagnostics)
-}
-
-type privateStateSetter interface {
-	SetKey(ctx context.Context, key string, value []byte) diag.Diagnostics
-}
-
-// kubeconfigHostChanged checks if the kubeconfig host has changed compared to the one tracked in the private state.
-// If the host was not tracked yet, i.e. state was upgraded from older provider version, it is treated as changed.
-// State upgrades cannot write private state, so the previous host is lost, and it is not possible to tell if it has
-// changed. Reinstalling the agent is idempotent, while skipping it could leave a new cluster without the agent.
-func kubeconfigHostChanged(ctx context.Context, private privateStateGetter, kubeconfig *common.Kubeconfig) (bool, diag.Diagnostics) {
-	if kubeconfig == nil {
-		return false, nil
-	}
-
-	value, diags := private.GetKey(ctx, kubeconfigHostPrivateKey)
-	if diags.HasError() {
-		return false, diags
-	}
-
-	if value == nil {
-		return true, diags
-	}
-
-	var host *string
-	if err := json.Unmarshal(value, &host); err != nil {
-		diags.AddError("Provider Error", fmt.Sprintf("Cannot unmarshal kubeconfig host from private state, got error: %s", err))
-		return false, diags
-	}
-
-	return host == nil || *host != kubeconfig.Host.ValueString(), diags
-}
-
-// setKubeconfigHost stores the kubeconfig host in the private state. If kubeconfig is not set, JSON null is stored.
-func setKubeconfigHost(ctx context.Context, private privateStateSetter, kubeconfig *common.Kubeconfig) diag.Diagnostics {
-	var host *string
-	if kubeconfig != nil {
-		host = lo.ToPtr(kubeconfig.Host.ValueString())
-	}
-
-	value, err := json.Marshal(host)
-	if err != nil {
-		var diags diag.Diagnostics
-		diags.AddError("Provider Error", fmt.Sprintf("Cannot marshal kubeconfig host to private state, got error: %s", err))
-		return diags
-	}
-
-	return private.SetKey(ctx, kubeconfigHostPrivateKey, value)
 }
 
 func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -298,14 +241,12 @@ func (r *clusterResource) ImportState(ctx context.Context, req resource.ImportSt
 }
 
 func (r *clusterResource) UpgradeState(_ context.Context) map[int64]resource.StateUpgrader {
-	// Version 1 schema is the same as the current one, except kubeconfig was not write-only.
+	// Version 1 schema is the same as the current one, except kubeconfig was in use and stored in the state.
 	priorSchemaV1 := r.schema()
 	priorSchemaV1.Version = 1
-	priorSchemaV1.Attributes["kubeconfig"] = common.KubeconfigResourceSchema(false)
 
 	return map[int64]resource.StateUpgrader{
-		// State upgrade from 1 to 2. Kubeconfig became write-only, so it has to be removed from the state.
-		// It cannot be done in the same schema version, as the framework passes such state through as is.
+		// State upgrade from 1 to 2. Kubeconfig was removed, so it has to be dropped from the state.
 		1: {
 			PriorSchema: &priorSchemaV1,
 			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
@@ -363,7 +304,7 @@ func (r *clusterResource) UpgradeState(_ context.Context) map[int64]resource.Sta
 					"helm_values": schema.StringAttribute{
 						Optional: true,
 					},
-					"kubeconfig": common.KubeconfigResourceSchema(false),
+					"kubeconfig": common.KubeconfigResourceSchema(),
 					"protect": schema.BoolAttribute{
 						Optional: true,
 						Computed: true,
@@ -431,7 +372,7 @@ func (r *clusterResource) UpgradeState(_ context.Context) map[int64]resource.Sta
 					return
 				}
 
-				// Kubeconfig is write-only now, so it is not copied to the upgraded state.
+				// Kubeconfig was removed, so it is not copied to the upgraded state.
 				upgradedStateData := cluster{
 					Id:            priorStateData.Id,
 					InsertedAt:    priorStateData.InsertedAt,

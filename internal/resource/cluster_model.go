@@ -124,15 +124,3 @@ func (c *cluster) ClusterVersionFrom(prov *console.ClusterProviderFragment, vers
 
 	return types.StringValue("unknown")
 }
-
-func (c *cluster) HasKubeconfig() bool {
-	return c.Kubeconfig != nil // || (c.CloudSettings != nil && c.CloudSettings.BYOK != nil && c.CloudSettings.BYOK.Kubeconfig != nil)
-}
-
-func (c *cluster) GetKubeconfig() *common.Kubeconfig {
-	if !c.HasKubeconfig() {
-		return nil
-	}
-
-	return c.Kubeconfig
-}

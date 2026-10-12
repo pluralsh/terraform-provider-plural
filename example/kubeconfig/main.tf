@@ -7,28 +7,7 @@ terraform {
   }
 }
 
-#####################################
-######### Deprecated method #########
-#####################################
-# provider "plural" {
-#   alias   = "deprecated"
-#   use_cli = true
-# }
-#
-# resource "plural_cluster" "deprecated" {
-#   provider = plural.deprecated
-#   name     = "byok"
-#   protect  = "false"
-#   detach   = true
-#   kubeconfig = {
-#     # It can no longer be sourced from environment variables.
-#     config_path = pathexpand("~/.kube/config")
-#   }
-# }
-
-#####################################
-############ New method #############
-#####################################
+# Kubeconfig is configured on the provider. Use provider aliases for multiple clusters.
 provider "plural" {
   alias   = "new"
   use_cli = true
