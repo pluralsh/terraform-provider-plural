@@ -19,7 +19,7 @@ func (r *clusterResource) schema() schema.Schema {
 	return schema.Schema{
 		Description:         "Cluster represents a Kubernetes cluster managed by the Plural Console for continuous deployment. Clusters serve as deployment targets for services and can be either management clusters (hosting the Plural Console and operators) or workload clusters (running application workloads). The Console tracks cluster health, versions, and coordinates service deployments across the fleet.",
 		MarkdownDescription: "Cluster represents a Kubernetes cluster managed by the Plural Console for continuous deployment. Clusters serve as deployment targets for services and can be either management clusters (hosting the Plural Console and operators) or workload clusters (running application workloads). The Console tracks cluster health, versions, and coordinates service deployments across the fleet.",
-		Version:             2,
+		Version:             1,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description:         "Internal identifier of this cluster.",

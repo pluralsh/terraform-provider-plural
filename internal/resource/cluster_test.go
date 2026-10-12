@@ -139,15 +139,28 @@ func nullObject(objectType tftypes.Object) map[string]tftypes.Value {
 func TestClusterResourceUpgradeStateRemovesKubeconfig(t *testing.T) {
 	ctx := context.Background()
 	r := &clusterResource{}
-	currentSchema := r.schema()
 
-	upgrader, ok := r.UpgradeState(ctx)[currentSchema.Version-1]
+	upgrader, ok := r.UpgradeState(ctx)[0]
 	if !ok {
-		t.Fatalf("expected state upgrader from version %d", currentSchema.Version-1)
+		t.Fatalf("expected state upgrader from version 0")
 	}
 
 	priorState := tfsdk.State{Schema: *upgrader.PriorSchema}
-	diags := priorState.Set(ctx, cluster{
+	diags := priorState.Set(ctx, struct {
+		Id          types.String       `tfsdk:"id"`
+		InsertedAt  types.String       `tfsdk:"inserted_at"`
+		Name        types.String       `tfsdk:"name"`
+		Handle      types.String       `tfsdk:"handle"`
+		ProjectId   types.String       `tfsdk:"project_id"`
+		Detach      types.Bool         `tfsdk:"detach"`
+		Protect     types.Bool         `tfsdk:"protect"`
+		Tags        types.Map          `tfsdk:"tags"`
+		Metadata    types.String       `tfsdk:"metadata"`
+		Bindings    *common.Bindings   `tfsdk:"bindings"`
+		HelmRepoUrl types.String       `tfsdk:"helm_repo_url"`
+		HelmValues  types.String       `tfsdk:"helm_values"`
+		Kubeconfig  *common.Kubeconfig `tfsdk:"kubeconfig"`
+	}{
 		Id:         types.StringValue("id"),
 		Name:       types.StringValue("name"),
 		ProjectId:  types.StringValue("project"),
@@ -158,7 +171,7 @@ func TestClusterResourceUpgradeStateRemovesKubeconfig(t *testing.T) {
 		t.Fatalf("unexpected diagnostics: %v", diags)
 	}
 
-	resp := &resource.UpgradeStateResponse{State: tfsdk.State{Schema: currentSchema}}
+	resp := &resource.UpgradeStateResponse{State: tfsdk.State{Schema: r.schema()}}
 	upgrader.StateUpgrader(ctx, resource.UpgradeStateRequest{State: &priorState}, resp)
 	if resp.Diagnostics.HasError() {
 		t.Fatalf("unexpected diagnostics: %v", resp.Diagnostics)
