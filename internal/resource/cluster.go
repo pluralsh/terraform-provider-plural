@@ -26,7 +26,6 @@ import (
 var _ resource.Resource = &clusterResource{}
 var _ resource.ResourceWithImportState = &clusterResource{}
 var _ resource.ResourceWithUpgradeState = &clusterResource{}
-var _ resource.ResourceWithModifyPlan = &clusterResource{}
 
 func NewClusterResource() resource.Resource {
 	return &clusterResource{}
@@ -45,26 +44,6 @@ func (r *clusterResource) Metadata(_ context.Context, req resource.MetadataReque
 
 func (r *clusterResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = r.schema()
-}
-
-// ModifyPlan keeps only the host of the deprecated kubeconfig in the plan and state, the rest is read from the config
-// during apply. Other fields, e.g. credentials refreshed by the cloud provider, can change during apply, which would
-// fail it with "Provider produced inconsistent final plan" if they were planned. The host is enough to detect changes
-// that require agent reinstall. Terraform accepts the plan not matching the config thanks to legacyTypeSystemServer.
-func (r *clusterResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
-	if req.Plan.Raw.IsNull() {
-		return
-	}
-
-	var kubeconfig types.Object
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("kubeconfig"), &kubeconfig)...)
-	if resp.Diagnostics.HasError() || kubeconfig.IsNull() || kubeconfig.IsUnknown() {
-		return
-	}
-
-	var host types.String
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("kubeconfig").AtName("host"), &host)...)
-	resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("kubeconfig"), &common.Kubeconfig{Host: host})...)
 }
 
 func (r *clusterResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -89,7 +68,6 @@ func (r *clusterResource) Configure(_ context.Context, req resource.ConfigureReq
 func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data cluster
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("kubeconfig"), &data.Kubeconfig)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -113,7 +91,6 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		}
 	}
 
-	data.Kubeconfig = data.Kubeconfig.HostOnly()
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -150,8 +127,6 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 		data.From(result.Cluster, ctx, &resp.Diagnostics)
 	}
 
-	// Drop kubeconfig fields stored by older provider versions, only the host is kept, see ModifyPlan.
-	data.Kubeconfig = data.Kubeconfig.HostOnly()
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -159,7 +134,6 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 	var data, state cluster
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("kubeconfig"), &data.Kubeconfig)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -202,7 +176,6 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		data.AgentDeployed = types.BoolValue(true)
 	}
 
-	data.Kubeconfig = data.Kubeconfig.HostOnly()
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -384,7 +357,7 @@ func (r *clusterResource) UpgradeState(_ context.Context) map[int64]resource.Sta
 					Bindings:      priorStateData.Bindings,
 					HelmRepoUrl:   priorStateData.HelmRepoUrl,
 					HelmValues:    priorStateData.HelmValues,
-					Kubeconfig:    priorStateData.Kubeconfig.HostOnly(),
+					Kubeconfig:    priorStateData.Kubeconfig,
 					AgentDeployed: types.BoolValue(true),
 				}
 

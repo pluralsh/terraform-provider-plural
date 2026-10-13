@@ -41,16 +41,6 @@ func (k *Kubeconfig) Unchanged(other *Kubeconfig) bool {
 	return k.Host == other.Host
 }
 
-// HostOnly returns a copy with only the host set. Other fields, e.g. credentials, can change during apply,
-// so they are not kept in the plan and state.
-func (k *Kubeconfig) HostOnly() *Kubeconfig {
-	if k == nil {
-		return nil
-	}
-
-	return &Kubeconfig{Host: k.Host}
-}
-
 func (k *Kubeconfig) FromEnvVars() {
 	if k == nil {
 		return
@@ -237,10 +227,8 @@ func KubeconfigProviderSchema() providerschema.SingleNestedAttribute {
 
 func KubeconfigResourceSchema() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
-		Description:         "Kubeconfig for cluster access. Only `host` is stored in the state, so changing other fields alone will not trigger an update.",
-		MarkdownDescription: "Kubeconfig for cluster access. Only `host` is stored in the state, so changing other fields alone will not trigger an update.",
-		DeprecationMessage:  "kubeconfig configuration has been moved to the provider.",
-		Optional:            true,
+		DeprecationMessage: "kubeconfig configuration has been moved to the provider.",
+		Optional:           true,
 		Attributes: map[string]schema.Attribute{
 			"host": schema.StringAttribute{
 				Optional:            true,

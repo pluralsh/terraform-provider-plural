@@ -5,15 +5,9 @@ import (
 	"reflect"
 	"testing"
 
-	"terraform-provider-plural/internal/common"
-
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	console "github.com/pluralsh/console/go/client"
 	"github.com/samber/lo"
 )
@@ -81,137 +75,5 @@ func TestClusterFromCreateSetsProjectId(t *testing.T) {
 	c.FromCreate(&console.CreateCluster{CreateCluster: &console.CreateCluster_CreateCluster{ID: "id", Name: "name"}}, context.Background(), &diags)
 	if !c.ProjectId.IsNull() {
 		t.Fatalf("expected project ID to be null when the API response has no project, got %v", c.ProjectId)
-	}
-}
-
-func TestClusterResourceModifyPlanKeepsOnlyKubeconfigHost(t *testing.T) {
-	ctx := context.Background()
-	r := &clusterResource{}
-	s := r.schema()
-
-	tests := []struct {
-		name       string
-		kubeconfig tftypes.Value
-		expected   *common.Kubeconfig
-	}{
-		{name: "null kubeconfig stays null", kubeconfig: tftypes.NewValue(kubeconfigType(ctx, s), nil), expected: nil},
-		{name: "only host is planned", kubeconfig: kubeconfigValue(ctx, s), expected: &common.Kubeconfig{Host: types.StringValue("host")}},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			config := tfsdk.Config{Schema: s, Raw: configWithKubeconfig(ctx, s, test.kubeconfig)}
-			plan := tfsdk.Plan{Schema: s, Raw: config.Raw}
-
-			resp := &resource.ModifyPlanResponse{Plan: plan}
-			r.ModifyPlan(ctx, resource.ModifyPlanRequest{Config: config, Plan: plan}, resp)
-			if resp.Diagnostics.HasError() {
-				t.Fatalf("unexpected diagnostics: %v", resp.Diagnostics)
-			}
-
-			var kubeconfig *common.Kubeconfig
-			if diags := resp.Plan.GetAttribute(ctx, path.Root("kubeconfig"), &kubeconfig); diags.HasError() {
-				t.Fatalf("unexpected diagnostics: %v", diags)
-			}
-
-			if !reflect.DeepEqual(kubeconfig, test.expected) {
-				t.Fatalf("expected %+v, got %+v", test.expected, kubeconfig)
-			}
-		})
-	}
-}
-
-func TestClusterResourceModifyPlanIgnoresDestroy(t *testing.T) {
-	ctx := context.Background()
-	r := &clusterResource{}
-	s := r.schema()
-	plan := tfsdk.Plan{Schema: s, Raw: tftypes.NewValue(s.Type().TerraformType(ctx), nil)}
-
-	resp := &resource.ModifyPlanResponse{Plan: plan}
-	r.ModifyPlan(ctx, resource.ModifyPlanRequest{Plan: plan}, resp)
-	if resp.Diagnostics.HasError() || !resp.Plan.Raw.IsNull() {
-		t.Fatalf("expected destroy plan to stay null, got %v, diagnostics: %v", resp.Plan.Raw, resp.Diagnostics)
-	}
-}
-
-func kubeconfigType(ctx context.Context, s schema.Schema) tftypes.Type {
-	return s.Attributes["kubeconfig"].GetType().TerraformType(ctx)
-}
-
-// kubeconfigValue returns a kubeconfig object with the host and a token set.
-func kubeconfigValue(ctx context.Context, s schema.Schema) tftypes.Value {
-	value := nullObject(kubeconfigType(ctx, s).(tftypes.Object))
-	value["host"] = tftypes.NewValue(tftypes.String, "host")
-	value["token"] = tftypes.NewValue(tftypes.String, "token")
-	return tftypes.NewValue(kubeconfigType(ctx, s), value)
-}
-
-func configWithKubeconfig(ctx context.Context, s schema.Schema, kubeconfig tftypes.Value) tftypes.Value {
-	objectType := s.Type().TerraformType(ctx).(tftypes.Object)
-	attributes := nullObject(objectType)
-	attributes["kubeconfig"] = kubeconfig
-	return tftypes.NewValue(objectType, attributes)
-}
-
-func nullObject(objectType tftypes.Object) map[string]tftypes.Value {
-	attributes := make(map[string]tftypes.Value, len(objectType.AttributeTypes))
-	for name, attributeType := range objectType.AttributeTypes {
-		attributes[name] = tftypes.NewValue(attributeType, nil)
-	}
-	return attributes
-}
-
-func TestClusterResourceUpgradeStateKeepsOnlyKubeconfigHost(t *testing.T) {
-	ctx := context.Background()
-	r := &clusterResource{}
-
-	upgrader, ok := r.UpgradeState(ctx)[0]
-	if !ok {
-		t.Fatalf("expected state upgrader from version 0")
-	}
-
-	priorState := tfsdk.State{Schema: *upgrader.PriorSchema}
-	diags := priorState.Set(ctx, struct {
-		Id          types.String       `tfsdk:"id"`
-		InsertedAt  types.String       `tfsdk:"inserted_at"`
-		Name        types.String       `tfsdk:"name"`
-		Handle      types.String       `tfsdk:"handle"`
-		ProjectId   types.String       `tfsdk:"project_id"`
-		Detach      types.Bool         `tfsdk:"detach"`
-		Protect     types.Bool         `tfsdk:"protect"`
-		Tags        types.Map          `tfsdk:"tags"`
-		Metadata    types.String       `tfsdk:"metadata"`
-		Bindings    *common.Bindings   `tfsdk:"bindings"`
-		HelmRepoUrl types.String       `tfsdk:"helm_repo_url"`
-		HelmValues  types.String       `tfsdk:"helm_values"`
-		Kubeconfig  *common.Kubeconfig `tfsdk:"kubeconfig"`
-	}{
-		Id:         types.StringValue("id"),
-		Name:       types.StringValue("name"),
-		ProjectId:  types.StringValue("project"),
-		Tags:       types.MapNull(types.StringType),
-		Kubeconfig: &common.Kubeconfig{Host: types.StringValue("host"), Token: types.StringValue("token")},
-	})
-	if diags.HasError() {
-		t.Fatalf("unexpected diagnostics: %v", diags)
-	}
-
-	resp := &resource.UpgradeStateResponse{State: tfsdk.State{Schema: r.schema()}}
-	upgrader.StateUpgrader(ctx, resource.UpgradeStateRequest{State: &priorState}, resp)
-	if resp.Diagnostics.HasError() {
-		t.Fatalf("unexpected diagnostics: %v", resp.Diagnostics)
-	}
-
-	var upgraded cluster
-	if diags := resp.State.Get(ctx, &upgraded); diags.HasError() {
-		t.Fatalf("unexpected diagnostics: %v", diags)
-	}
-
-	if expected := (&common.Kubeconfig{Host: types.StringValue("host")}); !reflect.DeepEqual(upgraded.Kubeconfig, expected) {
-		t.Fatalf("expected only kubeconfig host in the state, got %+v", upgraded.Kubeconfig)
-	}
-
-	if !upgraded.Id.Equal(types.StringValue("id")) || !upgraded.ProjectId.Equal(types.StringValue("project")) {
-		t.Fatalf("expected other attributes to be preserved, got id=%v project_id=%v", upgraded.Id, upgraded.ProjectId)
 	}
 }

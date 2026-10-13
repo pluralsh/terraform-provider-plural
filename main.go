@@ -1,12 +1,13 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 
 	"terraform-provider-plural/internal/provider"
 
-	"github.com/hashicorp/terraform-plugin-go/tfprotov6/tf6server"
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
 
 var (
@@ -20,12 +21,12 @@ func main() {
 	flag.BoolVar(&debug, "debug", false, "set to true to run the provider with support for debuggers like delve")
 	flag.Parse()
 
-	var opts []tf6server.ServeOpt
-	if debug {
-		opts = append(opts, tf6server.WithManagedDebug())
+	opts := providerserver.ServeOpts{
+		Address: "registry.terraform.io/pluralsh/plural",
+		Debug:   debug,
 	}
 
-	err := tf6server.Serve("registry.terraform.io/pluralsh/plural", provider.NewServer(version), opts...)
+	err := providerserver.Serve(context.Background(), provider.New(version), opts)
 
 	if err != nil {
 		log.Fatal(err.Error())
