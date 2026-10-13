@@ -84,25 +84,40 @@ func TestClusterFromCreateSetsProjectId(t *testing.T) {
 	}
 }
 
-func TestClusterResourceModifyPlanRemovesKubeconfig(t *testing.T) {
+func TestClusterResourceModifyPlanKeepsOnlyKubeconfigHost(t *testing.T) {
 	ctx := context.Background()
 	r := &clusterResource{}
 	s := r.schema()
-	plan := tfsdk.Plan{Schema: s, Raw: configWithKubeconfig(ctx, s, kubeconfigValue(ctx, s))}
 
-	resp := &resource.ModifyPlanResponse{Plan: plan}
-	r.ModifyPlan(ctx, resource.ModifyPlanRequest{Plan: plan}, resp)
-	if resp.Diagnostics.HasError() {
-		t.Fatalf("unexpected diagnostics: %v", resp.Diagnostics)
+	tests := []struct {
+		name       string
+		kubeconfig tftypes.Value
+		expected   *common.Kubeconfig
+	}{
+		{name: "null kubeconfig stays null", kubeconfig: tftypes.NewValue(kubeconfigType(ctx, s), nil), expected: nil},
+		{name: "only host is planned", kubeconfig: kubeconfigValue(ctx, s), expected: &common.Kubeconfig{Host: types.StringValue("host")}},
 	}
 
-	var kubeconfig types.Object
-	if diags := resp.Plan.GetAttribute(ctx, path.Root("kubeconfig"), &kubeconfig); diags.HasError() {
-		t.Fatalf("unexpected diagnostics: %v", diags)
-	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			config := tfsdk.Config{Schema: s, Raw: configWithKubeconfig(ctx, s, test.kubeconfig)}
+			plan := tfsdk.Plan{Schema: s, Raw: config.Raw}
 
-	if !kubeconfig.IsNull() {
-		t.Fatalf("expected kubeconfig to be removed from the plan, got %v", kubeconfig)
+			resp := &resource.ModifyPlanResponse{Plan: plan}
+			r.ModifyPlan(ctx, resource.ModifyPlanRequest{Config: config, Plan: plan}, resp)
+			if resp.Diagnostics.HasError() {
+				t.Fatalf("unexpected diagnostics: %v", resp.Diagnostics)
+			}
+
+			var kubeconfig *common.Kubeconfig
+			if diags := resp.Plan.GetAttribute(ctx, path.Root("kubeconfig"), &kubeconfig); diags.HasError() {
+				t.Fatalf("unexpected diagnostics: %v", diags)
+			}
+
+			if !reflect.DeepEqual(kubeconfig, test.expected) {
+				t.Fatalf("expected %+v, got %+v", test.expected, kubeconfig)
+			}
+		})
 	}
 }
 
@@ -123,10 +138,11 @@ func kubeconfigType(ctx context.Context, s schema.Schema) tftypes.Type {
 	return s.Attributes["kubeconfig"].GetType().TerraformType(ctx)
 }
 
-// kubeconfigValue returns a kubeconfig object with only the host set.
+// kubeconfigValue returns a kubeconfig object with the host and a token set.
 func kubeconfigValue(ctx context.Context, s schema.Schema) tftypes.Value {
 	value := nullObject(kubeconfigType(ctx, s).(tftypes.Object))
 	value["host"] = tftypes.NewValue(tftypes.String, "host")
+	value["token"] = tftypes.NewValue(tftypes.String, "token")
 	return tftypes.NewValue(kubeconfigType(ctx, s), value)
 }
 
@@ -145,7 +161,7 @@ func nullObject(objectType tftypes.Object) map[string]tftypes.Value {
 	return attributes
 }
 
-func TestClusterResourceUpgradeStateRemovesKubeconfig(t *testing.T) {
+func TestClusterResourceUpgradeStateKeepsOnlyKubeconfigHost(t *testing.T) {
 	ctx := context.Background()
 	r := &clusterResource{}
 
@@ -174,7 +190,7 @@ func TestClusterResourceUpgradeStateRemovesKubeconfig(t *testing.T) {
 		Name:       types.StringValue("name"),
 		ProjectId:  types.StringValue("project"),
 		Tags:       types.MapNull(types.StringType),
-		Kubeconfig: &common.Kubeconfig{Host: types.StringValue("host")},
+		Kubeconfig: &common.Kubeconfig{Host: types.StringValue("host"), Token: types.StringValue("token")},
 	})
 	if diags.HasError() {
 		t.Fatalf("unexpected diagnostics: %v", diags)
@@ -191,64 +207,11 @@ func TestClusterResourceUpgradeStateRemovesKubeconfig(t *testing.T) {
 		t.Fatalf("unexpected diagnostics: %v", diags)
 	}
 
-	if upgraded.Kubeconfig != nil {
-		t.Fatalf("expected kubeconfig to be removed from the state, got %+v", upgraded.Kubeconfig)
+	if expected := (&common.Kubeconfig{Host: types.StringValue("host")}); !reflect.DeepEqual(upgraded.Kubeconfig, expected) {
+		t.Fatalf("expected only kubeconfig host in the state, got %+v", upgraded.Kubeconfig)
 	}
 
 	if !upgraded.Id.Equal(types.StringValue("id")) || !upgraded.ProjectId.Equal(types.StringValue("project")) {
 		t.Fatalf("expected other attributes to be preserved, got id=%v project_id=%v", upgraded.Id, upgraded.ProjectId)
-	}
-}
-
-type fakePrivateState map[string][]byte
-
-func (f fakePrivateState) GetKey(_ context.Context, key string) ([]byte, diag.Diagnostics) {
-	return f[key], nil
-}
-
-func (f fakePrivateState) SetKey(_ context.Context, key string, value []byte) diag.Diagnostics {
-	f[key] = value
-	return nil
-}
-
-func TestKubeconfigHostChanged(t *testing.T) {
-	ctx := context.Background()
-	kubeconfig := func(host string) *common.Kubeconfig {
-		return &common.Kubeconfig{Host: types.StringValue(host)}
-	}
-
-	tests := []struct {
-		name       string
-		stored     *common.Kubeconfig
-		track      bool
-		kubeconfig *common.Kubeconfig
-		expected   bool
-	}{
-		{name: "untracked host is changed", track: false, kubeconfig: kubeconfig("a"), expected: true},
-		{name: "untracked host without kubeconfig is unchanged", track: false, kubeconfig: nil, expected: false},
-		{name: "missing kubeconfig is unchanged", track: true, stored: kubeconfig("a"), kubeconfig: nil, expected: false},
-		{name: "same host is unchanged", track: true, stored: kubeconfig("a"), kubeconfig: kubeconfig("a"), expected: false},
-		{name: "different host is changed", track: true, stored: kubeconfig("a"), kubeconfig: kubeconfig("b"), expected: true},
-		{name: "added kubeconfig is changed", track: true, stored: nil, kubeconfig: kubeconfig(""), expected: true},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			private := fakePrivateState{}
-			if test.track {
-				if diags := setKubeconfigHost(ctx, private, test.stored); diags.HasError() {
-					t.Fatalf("unexpected diagnostics: %v", diags)
-				}
-			}
-
-			changed, diags := kubeconfigHostChanged(ctx, private, test.kubeconfig)
-			if diags.HasError() {
-				t.Fatalf("unexpected diagnostics: %v", diags)
-			}
-
-			if changed != test.expected {
-				t.Fatalf("expected %v, got %v", test.expected, changed)
-			}
-		})
 	}
 }

@@ -15,8 +15,8 @@ func NewServer(version string) func() tfprotov6.ProviderServer {
 }
 
 // legacyTypeSystemServer makes Terraform log a warning instead of failing when the plural_cluster plan does not
-// match the config. plural_cluster plans the deprecated kubeconfig as null to keep it out of the plan, as its
-// values can change during apply and fail it with "Provider produced inconsistent final plan".
+// match the config. plural_cluster plans only the host of the deprecated kubeconfig, as its other fields can change
+// during apply and fail it with "Provider produced inconsistent final plan".
 // It can be removed together with plural_cluster kubeconfig.
 type legacyTypeSystemServer struct {
 	tfprotov6.ProviderServer
