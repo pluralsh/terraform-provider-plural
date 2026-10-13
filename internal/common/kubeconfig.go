@@ -213,12 +213,11 @@ func KubeconfigProviderSchema() providerschema.SingleNestedAttribute {
 	}
 }
 
-// KubeconfigResourceSchema returns the schema of the removed plural_cluster kubeconfig. It is kept only to read
-// state written by older provider versions and to show a helpful error when it is still set.
 func KubeconfigResourceSchema() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
-		Description:         "Removed, setting it fails validation. Use kubeconfig in the provider configuration instead.",
-		MarkdownDescription: "Removed, setting it fails validation. Use `kubeconfig` in the provider configuration instead.",
+		Description:         "Kubeconfig for cluster access. It is not stored in the state, so changing it alone will not trigger an update.",
+		MarkdownDescription: "Kubeconfig for cluster access. It is not stored in the state, so changing it alone will not trigger an update.",
+		DeprecationMessage:  "kubeconfig configuration has been moved to the provider.",
 		Optional:            true,
 		Attributes: map[string]schema.Attribute{
 			"host": schema.StringAttribute{

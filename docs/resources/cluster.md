@@ -25,7 +25,7 @@ Cluster represents a Kubernetes cluster managed by the Plural Console for contin
 - `handle` (String) A short, unique human-readable name used to identify this cluster. Does not necessarily map to the cloud resource name.
 - `helm_repo_url` (String) Helm repository URL you'd like to use in deployment agent Helm install.
 - `helm_values` (String) Additional Helm values you'd like to use in deployment agent Helm installs. This is useful for BYOK clusters that need to use custom images or other constructs.
-- `kubeconfig` (Attributes) Removed, setting it fails validation. Use `kubeconfig` in the provider configuration instead. (see [below for nested schema](#nestedatt--kubeconfig))
+- `kubeconfig` (Attributes, Deprecated) Kubeconfig for cluster access. It is not stored in the state, so changing it alone will not trigger an update. (see [below for nested schema](#nestedatt--kubeconfig))
 - `metadata` (String) Arbitrary JSON metadata to store user-specific state of this cluster (e.g. IAM roles for add-ons). Use `jsonencode` and `jsondecode` methods to encode and decode data.
 - `project_id` (String) ID of the project that this cluster belongs to.
 - `protect` (Boolean) If set to `true` then this cluster cannot be deleted.

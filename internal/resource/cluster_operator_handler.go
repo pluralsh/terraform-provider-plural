@@ -31,7 +31,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func InstallOrUpgradeAgent(ctx context.Context, client *client.Client, kubeClient *common.KubeClient,
+func InstallOrUpgradeAgent(ctx context.Context, client *client.Client, kubeconfig *common.Kubeconfig, kubeClient *common.KubeClient,
 	repoUrl string, values *string, consoleUrl string, token string, clusterId string, d *diag.Diagnostics) error {
 	if lo.IsEmpty(token) {
 		return fmt.Errorf("deploy token cannot be empty")
@@ -47,6 +47,14 @@ func InstallOrUpgradeAgent(ctx context.Context, client *client.Client, kubeClien
 				d.AddError("Provider Error", fmt.Sprintf("Cannot remove temporary working directory, got error: %s", err))
 			}
 		}(workingDir)
+	}
+
+	// kubeconfig defined on a cluster level can override one defined on the provider level.
+	if kubeconfig != nil {
+		kubeClient, err = common.NewKubeClient(ctx, kubeconfig, lo.ToPtr(console.OperatorNamespace))
+		if err != nil {
+			return err
+		}
 	}
 
 	handler, err := NewOperatorHandler(ctx, client, kubeClient, repoUrl, chartPath, values, consoleUrl, token, clusterId)
