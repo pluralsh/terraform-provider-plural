@@ -2,7 +2,7 @@ terraform {
   required_providers {
     plural = {
       source  = "pluralsh/plural"
-      version = "0.2.37"
+      version = "0.2.39"
     }
   }
 }
@@ -538,4 +538,160 @@ resource "plural_workbench_cron" "daily_check" {
   workbench_id = plural_workbench.full.id
   crontab      = "0 9 * * 1-5"
   prompt       = "Run a morning health check and summarize notable issues."
+}
+
+data "plural_service_deployment" "console" {
+  cluster = "mgmt"
+  name    = "console"
+}
+
+resource "plural_monitor" "error_logs" {
+  name            = "${local.name_prefix}error_logs"
+  service_id      = data.plural_service_deployment.console.id
+  description     = "Fires when the console logs too many errors or fatal messages."
+  severity        = "MEDIUM"
+  type            = "LOG"
+  evaluation_cron = "*/15 * * * *"
+
+  query = {
+    log = {
+      query       = "error OR fatal"
+      bucket_size = "10m"
+      duration    = "2h"
+      operator    = "OR"
+      facets = [
+        { key = "namespace", value = "plrl-console" },
+      ]
+    }
+  }
+
+  threshold = {
+    aggregate = "MAX"
+    value     = 20
+  }
+}
+
+resource "plural_monitor" "cpu_usage" {
+  name            = "${local.name_prefix}cpu_usage"
+  service_id      = data.plural_service_deployment.console.id
+  workbench_id    = plural_workbench.full.id
+  description     = "Fires when the console uses more than 2 CPU cores on average."
+  prompt          = "Investigate the high console CPU usage and suggest a fix."
+  severity        = "HIGH"
+  type            = "METRICS"
+  evaluation_cron = "*/10 * * * *"
+
+  query = {
+    metrics = {
+      query    = "sum(rate(container_cpu_usage_seconds_total{namespace=\"plrl-console\", container!=\"\"}[5m]))"
+      step     = "1m"
+      duration = "1h"
+    }
+  }
+
+  threshold = {
+    aggregate = "AVG"
+    value     = 2
+  }
+
+  modes = {
+    budget = {
+      cost   = 10
+      tokens = 200000
+    }
+    kubernetes = {
+      update             = true
+      exclude_namespaces = ["kube-system", "kube-public"]
+    }
+  }
+}
+
+resource "plural_dashboard" "overview" {
+  workbench_id = plural_workbench.full.id
+  name         = "${local.name_prefix}console_overview"
+  description  = "CPU, memory and restarts of the console on the mgmt cluster."
+
+  # Inputs are referenced in graph markdown and datasource inputs as ${name},
+  # which has to be escaped as $${name} in Terraform strings.
+  inputs = [
+    {
+      name        = "namespace"
+      label       = "Namespace"
+      description = "Namespace the console is running in."
+      type        = "TEXT"
+      default     = "plrl-console"
+    },
+    {
+      name        = "window"
+      label       = "Rate window"
+      description = "Window used to calculate CPU usage rate."
+      type        = "SELECT"
+      default     = "15m"
+      options     = ["5m", "15m", "1h"]
+    },
+    {
+      name        = "pod"
+      label       = "Pod"
+      description = "Filter graphs by console pod."
+      type        = "SELECT"
+      default     = ".*"
+      datasource = {
+        type = "LABELS"
+        tool = "plrl_metric_label_search"
+        input = jsonencode({
+          metric = "container_cpu_usage_seconds_total"
+          label  = "pod"
+          query  = "console"
+        })
+      }
+    },
+  ]
+
+  graphs = [
+    {
+      identifier = "overview"
+      title      = "Overview"
+      type       = "SECTION"
+      options    = jsonencode({ collapsed = true })
+      layout     = { x = 0, y = 0, w = 12, h = 1 }
+    },
+    {
+      identifier  = "cpu"
+      title       = "CPU usage"
+      description = "CPU cores used by console pods."
+      type        = "TIMESERIES"
+      section_id  = "overview"
+      layout      = { x = 0, y = 1, w = 12, h = 4 }
+      datasource = {
+        type  = "METRICS"
+        tool  = "plrl_metrics"
+        input = jsonencode({ query = "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"$${namespace}\", pod=~\"$${pod}\", container!=\"\"}[$${window}]))" })
+      }
+    },
+    {
+      identifier  = "memory"
+      title       = "Memory usage"
+      description = "Working set memory of console pods."
+      type        = "TIMESERIES"
+      section_id  = "overview"
+      layout      = { x = 0, y = 5, w = 8, h = 4 }
+      datasource = {
+        type  = "METRICS"
+        tool  = "plrl_metrics"
+        input = jsonencode({ query = "sum by (pod) (container_memory_working_set_bytes{namespace=\"$${namespace}\", pod=~\"$${pod}\", container!=\"\"})" })
+      }
+    },
+    {
+      identifier  = "restarts"
+      title       = "Restarts"
+      description = "Container restarts of console pods in the selected window."
+      type        = "STAT"
+      layout      = { x = 8, y = 5, w = 4, h = 4 }
+      datasource = {
+        type  = "METRICS"
+        tool  = "plrl_metrics"
+        input = jsonencode({ query = "sum(increase(kube_pod_container_status_restarts_total{namespace=\"$${namespace}\", pod=~\"$${pod}\"}[$${window}]))" })
+      }
+    },
+  ]
 }

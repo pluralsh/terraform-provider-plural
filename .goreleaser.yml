@@ -29,6 +29,11 @@ builds:
         goarch: arm64
       - goos: windows
         goarch: arm
+      # dd-trace-go (via plural-cli) does not compile on 32-bit platforms
+      - goos: linux
+        goarch: arm
+      - goos: freebsd
+        goarch: arm
     binary: '{{ .ProjectName }}_v{{ .Version }}'
 archives:
   - formats: [ 'zip' ]
